@@ -21,7 +21,7 @@ export interface MetricForStatsData {
 export class MetricForStatsDialogComponent {
   public variants: MetricVariantResult[];
   public metricVariantSelection: ISmCol[];
-  private projectId: string;
+  private readonly projectId: string;
 
   constructor(
     private matDialogRef: MatDialogRef<MetricForStatsDialogComponent>,

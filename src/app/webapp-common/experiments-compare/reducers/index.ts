@@ -18,10 +18,12 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scalars-graph.reducer';
 import {ExperimentParams, ModelDetail} from '../shared/experiments-compare-details.model';
 import {CompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
-import {groupByCharts, GroupByCharts} from '../../experiments/reducers/experiment-output.reducer';
+import {groupByCharts, GroupByCharts} from '../../experiments/actions/common-experiment-output.actions';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
-import {selectRouterConfig} from '../../core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details: experimentsCompareDetailsReducer,
@@ -32,6 +34,7 @@ export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   scalarsGraph: scalarsGraphReducer
 };
 
+export const selectCompareIdsFromRoute = createSelector(selectRouterParams, params => params.ids);
 export const experimentsCompare = state => state.experimentsCompare;
 
 // Details
@@ -94,10 +97,19 @@ export const selectSelectedExperimentSettings = createSelector(compareCharts, se
   (output, currentExperiments): ExperimentCompareSettings => output.settingsList?.find(setting => setting?.id?.join() === currentExperiments?.join()));
 
 export const selectSelectedSettingsHyperParams = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.selectedHyperParams || []);
+  (settings): Array<string> => settings?.selectedHyperParams);
 
 export const selectSelectedSettingsMetric = createSelector(selectSelectedExperimentSettings,
   (settings) => settings?.selectedMetric || null);
+
+export const selectSelectedSettingsMetrics = createSelector(selectSelectedExperimentSettings,
+  (settings) => settings?.selectedMetrics || null);
+
+export const selectSelectedSettingsHyperParamsHoverInfo = createSelector(selectSelectedExperimentSettings,
+  (settings): Array<string> => settings?.selectedParamsHoverInfo || []);
+
+export const selectSelectedSettingsMetricsHoverInfo = createSelector(selectSelectedExperimentSettings,
+  (settings) => settings?.selectedMetricsHoverInfo || null);
 
 export const selectSelectedSettingsValueType = createSelector(selectSelectedExperimentSettings,
   (settings) => settings?.valueType || 'value');
@@ -128,8 +140,11 @@ export const selectViewMode = (page: string) => createSelector(experimentsParams
 export const selectScalarsGraph = createSelector(experimentsCompare, (state): ScalarsGraphState => state?.scalarsGraph ?? {});
 export const selectScalarsGraphShowIdenticalHyperParams = createSelector(selectScalarsGraph, (state): boolean => state ? state.showIdenticalHyperParams : true);
 export const selectScalarsGraphMetrics = createSelector(selectScalarsGraph, (state): MetricOption[] => state.metrics);
+export const selectScalarsGraphMetricsResults = createSelector(selectScalarsGraph, (state): MetricVariantResult[] => state.metricVariantsResults);
 export const selectScalarsGraphHyperParams = createSelector(selectScalarsGraph, (state): GroupedHyperParams => state ? state.hyperParams : {});
 export const selectScalarsGraphTasks = createSelector(selectScalarsGraph, (state): any[] => state ? state.tasks : []);
+export const selectScalarsParamsHoverInfo = createSelector(selectScalarsGraph, (state): string[] => state ? state.paramsHoverInfo : []);
+export const selectScalarsMetricsHoverInfo = createSelector(selectScalarsGraph, (state): SelectedMetricVariant[] => state ? state.metricsHoverInfo : []);
 
 export const selectCompareTasksScalarCharts = createSelector(
   selectCompareHistogramCacheAxisType,

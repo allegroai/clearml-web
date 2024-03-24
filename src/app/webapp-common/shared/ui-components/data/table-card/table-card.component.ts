@@ -1,6 +1,6 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, TemplateRef} from '@angular/core';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {NgClass, NgIf} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 
 @Component({
   selector: 'sm-table-card',
@@ -8,8 +8,7 @@ import {NgClass, NgIf} from '@angular/common';
   styleUrls: ['./table-card.component.scss'],
   standalone: true,
   imports: [
-    NgClass,
-    NgIf
+    NgTemplateOutlet
   ]
 })
 export class TableCardComponent {
@@ -27,5 +26,7 @@ export class TableCardComponent {
 
   @Input() selected;
   @Input() checked: boolean;
+  @Input() tagsTemplate: TemplateRef<any>;
+  @Input() compactColDataTemplate: TemplateRef<any>;
 
 }

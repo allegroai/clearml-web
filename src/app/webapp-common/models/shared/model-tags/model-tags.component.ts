@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 const TAGS_NUMBER_LONG  = 3;
 const TAGS_NUMBER_SHORT = 2;
@@ -9,7 +9,7 @@ const TAGS_NUMBER_SHORT = 2;
   styleUrls  : ['./model-tags.component.scss']
 })
 
-export class ModelTagsComponent implements OnInit {
+export class ModelTagsComponent {
   private _tags: Array<string>;
   @Input() set tags(tags) {
     this._tags = tags || [];
@@ -21,11 +21,4 @@ export class ModelTagsComponent implements OnInit {
 
   TAGS_NUMBER_LONG  = TAGS_NUMBER_LONG;
   TAGS_NUMBER_SHORT = TAGS_NUMBER_SHORT;
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
-
 }

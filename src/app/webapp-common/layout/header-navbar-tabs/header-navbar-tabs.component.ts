@@ -14,7 +14,6 @@ import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-na
 })
 export class HeaderNavbarTabsComponent {
   public routes: HeaderNavbarTabConfig[];
-  activeFeature: string;
 
   public contextNavbar$: Observable<HeaderNavbarTabConfig[]>;
   public archivedMode$: Observable<boolean>;

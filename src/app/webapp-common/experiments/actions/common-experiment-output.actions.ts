@@ -5,6 +5,24 @@ import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {EventsGetTaskSingleValueMetricsResponseTasks} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
 import {ChartHoverModeEnum} from '../shared/common-experiments.const';
 
+export type GroupByCharts = 'metric' | 'none';
+
+export const groupByCharts = {
+  metric: 'metric' as GroupByCharts,
+  none: 'none' as GroupByCharts
+};
+
+export interface Log {
+  timestamp: number;
+  type: 'log';
+  task: string;
+  level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
+  worker: string;
+  msg: string;
+  metric: string;
+  variant: string;
+}
+
 export interface SeriesData {
   name: string;
   x: number[];

@@ -12,9 +12,10 @@ import {Subscription} from 'rxjs';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {last, findIndex} from 'lodash-es';
 import Convert from 'ansi-to-html';
-import {Log} from '../../reducers/experiment-output.reducer';
+import {Log} from '../../actions/common-experiment-output.actions';
 
 import hasAnsi from 'has-ansi';
+import DOMPurify from 'dompurify';
 
 interface LogRow {
   timestamp?: string;
@@ -44,7 +45,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
   public canRefresh = true;
   private prevLine: LogRow;
   private fetchPrev: boolean;
-  private prevLineOffset: number;
+  private prevLineOffset: number | null = null;
 
   @ViewChild(CdkVirtualScrollViewport) private logContainer: CdkVirtualScrollViewport;
   @Input() fetching = false;
@@ -54,11 +55,20 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
   private observer: IntersectionObserver;
   private logInView: boolean;
   public atEnd = true;
+  private locationBeforeFilter: number;
 
   @Input() set filterString(filter: string) {
     if (this.logInView) {
       this.shouldFocusLog = false;
       setTimeout(() => this.shouldFocusLog = true, 1000);
+    }
+    if(!this.hasFilter && filter) {
+      this.locationBeforeFilter = findIndex(this.lines, this.prevLine) + this.prevLineOffset;
+    } else if (this.locationBeforeFilter !== null) {
+      window.setTimeout(() => {
+        this.logContainer?.scrollToIndex(this.locationBeforeFilter);
+        this.locationBeforeFilter = null;
+      })
     }
     this.hasFilter = !!filter;
     if (this.hasFilter) {
@@ -172,7 +182,6 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     this.orgLogs
       .filter((row) => !this.hasFilter || this.regex.test(row?.msg ?? ''))
       .forEach(logItem => {
-        let first = true;
         if (!logItem.msg) {
           this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: '', hasAnsi: false, separator: true});
           return;
@@ -180,13 +189,12 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
         logItem.msg
           .split('\n')
           .filter(msg => !!msg)
-          .forEach((msg: string) => {
+          .forEach((msg: string, index) => {
             const msgHasAnsi = this.hasAnsi(msg);
-            const converted = msg ? (msgHasAnsi ? this.convert.toHtml(msg) :
+            const converted = msg ? (msgHasAnsi ? DOMPurify.sanitize(this.convert.toHtml(msg)) :
               msg) : '';
-            if (first) {
+            if (!index) {
               this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: msgHasAnsi});
-              first = false;
             } else {
               this.lines.push({entry: converted, hasAnsi: msgHasAnsi});
             }

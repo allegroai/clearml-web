@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
@@ -27,6 +27,9 @@ import {Container} from '~/business-logic/model/tasks/container';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import {
+  CommonExperimentConverterService
+} from '@common/experiments/shared/services/common-experiment-converter.service';
 
 @Component({
   selector: 'sm-experiment-info-execution',
@@ -35,28 +38,23 @@ import {
 })
 export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
-  public executionInfo$: Observable<IExecutionForm>;
-  public showExtraDataSpinner$: Observable<boolean>;
-  public editable$: Observable<boolean>;
-  public isInDev$: Observable<boolean>;
-  public saving$: Observable<boolean>;
-  public backdropActive$: Observable<boolean>;
-  public formData: IExecutionForm;
+  private store = inject(Store);
+  private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
+  private element = inject(ElementRef);
+  private converter = inject(CommonExperimentConverterService);
   private formDataSubscription: Subscription;
-  public minimized: boolean;
-
-  @ViewChild('outputDestination') outputDestination: ElementRef;
-  @ViewChild('orchestration') orchestration: ElementRef;
-  @ViewChild('sourceCode') sourceCode: ExperimentExecutionSourceCodeComponent;
-
-  @ViewChild('diffSection') diffSection: EditableSectionComponent;
-  @ViewChild('requirementsSection') requirementsSection: EditableSectionComponent;
-
-  @ViewChild('containerImage') containerImage: ElementRef;
-  @ViewChild('containerArguments') containerArguments: ElementRef;
+  public minimized = this.route.snapshot.routeConfig?.data?.minimized ?? false;
+  public executionInfo$ = this.store.select(selectExperimentExecutionInfoData);
+  public showExtraDataSpinner$ = this.store.select(selectShowExtraDataSpinner);
+  public editable$ = this.store.select(selectIsExperimentEditable);
+  public isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
+  public saving$ = this.store.select(selectIsExperimentSaving);
+  public backdropActive$ = this.store.select(selectBackdropActive);
+  public redactedArguments$ = this.store.select(selectHideRedactedArguments);
+  public formData: IExecutionForm;
   links = ['details', 'uncommitted changes', 'installed packages', 'container'];
   currentLink = 'details';
-  public redactedArguments$: Observable<{ key: string }[]>;
   public selectedRequirement = 'pip';
   public editableRequirements = false;
   private requirementLabels: IExecutionForm['requirements'] = {
@@ -67,20 +65,17 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   };
   public requirementsOptions: IOption[];
 
-  constructor(
-    private store: Store,
-    private dialog: MatDialog,
-    private route: ActivatedRoute,
-    private element: ElementRef
-  ) {
-    this.minimized = this.route.snapshot.routeConfig?.data?.minimized ?? false;
-    this.executionInfo$ = this.store.select(selectExperimentExecutionInfoData);
-    this.showExtraDataSpinner$ = this.store.select(selectShowExtraDataSpinner);
-    this.editable$ = this.store.select(selectIsExperimentEditable);
-    this.isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
-    this.saving$ = this.store.select(selectIsExperimentSaving);
-    this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.redactedArguments$ = this.store.select(selectHideRedactedArguments);
+  @ViewChild('outputDestination') outputDestination: ElementRef;
+  @ViewChild('orchestration') orchestration: ElementRef;
+  @ViewChild('sourceCode') sourceCode: ExperimentExecutionSourceCodeComponent;
+
+  @ViewChild('diffSection') diffSection: EditableSectionComponent;
+  @ViewChild('requirementsSection') requirementsSection: EditableSectionComponent;
+
+  @ViewChild('containerImage') containerImage: ElementRef;
+  @ViewChild('containerArguments') containerArguments: ElementRef;
+
+  constructor() {
 
   }
 
@@ -154,7 +149,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   }
 
   discardDiff() {
-    const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
+    this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Discard diff',
         body: 'Uncommitted changes will be discarded',
@@ -162,14 +157,15 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         no: 'Cancel',
         iconClass: 'al-icon al-ico-trash al-color blue-300',
       }
-    });
-
-    confirmDialogRef.afterClosed().pipe(take(1)).subscribe((confirmed) => {
-      if (confirmed) {
-        this.activateEditChanged('diff');
-        this.store.dispatch(commonInfoActions.saveExperimentSection({script: {diff: ''}}));
-      }
-    });
+    }).afterClosed()
+      .pipe(
+        take(1),
+        filter(res => res)
+      )
+      .subscribe(() => {
+          this.activateEditChanged('diff');
+          this.store.dispatch(commonInfoActions.saveExperimentSection({script: {diff: ''}}));
+      });
   }
 
   editContainerSetupShellScript(smEditableSection?: EditableSectionComponent) {
@@ -213,7 +209,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         this.store.dispatch(commonInfoActions.saveExperimentSection({
           script: {
             requirements: {
-              ...this.formData.requirements,
+              ...this.converter.convertRequirements(this.formData.requirements),
               pip: data
             }
           }

@@ -9,20 +9,56 @@ import {
   ViewChild
 } from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
-import {NgForm} from '@angular/forms';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {FormsModule, NgForm} from '@angular/forms';
+import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {MatOptionSelectionChange} from '@angular/material/core';
 import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
 import {Subscription} from 'rxjs';
 import {rootProjectsPageSize} from '@common/constants';
+import {MatInputModule} from '@angular/material/input';
+import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
+import {UniqueNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {InvalidPrefixValidatorDirective} from '@common/shared/ui-components/template-forms-ui/invalid-prefix-validator.directive';
+import {UniquePathValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-path-validator.directive';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 
 
 @Component({
   selector: 'sm-project-move-to-form',
   templateUrl: './project-move-to-form.component.html',
   styleUrls: ['./project-move-to-form.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatInputModule,
+    FormsModule,
+    MatAutocompleteModule,
+    StringIncludedInArrayPipe,
+    ClickStopPropagationDirective,
+    TooltipDirective,
+    SearchTextDirective,
+    MatProgressSpinnerModule,
+    ScrollEndDirective,
+    UniqueNameValidatorDirective,
+    UniqueProjectValidator,
+    ShowTooltipIfEllipsisDirective,
+    ShortProjectNamePipe,
+    ProjectLocationPipe,
+    InvalidPrefixValidatorDirective,
+    UniquePathValidatorDirective,
+    LabeledFormFieldDirective,
+    DotsLoadMoreComponent
+
+  ]
 })
 export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnDestroy {
   public readonly projectsRoot = 'Projects root';

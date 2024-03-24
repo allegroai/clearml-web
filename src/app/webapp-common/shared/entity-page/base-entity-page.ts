@@ -75,7 +75,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   public users$: Observable<User[]>;
   public projectsOptions$: Observable<Project[]>;
   protected parents = [];
-  public compareViewMode: 'scalars' | 'plots';
+  // public compareViewMode: 'scalars' | 'plots';
 
   @ViewChild('split') split: SplitComponent;
   protected abstract inEditMode$: Observable<boolean>;
@@ -101,20 +101,15 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     return this.route.parent.snapshot.params.projectId;
   }
 
-  protected store: Store;
-  protected route: ActivatedRoute;
-  protected router: Router;
-  protected dialog: MatDialog;
-  protected refresh: RefreshService;
-  protected contextMenuService: ContextMenuService;
+  protected store = inject(Store);
+  protected route = inject(ActivatedRoute);
+  protected router = inject(Router);
+  protected dialog = inject(MatDialog);
+  protected refresh = inject(RefreshService);
+  protected contextMenuService = inject(ContextMenuService);
+
 
   protected constructor() {
-    this.store = inject(Store);
-    this.route = inject(ActivatedRoute);
-    this.router = inject(Router);
-    this.dialog = inject(MatDialog);
-    this.refresh = inject(RefreshService);
-    this.contextMenuService = inject(ContextMenuService);
 
     this.users$ = this.store.select(selectSelectedProjectUsers);
     this.sub.add(this.store.select(selectSelectedProject).pipe(filter(p => !!p)).subscribe((project: Project) => {
@@ -188,11 +183,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   protected compareView() {
-    const comparedEntities = this.selectedExperiments.length > 0 ? this.selectedExperiments : this.entities
-    return this.router.navigate(['compare', this.compareViewMode ?? 'scalars', {ids: comparedEntities.map(e => e.id).join(',')}], {
-      relativeTo: this.route,
-      queryParamsHandling: 'preserve'
-    });
+    this.router.navigate(['compare'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
   }
 
   splitSizeChange(event: IOutputData) {

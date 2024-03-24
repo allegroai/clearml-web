@@ -22,12 +22,40 @@ import {ExperimentComparePlotsComponent} from '@common/experiments-compare/conta
 import {importProvidersFrom} from '@angular/core';
 import {StoreModule} from '@ngrx/store';
 import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
+import {compareNavigationGuard} from '@common/experiments/compare-navigation.guard';
+import {compareViewStateGuard} from '@common/experiments/compare-view-state.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: ExperimentsComponent,
     children: [
+      {
+        path: 'compare',
+        canActivate: [compareNavigationGuard],
+        children: []
+      },
+      {
+        path: 'compare/scalars',
+        canActivate: [compareViewStateGuard],
+        component: ExperimentCompareScalarChartsComponent,
+        data: {minimized: true},
+        providers: [
+          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+          importProvidersFrom(
+            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+          ),
+        ],
+      },
+      {
+        path: 'compare/plots',
+        canActivate: [compareViewStateGuard],
+        component: ExperimentComparePlotsComponent,
+        data: {minimized: true},
+        providers: [
+          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+        ],
+      },
       {
         path: ':experimentId', component: ExperimentOutputComponent,
         children: [
@@ -78,25 +106,6 @@ export const routes: Routes = [
           }
         ]
       },
-      {
-        path: 'compare/scalars',
-        component: ExperimentCompareScalarChartsComponent,
-        data: {minimized: true},
-        providers: [
-          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
-          importProvidersFrom(
-            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
-          ),
-        ],
-      },
-      {
-        path: 'compare/plots',
-        component: ExperimentComparePlotsComponent,
-        data: {minimized: true},
-        providers: [
-          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
-        ],
-      }
     ]
   },
 

@@ -1,60 +1,135 @@
 <div class="credentials-and-code">
-<div class="credentials">
-  <div class="cred-row">
-    <div class="label">Access key</div>
-    <div class="value">{{newCredential?.access_key}}</div>
-  </div>
-  <div class="cred-row">
-    <div class="label">Secret key</div>
-    <div class="value">{{newCredential?.secret_key}}</div>
-  </div>
-
-</div>
-<div >
-  <nav class="config-nav" >
-    <sm-navbar-item header="LOCAL PYTHON" [active]="!isJupyter" class="small-nav" (click)="setIsJupyter(false)"></sm-navbar-item>
-    <sm-navbar-item header="JUPYTER NOTEBOOK" [active]="isJupyter" class="small-nav" (click)="setIsJupyter(true)"></sm-navbar-item>
-  </nav>
-  <div class="code-container" [class.jupyter]="isJupyter">
-  <ng-container  *ngIf="!isJupyter; else jupyter" >
-  <div class="instructions mt-2 mb-2">Copy the below info for input to 'clearml-init' configuration request, or modify your existing clearml.conf</div>
-  <div class="mt-2 w-100 code">
-    <div #content class="content"><span class="variable">api</span> {{ '{' }} <ng-content></ng-content>
-    <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
-    <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.apiServer || API_BASE_URL}}</span><ng-container *ngIf="displayedServerUrls?.filesServer || fileBaseUrl">
-    <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.filesServer || fileBaseUrl}}</span></ng-container><ng-container *ngIf="newCredential?.label">
-    <span>{{'# ' + newCredential?.label}}</span></ng-container>
-    <span class="variable">credentials</span> {{ '{' }}
-        <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential?.access_key}}"</span>
-        <span class="string">"secret_key" </span> <span class="operation">=</span> <span class="string">"{{newCredential?.secret_key}}"</span>
+  <div class="credentials">
+    @if (serviceUserMode && credentialName) {
+      <div class="cred-row">
+        <div class="label">Name</div>
+        <div class="value">{{credentialName}}</div>
+      </div>
     }
-}</div>
-    <sm-copy-clipboard
-      *ngIf="newCredential?.secret_key"
-      [hideBackground]="true"
-      [label]="''"
-      [copyIcon]="'far fa-lg fa-copy'"
-      [clipboardText]="content.textContent"></sm-copy-clipboard>
+    <div class="cred-row">
+      <div class="label">Access key</div>
+      <div class="value">{{newCredential?.access_key}}</div>
+    </div>
+    <div class="cred-row">
+      <div class="label">Secret key</div>
+      <div class="value">{{newCredential?.secret_key}}</div>
+    </div>
+
   </div>
-  </ng-container>
-  </div>
-  <ng-template #jupyter>
+  <div [class.mt-4]="serviceUserMode">
+    @if (!serviceUserMode) {
+    <nav class="config-nav" >
+      <sm-navbar-item header="LOCAL PYTHON" [active]="!isJupyter" class="small-nav" (click)="setIsJupyter(false)"></sm-navbar-item>
+      <sm-navbar-item header="JUPYTER NOTEBOOK" [active]="isJupyter" class="small-nav" (click)="setIsJupyter(true)"></sm-navbar-item>
+    </nav>
+    }
+    <div class="code-container" [class.jupyter]="isJupyter">
+      @if (!isJupyter) {
+        @if (serviceUserMode){
+          <div class="instructions mt-2 mb-2">Copy the below configuration to the ClearML Agents clearml.conf file</div>
+        } @else {
+          <div class="instructions mt-2 mb-2">Copy the below info for input to 'clearml-init' configuration request, or modify your existing clearml.conf</div>
+        }
+        <div class="mt-2 w-100 code">
+          <div class="content">
+            <span class="variable">api</span> &#123;
+            @if (credentialsComment) {
+              <div class="ms-2">
+                <span class="comment">{{credentialsComment}}</span>
+              </div>
+            }
+            <div class="ms-2">
+              <span class="variable">web_server</span> <span class="operation me-1">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
+            </div>
+            <div class="ms-2">
+              <span class="variable">api_server</span><span class="operation me-1">:</span> <span class="string">{{configService.apiServerUrl()}}</span>
+            </div>
+            @if (configService.fileServerUrl(); as fileServer) {
+              <div class="ms-2">
+                <span class="variable">files_server</span><span class="operation me-1">:</span> <span class="string">{{fileServer}}</span>
+              </div>
+            }
+            @if (newCredential?.label) {
+              <div class="ms-2">
+                <span>{{'# ' + newCredential?.label}}</span>
+              </div>
+            }
+            <div class="ms-2">
+              <span class="variable">credentials</span> &#123;
+            </div>
+            <div class="ms-4">
+              <span class="string">"access_key"</span><span class="operation mx-1">=</span><span class="string">"{{newCredential?.access_key}}"</span>
+            </div>
+              <div class="ms-4">
+              <span class="string">"secret_key"</span><span class="operation mx-1">=</span><span class="string">"{{newCredential?.secret_key}}"</span>
+            </div>
+            <div class="ms-2">
+              &#125;
+            </div>
+            &#125;
+          </div>
+      @if (newCredential?.secret_key) {
+        <sm-copy-clipboard
+          [hideBackground]="true"
+          [label]="''"
+          [copyIcon]="'far fa-lg fa-copy'"
+          [clipboardText]="getCopyContent()"
+        ></sm-copy-clipboard>
+      }
+    </div>
+  } @else {
     <div class="instructions mt-2 mb-2">Add the below to your notebook to configure ClearML</div>
     <div class="code">
-      <div class="content" #jupyterCodeEl>{{jupyterCode}}</div>
+      <div class="content">
+        <div>
+          %env<span class="variable ms-2">CLEARML_WEB_HOST</span><span class="operation">=</span><span class="string">"{{WEB_SERVER_URL}}"</span>
+        </div>
+        <div>
+          %env<span class="variable ms-2">CLEARML_API_HOST</span><span class="operation">=</span><span class="string">"{{configService.apiServerUrl()}}"</span>
+        </div>
+        @if (configService.fileServerUrl(); as fileServer) {
+          <div>
+            %env<span class="variable ms-2">CLEARML_FILES_HOST</span><span class="operation">=</span><span class="string">"{{fileServer}}"</span>
+          </div>
+        }
+        @if (newCredential.label) {
+          <div># {{newCredential.label}}</div>
+        }
+        <div>
+          %env<span class="variable ms-2">CLEARML_API_ACCESS_KEY</span><span class="operation">=</span><span class="string">"{{newCredential?.access_key}}"</span>
+        </div>
+        <div>
+          %env<span class="variable ms-2">CLEARML_API_SECRET_KEY</span><span class="operation">=</span><span class="string">"{{newCredential.secret_key}}"</span>
+        </div>
+      </div>
       <sm-copy-clipboard
         [hideBackground]="false"
         [label]="''"
         [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
         theme="text-area"
-        [clipboardText]="jupyterCodeEl.innerHTML"></sm-copy-clipboard>
+      [clipboardText]="getJupiterCode()"></sm-copy-clipboard>
     </div>
-  </ng-template>
+  }
+</div>
+<ng-template #jupyter>
+  <div class="instructions mt-2 mb-2">Add the below to your notebook to configure ClearML</div>
+  <div class="code">
+    <div class="content" #jupyterCodeEl>{{jupyterCode}}</div>
+    <sm-copy-clipboard
+      [hideBackground]="false"
+      [label]="''"
+      [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
+      theme="text-area"
+    [clipboardText]="jupyterCodeEl.innerHTML"></sm-copy-clipboard>
+  </div>
+</ng-template>
 </div>
 </div>
-<form (submit)="onUpdateLabel()">
-  <mat-form-field appearance="outline" class="label-input no-bottom">
-    <input matInput [(ngModel)]="label" placeholder="Credentials label" name="credentials" [value]="newCredential?.label || ''">
-  </mat-form-field>
-  <button class="btn btn-neon label-button" type="submit" [disabled]="label === newCredential?.label">UPDATE LABEL</button>
-</form>
+@if (!serviceUserMode) {
+  <form (submit)="onUpdateLabel()">
+    <mat-form-field appearance="outline" class="label-input no-bottom">
+      <input matInput [(ngModel)]="label" placeholder="Credentials label" name="credentials" [value]="newCredential?.label || ''">
+    </mat-form-field>
+    <button class="btn btn-neon label-button" type="submit" [disabled]="label === newCredential?.label">UPDATE LABEL</button>
+  </form>
+}

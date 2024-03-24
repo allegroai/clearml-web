@@ -11,7 +11,7 @@ import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {
   CheckboxThreeStateListComponent
 } from '@common/shared/ui-components/panel/checkbox-three-state-list/checkbox-three-state-list.component';
-import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
+
 import {
   TableFilterDurationNumericComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
@@ -26,6 +26,7 @@ import {
   TableFilterDurationDateTimeComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 
 @Component({
   selector: 'sm-table-filter-sort-template',
@@ -35,19 +36,15 @@ import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll
   standalone: true,
   imports: [
     CheckboxThreeStateListComponent,
-    NgIf,
-    NgSwitchDefault,
-    NgSwitchCase,
     TableFilterDurationNumericComponent,
     TableFilterDurationComponent,
     MenuComponent,
     TooltipDirective,
-    NgSwitch,
     MenuItemComponent,
     ClickStopPropagationDirective,
-    NgForOf,
     TableFilterDurationDateTimeComponent,
-    ScrollEndDirective
+    ScrollEndDirective,
+    DotsLoadMoreComponent
   ]
 })
 export class TableFilterSortTemplateComponent {
@@ -137,8 +134,6 @@ export class TableFilterSortTemplateComponent {
   constructor() {
   }
 
-  trackByLabel = (index: number, item) => item.label;
-
   switchSortOrder($event: MouseEvent) {
     this.sortOrderChanged.emit($event.shiftKey);
   }
@@ -151,8 +146,7 @@ export class TableFilterSortTemplateComponent {
   }
 
   isFiltered() {
-    const filtered = (this.value && this.value.length > 0) || (this.subValue && this.subValue.length > 0);
-    return filtered;
+    return (this.value && this.value.length > 0) || (this.subValue && this.subValue.length > 0);
   }
 
   sortedClass() {

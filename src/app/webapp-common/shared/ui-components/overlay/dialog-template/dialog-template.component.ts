@@ -32,7 +32,7 @@ export class DialogTemplateComponent {
   @Output() xClicked = new EventEmitter();
 
   @ViewChild('container', {static: true}) container: ElementRef<HTMLDivElement>;
-  constructor(private dialog: MatDialogRef<DialogTemplateComponent, any>) {
+  constructor(private dialog: MatDialogRef<DialogTemplateComponent>) {
   }
 
   onXPressed() {

@@ -17,6 +17,7 @@ span {
     display: flex;
     overflow: hidden;
     flex-shrink: 0;
+    align-items: center;
 
     &.last {
       flex-shrink: 1;
@@ -44,7 +45,7 @@ span {
       white-space: nowrap;
       overflow: hidden;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
       align-items: center;
       grid-gap: 8px;
       .name {

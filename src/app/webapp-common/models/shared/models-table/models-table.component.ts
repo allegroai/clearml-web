@@ -4,7 +4,7 @@ import {
   Component,
   EventEmitter,
   HostListener,
-  Input,
+  Input, OnChanges,
   Output,
   ViewChild
 } from '@angular/core';
@@ -54,24 +54,24 @@ import {animate, style, transition, trigger} from '@angular/animations';
         transition(
           ':enter',
           [
-            style({opacity: 0 }),
+            style({opacity: 0}),
             animate('0.25s ease-in',
-              style({opacity: 1 }))
+              style({opacity: 1}))
           ]
         ),
         transition(
           ':leave',
           [
-            style({opacity: 1 }),
+            style({opacity: 1}),
             animate('0.2s ease-in',
-              style({opacity: 0 }))
+              style({opacity: 0}))
           ]
         )
       ]
     )
   ]
 })
-export class ModelsTableComponent extends BaseTableView {
+export class ModelsTableComponent extends BaseTableView implements OnChanges {
   readonly modelsTableColFields = MODELS_TABLE_COL_FIELDS;
   readonly modelsReadyOptions = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly timeFormatString = TIME_FORMAT_STRING;
@@ -93,11 +93,9 @@ export class ModelsTableComponent extends BaseTableView {
   public companyTags$: Observable<string[]>;
   private _selectedModels: TableModel[];
   private _models: SelectedModel[];
-  private _enableMultiSelect: boolean;
-  private _tableCols: ISmCol[];
   public getSysTags = getSysTags;
   public filtersMatch: { [colId: string]: string } = {};
-  public filtersSubValues: { [colId: string]: any } = {};
+  public filtersSubValues: { [colId: string]: string[] } = {};
   public singleRowContext: boolean;
   private _tableFilters: { [p: string]: FilterMetadata };
   public roundedMetricValues: { [colId: string]: { [expId: string]: boolean } } = {};
@@ -123,22 +121,8 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() noMoreModels: boolean;
   @Input() reorderableColumns = true;
-
-  @Input() set tableCols(tableCols: ISmCol[]) {
-    if (tableCols?.length > 0) {
-      tableCols[0].hidden = this.enableMultiSelect === false;
-      const statusColumn = tableCols.find(col => col.id === 'ready');
-      if (statusColumn) {
-        statusColumn.filterable = this.enableMultiSelect;
-        statusColumn.sortable = this.enableMultiSelect;
-      }
-      this._tableCols = tableCols;
-    }
-  }
-
-  get tableCols() {
-    return this._tableCols;
-  }
+  @Input() tableCols: ISmCol[];
+  @Input() enableMultiSelect: boolean;
 
   @Input() set onlyPublished(only: boolean) {
     const readyCol = this.tableCols.find(col => col.id === MODELS_TABLE_COL_FIELDS.READY);
@@ -157,17 +141,6 @@ export class ModelsTableComponent extends BaseTableView {
       value: project.id,
     }));
     this.sortOptionsList(MODELS_TABLE_COL_FIELDS.PROJECT);
-  }
-
-  @Input() set enableMultiSelect(enable: boolean) {
-    this._enableMultiSelect = enable;
-    if (this.tableCols) {
-      this.tableCols[0].hidden = enable === false;
-    }
-  }
-
-  get enableMultiSelect() {
-    return this._enableMultiSelect;
   }
 
   @Input() set selectedModels(selection) {
@@ -233,7 +206,10 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() set metadataValuesOptions(metadataValuesOptions: Record<ISmCol['id'], string[]>) {
     Object.entries(metadataValuesOptions).forEach(([id, values]) => {
-      this.filtersOptions[id] = values === null ? null : [{label: '(No Value)', value: null}].concat(values.map(value => ({
+      this.filtersOptions[id] = values === null ? null : [{
+        label: '(No Value)',
+        value: null
+      }].concat(values.map(value => ({
         label: value,
         value
       })));
@@ -292,6 +268,17 @@ export class ModelsTableComponent extends BaseTableView {
     this.entitiesKey = 'models';
     this.selectedEntitiesKey = 'selectedModels';
 
+  }
+
+  ngOnChanges() {
+    if (this.tableCols?.length > 0) {
+      this.tableCols[0].hidden = this.enableMultiSelect === false;
+      const statusColumn = this.tableCols.find(col => col.id === 'ready');
+      if (statusColumn) {
+        statusColumn.filterable = this.enableMultiSelect;
+        statusColumn.sortable = this.enableMultiSelect;
+      }
+    }
   }
 
 

@@ -1,83 +1,102 @@
 <div class="overflow-container" #container>
-  <ng-container *ngIf="isCommunity && activeWorkspace && !workspaceNeutral">
+  @if (isCommunity && activeWorkspace && !workspaceNeutral) {
     <span class="workspace">{{activeWorkspace.name}}</span>
     <i class="al-icon al-ico-slash"></i>
-  </ng-container>
-  <ng-container *ngFor="let breadcrumbGroup of breadcrumbs ; let lastGroup=last; let
-  firstGroup=first">
-    <ng-container *ngIf="!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable); else collapseMenu">
-      <ng-container *ngFor="let breadcrumb of breadcrumbGroup ; let lastCrumb=last; let firstCrumb=first">
+  }
+  @for (breadcrumbGroup of breadcrumbs ; track breadcrumbGroup; let lastGroup = $last; let
+    firstGroup = $first) {
+    @if (!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable)) {
+      @for (breadcrumb of breadcrumbGroup ; track breadcrumb; let lastCrumb = $last; let firstCrumb = $first) {
         <span class="sub-projects-breadcrumbs" [class.last]="lastCrumb && lastGroup">
-          <i *ngIf="breadcrumb.hidden" class="al-icon al-ico-ghost sm me-1 align-ghost"></i>
-          <a *ngIf="breadcrumb.url && !(lastCrumb && lastGroup); else noURL" class="crumb url"
-             [class.first]="firstCrumb && firstGroup"
-             [routerLink]="breadcrumb.url">
+          @if (breadcrumb.hidden) {
+            <i class="al-icon al-ico-ghost sm me-1 align-ghost"></i>
+          }
+          @if (breadcrumb.url && !(lastCrumb && lastGroup)) {
+            <a class="crumb url"
+              [class.first]="firstCrumb && firstGroup"
+              [routerLink]="breadcrumb.url">
             {{breadcrumb.name}}</a>
-          </span>
-        <i *ngIf="!(lastCrumb && lastGroup)" class="al-icon al-ico-slash"></i>
-        <ng-template #noURL>
-          <div #crumb class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb">
-            <div class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis
-            >{{breadcrumb.name}}{{breadcrumb.example ? ' (example)' : ''}}</div>
-            <sm-tag-list *ngIf="breadcrumb?.tags" [tags]="breadcrumb.tags"></sm-tag-list>
-          </div>
-        </ng-template>
-      </ng-container>
-    </ng-container>
-    <ng-template #collapseMenu>
-      <i *ngIf="breadcrumbGroup?.length > 0" [matMenuTriggerFor]="subProjectsMenu"
-         class="menu-trigger-icon al-icon msm pointer"
-         [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen"
-         [class.al-ico-d-menu-up]="subProjectsMenuIsOpen" (menuOpened)="subProjectsMenuOpened(true)"
-         (menuClosed)="subProjectsMenuOpened(false)"></i>
-      <ng-container class="d-flex" *ngIf="breadcrumbGroup?.length>0">
-        <i class="al-icon al-ico-slash"></i>
-      </ng-container>
-      <mat-menu #subProjectsMenu="matMenu" >
-        <span mat-menu-item
-          class="sub-project-menu-item"
-          [smTooltip]="breadcrumb.name"
-          smShowTooltipIfEllipsis
-          *ngFor="let breadcrumb of breadcrumbGroup"
-          [routerLink]="breadcrumb.url!=='projects/*/projects'? breadcrumb.url: 'projects/*'"
-        >
-          <i *ngIf="breadcrumb.hidden" class="al-icon al-ico-ghost sm me-1"></i>{{breadcrumb.name}}
+          } @else {
+            <div #crumb class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb">
+              <div class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis
+              >{{breadcrumb.name}}{{breadcrumb.example ? ' (example)' : ''}}</div>
+              @if (breadcrumb.id) {
+                <sm-id-badge [short]="true" [id]="breadcrumb.id" (copied)="copyToClipboard()"></sm-id-badge>
+              }
+              @if (breadcrumb.tags?.length) {
+                <sm-tag-list [tags]="breadcrumb.tags"></sm-tag-list>
+              }
+            </div>
+          }
         </span>
-      </mat-menu>
+        @if (!(lastCrumb && lastGroup)) {
+          <i class="al-icon al-ico-slash"></i>
+        }
+      }
+    } @else {
+      @if (breadcrumbGroup?.length > 0) {
+        <i [matMenuTriggerFor]="subProjectsMenu"
+          class="menu-trigger-icon al-icon msm pointer"
+          [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen"
+          [class.al-ico-d-menu-up]="subProjectsMenuIsOpen" (menuOpened)="subProjectsMenuOpened(true)"
+        (menuClosed)="subProjectsMenuOpened(false)"></i>
+      }
+      @if (breadcrumbGroup?.length>0) {
+        <ng-container class="d-flex">
+          <i class="al-icon al-ico-slash"></i>
+        </ng-container>
+      }
+      <mat-menu #subProjectsMenu="matMenu" >
+        @for (breadcrumb of breadcrumbGroup; track breadcrumb) {
+          <span mat-menu-item
+            class="sub-project-menu-item"
+            [smTooltip]="breadcrumb.name"
+            smShowTooltipIfEllipsis
+            [routerLink]="breadcrumb.url!=='projects/*/projects'? breadcrumb.url: 'projects/*'"
+            >
+            @if (breadcrumb.hidden) {
+              <i class="al-icon al-ico-ghost sm me-1"></i>
+              }{{breadcrumb.name}}
+            </span>
+          }
+        </mat-menu>
+      }
+    }
+    <div>
+      <div
+        #menuTrigger="matMenuTrigger"
+        [matMenuTriggerFor]="shareModal"
+        (menuOpened)="openShareModal()"
+        >
+        @if (showShareButton && !isCommunity) {
+          <i class="fa fa-share-alt share pointer" smTooltip="Share"></i>
+        }
+      </div>
+      <mat-menu #shareModal="matMenu">
+        <div class="share-menu-container" smClickStopPropagation>
+          <div class="d-flex align-items-center justify-content-between top">
+            <div class="share-title">SHARE VIEW</div>
+            <i class="pointer al-icon al-ico-dialog-x al-color blue-300 sm-md close-dialog"
+            (click)="menuTrigger.closeMenu()" smClickStopPropagation></i>
+          </div>
+          <div class="copy-title">Copy the following URL to share this view with others</div>
 
-    </ng-template>
-  </ng-container>
-  <div>
-    <div
-      #menuTrigger="matMenuTrigger"
-      [matMenuTriggerFor]="shareModal"
-      (menuOpened)="openShareModal()"
-    >
-      <i *ngIf="showShareButton && !isCommunity" class="fa fa-share-alt share pointer" smTooltip="Share"></i>
-    </div>
-    <mat-menu #shareModal="matMenu">
-      <div class="share-menu-container" smClickStopPropagation>
-        <div class="d-flex align-items-center justify-content-between top">
-          <div class="share-title">SHARE VIEW</div>
-          <i class="pointer al-icon al-ico-dialog-x al-color blue-300 sm-md close-dialog"
-             (click)="menuTrigger.closeMenu()" smClickStopPropagation></i>
-        </div>
-        <div class="copy-title">Copy the following URL to share this view with others</div>
-
-        <div class="share-link-container" [class.hidden]="!(currentUrl)">
-          <div class="ellipsis share-link">
+          <div class="share-link-container" [class.hidden]="!(currentUrl)">
+            <div class="ellipsis share-link">
             {{currentUrl}}</div>
-          <div ngxClipboard
-               smClickStopPropagation
-               [cbContent]="currentUrl"
-               class="copy pointer"
-               (cbOnSuccess)="copyToClipboardSuccess(); menuTrigger.closeMenu()">
-            <i class="fas fa-copy "></i>
+            <div ngxClipboard
+              smClickStopPropagation
+              [cbContent]="currentUrl"
+              class="copy pointer"
+              (cbOnSuccess)="copyToClipboardSuccess(); menuTrigger.closeMenu()">
+              <i class="fas fa-copy "></i>
+            </div>
           </div>
         </div>
-      </div>
-    </mat-menu>
-  </div>
-  <div *ngIf="archive" data-id="Archive Label" class="archive"><i class="al-icon xs al-ico-archive me-1"></i>Archive
-  </div>
+      </mat-menu>
+    </div>
+    @if (archive) {
+      <div data-id="Archive Label" class="archive"><i class="al-icon xs al-ico-archive me-1"></i>Archive
+    </div>
+  }
 </div>

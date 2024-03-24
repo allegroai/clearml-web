@@ -12,7 +12,7 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     hidden: false,
     bodyStyleClass: 'selected-col-body type-col',
     headerStyleClass: 'selected-col-header',
-    style: {width: '65px'},
+    style: {width: '70px'},
     disableDrag: true,
     disablePointerEvents: true,
   },

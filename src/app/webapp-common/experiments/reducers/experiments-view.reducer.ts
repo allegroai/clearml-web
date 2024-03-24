@@ -52,6 +52,7 @@ export interface ExperimentsViewState {
   types: string[];
   splitSize: number;
   tableMode: 'info' | 'table' | 'compare';
+  tableCompareView: 'scalars' | 'plots';
   showCompareScalarSettings: boolean;
   cloneForceParent: boolean;
 }
@@ -93,6 +94,7 @@ export const experimentsViewInitialState: ExperimentsViewState = {
   types: [],
   splitSize: 70,
   tableMode: 'table',
+  tableCompareView: 'scalars',
   showCompareScalarSettings: false,
   cloneForceParent: null,
 };
@@ -167,7 +169,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     on(actions.setSelectedExperiments, (state, action): ExperimentsViewState => ({
       ...state,
       selectedExperiments: action.experiments,
-      ...(state.tableMode === 'compare' && action.compareMode && {[action.compareMode === 'plots' ? 'metricVariantsPlots': 'metricVariants']:  []}),
+      // ...(state.tableMode === 'compare' && {[state.tableCompareView === 'plots' ? 'metricVariantsPlots': 'metricVariants']:  []}),
     })),
     on(actions.setSelectedExperimentsDisableAvailable, (state, action): ExperimentsViewState =>
       ({...state, selectedExperimentsDisableAvailable: action.selectedExperimentsDisableAvailable})),
@@ -210,7 +212,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
       }
     })),
     on(actions.toggleSelectedMetricCompare, (state, action): ExperimentsViewState => {
-      const selectedMetricsKey = action.compareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
+      const selectedMetricsKey = state.tableCompareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
       return {
         ...state,
         [selectedMetricsKey]: {
@@ -258,7 +260,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
       })),
     on(actions.addColumn, (state, action): ExperimentsViewState => ({...state, metricsCols: [...state.metricsCols, action.col]})),
     on(actions.addSelectedMetric, (state, action): ExperimentsViewState => {
-      const selectedMetricsKey = action.compareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
+      const selectedMetricsKey = state.tableCompareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
       return {
         ...state,
         [selectedMetricsKey]: {
@@ -288,7 +290,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
       };
     }),
     on(actions.removeSelectedMetric, (state, action): ExperimentsViewState => {
-      const selectedMetricsKey = action.compareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
+      const selectedMetricsKey = state.tableCompareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
       return {
         ...state,
         [selectedMetricsKey]: {
@@ -335,8 +337,17 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
 
       const discardBefore = new Date();
       discardBefore.setMonth(discardBefore.getMonth() - 2);
-      Object.entries(newState.compareSelectedMetrics).forEach(([projectId, selectedMetric]) =>
-        discardBefore > new Date(selectedMetric.lastModified || 1648771200000) && delete newState.compareSelectedMetrics[projectId])
+      Object.entries(newState.compareSelectedMetrics)
+        .filter(([, selectedMetric]) => discardBefore > new Date(selectedMetric.lastModified || 1648771200000))
+        .forEach(([projectId]) => {
+          try {
+            delete newState.compareSelectedMetrics[projectId];
+          } catch (err) {
+            if (!(err instanceof TypeError)) {
+              throw err;
+            }
+          }
+        });
 
       return newState;
     }),
@@ -356,6 +367,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     on(actions.getCustomHyperParams, (state): ExperimentsViewState => ({...state, metricsLoading: true})),
     on(actions.setSplitSize, (state, action): ExperimentsViewState => ({...state, splitSize: action.splitSize})),
     on(actions.setTableMode, (state, action): ExperimentsViewState => ({...state, tableMode: action.mode})),
+    on(actions.setCompareView, (state, action): ExperimentsViewState => ({...state, tableCompareView: action.mode})),
     on(actions.toggleCompareScalarSettings, (state): ExperimentsViewState => ({...state, showCompareScalarSettings: !state.showCompareScalarSettings})),
     on(cloneExperimentClicked, (state, action): ExperimentsViewState => ({...state, cloneForceParent: action.cloneData.forceParent})),
   );

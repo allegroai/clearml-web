@@ -2,8 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChi
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
-import {trackByKey} from '@common/shared/utils/forms-track-by';
-import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {
@@ -28,12 +27,10 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     FormsModule,
     CheckboxThreeStateListComponent,
     MatListModule,
-    NgIf,
     MenuItemComponent,
-    NgForOf,
     FilterPipe,
     ClickStopPropagationDirective
-  ]
+]
 })
 export class TableCardFilterTemplateComponent {
 
@@ -84,7 +81,6 @@ export class TableCardFilterTemplateComponent {
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 
-  trackByKey = trackByKey;
   trackByLabel = (index: number, item) => item.label;
 
   onFilterChanged(colId: string, val) {

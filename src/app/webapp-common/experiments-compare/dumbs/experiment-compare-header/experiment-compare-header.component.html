@@ -2,7 +2,7 @@
   <div class="actions-container">
     <span class="d-flex">
         <button class="btn btn-secondary btn-add-experiment" (click)="showGlobalLegend()">
-          <span>{{entityType | uppercase}}S</span>
+          <span>{{ entityType | uppercase }}S</span>
         </button>
         <button [smTooltip]="(allowAddExperiment$ | async) ?
       'Add/Remove ' + entityType + 's to comparison' :
@@ -19,37 +19,37 @@
         (selectionChange)="changeView($event)"
       >
         <mat-select-trigger>
-          <i data-id="viewTypeMenuOption" class="fas me-2"
-             [ngClass]="{'fa-align-left': viewMode.endsWith('values'), 'fa-chart-area': viewMode === 'graph'}"></i>
+          <i data-id="viewTypeMenuOption" class="al-icon sm-md me-2"
+             [ngClass]="{'al-ico-description': viewMode.endsWith('values'), 'al-ico-charts-view': viewMode === 'graph', 'al-ico-scatter-view': viewMode === 'scatter'}"></i>
           <ng-container [ngSwitch]="true">
             <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'graph'">Parallel Coordinates</span>
-            <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'scatter'"><i class="al-icon al-ico-no-scatter-graph sm me-2"></i>Scatter Plot</span>
+            <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'scatter'">Scatter Plot</span>
             <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'graph'">Graph</span>
             <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'values'">Last Values</span>
-            <span *ngSwitchDefault>{{(queryParamsViewMode$ | async) || viewMode | noUnderscore | titlecase}}</span>
+            <span *ngSwitchDefault>{{ (queryParamsViewMode$ | async) || viewMode | noUnderscore | titlecase }}</span>
           </ng-container>
         </mat-select-trigger>
         <ng-container *ngIf="currentPage === 'scalars'; else: otherOptions">
           <mat-option value="values" class="compare-mat-option">
-            <i class="fas fa-align-left me-2"></i>Last Values
+            <i class="al-icon al-ico-description sm-md me-2"></i>Last Values
           </mat-option>
           <mat-option *ngIf="currentPage === 'scalars'" value="min-values" class="compare-mat-option">
-            <i class="fas fa-align-left me-2"></i>Min Values
+            <i class="al-icon al-ico-description sm-md me-2"></i>Min Values
           </mat-option>
           <mat-option *ngIf="currentPage === 'scalars'" value="max-values" class="compare-mat-option">
-            <i class="fas fa-align-left me-2"></i>Max Values
+            <i class="al-icon al-ico-description sm-md me-2"></i>Max Values
           </mat-option>
         </ng-container>
         <ng-template #otherOptions>
           <mat-option value="values" class="compare-mat-option">
-            <i class="fas fa-align-left me-2"></i>Values
+            <i class="al-icon al-ico-description sm-md me-2"></i>Values
           </mat-option>
         </ng-template>
         <mat-option value="graph" class="compare-mat-option">
-          <i class="fas fa-chart-area me-2"></i>{{currentPage === 'hyper-params' ? 'Parallel Coordinates' : 'Graph'}}
+          <i class="al-icon al-ico-charts-view sm-md me-2"></i>{{ currentPage === 'hyper-params' ? 'Parallel Coordinates' : 'Graph' }}
         </mat-option>
         <mat-option *ngIf="currentPage === 'hyper-params'" value="scatter" class="compare-mat-option">
-          <i class="al-icon al-ico-no-scatter-graph sm me-2"></i>Scatter Plot
+          <i class="al-icon al-ico-scatter-view sm-md me-2"></i>Scatter Plot
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -57,9 +57,9 @@
     <div id="nextDiff" class="next-diff"></div>
 
     <mat-slide-toggle
-      *ngIf="['hyper-params', 'details', 'models-details', 'network'].includes(currentPage) && viewMode !== 'graph' && viewMode !== 'scatter'"
+      *ngIf="['hyper-params', 'details', 'models-details', 'network'].includes(currentPage)"
       (change)="hideIdenticalFieldsToggled($event)"
-      [checked]="selectHideIdenticalFields$ | async">Hide Identical Fields
+      [checked]="selectHideIdenticalFields$ | async">Hide Identical {{ (viewMode === 'graph' || viewMode === 'scatter') ? 'Parameters' : 'Fields' }}
     </mat-slide-toggle>
 
     <mat-slide-toggle color="primary"

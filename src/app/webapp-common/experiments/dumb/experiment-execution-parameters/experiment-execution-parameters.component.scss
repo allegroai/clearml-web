@@ -76,4 +76,10 @@
     color: $grey-purple;
     transition: all ease-in-out 0.15s, border ease-in-out 0.15s;
   }
+
+  ::ng-deep .table-container {
+    td:first-child {
+      padding-left: 8px !important;
+    }
+  }
 }

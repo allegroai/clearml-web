@@ -1,9 +1,9 @@
-@import "variables";
-@import "src/app/webapp-common/shared/ui-components/styles/variables.scss";
+@import "../../shared/ui-components/styles/variables";
+@import "./variables";
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?1skk4q') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?hr04a1') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,65 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-queue {
+  &:before {
+    content: $al-ico-queue; 
+  }
+}
+.al-ico-weight {
+  &:before {
+    content: $al-ico-weight; 
+  }
+}
+.al-ico-link-plus {
+  &:before {
+    content: $al-ico-link-plus; 
+  }
+}
+.al-ico-drag-vertical {
+  &:before {
+    content: $al-ico-drag-vertical; 
+  }
+}
+.al-ico-drag-horizontal {
+  &:before {
+    content: $al-ico-drag-horizontal; 
+  }
+}
+.al-ico-admin-support {
+  &:before {
+    content: $al-ico-admin-support;
+  }
+}
+.al-ico-scatter-view {
+  &:before {
+    content: $al-ico-scatter-view;
+  }
+}.al-ico-scatter-view {
+  &:before {
+    content: $al-ico-scatter-view;
+  }
+}
+.al-ico-schedulers {
+  &:before {
+    content: $al-ico-schedulers;
+  }
+}
+.al-ico-triggers {
+  &:before {
+    content: $al-ico-triggers;
+  }
+}
+.al-ico-autoscalers {
+  &:before {
+    content: $al-ico-autoscalers;
+  }
+}
+.al-ico-automation {
+  &:before {
+    content: $al-ico-automation;
+  }
+}
 .al-ico-charts-view:before {
   content: "\e9f9";
 }

@@ -24,7 +24,7 @@ import {setBreadcrumbs} from '@common/core/actions/router.actions';
 import {selectBreadcrumbs} from '@common/core/reducers/view.reducer';
 import {MatMenuModule} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgForOf, NgIf} from '@angular/common';
+
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
@@ -33,6 +33,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 import {cloneItemIntoDummy} from '@common/shared/utils/shared-utils';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
 
 export enum CrumbTypeEnum {
   Workspace = 'Workspace',
@@ -50,6 +51,7 @@ export interface IBreadcrumbsLink {
   hidden?: boolean;
   collapsable?: boolean;
   example?: boolean;
+  id?: string;
   tags?: string[];
   onlyWithProject?: boolean;
 }
@@ -76,14 +78,13 @@ export interface IBreadcrumbsOptions {
   imports: [
     MatMenuModule,
     TooltipDirective,
-    NgForOf,
     ShowTooltipIfEllipsisDirective,
     ClipboardModule,
     RouterLink,
-    NgIf,
     ClickStopPropagationDirective,
-    TagListComponent
-  ],
+    TagListComponent,
+    IdBadgeComponent
+],
   standalone: true
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
@@ -173,7 +174,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
       ).subscribe(([config, params, showHidden]) => {
         this.showHidden = showHidden;
         this.projectFeature = config?.[0] === 'projects';
-        this.archive = !!params?.archive;
+        this.archive = params?.archive==='true';
         let route = this.route.snapshot;
         let hide = false;
         while (route.firstChild) {
@@ -217,5 +218,9 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   subProjectsMenuOpened(b: boolean) {
     this.subProjectsMenuIsOpen = b;
+  }
+
+  copyToClipboard() {
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'ID copied to clipboard'));
   }
 }

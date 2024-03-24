@@ -1,4 +1,4 @@
-@import "src/app/webapp-common/shared/ui-components/styles/variables";
+@import "variables";
 
 
 .single-table-container {
@@ -86,11 +86,8 @@
 
     .csv-no-icon {
       display: block;
-      background-color: $blue-300;
-      color: #fff;
-      font-size: 10px;
-      padding: 6px 2px;
-      border-radius: 4px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
     }
 

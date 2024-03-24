@@ -20,7 +20,7 @@ export class SelectMetricForCustomColComponent {
   public filteredMetricTree: [string, MetricVariantResult[]][];
   public expandedMetrics = {};
   public metricsCols: {[metVar: string]: string[]};
-  public searchText: any;
+  public searchText: string;
   public entriesLimit = 300;
   public moreResults: number;
   trackByMetric = (index, entry: [string, MetricVariantResult[]]) => entry[1][0].metric_hash;
@@ -41,7 +41,7 @@ export class SelectMetricForCustomColComponent {
 
   @Input() set tableCols(tableCols) {
     this.metricsCols = {};
-    tableCols.filter(tableCol => tableCol.metric_hash).forEach(tableCol => {
+    tableCols?.filter(tableCol => tableCol.metric_hash)?.forEach(tableCol => {
       this.expandedMetrics[tableCol.metric_hash] = this.expandedMetrics[tableCol.metric_hash] ?? true;
       this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] ?
         this.metricsCols[tableCol.metric_hash + tableCol.variant_hash].push(tableCol.valueType) :
@@ -50,14 +50,16 @@ export class SelectMetricForCustomColComponent {
   }
   @Input() multiSelect = true;
   @Input() skipValueType = false;
-  @Output() getMetricsToDisplay  = new EventEmitter();
+  @Input() enableClearSelection: boolean;
+  // @Output() getMetricsToDisplay  = new EventEmitter();
   @Output() selectedMetricToShow = new EventEmitter<SelectionEvent>();
+  @Output() clearSelection = new EventEmitter();
   @Output() goBack               = new EventEmitter();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
 
-  toggleAllMetricsToDisplay(variant: any, on: boolean) {
+  toggleAllMetricsToDisplay(variant: ISmCol, on: boolean) {
     if (!on) {
       this.toggleMetricToDisplay(variant, on, null);
       this.multiSelect ?
@@ -72,6 +74,9 @@ export class SelectMetricForCustomColComponent {
 
   public toggleMetricToDisplay(variant: ISmCol, value: boolean, valueType: MetricValueType) {
     this.selectedMetricToShow.emit({variant, addCol: !value, valueType});
+  }
+  public resetSearch(){
+    this.searchQ('');
   }
 
   public searchQ(value: string) {
@@ -91,4 +96,5 @@ export class SelectMetricForCustomColComponent {
       this.changeDetectorRef.detectChanges();
     }, 275);
   }
+
 }

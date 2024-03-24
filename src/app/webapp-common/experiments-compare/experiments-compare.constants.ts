@@ -1,10 +1,15 @@
 import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 export type MetricValueType = 'min_value' | 'max_value' | 'value';
 
 export interface SelectedMetric {
   name: string;
   path: string;
+  valueType?: 'min_value' | 'max_value' | 'value';
+}
+
+export interface SelectedMetricVariant extends MetricVariantResult{
   valueType?: 'min_value' | 'max_value' | 'value';
 }
 

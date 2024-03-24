@@ -14,6 +14,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {MatExpansionModule} from '@angular/material/expansion';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {IsEmptyPipe} from '@common/shared/pipes/is-empty.pipe';
 
 const declarations = [
   ExperimentSettingsComponent,
@@ -32,7 +33,8 @@ const declarations = [
     ClickStopPropagationDirective,
     MatExpansionModule,
     TooltipDirective,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    IsEmptyPipe
   ],
   declarations   : [declarations],
   exports        : [...declarations]

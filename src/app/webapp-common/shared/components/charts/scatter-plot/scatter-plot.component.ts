@@ -70,12 +70,20 @@ export class ScatterPlotComponent implements OnChanges {
         usePointStyle: true,
         boxWidth: 6,
         callbacks: {
-          label: (item: TooltipItem<'scatter'>): string | string[] =>
-            `${(this.chartData.datasets[item.datasetIndex].data as ScatterPlotSeries['data'])[item.dataIndex].name}`,
-          afterLabel: (item: TooltipItem<'scatter'>): string | string[] =>
-            `${(this.chartData.datasets[item.datasetIndex].data as ScatterPlotSeries['data'])[item.dataIndex].y}`,
           beforeLabel: (item: TooltipItem<'scatter'>): string | string[] =>
             (this.chartData.datasets[item.datasetIndex].data as ScatterPlotSeries['data'])[item.dataIndex].description,
+          label: (item: TooltipItem<'scatter'>): string | string[] => {
+            const data = this.chartData.datasets[item.datasetIndex].data as ScatterPlotSeries['data'];
+            return [`${data[item.dataIndex].name}`,
+              ...(this.yAxisLabel ? [`${this.yAxisLabel}: ${data[item.dataIndex].y}`] : []),
+              ...(this.xAxisLabel ? [`${this.xAxisLabel}: ${data[item.dataIndex].x}`] : []),
+              ...(data[item.dataIndex]?.extraParamsHoverInfo?.length > 0 ? ['', 'Additional info:'] : []),
+              ...(data[item.dataIndex]?.extraParamsHoverInfo?.length === 0 ? ['', 'To see more info here please add additional data point information'] : []),
+              ...(data[item.dataIndex]?.extraParamsHoverInfo?.length > 0 ? data?.[item.dataIndex]?.extraParamsHoverInfo ?? [] : [])
+              ];
+            },
+          afterLabel: (item: TooltipItem<'scatter'>): string | string[] =>
+            !this.yAxisLabel ? `${(this.chartData.datasets[item.datasetIndex].data as ScatterPlotSeries['data'])[item.dataIndex].y}` : '',
         }
       },
       zoom: {
@@ -90,6 +98,7 @@ export class ScatterPlotComponent implements OnChanges {
       }
     }
   };
+
   private darkTheme: boolean;
 
   constructor(private cdr: ChangeDetectorRef) {
@@ -114,7 +123,7 @@ export class ScatterPlotComponent implements OnChanges {
         backgroundColor: 'black',
         borderColor: '#8492c2',
         bodyColor: '#c3cdf0',
-      }
+      };
       this.scatterChartOptions.plugins.legend.labels.color = '#c1cdf3';
     }
   }
@@ -122,6 +131,9 @@ export class ScatterPlotComponent implements OnChanges {
   @Input() colors: string[];
   @Input() xAxisLabel: string;
   @Input() yAxisLabel: string;
+  @Input() extraHoverInfoParams: string[] = [];
+
+
   @Input() set data(data: ScatterPlotSeries[]) {
     if (data) {
       this.loading = false;
@@ -171,13 +183,13 @@ export class ScatterPlotComponent implements OnChanges {
     }
   }
 
-  @Output() clicked = new EventEmitter();
+  @Output() clicked = new EventEmitter<string>();
 
   chartClicked(active: object[]) {
     if (active.length < 1) {
       return;
     }
-    const {index, datasetIndex} = active[0] as {index: number; datasetIndex: number};
+    const {index, datasetIndex} = active[0] as { index: number; datasetIndex: number };
     this.clicked.emit((this.chartData.datasets[datasetIndex].data as ScatterPlotSeries['data'])[index].id);
   }
 }

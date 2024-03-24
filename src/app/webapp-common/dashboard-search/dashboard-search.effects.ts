@@ -5,13 +5,11 @@ import {
   getCurrentPageResults,
   getResultsCount,
   searchActivate,
-  searchClear,
   searchExperiments,
   searchModels,
   searchOpenDatasets,
   searchPipelines,
   searchProjects, searchReports,
-  searchSetTerm,
   searchStart,
   setExperimentsResults,
   setModelsResults, setOpenDatasetsResults,
@@ -27,7 +25,6 @@ import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsG
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
-import {isEqual} from 'lodash-es';
 import {activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {emptyAction} from '~/app.constants';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
@@ -119,10 +116,10 @@ export class DashboardSearchEffects {
       this.store.select(selectActiveSearch),
       this.store.select(selectSearchTerm)
     ]),
-    mergeMap(([action, active, term]) => {
+    mergeMap(([, active, term]) => {
       const actionsToFire = [];
       if (!active) {
-        actionsToFire.push(searchClear());
+        // actionsToFire.push(searchClear());
         actionsToFire.push(searchActivate());
       }
       actionsToFire.push(getResultsCount(term));

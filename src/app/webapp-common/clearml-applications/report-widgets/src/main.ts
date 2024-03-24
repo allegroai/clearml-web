@@ -1,15 +1,14 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
-import { AppModule } from './app/app.module';
 import {APP_BASE_HREF} from '@angular/common';
-import {Environment} from '../../../../../environments/base';
+import {bootstrapApplication} from '@angular/platform-browser';
 import {environment} from './environments/environment';
 import {updateHttpUrlBaseConstant} from '~/app.constants';
+import {appConfig} from '@common/clearml-applications/report-widgets/src/app/app.config';
+import {Environment} from '../../../../../environments/base';
+import {AppComponent} from './app/app.component';
 
-if (environment.production) {
-  enableProdMode();
-}
+// bootstrapApplication(AppComponent, appConfig)
+//   .catch((err) => console.error(err));
+
 
 (async () => {
   const configData = {baseHref: ''} as Environment;
@@ -18,8 +17,9 @@ if (environment.production) {
     (window as any).configuration = {};
   } finally {
     updateHttpUrlBaseConstant({...environment, ...configData});
-    await platformBrowserDynamic([
-      {provide: APP_BASE_HREF, useValue: configData.baseHref}
-    ]).bootstrapModule(AppModule);
+    await bootstrapApplication(AppComponent, {providers: [
+        ...appConfig.providers,
+        {provide: APP_BASE_HREF, useValue: configData.baseHref}
+      ]});
   }
 })();

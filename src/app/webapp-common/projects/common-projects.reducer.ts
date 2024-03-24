@@ -140,13 +140,13 @@ export const selectNonFilteredProjectsList = createSelector(projects, state => s
 export const selectProjectsOrderBy = createSelector(projects, state => state?.orderBy || '');
 export const selectProjectsSortOrder = createSelector(projects, state => state?.sortOrder || TABLE_SORT_ORDER.DESC);
 export const selectProjectsSearchQuery = createSelector(projects, state => state?.searchQuery);
-export const selectValidatedProject = createSelector(projects, state => state.validatedProject);
+export const selectValidatedProject = createSelector(projects, state => state?.validatedProject);
 export const selectReadyForDeletion = createSelector(projects, state =>
-  state.projectReadyForDeletion);
+  state?.projectReadyForDeletion);
 export const selectProjectReadyForDeletion = createSelector(selectValidatedProject, selectReadyForDeletion,
   (project, projectReadyForDeletion) => projectReadyForDeletion ? {...projectReadyForDeletion, project} : null);
-export const selectProjectForDelete = createSelector(projects, state => [state?.validatedProject]);
-export const selectNoMoreProjects = createSelector(projects, state => state.noMoreProjects);
+export const selectProjectForDelete = createSelector(projects, state => state?.validatedProject ? [state?.validatedProject]: []);
+export const selectNoMoreProjects = createSelector(projects, state => state?.noMoreProjects);
 export const selectProjectsScrollId = createSelector(projects, (state): string => state?.scrollId || null);
 export const selectTableModeAwareness = createSelector(projects, state => state?.tableModeAwareness);
 export const selectShowPipelineExamples = createSelector(projects, state => state?.showPipelineExamples);

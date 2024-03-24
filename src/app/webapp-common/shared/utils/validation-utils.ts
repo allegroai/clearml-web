@@ -32,7 +32,7 @@ export function validateJson(obj) {
   try {
     JSON.parse(obj);
   } catch (e) {
-    return {json: false};
+    return false;
   }
-  return null;
+  return true;
 }

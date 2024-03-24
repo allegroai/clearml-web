@@ -3,8 +3,7 @@
   smMenuClass="light-theme custom-columns"
   data-id="CustomizeColumn"
   [buttonTooltip]=" skipValueType ? 'Customize charts view' : 'Customize table'"
-  [showButton]="false"
-  (click)="!disabled && getMetricsToDisplay.emit()"
+  (mouseup)="!disabled && getMetricsToDisplay.emit()"
   (menuClosed)="setMode(customColumnModeEnum.Standard)"
   [style.pointer-events]="disabled ? 'none' : 'initial'"
 >

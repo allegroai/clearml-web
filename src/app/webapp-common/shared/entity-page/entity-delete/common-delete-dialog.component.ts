@@ -72,7 +72,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.entityType = data.entityType;
     this.hideDeleteArtifacts = hideDeleteArtifactsEntities.includes(data.entityType);
     this.numSelected = data.numSelected;
-    const name = DOMPurify.sanitize(data.entity.name);
+    const name = DOMPurify.sanitize(data.entity?.name);
     this.entityName = data.numSelected === 1 ?
       data.entityType === EntityTypeEnum.project ?
         htmlTextShort(name.split('/').pop()) : htmlTextShort(name) :

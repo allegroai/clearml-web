@@ -1,4 +1,6 @@
-import {Injectable} from '@angular/core';
+import {computed, inject, Injectable} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {guessAPIServerURL, HTTP} from '~/app.constants';
 import {environment} from '../../../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, of, timer, throwError} from 'rxjs';
@@ -13,12 +15,38 @@ export const fetchConfigOutSideAngular = async (): Promise<Environment> =>
   providedIn: 'root'
 })
 export class ConfigurationService {
+  private httpClient = inject(HttpClient);
 
   public static globalEnvironment = environment as Environment;
   public globalEnvironmentObservable = new BehaviorSubject(environment as Environment);
+  public readonly configuration = toSignal<Environment>(this.globalEnvironmentObservable.asObservable());
+  public readonly fileServerUrl = computed(() => {
+    const filesServer = this.configuration().displayedServerUrls?.filesServer
+    if (filesServer) {
+      if (filesServer.startsWith('http')) {
+        return filesServer;
+      }
+      const url = new URL(window.location.origin);
+      url.pathname = filesServer;
+      return url.toString();
+    } else {
+      return HTTP.FILE_BASE_URL;
+    }
+  });
 
-  constructor(private httpClient: HttpClient) {
-  }
+  public readonly apiServerUrl = computed(() => {
+    const apiServer = this.configuration().displayedServerUrls?.apiServer
+    if (apiServer) {
+      if (apiServer.startsWith('http')) {
+        return apiServer;
+      }
+      const url = new URL(window.location.origin);
+      url.pathname = apiServer;
+      return url.toString();
+    } else {
+      return guessAPIServerURL();
+    }
+  });
 
   initConfigurationService() {
     if ((window as any).configuration) {

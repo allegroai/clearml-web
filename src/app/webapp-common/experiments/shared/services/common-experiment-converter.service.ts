@@ -34,6 +34,15 @@ export class CommonExperimentConverterService {
       docker_cmd: execution?.docker_cmd
     };
   }
+
+  convertRequirements(requirements: IExecutionForm['requirements']) {
+    const {orgPip, orgConda, ...rest} = requirements;
+    return {
+      ...rest,
+      ...(orgPip && {org_pip: orgPip}),
+      ...(orgConda && {org_conda: orgConda}),
+    };
+  }
 }
 
 

@@ -51,6 +51,7 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
 
       this.resetComponentState(experiments);
       this.calculateTree(experiments);
+      this.nativeWidth = Math.max(this.treeCardBody?.getBoundingClientRect().width, 410);
     });
   }
 

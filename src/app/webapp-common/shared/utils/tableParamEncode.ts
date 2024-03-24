@@ -30,10 +30,10 @@ export const excludedKey = '__$not';
 
 const metricVariantDelimiter = '\u203A'
 
-const MetricValueTypeStrings = {
-  value: 'LAST',
-  max_value: 'MAX',
-  min_value: 'MIN',
+export const MetricValueTypeStrings = {
+  value: '(Last)',
+  max_value: '(Max)',
+  min_value: '(Min)',
 };
 
 export const getValueTypeName = (valueType: MetricValueType) => MetricValueTypeStrings[valueType] ?? valueType;
@@ -165,7 +165,7 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   sortable: true,
   filterable: true,
   filterType: ColHeaderFilterTypeEnum.durationNumeric,
-  header: `${column.metric} ${metricVariantDelimiter} ${column.variant}${getValueTypeName(column.valueType) ? ' (' + getValueTypeName(column.valueType) + ')': ''}`,
+  header: `${column.metric} ${metricVariantDelimiter} ${column.variant}${getValueTypeName(column.valueType) ? ' ' + getValueTypeName(column.valueType): ''}`,
   hidden: false,
   /* eslint-disable @typescript-eslint/naming-convention */
   metric_hash: column.metricHash,

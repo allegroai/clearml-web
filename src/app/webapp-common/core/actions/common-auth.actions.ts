@@ -16,7 +16,7 @@ export const updateS3Credential = createAction(
 );
 export const createCredential = createAction(
   AUTH_PREFIX + 'CREATE_CREDENTIAL (API)',
-  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string}>()
+  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string; userId?: string}>()
 );
 
 export const updateCredentialLabel = createAction(
@@ -33,6 +33,7 @@ export const addCredential = createAction(
   props<{ newCredential: CredentialKeyExt; workspaceId: string }>()
 );
 export const resetCredential = createAction(AUTH_PREFIX + 'RESET_CREDENTIAL');
+export const resetCredentials = createAction(AUTH_PREFIX + 'RESET_CREDENTIALS');
 export const removeCredential = createAction(
   AUTH_PREFIX + '[remove credentials]',
   props<{ accessKey: string; workspaceId: string }>()
@@ -55,7 +56,9 @@ export const showLocalFilePopUp = createAction(
   AUTH_PREFIX + 'SHOW_LOCAL_FILE_POPUP',
   props<{ url: string }>()
 );
-export const getAllCredentials = createAction(AUTH_PREFIX + 'GET_ALL_CREDENTIALS');
+export const getAllCredentials = createAction(
+  AUTH_PREFIX + 'GET_ALL_CREDENTIALS',
+  props<{userId?: string}>());
 export const credentialRevoked = createAction(
   AUTH_PREFIX + 'REVOKE_CREDENTIAL (API)',
   props<{ accessKey: string; workspaceId: string }>()

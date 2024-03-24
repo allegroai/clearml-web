@@ -1,6 +1,6 @@
 import {
   Component, ViewChild, ApplicationRef, Injector,
-  OnDestroy, AfterViewInit, Inject, ComponentFactoryResolver, EventEmitter, Output, ViewContainerRef, Input
+  OnDestroy, AfterViewInit, Inject, ComponentFactoryResolver, EventEmitter, Output, Input
 } from '@angular/core';
 import {CdkPortal, DomPortalOutlet} from '@angular/cdk/portal';
 import {DOCUMENT} from '@angular/common';

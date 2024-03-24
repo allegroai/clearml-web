@@ -31,8 +31,9 @@ export const searchReducer = createReducer(
 );
 
 export const selectCommonSearch = createFeatureSelector<SearchState>('commonSearch');
-export const selectIsSearching  = createSelector(selectCommonSearch, (state: SearchState): boolean => state ? state.isSearching : false);
-export const selectSearchQuery  = createSelector(selectCommonSearch, (state: SearchState) => state ? state.searchQuery : searchInitState.searchQuery);
-export const selectPlaceholder  = createSelector(selectCommonSearch, (state: SearchState) => state ? state.placeholder : '');
+export const selectIsSearching  = createSelector(selectCommonSearch, state => state ? state.isSearching : false);
+export const selectSearchQuery  = createSelector(selectCommonSearch, state => state ? state.searchQuery : searchInitState.searchQuery);
+export const selectPlaceholder  = createSelector(selectCommonSearch, state => state ? state.placeholder : '');
+export const selectActiveSearch = createSelector(selectSearchQuery, state => state?.query?.length >= 1);
 
 

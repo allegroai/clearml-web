@@ -13,6 +13,12 @@ import {MatOptionModule} from '@angular/material/core';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  RequiredAutocompleteSelectionValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/required-autocomplete-selection-validator.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @NgModule({
   imports: [
@@ -28,6 +34,8 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
     MatAutocompleteModule,
     DialogTemplateComponent,
     TooltipDirective,
+    RequiredAutocompleteSelectionValidatorDirective,
+    ShowTooltipIfEllipsisDirective,
   ],
   providers      : [],
   declarations   : [SelectQueueComponent],

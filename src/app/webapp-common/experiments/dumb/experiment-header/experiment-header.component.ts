@@ -15,7 +15,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   styleUrls  : ['./experiment-header.component.scss']
 })
 export class ExperimentHeaderComponent extends BaseEntityHeaderComponent implements OnInit{
-  private _tableCols: any;
+  private _tableCols: ISmCol[];
   toggleButtons: Option[];
   @Input() isArchived: boolean;
   @Input() metricVariants: Array<MetricVariantResult>;
@@ -29,7 +29,7 @@ export class ExperimentHeaderComponent extends BaseEntityHeaderComponent impleme
   @Input() compareView: 'scalars' | 'plots';
   @Input() showCompareScalarSettings: boolean;
   @Input() rippleEffect: boolean;
-  @Input() addButtonTemplate: TemplateRef<any>;
+  @Input() addButtonTemplate: TemplateRef<{smallScreen: boolean}>;
 
   @Input() set tableCols(tableCols) {
     this._tableCols = tableCols?.filter(col => col.header !== '');

@@ -1,7 +1,9 @@
 <div class="status-line" [class]="status" >
-    <span class="d-flex align-items-center">
-      <span class="label" *ngIf="showLabel">
+  <span class="d-flex align-items-center">
+    @if (showLabel) {
+      <span class="label">
         {{'  ' + (experimentsStatusLabels[status] ? experimentsStatusLabels[status] : '') | uppercase}}
       </span>
-    </span>
+    }
+  </span>
 </div>

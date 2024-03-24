@@ -19,7 +19,12 @@
     <button *ngIf="no" (click)="closeDialog(false)" id={{no}} class="btn btn-outline-neon yes-button">
       {{no}}
     </button>
-    <button (click)="closeDialog(true)" id={{yes}} class="btn btn-neon" *ngIf="yes">
+    <button *ngIf="yes"
+            id={{yes}}
+            class="btn"
+            [class.btn-delete]="yes === 'DELETE'"
+            [class.btn-neon]="yes !== 'DELETE'"
+            (click)="closeDialog(true)">
       {{yes}}
     </button>
   </div>

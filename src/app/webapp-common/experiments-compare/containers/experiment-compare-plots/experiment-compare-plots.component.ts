@@ -79,6 +79,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   public splitSize$: Observable<number>;
   private originMetrics: Array<MetricVariantResult>;
   private firstTime = true;
+  private previousTaskIds: Array<string>;
 
   @HostListener('window:beforeunload', ['$event']) unloadHandler() {
     this.saveSettingsState();
@@ -101,7 +102,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     );
 
     this.routerParams$ = this.store.select(selectRouterParams).pipe(
-      filter(params => !!params.ids),
+      filter(params => params.ids!== undefined),
       distinctUntilChanged(),
       tap(() => this.refreshDisabled = true)
     );
@@ -135,7 +136,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
       .subscribe(([params, metrics, selectedExperiments]) => {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
           const previousTaskIds = this.taskIds;
-          this.taskIds = params.ids.split(',').sort();
+          this.taskIds = params.ids.split(',').sort().filter(id => !!id);
           this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
           if (metrics.length === 0 || (metrics.length > 0 && previousTaskIds !== undefined) || !isEqual(selectedExperiments, this.taskIds)) {
             this.store.dispatch(getCustomMetricsPerType({ids: this.taskIds, metricsType: EventTypeEnum.Plot, isModel: this.entityType === EntityTypeEnum.model}));
@@ -146,7 +147,8 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.subs.add(this.store.select(selectCompareSelectedMetrics('plots'))
       .pipe(
         filter(metrics => !!metrics && this.minimized),
-        distinctUntilChanged((prev, curr) => isEqual(prev, curr)))
+        // distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+      )
       .subscribe(selectedMetrics => {
         const metricsVariants = selectedMetrics.filter(m => !m.hidden).reduce((acc, curr) => {
           if (acc[curr.metricName]) {
@@ -159,11 +161,12 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         this.settings.selectedMetricsPlot = selectedMetrics.filter(m => !m.hidden).map(m => `${m.metricName} - ${m.variantName}`);
         const variants = Object.entries(metricsVariants).map(([metricName, variants]) => ({metric: metricName, variants}))
         this.selectedVariants = variants;
-        if (this.firstTime || this.previousSelectedMetrics?.length !== selectedMetrics?.length) {
+        if (this.firstTime || this.previousSelectedMetrics?.length !== selectedMetrics?.length || this.taskIds.length !== this.previousTaskIds.length) {
           this.firstTime = false;
           this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, metrics: variants}));
         }
         this.previousSelectedMetrics = selectedMetrics;
+        this.previousTaskIds = this.taskIds;
       }));
 
     this.subs.add(this.refresh.tick

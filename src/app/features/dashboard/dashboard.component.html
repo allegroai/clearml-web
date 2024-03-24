@@ -1,5 +1,4 @@
-<sm-dashboard-search-base [class.dashboard-search]="activeSearch$ | async"></sm-dashboard-search-base>
-<div *ngIf="(activeSearch$ | async) !== true" class="dashboard-body">
+<div class="dashboard-body">
   <div class="recent">
     <sm-dashboard-projects (width)="setWidth($event)"></sm-dashboard-projects>
     <sm-dashboard-experiments

@@ -4,7 +4,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {ITask} from '~/business-logic/model/al-task';
 import {Model} from '~/business-logic/model/models/model';
 import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
-import {IReport} from '../../../../webapp-common/reports/reports.consts';
+import {IReport} from '@common/reports/reports.consts';
 
 @Component({
   selector: 'sm-search-results-page',

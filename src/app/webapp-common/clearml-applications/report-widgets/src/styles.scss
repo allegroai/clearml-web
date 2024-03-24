@@ -132,7 +132,7 @@ $sm-dark-theme: mat.define-dark-theme((
 
 @include mat.select-theme($sm-dark-theme);
 
-@import "src/app/webapp-common/shared/ui-components/styles/variables";
+@import "variables";
 
 * {
   margin: 0;
@@ -191,6 +191,11 @@ body {
 .h-100 {
   height: 100%;
 }
+
+.w-100 {
+  width: 100% !important;
+}
+
 .dark-theme .plot-container .hoverlayer {
   line[stroke-width="1"] {
     stroke: $blue-300;
@@ -274,11 +279,6 @@ body {
 .al-icon {
   text-align: center;
   display: inline-block;
-}
-
-
-.modebar {
-  top: 20px !important;
 }
 
 .modebar-btn[data-attr="plotly-disabled-maximize"] {

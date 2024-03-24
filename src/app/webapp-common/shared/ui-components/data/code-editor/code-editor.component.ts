@@ -3,11 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   NgZone,
+  Output,
   ViewChild,
 } from '@angular/core';
-import {Ace, edit} from 'ace-builds';
+import {Ace} from 'ace-builds';
 import {Store} from '@ngrx/store';
 import {selectAceReady} from '@common/core/reducers/view.reducer';
 import {filter} from 'rxjs/operators';
@@ -15,6 +17,7 @@ import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {NgIf} from '@angular/common';
 import {ClipboardModule} from 'ngx-clipboard';
+declare const ace;
 
 @Component({
   selector: 'sm-code-editor',
@@ -40,6 +43,7 @@ export class CodeEditorComponent implements AfterViewInit {
   }
 
   @Input() readonly = false;
+  @Output() codeChanged = new EventEmitter<string>();
   @Input() showCopyButton = false;
   private _code: string;
   @Input() set code(text: string) {
@@ -51,6 +55,10 @@ export class CodeEditorComponent implements AfterViewInit {
 
   get code() {
     return this._code;
+  }
+
+  get aceCode() {
+    return this.aceEditor.getSession().getValue();
   }
 
   @ViewChild('aceEditor') private aceEditorElement: ElementRef<HTMLDivElement>;
@@ -65,7 +73,8 @@ export class CodeEditorComponent implements AfterViewInit {
       return;
     }
     this.zone.runOutsideAngular(() => {
-      const aceEditor = edit(this.aceEditorElement.nativeElement) as Ace.Editor;
+      const aceEditor = ace.edit(this.aceEditorElement.nativeElement) as Ace.Editor;
+      ace.config.set('basePath', '/node_modules/ace-builds/src-min-noconflict');
       this.aceEditor = aceEditor;
       aceEditor.setOptions({
         readOnly: this.readonly,
@@ -76,7 +85,10 @@ export class CodeEditorComponent implements AfterViewInit {
         highlightActiveLine: false,
         highlightSelectedWord: false,
         showPrintMargin: false,
-
+        useWorker: true,
+      });
+      this.aceEditor.getSession().on('change', () => {
+        this.codeChanged.emit(this.aceEditor.getSession().getValue());
       });
 
       aceEditor.renderer.setScrollMargin(12, 12, 12, 12);

@@ -229,6 +229,7 @@ export class LineChartComponent {
       pointRadius: 0,
       pointBorderColor: '#1a1e2c',
       borderWidth: 2,
+      lineTension: 0.1,
       pointBackgroundColor: this.colorScheme[index % this.colorScheme.length],
       borderColor: this.colorScheme[index % this.colorScheme.length],
       backgroundColor: this.colorScheme[index % this.colorScheme.length]

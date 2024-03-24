@@ -1,7 +1,9 @@
-@import '../../styles/variables';
+@import 'variables';
 
 $generic-font-size: 11px;
 :host {
+  height: 100%;
+
   .dialog-template-container {
     height: 100%;
     min-height: 150px;

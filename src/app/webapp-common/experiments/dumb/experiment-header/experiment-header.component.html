@@ -34,7 +34,12 @@
     </sm-menu>
 
     <mat-form-field *ngIf="tableMode === 'compare'" appearance="outline" class="dark-outline compare-view-select no-bottom">
-      <mat-select [(ngModel)]="compareView" name="compareView" panelClass="dark-outline" (ngModelChange)="compareViewChanged.emit($event)">
+      <mat-select
+        name="compareView"
+        panelClass="dark-outline"
+        [ngModel]="compareView"
+        (selectionChange)="compareViewChanged.emit($event.value)"
+      >
         <mat-option value="scalars">Scalars</mat-option>
         <mat-option value="plots">Plots</mat-option>
       </mat-select>
@@ -63,7 +68,6 @@
     <sm-refresh-button
       [allowAutoRefresh]="true"
       (setAutoRefresh)="setAutoRefresh.emit($event)"
-    >
-    </sm-refresh-button>
+    ></sm-refresh-button>
   </div>
 </div>

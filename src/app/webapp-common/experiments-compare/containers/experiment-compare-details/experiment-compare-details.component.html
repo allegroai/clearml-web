@@ -64,10 +64,10 @@
                   'hide-identical-mode': hideIdenticalFields
                 }" data-id="selectedRowHighlighter">
                   <div>
-                    <pre *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)"
-                         [class.no-ellipsis]="((node.data.key | hideHash) + node.data.value).length < 45"
+                    <pre #row *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)"
+                         [class.no-ellipsis]="(nativeWidth -2 > row.scrollWidth) && (row.scrollWidth === row.clientWidth)"
                          [class.with-ellipsis]="showEllipsis"
-                         [style.width.px]="showEllipsis ? nativeWidth - 55 - node.level * 20 : null" data-id="diffDataRow"
+                         [style.width.px]="showEllipsis ? nativeWidth - 45 - node.level * 20 : null" data-id="diffDataRow"
                     ><ng-container
                       *ngIf="!!node.data.value?.dataDictionary && !!node.data.value?.link; else simple">{{node.data.key |
                       hideHash}}<span

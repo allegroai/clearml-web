@@ -4,7 +4,6 @@ import {ProjectInfoComponent} from './project-info.component';
 import {ProjectInfoRoutingModule} from './project-info-routing.module';
 import {LMarkdownEditorModule} from 'ngx-markdown-editor';
 import {FormsModule} from '@angular/forms';
-import {CommonLayoutModule} from '../layout/layout.module';
 import { ProjectStatsComponent } from './conteiners/project-stats/project-stats.component';
 import {MetricForStatsDialogComponent} from './conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
@@ -13,6 +12,9 @@ import {MarkdownEditorComponent} from '@common/shared/components/markdown-editor
 import {MatExpansionModule} from '@angular/material/expansion';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @NgModule({
   declarations: [ProjectInfoComponent, ProjectStatsComponent, MetricForStatsDialogComponent],
@@ -21,13 +23,13 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
     FormsModule,
     ProjectInfoRoutingModule,
     LMarkdownEditorModule,
-    CommonLayoutModule,
     ExperimentCompareSharedModule,
     ScatterPlotComponent,
     MarkdownEditorComponent,
     MatExpansionModule,
     TooltipDirective,
     DialogTemplateComponent,
+    ShowTooltipIfEllipsisDirective,
   ]
 })
 export class ProjectInfoModule {

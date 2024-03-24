@@ -16,7 +16,7 @@ export const MODELS_VIEW_MODES = {
   TREE : 'tree' as ModelsViewModesEnum,
 };
 
-export const MODELS_PAGE_SIZE = 15;
+export const MODELS_PAGE_SIZE = 30;
 export const MODELS_STORE_KEY = 'models';
 
 export const MODELS_PREFIX_INFO = 'MODELS_INFO_';

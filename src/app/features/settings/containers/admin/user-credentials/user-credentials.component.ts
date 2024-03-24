@@ -27,7 +27,7 @@ export class UserCredentialsComponent implements OnInit, OnDestroy {
       .pipe(filter(user => !!user), take(1))
       .subscribe(user => {
         this.user = user;
-        this.store.dispatch(getAllCredentials());
+        this.store.dispatch(getAllCredentials({userId: ''}));
       });
     this.credentials$ = this.store.select(selectCredentials);
 

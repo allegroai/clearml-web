@@ -4,6 +4,10 @@ import {Observable} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ProjectDialogComponent} from '../../shared/project-dialog/project-dialog.component';
 import {isGoogleCloudUrl} from '@common/settings/admin/base-admin-utils';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {FormsModule} from '@angular/forms';
+import {S3AccessDialogComponent} from '@common/layout/s3-access-dialog/s3-access-dialog.component';
 
 
 export interface S3AccessDialogData {
@@ -13,21 +17,27 @@ export interface S3AccessDialogData {
 }
 
 @Component({
-  selector   : 'sm-s3-access-resolver',
+  selector: 'sm-s3-access-resolver',
   templateUrl: './s3-access-resolver.component.html',
-  styleUrls  : ['./s3-access-resolver.component.scss']
+  styleUrls: ['./s3-access-resolver.component.scss'],
+  standalone: true,
+  imports: [
+    DialogTemplateComponent,
+    MatCheckboxModule,
+    FormsModule,
+    S3AccessDialogComponent
+  ]
 })
 export class S3AccessResolverComponent {
-  show: Observable<any>;
-  subscription: any;
+  show: Observable<boolean>;
   bucket: string;
-  endpoint: any;
-  key: any;
-  secret: any;
-  token: any;
-  region: any;
-  header: any;
-  editMode: any;
+  endpoint: string;
+  key: string;
+  secret: string;
+  token: string;
+  region: string;
+  header: string;
+  editMode: boolean;
   title: string;
   public useSSL: boolean;
   useGcsHmac = false;

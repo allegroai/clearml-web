@@ -17,7 +17,7 @@ export const environment = {
   production: false,
   baseUrl: 'localhost:4200',
   autoLogin: false,
-  apiBaseUrl: 'service/1/api',
+  apiBaseUrl: '../service/1/api',
   // communityServer: true,
   accountAdministration: true,
   fileBaseUrl: 'https://files.allegro.ai',

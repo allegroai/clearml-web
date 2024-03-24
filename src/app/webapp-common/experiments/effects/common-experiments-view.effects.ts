@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {cloneDeep, flatten, isEqual} from 'lodash-es';
-import {EMPTY, iif, interval, Observable, of} from 'rxjs';
+import {EMPTY, forkJoin, iif, interval, Observable, of} from 'rxjs';
 import {
   auditTime,
   catchError,
@@ -179,10 +179,10 @@ export class CommonExperimentsViewEffects {
         this.store.select(selectIsDatasets),
       ]),
       switchMap(([
-                   , projectId, isArchived, gb, orderFields, filters, selectedExperiments,
-                   showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, showArcived,
-                   isPipeline, isDataset
-                 ]) => {
+          , projectId, isArchived, gb, orderFields, filters, selectedExperiments,
+          showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, showArcived,
+          isPipeline, isDataset
+        ]) => {
           const tableFilters = cloneDeep(filters) || {} as { [key: string]: FilterMetadata };
           if (tableFilters && tableFilters.status && tableFilters.status.value.includes('completed')) {
             tableFilters.status.value.push('closed');
@@ -513,32 +513,38 @@ export class CommonExperimentsViewEffects {
     concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
     ]),
-    switchMap(([action, projectId]) => this.eventsApi.eventsGetMultiTaskMetrics({
-        tasks: action.ids,
-        ...(action.metricsType && {event_type: action.metricsType}),
-        model_events: action.isModel
-      })
-        .pipe(
-          map((res: EventsGetMultiTaskMetricsResponse) => [
-            // {metric: singleValueChartTitle, variant: '', metric_hash: singleValueChartTitle, variant_hash: singleValueChartTitle},
-            ...res.metrics.map(metric => metric.variants.map(variant => (
-              {metric: metric.metric.replace(/^Summary$/, ' Summary'), metric_hash: metric.metric, variant: variant, variant_hash: variant}))).flat(1)
-          ] as MetricVariantResult[]),
-          mergeMap(metrics => [
-            exActions.setCustomMetrics({metrics: sortByField(metrics, 'metric'), projectId, compareView: action.metricsType}),
-            deactivateLoader(action.type)
-          ]),
-          catchError(error => [
-            requestFailed(error),
-            deactivateLoader(action.type),
-            addMessage('warn', 'Fetch custom metrics failed', error?.meta && [{
-              name: 'More info',
-              actions: [setServerError(error, null, 'Fetch custom metrics failed')]
-            }]),
-            exActions.setCustomHyperParams({params: []})])
-        )
-    )
-  ));
+    switchMap(([action, projectId]) => {
+        if (action.ids.length > 0) {
+          return this.eventsApi.eventsGetMultiTaskMetrics({
+            tasks: action.ids,
+            ...(action.metricsType && {event_type: action.metricsType}),
+            model_events: action.isModel
+          })
+            .pipe(
+              map((res: EventsGetMultiTaskMetricsResponse) => [
+                // {metric: singleValueChartTitle, variant: '', metric_hash: singleValueChartTitle, variant_hash: singleValueChartTitle},
+                ...res.metrics.map(metric => metric.variants.map(variant => (
+                  {metric: metric.metric.replace(/^Summary$/, ' Summary'), metric_hash: metric.metric, variant: variant, variant_hash: variant}))).flat(1)
+              ] as MetricVariantResult[]),
+              mergeMap(metrics => [
+                exActions.setCustomMetrics({metrics: sortByField(metrics, 'metric'), projectId, compareView: action.metricsType}),
+                deactivateLoader(action.type)
+              ]),
+              catchError(error => [
+                requestFailed(error),
+                deactivateLoader(action.type),
+                addMessage('warn', 'Fetch custom metrics failed', error?.meta && [{
+                  name: 'More info',
+                  actions: [setServerError(error, null, 'Fetch custom metrics failed')]
+                }]),
+                exActions.setCustomHyperParams({params: []})])
+            );
+        } else {
+          return of(action)
+            .pipe(map((action) => exActions.setCustomMetrics({metrics: [], projectId, compareView: action.metricsType})));
+        }
+      }
+    )));
 
   getCustomHyperParams = createEffect(() => this.actions$.pipe(
     ofType(exActions.getCustomHyperParams),
@@ -612,9 +618,9 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectIsDatasets),
     ]),
     switchMap(([
-                 action, projectId, archived, globalSearch, cols, metricCols,
-                 tableFilters, deep, showHidden, isPipeline, isDataset
-               ]) => {
+      action, projectId, archived, globalSearch, cols, metricCols,
+      tableFilters, deep, showHidden, isPipeline, isDataset
+    ]) => {
       const pageSize = 5000;
       const query = this.getGetAllQuery({
         projectId,
@@ -658,14 +664,14 @@ export class CommonExperimentsViewEffects {
       iif(() => selectedExperiments.length > 0,
         [setSelectedExperiments({experiments: selectedExperiments.slice(0, 100)})],
         iif(() => {
-            const experimentsFromStore = experiments.filter(entity => action.ids.includes(entity.id))
-            return experimentsFromStore.length === action.ids.length
+            const experimentsFromStore = experiments.filter(entity => action.ids.includes(entity.id));
+            return experimentsFromStore.length === action.ids.length;
           },
           [setSelectedExperiments({experiments: experiments.filter(entity => action.ids.includes(entity.id)).slice(0, 100)})],
           this.apiTasks.tasksGetAllEx({id: action.ids}).pipe(
             map(res => setSelectedExperiments({experiments: res.tasks}))
           ))))
-  ))
+  ));
 
   setURLParams = createEffect(() => this.actions$.pipe(
     ofType(exActions.updateUrlParams, exActions.toggleColHidden),
@@ -683,8 +689,8 @@ export class CommonExperimentsViewEffects {
       this.route.queryParams
     ]),
     map(([, projectId, isArchived, , sortFields, filters,
-           cols, hiddenCols, metricsCols, colsOrder, isDeep, queryParams
-         ]) => {
+      cols, hiddenCols, metricsCols, colsOrder, isDeep, queryParams
+    ]) => {
       const columns = encodeColumns(cols, hiddenCols, this.filterColumns(projectId, metricsCols), colsOrder ? colsOrder : queryParams.columns);
       return setURLParams({
         columns,
@@ -714,24 +720,24 @@ export class CommonExperimentsViewEffects {
   }
 
   getGetAllQuery({
-                   refreshScroll = false,
-                   scrollId = null,
-                   projectId,
-                   searchQuery,
-                   archived,
-                   orderFields = [],
-                   tableFilters,
-                   selectedIds = [],
-                   cols = [],
-                   metricCols = [],
-                   deep = false,
-                   showHidden = false,
-                   isCompare,
-                   showArchived = false,
-                   isPipeline = false,
-                   isDataset = false,
-                   pageSize = EXPERIMENTS_PAGE_SIZE
-                 }: {
+    refreshScroll = false,
+    scrollId = null,
+    projectId,
+    searchQuery,
+    archived,
+    orderFields = [],
+    tableFilters,
+    selectedIds = [],
+    cols = [],
+    metricCols = [],
+    deep = false,
+    showHidden = false,
+    isCompare,
+    showArchived = false,
+    isPipeline = false,
+    isDataset = false,
+    pageSize = EXPERIMENTS_PAGE_SIZE
+  }: {
     refreshScroll?: boolean;
     scrollId?: string;
     projectId: string;
@@ -851,10 +857,10 @@ export class CommonExperimentsViewEffects {
           this.store.select(selectIsDatasets),
         ]),
         switchMap(([
-                     scrollId, projectId, isArchived, gb, orderFields, filters, selectedExperiments,
-                     showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, showArcived,
-                     isPipeline, isDataset
-                   ]) => {
+          scrollId, projectId, isArchived, gb, orderFields, filters, selectedExperiments,
+          showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, showArcived,
+          isPipeline, isDataset
+        ]) => {
           const tableFilters = cloneDeep(filters) || {} as { [key: string]: FilterMetadata };
           if (tableFilters && tableFilters.status && tableFilters.status.value.includes('completed')) {
             tableFilters.status.value.push('closed');

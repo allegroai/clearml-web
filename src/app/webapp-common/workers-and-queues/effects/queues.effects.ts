@@ -1,11 +1,10 @@
 import {Injectable} from '@angular/core';
-import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType, concatLatestFrom} from '@ngrx/effects';
 import {ApiQueuesService} from '~/business-logic/api-services/queues.service';
 import {QueuesGetQueueMetricsRequest} from '~/business-logic/model/queues/queuesGetQueueMetricsRequest';
 import {QueuesGetQueueMetricsResponse} from '~/business-logic/model/queues/queuesGetQueueMetricsResponse';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {
   selectQueues,
   selectQueuesStatsTimeFrame,
@@ -45,12 +44,15 @@ import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 
 @Injectable()
 export class QueuesEffect {
   constructor(
     private actions: Actions, private queuesApi: ApiQueuesService, private tasksApi: ApiTasksService,
-    private store: Store
+    private store: Store, private dialog: MatDialog
   ) {
   }
 
@@ -64,8 +66,8 @@ export class QueuesEffect {
     switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
       filter(ready => ready),
       map(() => action))),
-    withLatestFrom(
-      this.store.select(selectQueuesTableSortFields)),
+    concatLatestFrom(
+      () => this.store.select(selectQueuesTableSortFields)),
     switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({
       /* eslint-disable @typescript-eslint/naming-convention */
       only_fields: ['*', 'entries.task.name'],
@@ -79,10 +81,10 @@ export class QueuesEffect {
 
   setQueuesSort = createEffect(() => this.actions.pipe(
     ofType(queuesTableSetSort),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectQueuesTableSortFields),
       this.store.select(selectQueues)
-    ),
+    ]),
     switchMap(([action, orderFields, queues]) =>
       [setQueues({queues: sortTable(orderFields, queues)}), deactivateLoader(action.type)]
     ),
@@ -109,7 +111,7 @@ export class QueuesEffect {
 
   refreshSelectedQueue = createEffect(() => this.actions.pipe(
     ofType(refreshSelectedQueue),
-    withLatestFrom(this.store.select(selectSelectedQueue)),
+    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesGetAllEx({
       id: [queue.id],
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -125,12 +127,28 @@ export class QueuesEffect {
 
   deleteQueues = createEffect(() => this.actions.pipe(
     ofType(deleteQueue),
-    switchMap(action => this.queuesApi.queuesDelete({queue: action.queue.id}).pipe(
-      mergeMap(() => [getQueues(),
-        setSelectedQueue({}),
-      ]),
-      catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')])
-    ))
+    switchMap(action => this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, boolean>(
+      ConfirmDialogComponent,
+      {
+        data: {
+          title: 'Delete Queue',
+          body: `Are you sure you would like to delete the "<b>${action.queue.name}</b>" queue?`,
+          centerText: true,
+          yes: 'Delete',
+          no: 'Cancel',
+          iconClass: 'al-ico-trash'
+        }
+      }).afterClosed().pipe(
+      filter(response => response),
+      map(() => action)
+    )),
+    switchMap(action => this.queuesApi.queuesDelete({queue: action.queue.id})),
+    mergeMap(() => [getQueues(), setSelectedQueue({})]),
+    catchError(err => [
+      deactivateLoader(deleteQueue.type),
+      requestFailed(err),
+      addMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')
+    ])
   ));
 
   clearQueue = createEffect(() => this.actions.pipe(
@@ -140,7 +158,7 @@ export class QueuesEffect {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       remove_from_all_queues: true
     }).pipe(
-      withLatestFrom(this.store.select(selectSelectedQueue)),
+      concatLatestFrom(() => [this.store.select(selectSelectedQueue)]),
       mergeMap(([, selectedQueue]) => [
         getQueues(),
         selectedQueue ? refreshSelectedQueue() : emptyAction(),
@@ -152,7 +170,7 @@ export class QueuesEffect {
 
   moveExperimentToTopOfQueue = createEffect(() => this.actions.pipe(
     ofType(moveExperimentToTopOfQueue),
-    withLatestFrom(this.store.select(selectSelectedQueue)),
+    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToFront({
       queue: queue.id,
       task: action.task
@@ -164,7 +182,7 @@ export class QueuesEffect {
 
   moveExperimentToBottomOfQueue = createEffect(() => this.actions.pipe(
     ofType(moveExperimentToBottomOfQueue),
-    withLatestFrom(this.store.select(selectSelectedQueue)),
+    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToBack({
       queue: queue.id,
       task: action.task
@@ -176,7 +194,7 @@ export class QueuesEffect {
 
   moveExperimentInQueue = createEffect(() => this.actions.pipe(
     ofType(moveExperimentInQueue),
-    withLatestFrom(this.store.select(selectSelectedQueue)),
+    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) =>
       this.queuesApi.queuesMoveTaskBackward({
         queue: queue.id,
@@ -204,7 +222,7 @@ export class QueuesEffect {
 
   moveExperimentToOtherQueue = createEffect(() => this.actions.pipe(
     ofType(moveExperimentToOtherQueue),
-    withLatestFrom(this.store.select(selectSelectedQueue)),
+    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesRemoveTask({queue: queue.id, task: action.task}).pipe(
         mergeMap(() => [addExperimentToQueue({task: action.task, queue: action.queue})]),
         catchError(err => [deactivateLoader(action.type), requestFailed(err),
@@ -224,11 +242,11 @@ export class QueuesEffect {
 
   getStats$ = createEffect(() => this.actions.pipe(
     ofType(getStats),
-    withLatestFrom(this.store.select(selectQueueStats),
+    concatLatestFrom(() => [this.store.select(selectQueueStats),
       this.store.select(selectSelectedQueue),
       this.store.select(selectQueuesStatsTimeFrame)
-    ),
-    switchMap(([action, currentStats, queue, selectedRange]: [ReturnType<typeof getStats>, any, Queue, string]) => {
+    ]),
+    switchMap(([action, currentStats, queue, selectedRange]) => {
       const now = Math.floor((new Date()).getTime() / 1000);
       const range = parseInt(selectedRange, 10);
       const granularity = Math.max(Math.floor(range / action.maxPoints), queue ? 10 : 40);
@@ -308,7 +326,7 @@ export class QueuesEffect {
 
   tableSortChange = createEffect(() => this.actions.pipe(
     ofType(queuesTableSortChanged),
-    withLatestFrom(this.store.select(selectQueuesTableSortFields)),
+    concatLatestFrom(() => this.store.select(selectQueuesTableSortFields)),
     switchMap(([action, oldOrders]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
       return [queuesTableSetSort({orders})];

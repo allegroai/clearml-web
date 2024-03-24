@@ -53,8 +53,7 @@ export class ReportCodeEmbedBaseService {
     this._clipboardService.copy(code);
   }
   encodeSrc(conf: ReportCodeEmbedConfiguration, internal = true){
-    const url = new URL(window.location.origin + this.locationStrategy.getBaseHref());
-    url.pathname = url.pathname + 'widgets/';
+    const url = this.getUrl();
     url.searchParams.set('type', conf.type);
     url.searchParams.set('objectType', conf.objectType);
     conf.seriesName && url.searchParams.set('series', conf.seriesName);
@@ -62,11 +61,17 @@ export class ReportCodeEmbedBaseService {
     conf.xaxis && url.searchParams.set('xaxis', conf.xaxis);
     let urlStr = url.toString();
     ['objects', 'metrics', 'variants'].forEach(key => {
-      if (conf[key]?.filter(v => !!v).length > 0) {
+      if (conf[key]?.filter(v => !!v || typeof v === 'string').length > 0) {
         urlStr += '&' + conf[key].map(val => `${key}=${encodeURIComponent(val)}`).join('&');
       }
     });
     return urlStr;
+  }
+
+  getUrl() {
+    const url = new URL(window.location.origin + this.locationStrategy.getBaseHref());
+    url.pathname = url.pathname + 'widgets/';
+    return url;
   }
 
   generateEmbedSnippet(conf: ReportCodeEmbedConfiguration) {

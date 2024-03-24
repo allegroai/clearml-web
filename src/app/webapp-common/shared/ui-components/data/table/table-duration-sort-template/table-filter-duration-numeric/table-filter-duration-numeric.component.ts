@@ -18,7 +18,7 @@ import {
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
 import {DividerComponent} from '@common/shared/ui-components/indicators/divider/divider.component';
 import {MatInputModule} from '@angular/material/input';
-import {NgIf} from '@angular/common';
+
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {
   KeydownStopPropagationDirective
@@ -38,11 +38,10 @@ const getDurationValue = (value: IDurationThan) => value.checked ? `${value.valu
     DividerComponent,
     MatInputModule,
     ReactiveFormsModule,
-    NgIf,
     ClickStopPropagationDirective,
     KeydownStopPropagationDirective,
     LabeledFormFieldDirective
-  ],
+],
   standalone: true
 
 })

@@ -101,10 +101,12 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     return '';
   }
 
-  public addIdToDuplicateExperiments(data: ExtData[], taskId: string): ExtData[] {
+  public addIdToDuplicateExperiments(chart: ExtFrame): ExtData[] {
+    const data = chart.data;
+    const taskId = chart.task;
     const namesHash = {};
     for (let i = 0; i < data.length; i++) {
-      if (!data[i].name) {
+      if (!data[i].name || data[i].name === chart.variant || data[i].name.endsWith('</span>')) {
         continue;
       }
       const name = data[i].name;

@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ClipboardModule} from 'ngx-clipboard';
-import {NgIf} from '@angular/common';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
   selector: 'sm-id-badge',
@@ -12,12 +12,13 @@ import {NgIf} from '@angular/common';
   imports: [
     TooltipDirective,
     ClipboardModule,
-    NgIf
+    ClickStopPropagationDirective
   ]
 })
 export class IdBadgeComponent {
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   @Input() id: string;
+  @Input() short = false;
   @Output() copied = new EventEmitter();
 
   openMenu() {

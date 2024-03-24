@@ -20,6 +20,7 @@ import {setExportTable} from '@common/experiments-compare/actions/compare-header
 import {Table} from 'primeng/table';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {GroupedList} from '@common/tasks/tasks.model';
+import {sortMetricsList} from '@common/tasks/tasks.utils';
 
 interface ValueMode {
   key: string;
@@ -90,11 +91,12 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
   private subs = new Subscription();
   private selectExportTable$: Observable<boolean>;
+  public showFilterTooltip = false;
 
   @ViewChildren(Table) public tableComp: QueryList<Table>;
   private scrollContainer: HTMLDivElement;
   public scrolled: boolean;
-  private filterValue: string;
+  public filterValue: string;
   public settings: ExperimentCompareSettings = {} as ExperimentCompareSettings;
   private initialSettings = {
     selectedMetricsScalar: []
@@ -220,7 +222,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       allMetricsVariants = mergeWith(allMetricsVariants, ...lastMetrics);
 
       this.metricVariantList = {};
-      const dataTable = Object.entries(allMetricsVariants).map(([metricId, metricsVar]) => Object.keys(metricsVar).map(variantId => {
+      this.dataTable = sortMetricsList(Object.keys(allMetricsVariants)).map((metricId) => Object.keys(allMetricsVariants[metricId]).map(variantId => {
         let metric, variant;
         return {
           metricId,
@@ -249,8 +251,6 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
           }, {values: {}} as { metric, variant, firstMetricRow: boolean, min:  number, max: number, values: { [expId: string]: Task['last_metrics'] } })
         };
       })).flat(1);
-      dataTable.sort((a) => a.metric.startsWith(':') ? 1 : -1);
-      this.dataTable = dataTable.sort((a) => a.metric === ' Summary' ? -1 : 1);
       if (!this.settings.selectedMetricsScalar || this.settings.selectedMetricsScalar?.length === 0) {
         this.settings.selectedMetricsScalar = this.getFirstMetrics(10);
       }
@@ -263,6 +263,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       return;
     }
     this.dataTableFiltered = this.dataTable.filter(row => this.settings.selectedMetricsScalar?.includes(`${row.metric}${row.variant}`)).filter(row => row.metric.includes(value) || row.variant.includes(value));
+    this.showFilterTooltip = true;
     let previousMetric: string;
     this.dataTableFiltered.forEach(row => {
       row.firstMetricRow = row.metric !== previousMetric;

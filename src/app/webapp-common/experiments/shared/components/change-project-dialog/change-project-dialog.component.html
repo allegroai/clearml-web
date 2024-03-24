@@ -1,80 +1,48 @@
 <sm-dialog-template header="MOVE TO PROJECT" [iconClass]="'al-ico-move-to'">
   <div class="message">
-    <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">
-      {{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}
-    </b> will be moved
+    <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined"> {{ reference.length > 80 ? (reference | slice:0:77) + '...' : reference }} </b> will be moved
     <span *ngIf="currentProjectInstance"> from
-      <b
-        [smTooltip]="currentProjectInstance.name.length > 80 ? currentProjects[0] : undefined">
-        {{currentProjectInstance.name.length > 80 ? (currentProjectInstance.name | slice:0:77) + '...' : currentProjectInstance.name}}
+      <b [smTooltip]="currentProjectInstance.name.length > 80 ? currentProjects[0] : undefined">
+        {{ currentProjectInstance.name.length > 80 ? (currentProjectInstance.name | slice:0:77) + '...' : currentProjectInstance.name }}
       </b>
     </span> to the selected project.
   </div>
   <ng-form #moveToForm="ngForm" (submit)="closeDialog(true)" class="light-theme">
-    <mat-form-field class="w-100" appearance="outline"
-                    (mousedown)="!isFocused(projectInputRef) && projectInput.value && clear(); projectInputRef.blur(); projectInputRef.focus()">
+    <mat-form-field class="w-100" appearance="outline" (mousedown)="!isFocused(projectInputRef) && projectInput.value && clear(); projectInputRef.blur(); projectInputRef.focus()">
       <mat-label>Project</mat-label>
-      <input matInput
-             type="text"
-             [matAutocomplete]="auto"
-             [(ngModel)]="formData.project"
-             name="projectName"
-             placeholder="Search for project path"
-             #projectInputRef
-             #projectInput="ngModel"
-             required
-             minlength="3"
-             (keydown.enter)="projectInput.control.markAsTouched() "
-             smUniqueNameValidator
-             [existingNames]="readOnlyProjects$ | async">
-      <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project && formData.project?.value !== null"
-            class="creat-new-suffix">(Create New)
+      <input matInput type="text" [matAutocomplete]="auto" [(ngModel)]="formData.project" name="projectName" placeholder="Search for project path" #projectInputRef #projectInput="ngModel" required minlength="3" (keydown.enter)="projectInput.control.markAsTouched() " smUniqueNameValidator [existingNames]="readOnlyProjects$ | async">
+      <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project && formData.project?.value !== null" class="creat-new-suffix">(Create New)
       </span>
-      <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="formData.project? 'al-ico-dialog-x pointer' : 'al-ico-search'"
-         (click)="formData.project && clear(); projectInputRef.focus()"
-         smClickStopPropagation></i>
+      <i matSuffix class="al-icon sm-md search-icon" [ngClass]="formData.project? 'al-ico-dialog-x pointer' : 'al-ico-search'" (click)="formData.project && clear(); projectInputRef.focus()" smClickStopPropagation></i>
       <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
       <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
-      <mat-error *ngIf="projectInput?.errors?.uniqueName && !currentProjects.includes(formData.project?.value)">Please provide a different name as this
-        project name is taken as an Example project
+      <mat-error *ngIf="projectInput?.errors?.uniqueName && !currentProjects.includes(formData.project?.value)">Please provide a different name as this project name is taken as an Example project
       </mat-error>
-<!--      TODO: Need another validator for this val error-->
+      <!--      TODO: Need another validator for this val error-->
       <mat-error *ngIf="formData.project && currentProjects.includes(formData.project.value)">
-        {{isMulti? (type | titlecase)+'s are' : (type| titlecase) + ' is'}} already in the selected project
+        {{ isMulti ? (type | titlecase) + 's are' : (type| titlecase) + ' is' }} already in the selected project
       </mat-error>
       <mat-error *ngIf="projectInput.touched && projectInput.errors?.emptyName && !projectInput.errors?.minlength">*Project name can't contain only spaces.</mat-error>
 
-      <mat-autocomplete #auto="matAutocomplete"
-                        name="ExperimentProject"
-                        class="light-theme"
-                        classList="light-theme"
-                        (opened)="setIsAutoCompleteOpen(true)"
-                        (closed)="setIsAutoCompleteOpen(false)"
-                        [displayWith]="displayFn"
-                        autoActiveFirstOption
-      >
-        <mat-option
-          class="item"
-          *ngIf="!projectInput?.errors && projects !== null && projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames)"
-          [value]="projectInput.value"
-        >"{{projectInput.value}}" <span class="new">(Create New)</span></mat-option>
-        <mat-option *ngFor="let project of projects; trackBy: trackByFn" [value]="project" [smTooltip]="project.label"  smShowTooltipIfEllipsis>
-          <div [smSearchText]="projectInput.value">{{project.label}}</div>
+      <mat-autocomplete #auto="matAutocomplete" name="ExperimentProject" class="light-theme" classList="light-theme" (opened)="setIsAutoCompleteOpen(true)" (closed)="setIsAutoCompleteOpen(false)" [displayWith]="displayFn" autoActiveFirstOption>
+        <mat-option class="item" *ngIf="!projectInput?.errors && projects !== null && projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames)" [value]="projectInput.value">"{{ projectInput.value }}"
+          <span class="new">(Create New)</span></mat-option>
+        <mat-option *ngFor="let project of projects; trackBy: trackByFn" [value]="project" [smTooltip]="project.label" smShowTooltipIfEllipsis>
+          <div [smSearchText]="projectInput.value">{{ project.label }}</div>
         </mat-option>
         <div *ngIf="projects === null" class="py-4 pe-none">
           <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
         </div>
-        <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(projectInput.value)" class="text-center">Loading more...</div>
+        <sm-dots-load-more [class.hidden]="!projects || noMoreOptions" [loading]="loading" (loadMore)="loadMore(projectInput.value)"></sm-dots-load-more>
         <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
       </mat-autocomplete>
     </mat-form-field>
   </ng-form>
   <div class="buttons">
-    <button [disabled]="moveToForm.invalid" (click)="closeDialog(true)" cdkFocusInitial
-            class="btn btn-neon yes-button" data-id="MoveButton" #moveButton>
+    <button [disabled]="moveToForm.invalid" (click)="closeDialog(true)" cdkFocusInitial class="btn btn-neon yes-button" data-id="MoveButton" #moveButton>
       MOVE
     </button>
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id ="CancelButton">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id="CancelButton">
       CANCEL
     </button>
 

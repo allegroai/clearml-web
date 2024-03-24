@@ -113,8 +113,9 @@ export class CommonExperimentReverterService implements OnDestroy {
   private revertRequirements(script: Script) {
     return Object.entries(script?.requirements ?? {pip: ''}).reduce((acc, [key, value]: [string, string | string[]]) => {
       const val = (Array.isArray(value) ? value.join('\n') : value) || '';
-      if (key === 'pip' || val.length > 0)
-      acc[camelCase(key)] = val
+      if (key === 'pip' || val.length > 0) {
+        acc[camelCase(key)] = val
+      }
       return acc;
     }, {});
   }

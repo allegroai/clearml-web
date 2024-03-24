@@ -4,6 +4,7 @@
 .dark-theme, .light-theme {
 
   --mat-form-field-outlined-label-text-populated-size: 12px;
+  --mat-form-field-subscript-text-tracking: 0;
 
   /* mat select */
   --mat-select-trigger-text-size: 14px;
@@ -83,18 +84,20 @@
 .mat-mdc-form-field.notched {
   .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
     margin-top: 20px;
+    padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
+    padding-right: max(12px, var(--mdc-outlined-text-field-container-shape));
 
     .mdc-notched-outline--upgraded {
       .mdc-floating-label--float-above {
-        // --mat-mdc-form-field-label-transform: translate(-4px, -42.75px) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
-        --mat-mdc-form-field-label-transform: translate(-4px, -44px) scale(1);
+        --mat-mdc-form-field-label-transform: translate(0, -44px) scale(1);
+        margin-left: -16px;
+        font-size: 12px;
       }
     }
 
     .mdc-notched-outline__notch {
-      margin-left: -12px;
       border-top: 1px solid;
-      border-radius: 4px 0 0 4px;
+      border-left: none !important;
     }
   }
 }
@@ -215,7 +218,7 @@
 
   .mat-mdc-form-field, .mat-mdc-form-field.notched {
     .mdc-notched-outline__notch {
-      border-radius: 4px 0 0 4px;
+      clip-path: unset;
     }
 
     .mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__notch {
@@ -444,6 +447,10 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
   .mat-mdc-tab-header-pagination {
     color: $blue-400;
   }
+}
+
+.mat-mdc-tab-link-container {
+  --mat-tab-header-divider-height: 0;
 }
 
 .mat-mdc-tab-link.mdc-tab {

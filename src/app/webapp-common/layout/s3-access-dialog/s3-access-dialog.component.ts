@@ -1,13 +1,32 @@
-import {Component, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {AdminService} from '~/shared/services/admin.service';
-import {NgForm} from '@angular/forms';
-import {EventEmitter} from '@angular/core';
+import {FormsModule, NgForm} from '@angular/forms';
 import {Credentials} from '@common/core/reducers/common-auth-reducer';
+import {MatInputModule} from '@angular/material/input';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @Component({
-  selector   : 'sm-s3-access-dialog',
+  selector: 'sm-s3-access-dialog',
   templateUrl: './s3-access-dialog.component.html',
-  styleUrls  : ['./s3-access-dialog.component.scss']
+  styleUrls: ['./s3-access-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    MatInputModule,
+    TooltipDirective,
+    LabeledFormFieldDirective
+  ]
 })
 export class S3AccessDialogComponent implements OnChanges {
   public formIsSubmitted: boolean;
@@ -27,8 +46,8 @@ export class S3AccessDialogComponent implements OnChanges {
   @Input() editMode = false;
   @Input() header: string;
 
-  @Output() closeCancel: EventEmitter<Credentials> = new EventEmitter();
-  @Output() closeSave: EventEmitter<Credentials> = new EventEmitter<any>();
+  @Output() closeCancel  = new EventEmitter<Credentials>();
+  @Output() closeSave = new EventEmitter<Credentials>();
   @Input() saveEnabled = true;
 
 

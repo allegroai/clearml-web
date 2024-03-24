@@ -1,14 +1,10 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'sm-navbar-item',
   templateUrl: './navbar-item.component.html',
   styleUrls: ['./navbar-item.component.scss'],
   standalone: true,
-  imports: [
-    NgIf
-  ]
 })
 export class NavbarItemComponent {
 

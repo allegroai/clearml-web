@@ -22,7 +22,7 @@
       </mat-chip-grid>
       <i *ngIf="!disabled"
          matSuffix
-         class="al-icon sm me-2"
+         class="al-icon me-2"
          data-id="filterBylabelDropdownIcon"
         [class]="!!val && !(multiple && clearable) ? 'al-ico-dialog-x pointer' : 'al-ico-dropdown-arrow'"
         (click)="$event.stopPropagation(); !!val && !(multiple && clearable) ? clear() : openDropdown()"

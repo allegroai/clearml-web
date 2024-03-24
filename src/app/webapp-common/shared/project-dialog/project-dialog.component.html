@@ -1,16 +1,19 @@
 <sm-dialog-template [iconClass]="modeParameters[mode]?.icon" [header]="modeParameters[mode]?.header">
-  <sm-create-new-project-form *ngIf="mode === 'create'"
-                              [projects]="projects$ | async"
-                              [baseProject]="baseProject"
-                              (filterSearchChanged)="filterSearchChanged($event)"
-                              (projectCreated)="createProject($event)">
-  </sm-create-new-project-form>
-  <sm-project-move-to-form *ngIf="mode === 'move'"
-                           [projects]="projects$ | async"
-                           [baseProject]="baseProject"
-                           (moveProject)="moveProject($event)"
-                           (filterSearchChanged)="filterSearchChanged($event)"
-                           (dismissDialog)="closeDialog()">
-  </sm-project-move-to-form>
-
+  @if ( mode === 'create') {
+    <sm-create-new-project-form
+      [projects]="projects$ | async"
+      [baseProject]="baseProject"
+      (filterSearchChanged)="filterSearchChanged($event)"
+      (projectCreated)="createProject($event)">
+    </sm-create-new-project-form>
+  }
+  @if ( mode === 'move') {
+    <sm-project-move-to-form
+      [projects]="projects$ | async"
+      [baseProject]="baseProject"
+      (moveProject)="moveProject($event)"
+      (filterSearchChanged)="filterSearchChanged($event)"
+      (dismissDialog)="closeDialog()">
+    </sm-project-move-to-form>
+  }
 </sm-dialog-template>

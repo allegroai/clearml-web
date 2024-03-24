@@ -91,7 +91,6 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 
   i {
     color: $blue-400;
-    margin-left: 8px;
 
     &:hover {
       color: $blue-300;
@@ -103,7 +102,24 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
   display: flex;
   width: 401px;
   align-items: center;
-  gap: 12px;
+  gap: 24px;
+  padding-left: 8px;
+
+  .btn-icon {
+    border: 1px solid transparent;
+    background-color: transparent;
+    padding: 5px;
+
+    &:hover {
+      border-color: $blue-250;
+      background-color: white;
+    }
+  }
+
+  .is-filtered {
+    border-color: $cloudy-blue;
+    background-color: white;
+  }
 
   mat-form-field {
     flex-grow: 1;
@@ -216,11 +232,15 @@ tr.first-row {
   }
 }
 
+.head {
+  padding: 12px 24px 0;
+  height: 24px;
+  display: flex;
+  justify-content: end;
+}
+
 .close {
   cursor: pointer;
-  position: absolute;
-  right: 10px;
-  top: 10px;
   z-index: 1;
 }
 

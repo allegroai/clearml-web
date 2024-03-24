@@ -4,7 +4,7 @@ import {isEqual} from 'lodash-es';
 import {
   addCredential,
   cancelS3Credentials,
-  removeCredential, removeSignedUrl, resetCredential,
+  removeCredential, removeSignedUrl, resetCredential, resetCredentials,
   resetDontShowAgainForBucketEndpoint,
   saveS3Credentials, setCredentialLabel, setS3Credentials, setSignedUrl,
   showLocalFilePopUp,
@@ -118,6 +118,7 @@ export const commonAuthReducer = [
     }
   }),
   on(resetCredential, state => ({...state, newCredential: initAuth.newCredential})),
+  on(resetCredentials, state => ({...state, credentials: initAuth.credentials})),
   on(addCredential, (state, action) => ({
     ...state,
     newCredential: {...action.newCredential, company: action.workspaceId},

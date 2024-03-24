@@ -1,11 +1,21 @@
-<div [class]="showIcon && status" class="d-flex align-items-center w-100">
-  <i *ngIf="showIcon" class="icon xs" [class]="'i-'+ status" ></i>
-  <div class="ellipsis label" [class.with-spinner]="showSpinner && progress" *ngIf="showLabel">{{experimentsStatusLabels[status] || status}}</div>
+@if (showIcon){
+  <i class="icon xs" [class]="'i-'+ status" ></i>
+}
+@if (showLabel) {
+  <div
+    class="ellipsis label"
+    [class.with-spinner]="showSpinner && progress"
+  >{{experimentsStatusLabels[status] || status}}</div>
+}
+@if (showSpinner && enableSpinner) {
   <mat-progress-spinner
-    *ngIf="showSpinner && progress"
     class="spinner"
+    [class.show]="showSpinner && progress"
     [value]="progress"
     [diameter]="18"
     color="accent"
   ></mat-progress-spinner>
-</div>
+} @else {
+  <div></div>
+}
+

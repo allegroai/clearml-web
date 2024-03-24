@@ -1,0 +1,18 @@
+<sm-search-results-page
+  (projectSelected)="projectCardClicked($event)"
+  (experimentSelected)="taskSelected($event)"
+  (modelSelected)="modelSelected($event)"
+  (pipelineSelected)="pipelineSelected($event)"
+  (reportSelected)="reportSelected($event)"
+  (activeLinkChanged)="changeActiveLink($event)"
+  (openDatasetSelected)="openDatasetCardClicked($event)"
+  (loadMoreClicked)="loadMore()"
+  [projectsList]="projectsResults$ | async"
+  [experimentsList]="experimentsResults$ | async"
+  [modelsList]="modelsResults$ | async"
+  [datasetsList]="datasetsResults$ | async"
+  [pipelinesList]="pipelinesResults$ | async"
+  [reportsList]="reportsResults$ | async"
+  [activeLink]="activeLink"
+  [resultsCount]="resultsCount$ | async"
+></sm-search-results-page>
