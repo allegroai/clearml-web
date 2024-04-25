@@ -75,6 +75,7 @@ export const getSignedUrl = createAction(
     disableCache?: number;
     dprsUrl?: string | boolean;
     error?: boolean;
+    method?: string;
   }}>()
 );
 export const setSignedUrl = createAction(

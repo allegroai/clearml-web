@@ -1,0 +1,46 @@
+.body {
+    margin-bottom: 3rem !important;
+  }
+  
+  .buttons {
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+    margin-top: 41px;
+  
+    button {
+      text-transform: uppercase;
+      min-width: 126px;
+    }
+  }
+  
+  #fileInput {
+    position: absolute;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    height: 100%;
+    width: 100%;
+    left: 0px;
+    top: 0px;
+  }
+  
+  .mat-toolbar-single-row {
+    height: auto !important;
+    background: transparent;
+    padding: 0;
+  }
+  
+  .mat-toolbar-single-row button {
+    width: 100px;
+  }
+  
+  .mat-form-field {
+    width: 100%;
+  }
+  
+  .option {
+    color: #000;
+  }
+  

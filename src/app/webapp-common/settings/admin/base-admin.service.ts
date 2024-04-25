@@ -3,7 +3,7 @@ import {Store} from '@ngrx/store';
 import {from, fromEvent, Observable, of, Subject} from 'rxjs';
 import {fromFetch} from 'rxjs/fetch';
 import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
-import {DeleteObjectsCommand, GetObjectCommand, ObjectIdentifier, S3Client, S3ClientConfig} from '@aws-sdk/client-s3';
+import {DeleteObjectsCommand, GetObjectCommand, ObjectIdentifier, S3Client, S3ClientConfig, PutObjectCommand} from '@aws-sdk/client-s3';
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
 import {convertToReverseProxy, isFileserverUrl} from '~/shared/utils/url';
 import {
@@ -63,9 +63,9 @@ export class BaseAdminService {
     this.store.dispatch(showLocalFilePopUp({url}));
   }
 
-  signUrlIfNeeded(url: string, config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number }, previousSignedUrl?: { signed: string; expires: number }):
-    Observable<SignResponse> {
-    config = {...{skipLocalFile: true, skipFileServer: this.confService.getStaticEnvironment().production, disableCache: null}, ...config};
+  signUrlIfNeeded(url: string, config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number; method?: string; },
+     previousSignedUrl?: { signed: string; expires: number }): Observable<SignResponse> {
+    config = {...{skipLocalFile: true, skipFileServer: this.confService.getStaticEnvironment().production, disableCache: null, method: 'GET'}, ...config};
 
     if (isFileserverUrl(url)) {
       if (this.environment.communityServer) {
@@ -97,7 +97,7 @@ export class BaseAdminService {
         return of({type: 'popup', bucket: bucketKeyEndpoint, provider: 'azure'});
       }
       const s3 = this.findOrInitBucketS3(bucketKeyEndpoint);
-      if (s3) {
+      if (s3 && (config.method === 'GET' || config.method === '')) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const command = new GetObjectCommand({
           Key: bucketKeyEndpoint.Key,
@@ -107,6 +107,18 @@ export class BaseAdminService {
           expiresIn: FOUR_DAYS,
           unhoistableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
           unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
+        }))
+          .pipe(map(signed => ({type: 'sign', signed, expires: (new Date()).getTime() + FOUR_DAYS * 1000})));
+      } else if(s3 && config.method === 'PUT') {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const command = new PutObjectCommand({
+          Key: bucketKeyEndpoint.Key,
+          Bucket: bucketKeyEndpoint.Bucket/*, ResponseContentType: 'image/jpeg'*/
+        });
+        return from(getSignedUrl(s3, command, {
+          expiresIn: FOUR_DAYS,
+          unhoistableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
+          unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id'])
         }))
           .pipe(map(signed => ({type: 'sign', signed, expires: (new Date()).getTime() + FOUR_DAYS * 1000})));
       } else if (isGoogleCloudUrl(url) && !previousSignedUrl?.signed) {
