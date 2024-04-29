@@ -27,6 +27,11 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
 import {UpdateNotifierComponent} from '@common/shared/ui-components/overlay/update-notifier/update-notifier.component';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spinner.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { UploadArtifactDialogComponent } from '@common/shared/ui-components/overlay/upload-artifact-dialog/upload-artifact-dialog.component';
+
 
 @NgModule({
   declarations   : [AppComponent],
@@ -61,6 +66,10 @@ import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spi
     UpdateNotifierComponent,
     ChooseColorModule,
     SpinnerComponent,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    UploadArtifactDialogComponent
   ],
   providers      : [
     UserPreferences,

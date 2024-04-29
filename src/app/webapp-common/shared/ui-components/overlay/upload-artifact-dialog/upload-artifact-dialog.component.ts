@@ -1,6 +1,6 @@
 import { Component, Inject, Input, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { addMessage } from '@common/core/actions/layout.actions';
 import { UploadArtifactDialogConfig, ArtifactType } from './upload-artifact-dialog.model';
@@ -15,11 +15,30 @@ import { getSignedUrl } from '@common/core/actions/common-auth.actions';
 import { selectExperimentExecutionInfoData } from '@common/experiments/reducers';
 import { ArtifactModeEnum } from '~/business-logic/model/tasks/artifactModeEnum';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { DialogTemplateComponent } from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import { CommonModule } from '@angular/common';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { SafePipe } from '@common/shared/pipes/safe.pipe';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'sm-upload-artifact-dialog',
   templateUrl: './upload-artifact-dialog.component.html',
-  styleUrls: ['./upload-artifact-dialog.component.scss']
+  styleUrls: ['./upload-artifact-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    SafePipe,
+    FormsModule,
+    ReactiveFormsModule,
+    DialogTemplateComponent,
+    CommonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatRadioModule,
+  ]
 })
 export class UploadArtifactDialogComponent implements OnInit, OnDestroy {
   artifactType: ArtifactType[] = [
@@ -216,7 +235,7 @@ export class UploadArtifactDialogComponent implements OnInit, OnDestroy {
         type: this.uploadForm.controls['artType'].value,
         content_size: item.size,
         timestamp: ts,
-        hash: 'SHA256: ' + fileHash,
+        hash: fileHash,
         uri: this.uploadUrl + item.name,
         mode: this.uploadForm.controls['mode'].value as ArtifactModeEnum
       });

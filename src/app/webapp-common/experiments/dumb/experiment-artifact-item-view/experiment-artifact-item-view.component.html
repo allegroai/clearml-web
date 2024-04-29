@@ -18,6 +18,7 @@
       </sm-labeled-row>
       <sm-labeled-row label="FILE SIZE" data-id="fileSizeId">{{(artifact?.content_size | filesize : fileSizeConfigStorage)  || ''}}</sm-labeled-row>
       <sm-labeled-row label="HASH" data-id="hashId">{{artifact?.hash}}</sm-labeled-row>
+      <sm-labeled-row label="MODE" data-id="modeId">{{artifact?.mode | titlecase}}</sm-labeled-row>
       <sm-labeled-row *ngFor="let data of artifact?.display_data" [label]="data[0]| uppercase">{{data[1]}}</sm-labeled-row>
     </div>
   </sm-editable-section>
@@ -32,5 +33,5 @@
       [formData]="artifact?.type_data?.preview"
     ></sm-scroll-textarea>
   </sm-editable-section>
-
+  <button *ngIf="enableDeleteButton()" class="btn btn-neon" style="margin: auto;" (click)="deleteArtifact(artifact?.key, artifact?.mode)">DELETE ARTIFACT</button>
 

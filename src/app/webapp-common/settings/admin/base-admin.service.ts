@@ -242,7 +242,7 @@ export class BaseAdminService {
       Bucket: bucketKeyEndpoint.Bucket,
       Delete: {
         Quiet: true,
-        Objects: files.map(file => ({Key: file} as ObjectIdentifier))
+        Objects: files.map(() => ({Key: bucketKeyEndpoint.Key} as ObjectIdentifier))
       }
     });
     /* eslint-enable @typescript-eslint/naming-convention */
