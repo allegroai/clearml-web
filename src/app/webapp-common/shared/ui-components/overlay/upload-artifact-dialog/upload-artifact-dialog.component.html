@@ -1,0 +1,43 @@
+<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title" 
+(xClicked)="closeDialog()" [closeOnX]="false" [iconClass]="iconClass" 
+[iconData]="iconData">
+  <div *ngIf="body" class="body" [class.text-center]="this.centerText" [innerHTML]="body | safe: 'html'"></div>
+  <form [formGroup]="uploadForm">
+    <div>
+      <mat-form-field class="mat-mdc-form-field w-100 mat-light mat-primary" appearance="outline">
+        <mat-label>Artifact(s)</mat-label>
+        <input matInput name="fileName" formControlName="fName" placeholder="Select File(s)" required readonly/>
+        <input type="file" id="fileInput" (change)="selectFiles($event)" formControlName="fInput" name="fileInput" multiple/>
+        <mat-error *ngIf="uploadForm.get('fName').hasError('required')">File selection is required.</mat-error>
+      </mat-form-field>
+    </div>
+    <div *ngIf="this.filesSelected">
+      <mat-label>Artifact name(s)</mat-label>
+      <mat-form-field *ngFor="let name of this.upKeys; let i = index" class="mat-mdc-form-field w-100 mat-light mat-primary" appearance="outline">
+        <input matInput value={{name}} (change)="updateName(i, $event)"/>
+      </mat-form-field>
+    </div>
+    <mat-form-field class="mat-mdc-form-field w-100 mat-light mat-primary" appearance="outline">
+      <mat-label>Artifact Type</mat-label>
+      <mat-select formControlName="artType" name="artType" required>
+        <mat-option *ngFor="let type of artifactType" [value]="type.value"><span class="option">{{type.viewValue}}</span></mat-option>
+      </mat-select>
+      <mat-error *ngIf="uploadForm.get('artType').hasError('required')">Type selection is required.</mat-error>
+    </mat-form-field>
+    <mat-form-field class="mat-mdc-form-field w-100 mat-light mat-primary" appearance="outline">
+      <mat-label>Bucket URL</mat-label>
+      <input matInput name="bucketUrl" formControlName="upDest" placeholder="s3://bucket/folder" />
+    </mat-form-field>
+    <mat-radio-group formControlName="mode">
+      <mat-label>Artifact Mode</mat-label>
+      <mat-radio-button value="output">Output</mat-radio-button>
+      <mat-radio-button value="input">Input</mat-radio-button>
+    </mat-radio-group>
+  </form>
+  <div><strong>*NOTE*</strong> These settings apply to <strong><u>ALL FILES</u></strong> selected for upload.</div>
+
+  <div class="buttons">
+    <button (click)="closeDialog()" class="btn btn-outline-neon">CANCEL</button>
+    <button [disabled]="uploadForm.invalid" (click)="uploadFiles()" class="btn btn-neon">UPLOAD</button>
+  </div>
+</sm-dialog-template>

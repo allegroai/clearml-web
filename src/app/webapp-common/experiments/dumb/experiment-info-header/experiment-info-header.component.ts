@@ -26,6 +26,8 @@ import {
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MatMenuTrigger} from '@angular/material/menu';
 import { selectExperimentsTags } from '@common/experiments/reducers';
+import { UploadArtifactDialogComponent } from '@common/shared/ui-components/overlay/upload-artifact-dialog/upload-artifact-dialog.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'sm-experiment-info-header',
@@ -43,6 +45,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   public shared: boolean;
   public isPipeline: boolean;
   public selectedDisableAvailable = {};
+  private upUrl: string;
 
   @Input() editable: boolean = true;
   @Input() infoData;
@@ -57,7 +60,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   @ViewChild('tagsMenuTrigger') tagMenuTrigger: MatMenuTrigger;
   @ViewChild(TagsMenuComponent) tagMenu: TagsMenuComponent;
 
-  constructor(private store: Store, private router: Router, private activatedRoute: ActivatedRoute) {
+  constructor(private store: Store, private router: Router, private activatedRoute: ActivatedRoute, private dialog: MatDialog) {
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
     this.projectTags$ = this.store.select(selectExperimentsTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
@@ -151,5 +154,24 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
 
   copyToClipboard() {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));
+  }
+
+  enableUploadButton() {
+    return this.getStatusLabel() === 'Draft';
+  }
+
+  public openUploadDialog() {
+    if(this.enableUploadButton()) {
+      const uploadDialogRef: MatDialogRef<any> = this.dialog.open(UploadArtifactDialogComponent, {
+        data: {
+          uploadUrl: this.upUrl,
+          task: this.experiment.id,
+          title: 'Upload Artifacts',
+          iconClass: 'al-icon al-ico-upload al-color blue-300',
+        }
+      });
+    } else {
+      this.store.dispatch(addMessage('info', 'Upload only available in \'Draft\' state.'));
+    }
   }
 }

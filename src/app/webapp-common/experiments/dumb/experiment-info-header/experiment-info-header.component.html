@@ -22,6 +22,9 @@
          *ngIf="(!minimized) && shared"
     ><i class="al-icon al-ico-link sm-md"></i></div>
     <sm-id-badge class="me-3" [id]="experiment?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
+    <div class="line-item pointer" smTooltip="Upload Artifacts">
+      <i class="al-icon al-ico-upload line-item pointer" (click)="openUploadDialog()"></i>
+    </div>
     <span class="comment line-item"
           [delay]="1000" [action]="'leave'"
           (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
