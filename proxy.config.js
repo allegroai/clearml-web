@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const targets = ["http://13.201.173.241:8008"];
+const targets = ["https://clearml-apiserver.solytics.us/"];
 
 const PROXY_CONFIG = {
   "^/version.json$": {
