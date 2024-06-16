@@ -1,13 +1,10 @@
-import {
-  Component,
-  Input,
-  ChangeDetectionStrategy, ViewChild,
-} from '@angular/core';
-import {trackById} from '@common/shared/utils/forms-track-by';
+import {Component, ChangeDetectionStrategy, signal, effect, input, computed, viewChild} from '@angular/core';
 import {ChartData, ChartEvent, ChartOptions, ChartType} from 'chart.js';
-import {BaseChartDirective, NgChartsModule} from 'ng2-charts';
-import {NgForOf} from '@angular/common';
+import {BaseChartDirective} from 'ng2-charts';
+
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {fromEvent} from 'rxjs';
 
 export interface DonutChartData {
   name: string;
@@ -22,23 +19,19 @@ export interface DonutChartData {
   templateUrl: './donut.component.html',
   styleUrls: ['./donut.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
-    NgChartsModule,
-    NgForOf,
-    ChooseColorModule,
+    BaseChartDirective,
+    ChooseColorModule
   ],
-  standalone: true
 })
 export class DonutComponent {
-
-  public donutData: ChartData<'doughnut'>;
-  trackById = trackById;
   public doughnutChartType: ChartType = 'doughnut';
-  public percent: number = null;
-  private total: number;
-  private _colors: string[];
+  private windowResize = toSignal(fromEvent(window, 'resize'));
+  protected resizing = signal(false);
+  private chart = viewChild(BaseChartDirective);
 
-  highlight: number = null;
+  highlight = signal<number>(null);
   donutOptions = {
     maintainAspectRatio: false,
     borderWidth: 0,
@@ -47,55 +40,56 @@ export class DonutComponent {
     }
   } as ChartOptions<'doughnut'>;
 
-  @Input() set data(data: DonutChartData[]) {
-    this.donutData = {
-      labels: data.map(slice => slice.name),
+  data = input.required<DonutChartData[]>();
+  colors = input<string[]>();
+  resize = input<number>();
+  protected donutData = computed<ChartData<'doughnut'>>(() => ({
+      labels: this.data().map(slice => slice.name),
       datasets: [{
-        data: data.map(slice => slice.quantity),
-        backgroundColor: this.colors,
+        data: this.data().map(slice => slice.quantity),
+        backgroundColor: this.colors(),
       }]
-    };
-    this.total = data.reduce((acc, slice) => acc + slice.quantity, 0)
-  }
-
-  get colors(): string[] {
-    return this._colors;
-  }
-
-  @Input() set colors(colors: string[]) {
-    this._colors = colors;
-    if (this.donutData) {
-      this.donutData = {...this.donutData, datasets: [{...this.donutData.datasets[0], backgroundColor: colors}]};
-      this.chart?.update();
+    })
+  );
+  protected total = computed(() =>
+    this.data().reduce((acc, slice) => acc + slice.quantity, 0)
+  );
+  protected percent = computed(() => {
+    if (this.highlight() !== null) {
+      return  Math.round(this.donutData().datasets[0].data[this.highlight()] / this.total() * 100);
+    } else {
+      return null;
     }
-  }
+  });
 
-  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+  constructor() {
+    let setTimer: number = 0;
+    effect(() => {
+      this.windowResize();
+      this.resize();
+      this.resizing.set(true);
+      window.clearTimeout(setTimer);
+      setTimer = window.setTimeout(() => {
+        this.resizing.set(false);
+      }, 100);
+    }, {allowSignalWrites: true});
+
+    effect(() => {
+      if (this.chart()) {
+        window.setTimeout(() => this.chart().update(), 50)
+      }
+    });
+  }
 
   public chartHovered({ active }: { event: ChartEvent; active: object[]; }): void {
-    this.highlight = (active?.[0] as {datasetIndex: number; index: number})?.index ?? null;
-    this.calcPercent();
+    this.highlight.set((active?.[0] as {datasetIndex: number; index: number})?.index ?? null);
   }
 
-  private calcPercent() {
-    if (this.highlight !== null) {
-      this.percent = Math.round(this.donutData.datasets[0].data[this.highlight] / this.total * 100);
-    } else {
-      this.percent = null;
-    }
-  }
-
-  hoverLegend(slice) {
-    this.highlight = slice;
-    this.calcPercent();
+  hoverLegend(slice: number) {
+    this.highlight.set(slice);
   }
 
   leaveLegend() {
-    this.highlight = null;
-    this.calcPercent();
-  }
-
-  resize() {
-    this.chart.update(30);
+    this.highlight.set(null);
   }
 }

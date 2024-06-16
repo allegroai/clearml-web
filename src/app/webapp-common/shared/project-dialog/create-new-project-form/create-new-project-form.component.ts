@@ -1,9 +1,13 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component, computed, effect,
+  EventEmitter, inject,
+  input,
+  Output,
+} from '@angular/core';
 import {URI_REGEX} from '~/app.constants';
 import {Project} from '~/business-logic/model/projects/project';
-import {FormsModule, NgForm} from '@angular/forms';
-import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {Subscription} from 'rxjs';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {rootProjectsPageSize} from '@common/constants';
 import {MatInputModule} from '@angular/material/input';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
@@ -16,7 +20,10 @@ import {UniqueNameValidatorDirective} from '@common/shared/ui-components/templat
 import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
-import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {
+  PaginatedEntitySelectorComponent
+} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -27,8 +34,6 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
   standalone: true,
   imports: [
     MatInputModule,
-    FormsModule,
-    MatAutocompleteModule,
     StringIncludedInArrayPipe,
     ClickStopPropagationDirective,
     TooltipDirective,
@@ -39,114 +44,76 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
     UniqueProjectValidator,
     ShowTooltipIfEllipsisDirective,
     LabeledFormFieldDirective,
-    DotsLoadMoreComponent
+    PaginatedEntitySelectorComponent,
+    ReactiveFormsModule,
   ]
 })
-export class CreateNewProjectFormComponent implements OnChanges, OnInit, OnDestroy {
+export class CreateNewProjectFormComponent {
+  private readonly formBuilder = inject(FormBuilder);
+
   public rootFiltered: boolean;
   public readonly projectsRoot = 'Projects root';
-  public projectsNames: Array<string> = null;
   public outputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WITH_BUCKET_AND_HOST}$|${URI_REGEX.FILE}$|${URI_REGEX.NON_AWS_S3}$|${URI_REGEX.GS_WITH_BUCKET}$|${URI_REGEX.GS_WITH_BUCKET_AND_HOST}|${URI_REGEX.AZURE_WITH_BUCKET}`;
-  public project = {
-    name: '',
-    description: '',
+
+  projectForm = this.formBuilder.group({
+    name: ['', [Validators.required, Validators.minLength(3)]],
+    description: [''],
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    default_output_destination: null,
+    default_output_destination: [null],
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    system_tags: [],
-    parent: null
-  };
-  private _projects: Project[];
-  private subs = new Subscription();
+    system_tags: [[]],
+    parent: [null as string, [Validators.required, Validators.minLength(3)]]
+  });
+
   public loading: boolean;
   public noMoreOptions: boolean;
-  private inititated: boolean;
+  private initiated: boolean;
   private previousLength: number | undefined;
 
 
-  @Input() set projects(projects) {
-    this.loading = false;
-    this.noMoreOptions = projects?.length === this.previousLength || projects?.length < rootProjectsPageSize;
-    this.previousLength = projects?.length;
-    this._projects = projects;
-    if (!projects) {
-      return;
-    }
-    // this.projectsNames = this.rootFiltered ? projects.map(project => project.name) : [this.projectsRoot].concat(projects.map(project => project.name));
-    this.projectsNames = [
-      ...(this.rootFiltered ? []: [this.projectsRoot]),
-      ...(this.baseProject && !this.project.parent ? [this.baseProject.name] : []),
-      ...projects.map(project => project.name)
-    ];
-  }
-
-  get projects(): Project[] {
-    return this._projects;
-  }
-
-  @Input() baseProject: Project;
+  baseProject = input<Project>();
+  private projectValue = toSignal(this.projectForm.controls.parent.valueChanges);
+  projects = input<Project[]>();
+  protected allProjects = computed(() => ([
+    ...(this.rootFiltered || this.baseProject()?.id === null ? [] : [{name: this.projectsRoot, id: '999999999999999'}]),
+    ...(this.baseProject() && !this.projectForm.controls.parent.value ? [this.baseProject()] : []),
+    ...this.projects() ?? []
+  ]));
+  protected projectsNames = computed(() => (this.allProjects().map(project => project.name)));
 
   @Output() filterSearchChanged = new EventEmitter<{value: string; loadMore?: boolean}>();
   @Output() projectCreated = new EventEmitter();
-  @ViewChild('projectForm') public form: NgForm;
-  isAutoCompleteOpen: boolean;
-
-  send() {
-    if (this.project.default_output_destination === '') {
-      this.project.default_output_destination = null;
-    }
-    this.projectCreated.emit(this.project);
-  }
 
 
-  ngOnChanges(): void {
-    if (this.projects?.length > 0 && this.project.parent === null && !this.inititated) {
-      this.project.parent = this.baseProject?.name ?? this.projectsRoot;
-      this.inititated = true;
-    }
-  }
+  constructor() {
+    effect(() => {
+      const projectsCount = this.projects()?.length;
+      this.loading = false;
+      this.noMoreOptions = projectsCount === this.previousLength || projectsCount < rootProjectsPageSize;
+      this.previousLength = projectsCount;
 
-    clearLocation() {
-    this.project.parent = '';
-  }
+      if (projectsCount > 0 && this.projectForm.controls.parent.value === null && !this.initiated) {
+        this.projectForm.controls.parent.patchValue(this.baseProject()?.name ?? this.projectsRoot);
+        this.initiated = true;
+      }
+    });
 
-
-  setIsAutoCompleteOpen(focus: boolean) {
-    this.isAutoCompleteOpen = focus;
-  }
-
-  locationSelected($event: MatAutocompleteSelectedEvent) {
-    this.project.parent = $event.option.value;
-  }
-
-  searchChanged(searchString: any) {
-    this.projectsNames = null;
-    this.rootFiltered = !this.projectsRoot.includes(searchString) && this.projectsRoot === this.baseProject?.name;
-    searchString !== null && this.filterSearchChanged.emit({value: searchString});
-  }
-
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.subs.add(this.form.controls['location'].valueChanges.subscribe(searchString => {
-          if (searchString !== this.project.parent) {
-            this.searchChanged(searchString || '');
-          }
-        })
-      );
+    effect(() => {
+      this.rootFiltered = !this.projectsRoot.includes(this.projectValue()) && this.projectsRoot === this.baseProject()?.name;
+      this.filterSearchChanged.emit({value: this.projectValue() ?? ''});
     });
   }
 
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
+  send() {
+    this.projectCreated.emit({
+      ...this.projectForm.value,
+      ...(this.projectForm.controls.default_output_destination.value === '' && {default_output_destination: null})
+    });
   }
 
-  loadMore(searchString) {
+  loadMore(searchString, loadMore) {
     this.loading = true;
-    this.filterSearchChanged.emit({value: searchString || '', loadMore: true});
-  }
-
-  isFocused(locationRef: HTMLInputElement) {
-    return document.activeElement === locationRef;
+    this.filterSearchChanged.emit({value: searchString || '', loadMore});
   }
 }
 

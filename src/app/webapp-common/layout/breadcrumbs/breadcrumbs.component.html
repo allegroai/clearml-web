@@ -1,9 +1,9 @@
 <div class="overflow-container" #container>
-  @if (isCommunity && activeWorkspace && !workspaceNeutral) {
+  @if (isCommunity() && activeWorkspace && !workspaceNeutral()) {
     <span class="workspace">{{activeWorkspace.name}}</span>
     <i class="al-icon al-ico-slash"></i>
   }
-  @for (breadcrumbGroup of breadcrumbs ; track breadcrumbGroup; let lastGroup = $last; let
+  @for (breadcrumbGroup of breadcrumbs() ; track breadcrumbGroup; let lastGroup = $last; let
     firstGroup = $first) {
     @if (!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable)) {
       @for (breadcrumb of breadcrumbGroup ; track breadcrumb; let lastCrumb = $last; let firstCrumb = $first) {
@@ -55,8 +55,9 @@
             [routerLink]="breadcrumb.url!=='projects/*/projects'? breadcrumb.url: 'projects/*'"
             >
             @if (breadcrumb.hidden) {
-              <i class="al-icon al-ico-ghost sm me-1"></i>
-              }{{breadcrumb.name}}
+              <i matMenuItemIcon class="al-icon al-ico-ghost sm me-1"></i>
+            }
+            {{breadcrumb.name}}
             </span>
           }
         </mat-menu>
@@ -68,7 +69,7 @@
         [matMenuTriggerFor]="shareModal"
         (menuOpened)="openShareModal()"
         >
-        @if (showShareButton && !isCommunity) {
+        @if (showShareButton && !isCommunity()) {
           <i class="fa fa-share-alt share pointer" smTooltip="Share"></i>
         }
       </div>
@@ -95,7 +96,7 @@
         </div>
       </mat-menu>
     </div>
-    @if (archive) {
+    @if (archive()) {
       <div data-id="Archive Label" class="archive"><i class="al-icon xs al-ico-archive me-1"></i>Archive
     </div>
   }

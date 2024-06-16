@@ -107,6 +107,7 @@ $sm-neon-theme: mat.define-dark-theme((
   @include mat.divider-color($dark-theme);
   @include mat.checkbox-theme($dark-theme);
   @include mat.list-theme($dark-theme);
+  @include mat.stepper-theme($dark-theme);
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
@@ -147,6 +148,7 @@ $sm-neon-theme: mat.define-dark-theme((
   @include mat.divider-color($light-theme);
   @include mat.checkbox-color($sm-theme);
   @include mat.list-color($light-theme);
+  @include mat.stepper-color($sm-theme);
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
@@ -195,6 +197,52 @@ $sm-neon-theme: mat.define-dark-theme((
     font-size: 12px;
     font-family: $font-family-monospace;
   }
+
+  // MAT STEPPER
+  // ------------------------
+
+  .mat-step-header.mat-accent {
+     --mat-stepper-header-selected-state-label-text-color: #{$blue-300};
+     --mat-stepper-header-focus-state-layer-color: transparent;
+  }
+
+  .mat-horizontal-stepper-header-container {
+    padding: 0 24px;
+  }
+
+  .mat-ripple {display: none;}
+
+  .mat-step-header:hover:not([aria-disabled]),
+  .mat-step-header:hover[aria-disabled=false] {
+    background-color: unset;
+  }
+
+  .mat-step-icon {
+    --mat-stepper-header-icon-background-color: #{$white};
+    --mat-stepper-header-icon-foreground-color: #{$blue-400};
+    border: 2px solid $blue-300;
+    transition: border 0.3s;
+  }
+
+  .mat-step-icon-selected,
+  .mat-step-icon-state-edit {
+    border-color: $purple;
+  }
+
+  .mat-step-label {
+    min-width: 30px;
+  }
+
+  .mat-step-text-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .mat-step-label.mat-step-label-active.mat-step-label-selected {
+     --mat-stepper-header-selected-state-label-text-color: #{$purple};
+  }
+
 }
 
 * {
@@ -319,10 +367,6 @@ mat-expansion-panel {
   .mat-expansion-panel-header {
     margin-bottom: 0;
   }
-}
-
-.mat-expansion-panel-header {
-  font-family: $font-family-base, sans-serif;
 }
 
 .al-empty-collapse .mat-expansion-panel-header-title .al-header.sub-header {
@@ -607,6 +651,7 @@ html {
 
     &.custom-columns {
       width: 370px;
+
     }
 
     sm-checkbox-three-state-list {
@@ -623,16 +668,24 @@ html {
 }
 
 .sm-menu-header {
-  text-align: center;
-  padding: 12px;
-  background: $blue-25;
-  color: $blue-400;
-  border-bottom: 1px solid $blue-200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $blue-200;
+  font-weight: normal;
+  border-bottom: 1px solid $blue-500;
   font-size: 14px;
+  min-height: 48px;
 }
 
 .light-theme {
   .mat-mdc-menu-content {
+    .sm-menu-header {
+      background: $blue-25;
+      color: $blue-400;
+      border-bottom: 1px solid $blue-200;
+    }
+
     .mat-mdc-menu-item {
       &.cdk-keyboard-focused, &.cdk-program-focused {
         color: rgba(0, 0, 0, 0.87);
@@ -659,7 +712,7 @@ html {
     min-height: 40px;
     --mat-menu-item-label-text-line-height: 20px;
     --mat-menu-item-label-text-size: 14px;
-    padding: 0 32px 0 12px;
+    padding: 0 12px;
     border-radius: 4px;
 
     .mat-icon {
@@ -705,10 +758,17 @@ input[type=number] {
   z-index: 11 !important;
 }
 
+
+// SPILTTER
+// ------------------------------
+
 as-split {
   &.as-dragging {
     .as-split-area {
-      transition: unset;
+      transition: opacity 0.5s;
+    }
+    .as-split-gutter-icon {
+      display: none;
     }
   }
 
@@ -718,29 +778,114 @@ as-split {
 
   &.as-horizontal {
     & > .as-split-gutter {
-      height: unset !important;
+      position: relative;
+      background-color: $dark-border !important;
+
+      &::before {
+        // splitter vertical line
+        content: "";
+        display: block;
+        width: 2px;
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        bottom: 0;
+        left: -1px;
+        background-color: transparent;
+      }
+      &:hover::before {
+        background-color: $purple;
+        transition: background-color 0.2s ease 0.2s;
+      }
+
+      &::after {
+        // splitter area handle
+        content: "";
+        position: absolute;
+        z-index: 101;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+      }
 
       .as-split-gutter-icon {
-        background-color: $blue-900;
-        border-left: $blue-600 solid 1px;
-        border-right: $blue-600 solid 1px;
+        // arrow circle icon
+        display: none;
+        position: absolute;
+        z-index: 101;
+        width: 20px !important;
+        height: 20px !important;
+        background-image: none !important;
+        border: none !important;
+        border-radius: 20px;
+        &::after {
+          // arrow
+          content: "";
+          display: inline-block;
+          padding: 2px;
+          position: absolute;
+          top: 8px;
+          border: solid lighten($purple, 30%);
+        }
       }
     }
   }
+
+  &.closed.as-horizontal {
+    > .as-split-gutter {
+        .as-split-gutter-icon {
+          display: block;
+          left: -10px;
+          background: $purple !important;
+          &::after {
+            // arrow direction right
+            left: 6px;
+            border-width: 0 2px 2px 0;
+            transform: rotate(-45deg);
+          }
+        }
+    }
+    > .as-split-area:nth-child(1) {
+      opacity: 0;
+    }
+  }
+  &.opened.as-horizontal {
+    > .as-split-gutter {
+        &:hover::before {
+          left: auto;
+          right: -1px;
+        }
+        .as-split-gutter-icon {
+          display: block;
+          right: -10px;
+          background: $purple !important;
+          &::after {
+            // arrow direction left
+            left: 8px;
+            border-width: 0 2px 2px 0;
+            transform: rotate(135deg);
+          }
+        }
+    }
+    > .as-split-area:nth-child(2) {
+      opacity: 0;
+    }
+  }
+
 }
 
-.dark-theme .light-theme .as-horizontal > .as-split-gutter {
-  background-color: transparent !important;
+as-split.as-horizontal.light-theme > .as-split-gutter {
+  background-color: #dee1e9 !important;
+}
 
-  .as-split-gutter-icon {
-    background-color: transparent !important;
-    border-left: solid 1px #DEE1E9;
-    border-right: none;
-    background-image: none !important;
-
-    &:hover {
-      border-left: $purple solid 2px;
-    }
+// splitter shown on light background
+as-split.as-horizontal:not(.closed, .opened) as-split-area.light-theme + .as-split-gutter {
+  &::before {
+    left: 1px;
+    width: 3px;
+  }
+  &::after {
+    left: 0;
   }
 }
 
@@ -789,6 +934,10 @@ $type-colors: (
 
     }
   }
+}
+
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+  --mat-dialog-container-max-width: 100vw;
 }
 
 .image-viewer-dialog {
@@ -982,3 +1131,13 @@ button.btn.button-outline-dark {
     --mdc-dialog-container-color: transparent;
   }
 }
+
+.btn-check:checked + .dark-theme .btn,
+:not(.btn-check) + .dark-theme .btn:active
+{
+  --bs-btn-active-border-color: transparent;
+}
+
+//.pallete-cursor {
+//  cursor: url(../assets/icons/pallete-cursor.svg) 6 0, pointer;
+//}

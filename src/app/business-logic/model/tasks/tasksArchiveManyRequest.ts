@@ -25,4 +25,8 @@ export interface TasksArchiveManyRequest {
      * Extra information regarding status change
      */
     status_message?: string;
+    /**
+     * If set then for the passed pipeline controller tasks also delete the pipeline   steps
+     */
+    include_pipeline_steps?: boolean;
 }

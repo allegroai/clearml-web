@@ -264,6 +264,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
       [EXPERIMENTS_TABLE_COL_FIELDS.TAGS]: [],
       [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: null,
       [EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]: null,
+      [EXPERIMENTS_TABLE_COL_FIELDS.VERSION]: [],
     };
   }
 
@@ -354,7 +355,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
         this.tagsMenuOpened.emit();
       }
     } else if (col.id.includes('hyperparams')) {
-      this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: col.id}, loadMore: false, values: null}));
+      this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: col.id}, loadMore: false, values: []}));
       this.store.dispatch(setHyperParamsFiltersPage({page: 0}));
       this.store.dispatch(hyperParamSelectedExperiments({col, searchValue: ''}));
     } else if (col.id === EXPERIMENTS_TABLE_COL_FIELDS.PROJECT) {

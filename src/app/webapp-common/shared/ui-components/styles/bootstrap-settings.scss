@@ -75,8 +75,10 @@ $btn-font-family: $font-family-base;
       $hover-background: $neon-yellow-hover,
     );
     font-weight: 500;
-    height: 32px;
-    padding: 0 32px;
+    &:not(.narrow) {
+      height: 32px;
+      padding: 0 32px;
+    }
   }
 
   .btn-dark-fill {
@@ -350,8 +352,10 @@ $btn-font-family: $font-family-base;
     );
     font-size: 12px;
     font-weight: 500;
-    height: 32px;
-    padding: 0 32px;
+    &:not(.narrow) {
+      height: 32px;
+      padding: 0 32px;
+    }
   }
 
   .btn-outline-neon {

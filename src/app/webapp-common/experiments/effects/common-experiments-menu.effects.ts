@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {Router} from '@angular/router';
@@ -98,7 +99,7 @@ export class CommonExperimentsMenuEffects {
   enqueueExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.enqueueClicked),
     concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
-    switchMap(([action, selectedEntity]: [ReturnType<typeof menuActions.enqueueClicked>, IExperimentInfo]) => {
+    switchMap(([action, selectedEntity]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
         return this.apiTasks.tasksEnqueueMany({
           /* eslint-disable @typescript-eslint/naming-convention */
@@ -262,7 +263,7 @@ export class CommonExperimentsMenuEffects {
           data: {tasks: action.experiments, shouldBeAbortedTasks}
         })).afterClosed()),
         mergeMap(confirmed => [
-          confirmed ? stopClicked({selectedEntities: [...confirmed.shouldBeAbortedTasks, ...action.experiments]}) : emptyAction(),
+          confirmed ? stopClicked({selectedEntities: action.experiments, includePipelineSteps: isPipeline }) : emptyAction(),
           deactivateLoader(action.type)
         ]),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to fetch tasks running children')])
@@ -275,7 +276,7 @@ export class CommonExperimentsMenuEffects {
     concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
-        return this.apiTasks.tasksStopMany({ids})
+        return this.apiTasks.tasksStopMany({ids, include_pipeline_steps: action.includePipelineSteps})
           .pipe(
             mergeMap(res => this.updateExperimentsSuccess(action, MenuItems.abort, ids, selectedEntity, res)),
             catchError(error => this.updateExperimentFailed(action.type, error))
@@ -410,8 +411,10 @@ export class CommonExperimentsMenuEffects {
       this.store.select(selectRouterParams),
       this.store.select(exSelectors.selectSelectedTableExperiment),
       this.store.select(selectTableMode),
+      this.store.select(selectIsPipelines),
     ]),
-    switchMap(([action, routerParams, selectedExperiment, tableMode]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
+    switchMap(([action, routerParams, selectedExperiment, tableMode, isPipelines]) =>
+      this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id), include_pipeline_steps: isPipelines})
       .pipe(
         concatLatestFrom(() => this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [TasksArchiveManyResponse, RouterState['config']]) => {

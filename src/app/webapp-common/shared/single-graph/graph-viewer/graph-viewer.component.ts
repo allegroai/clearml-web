@@ -34,7 +34,7 @@ export interface GraphViewerData {
   isCompare: boolean;
   moveLegendToTitle: boolean;
   embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
-  legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }>;
+  legendConfiguration: Partial<ExtLegend>;
 }
 
 @Component({

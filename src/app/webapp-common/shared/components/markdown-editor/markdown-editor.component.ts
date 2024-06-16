@@ -80,6 +80,9 @@ export class MarkdownEditorComponent {
   public isExpand: boolean = false;
   public duplicateNames: boolean;
   public postRender = (dirty: string): string => {
+    if (this.blockUserScripts) {
+      return '<div class="d-flex-center flex-column h-100 mt-4"><div>Preview not available because 3rd party scripts are blocked.</div><div>You can enable it in configuration section in the settings page.</div></div>';
+    }
     return DOMPurify.sanitize(dirty, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'], FORBID_ATTR: ['action'] })
   };
 
@@ -101,6 +104,7 @@ export class MarkdownEditorComponent {
   @Input() readOnly: boolean;
   @Input() handleUpload: (files: File[]) => Promise<UploadResult[]>;
   @Input() resources = [] as {unused: boolean; url: string}[];
+  @Input() blockUserScripts = false;
   @Output() saveInfo = new EventEmitter<string>();
   @Output() editModeChanged = new EventEmitter();
   @Output() dirtyChanged = new EventEmitter<boolean>();
@@ -160,7 +164,7 @@ export class MarkdownEditorComponent {
     this.editorVisible = false;
     setTimeout(() => {
       this.updateEditorVisibility();
-      this.ace.focus();
+      this.ace?.focus();
     });
   }
 

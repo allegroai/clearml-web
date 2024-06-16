@@ -1,62 +1,56 @@
 @import "variables";
 
+$dot-size: 8px;
+
 :host {
   display: flex;
+  justify-content: center;
+  padding: 2px 8px;
+  position: relative;
   &.hidden {
     display: none;
   }
-  justify-content: center;
-  padding: 2px 8px;
-  color: $blue-500;
-  position: relative;
 }
 
-.load-more__dot {
-  position: relative;
-  width: 6px;
-  height: 6px;
-  border-radius: 3px;
-  background-color: $blue-500;
-  color: $blue-500;
-  animation: dot 1s infinite linear alternate;
-  animation-delay: 0.5s;
-}
+.load-more {
+  &__dot {
+    --dot-color: #{$blue-300};
 
-.load-more__dot::before,
-.load-more__dot::after {
-  content: "";
-  display: inline-block;
-  position: absolute;
-  top: 0;
-}
-
-.load-more__dot::before {
-  left: -12px;
-  width: 6px;
-  height: 6px;
-  border-radius: 3px;
-  background-color: $blue-500;
-  color: $blue-500;
-  animation: dot 1s infinite alternate;
-  animation-delay: 0s;
-}
-
-.load-more__dot::after {
-  left: 12px;
-  width: 6px;
-  height: 6px;
-  border-radius: 3px;
-  background-color: $blue-500;
-  color: $blue-500;
-  animation: dot 1s infinite alternate;
-  animation-delay: 1s;
+    position: relative;
+    width: $dot-size;
+    height: $dot-size;
+    border-radius: $dot-size;
+    background-color: var(--dot-color);
+    animation: dot 1s infinite linear alternate;
+    animation-delay: 0.5s;
+  }
+  &__dot::before,
+  &__dot::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    width: inherit;
+    height: inherit;
+    border-radius: inherit;
+    background-color: inherit;
+    animation: dot 1s infinite alternate;
+  }
+  &__dot::before {
+    left: calc(-#{$dot-size} * 2);
+    animation-delay: 0s;
+  }
+  &__dot::after {
+    left: calc(#{$dot-size} * 2);
+    animation-delay: 1s;
+  }
 }
 
 @keyframes dot {
   0% {
-    background-color: $blue-500;
+    background-color: var(--dot-color);
   }
   50%, 100% {
-    background-color: rgba($blue-500, 0.2);
+    background-color: rgba(var(--dot-color), 0.5);
   }
 }

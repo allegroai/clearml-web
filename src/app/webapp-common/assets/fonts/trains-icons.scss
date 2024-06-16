@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?hr04a1') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?luezm6') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,30 +23,49 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-.al-ico-queue {
+.al-ico-link-off {
   &:before {
-    content: $al-ico-queue; 
+    content: $al-ico-link-off; 
   }
 }
-.al-ico-weight {
+.al-ico-policy {
   &:before {
-    content: $al-ico-weight; 
+    content: $al-ico-policy;
+  }
+}
+.al-ico-info-group {
+  &:before {
+    content: $al-ico-info-group;
+  }
+}
+.al-ico-advanced-filters {
+  &:before {
+    content: $al-ico-advanced-filters;
+  }
+}
+.al-ico-triggers-scheduled {
+  &:before {
+    content: $al-ico-triggers-scheduled;
+  }
+}
+.al-ico-queue {
+  &:before {
+    content: $al-ico-queue;
   }
 }
 .al-ico-link-plus {
   &:before {
-    content: $al-ico-link-plus; 
+    content: $al-ico-link-plus;
   }
 }
 .al-ico-drag-vertical {
   &:before {
-    content: $al-ico-drag-vertical; 
+    content: $al-ico-drag-vertical;
   }
 }
 .al-ico-drag-horizontal {
   &:before {
-    content: $al-ico-drag-horizontal; 
+    content: $al-ico-drag-horizontal;
   }
 }
 .al-ico-admin-support {
@@ -480,11 +499,6 @@
     content: $al-ico-model;
   }
 }
-.al-ico-temp-edit {
-  &:before {
-    content: $al-ico-temp-edit;
-  }
-}
 .al-ico-dialog-x {
   &:before {
     content: $al-ico-dialog-x;
@@ -613,11 +627,6 @@
 .al-ico-pytorch-icon {
   &:before {
     content: $al-ico-pytorch-icon;
-  }
-}
-.al-ico-question-mark {
-  &:before {
-    content: $al-ico-question-mark;
   }
 }
 .al-ico-rectangle {
@@ -1145,11 +1154,6 @@
 .al-ico-no-scatter-graph {
   &:before {
     content: $al-ico-no-scatter-graph;
-  }
-}
-.al-ico-applications-exp {
-  &:before {
-    content: $al-ico-applications-exp;
   }
 }
 .al-ico-auto-refresh-play .path1 {

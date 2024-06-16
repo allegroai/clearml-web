@@ -26,6 +26,7 @@ export interface ExtFrame extends Omit<plotly.Frame, 'data' | 'layout'> {
   config: Partial<plotly.Config>;
   tags?: string[];
   plot_str?: string;
+  colorKey?: string;
 }
 
 export interface ExtLegend extends plotly.Legend {
@@ -47,7 +48,6 @@ export interface ExtData extends plotly.PlotData {
   name: string;
   colorKey?: string;
   isSmoothed: boolean;
-  colorHash: string;
   originalMetric?: string;
 }
 
@@ -75,7 +75,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
       return;
     }
     const colorString = new TinyColor({r: newColor[0], g: newColor[1], b: newColor[2]})
-      .lighten((this.isSmooth && !trace.isSmoothed) ? 20 : 0).toRgbString();
+      .lighten((this.isSmooth && !trace.isSmoothed) ? 40 : 0).toRgbString();
     if (trace.marker) {
       trace.marker.color = colorString;
       if (trace.marker.line) {
@@ -121,12 +121,19 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     const merged = [...duplicateIndexes];
 
     for (const key of merged) {
-      data[key].colorHash = data[key].name;
+      data[key].colorKey = data[key].colorKey ?? data[key].name;
       // Warning: "data[key].task" in compare case. taskId in subplots (multiple plots with same name)
       if (data[key].task || taskId) {
         data[key].name = `${data[key].name}.${(data[key].task || taskId).substring(0, 6)}`;
       }
     }
+
+    // Case all series in plot has same colorKey (same task name)
+    const duplicateColorKey = Array.from(new Set(data.map(plot => plot.colorKey))).length < data.length;
+    if (duplicateColorKey && chart.variants?.length > 0) {
+      data.forEach((plot => plot.colorKey = plot.name))
+    }
+
     return data;
   }
 

@@ -1,73 +1,100 @@
 <div class="d-flex justify-content-between header-container align-items-center"
-     [ngClass]="{'archive-mode': isArchived}">
+  [class.archive-mode]="isArchived()">
   <div class="d-flex-center">
-    <ng-container *ngTemplateOutlet="addButtonTemplate; context: {smallScreen: (isSmallScreen$ | async).matches}">
+    <ng-container *ngTemplateOutlet="addButtonTemplate(); context: {smallScreen: (isSmallScreen$ | async).matches}">
     </ng-container>
     <sm-toggle-archive
-      [class.hide-item]="sharedView"
-      [showArchived]="isArchived"
+      [class.hide-item]="sharedView()"
+      [showArchived]="isArchived()"
       [minimize]="(isSmallScreen$ | async).matches"
       (toggleArchived)="isArchivedChanged.emit($event)"
     ></sm-toggle-archive>
     <sm-button-toggle
-      [disabled]="!tableMode || noData"
+      [disabled]="!tableMode() || noData"
       class="ms-3"
       [options]="toggleButtons"
-      [value]="!noData && tableMode"
-      [rippleEffect]="rippleEffect"
+      [value]="!noData && tableMode()"
+      [rippleEffect]="rippleEffect()"
       (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
   </div>
 
 
   <div class="d-flex justify-content-end align-items-center right-buttons">
-    <sm-clear-filters-button
-      *ngIf="!minimizedView"
-      [tableFilters]="tableFilters"
-      (clearTableFilters)="clearTableFilters.emit(tableFilters)"
-    ></sm-clear-filters-button>
-    <sm-menu *ngIf="tableMode !== 'compare'"
-      class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
-             [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
-      <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
-      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
-                    [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
-    </sm-menu>
+    @if (!minimizedView()) {
+      <sm-clear-filters-button
+        [tableFilters]="tableFilters()"
+        (clearTableFilters)="clearTableFilters.emit(tableFilters())"
+      ></sm-clear-filters-button>
+    }
+    @if (tableMode() !== 'compare') {
+      <sm-menu
+        class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
+        [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
+        <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
+        <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
+        [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
+      </sm-menu>
+    }
 
-    <mat-form-field *ngIf="tableMode === 'compare'" appearance="outline" class="dark-outline compare-view-select no-bottom">
-      <mat-select
-        name="compareView"
-        panelClass="dark-outline"
-        [ngModel]="compareView"
-        (selectionChange)="compareViewChanged.emit($event.value)"
-      >
-        <mat-option value="scalars">Scalars</mat-option>
-        <mat-option value="plots">Plots</mat-option>
-      </mat-select>
-    </mat-form-field>
+    @if (tableMode() === 'compare') {
+      <mat-form-field appearance="outline" class="dark-outline compare-view-select no-bottom">
+        <mat-select
+          name="compareView"
+          panelClass="dark-outline"
+          [ngModel]="compareView()"
+          (selectionChange)="compareViewChanged.emit($event.value)"
+          >
+          <mat-option value="scalars">Scalars</mat-option>
+          <mat-option value="plots">Plots</mat-option>
+        </mat-select>
+      </mat-form-field>
+    }
 
-    <i class="al-icon al-ico-tune sm-md"
-       *ngIf="tableMode === 'compare' && compareView === 'scalars'"
-       [class.active]="showCompareScalarSettings"
-       (click)="toggleShowCompareSettings.emit()"></i>
+    @if (tableMode() === 'compare' && compareView() === 'scalars') {
+      <i class="al-icon al-ico-tune sm-md"
+        [class.active]="showCompareScalarSettings()"
+      (click)="toggleShowCompareSettings.emit()"></i>
+    }
 
-    <sm-experiment-custom-cols-menu
-      *ngIf="!minimizedView || tableMode === 'compare'"
-      [metricVariants]="metricVariants"
-      [hyperParams]="hyperParams"
-      [tableCols]="tableCols"
-      [isLoading]="isMetricsLoading"
-      [skipValueType]="tableMode === 'compare'"
-      [disabled]="tableMode === 'compare' && metricVariants?.length === 0"
-      (selectedMetricToShow)="selectedMetricToShow.emit($event)"
-      (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
-      (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
-      (getMetricsToDisplay)="getMetricsToDisplay.emit($event)"
-      (removeColFromList)="removeColFromList.emit($event)"
-      (clearSelection)="clearSelection.emit()"
-    ></sm-experiment-custom-cols-menu>
+    @if (!minimizedView() || tableMode() === 'compare') {
+      <sm-custom-cols-menu
+        [sections]="tableMode() === 'compare' ? [{title: 'add metric', name: 'metrics', options: metricVariants(), template: metricsTemplate}] : [{title: 'add metric',name: 'metrics', options: metricVariants(), template: metricsTemplate}, {name: 'hyperparameters', options: hyperParams(), template: hyperParamsTemplate}]"
+        [topTitle]="tableMode() === 'compare' ? 'Customize charts view' : 'Customize columns'"
+        [menuTooltip]="tableMode() === 'compare' ? 'Customize charts view' : 'Customize table'"
+        [sectionsTitle]="'ADD CUSTOM COLUMN'"
+        [tableCols]="tableColsWithHeader()"
+        [isLoading]="isMetricsLoading()"
+        [disabled]="tableMode() === 'compare' && metricVariants()?.length === 0"
+        [(customColumnMode)]="customColumnMode"
+        (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
+        (getMetricsToDisplay)="getMetricsToDisplay.emit($event)"
+        (removeColFromList)="removeColFromList.emit($event)"
+      ></sm-custom-cols-menu>
+    }
     <sm-refresh-button
       [allowAutoRefresh]="true"
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     ></sm-refresh-button>
   </div>
 </div>
+
+<ng-template #metricsTemplate let-sectionData>
+  <sm-select-metric-for-custom-col
+    [tableCols]="tableColsWithHeader()"
+    [metricVariants]="sectionData.options"
+    [skipValueType]="tableMode() === 'compare'"
+    (goBack)="customColumnMode = customColumnModeEnum.Standard"
+    (selectedMetricToShow)="selectedMetricToShow.emit($event)">
+  </sm-select-metric-for-custom-col>
+</ng-template>
+
+<ng-template #hyperParamsTemplate let-sectionData>
+  <sm-select-hyper-params-for-custom-col
+    class="hyper-params-custom-col"
+    [tableCols]="tableCols()"
+    [hyperParams]="sectionData.options"
+    (goBack)="customColumnMode = customColumnModeEnum.Standard"
+    (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
+    (clearSelection)="clearSelection.emit()">
+  </sm-select-hyper-params-for-custom-col>
+</ng-template>

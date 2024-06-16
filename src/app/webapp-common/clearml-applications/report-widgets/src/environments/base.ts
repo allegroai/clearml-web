@@ -94,7 +94,7 @@ export const BASE_ENV: Environment = {
   whiteLabelLoginTitle: null,
   whiteLabelLoginSubtitle: null,
   whiteLabelSlogan: null,
-  plotlyURL: 'app/webapp-common/assets/plotly-2.25.2.min.js',
+  plotlyURL: 'app/webapp-common/assets/plotly-2.31.1.min.js',
   docsLink: '/docs',
   useFilesProxy: true,
   branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},

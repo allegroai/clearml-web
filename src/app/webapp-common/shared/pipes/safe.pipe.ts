@@ -31,6 +31,6 @@ export class SaferPipe implements PipeTransform {
   constructor(protected sanitizer: DomSanitizer) {}
 
   public transform(value: string) {
-    return DOMPurify.sanitize(value);
+    return this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(value));
   }
 }

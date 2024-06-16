@@ -1,16 +1,18 @@
 import * as createNewProjectActions from './project-dialog.actions';
-import {moveProject} from './project-dialog.actions';
-import * as createProjectSelectors from './project-dialog.reducer';
-import {CREATION_STATUS} from './project-dialog.reducer';
-
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
 import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
+
+export interface ProjectDialogConfig {
+  project: Project;
+  mode: string;
+}
+
 
 @Component({
   selector: 'sm-project-create-dialog',
@@ -19,7 +21,6 @@ import {Project} from '~/business-logic/model/projects/project';
 })
 export class ProjectDialogComponent implements OnInit, OnDestroy {
   public projects$: Observable<any>;
-  private creationStatusSubscription: Subscription;
   public baseProject: Project;
   public mode: string;
   public header: string;
@@ -38,7 +39,7 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private matDialogRef: MatDialogRef<ProjectDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { project: Project; mode: string }
+    @Inject(MAT_DIALOG_DATA) data: ProjectDialogConfig
   ) {
     this.baseProject = data.project;
     this.mode = data.mode;
@@ -47,29 +48,24 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.dispatch(getTablesFilterProjectsOptions({searchString: '', loadMore: false}));
-    this.creationStatusSubscription = this.store.select(createProjectSelectors.selectCreationStatus).subscribe(status => {
-      if (status === CREATION_STATUS.SUCCESS) {
-        return this.matDialogRef.close(true);
-      }
-    });
   }
 
   ngOnDestroy(): void {
     this.store.dispatch(createNewProjectActions.resetState());
-    this.creationStatusSubscription.unsubscribe();
   }
 
   public createProject(projectForm) {
     const project = this.convertFormToProject(projectForm);
-    this.store.dispatch(createNewProjectActions.createNewProject({req: project}));
+    this.store.dispatch(createNewProjectActions.createNewProject({req: project, dialogId: this.matDialogRef.id}));
   }
 
   moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {
-    this.store.dispatch(moveProject({
+    this.store.dispatch(createNewProjectActions.moveProject({
       project: this.baseProject.id,
       ...event,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       new_location: event.location === 'Projects root' ? '' : event.location,
+      dialogId: this.matDialogRef.id
     }));
   }
 

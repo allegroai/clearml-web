@@ -55,16 +55,20 @@
       </div>
 
       <div class="html-snippet" *ngSwitchCase="'html'">
-        <div class="html-wrap" [class.loading]="isLoading">
-          <iframe
-            class="html-viewer"
-            data-id="htmlViewer"
-            width="400" height="400"
-            referrerpolicy="origin-when-cross-origin"
-            sandbox="allow-scripts sallow-popups allow-same-origin allow-storage-access-by-user-activation"
-            [src]="source | safe: 'url'"
-            (load)="iframeLoaded($event)"
-          ></iframe>
+        <div class="html-wrap" [class.loading]="!blockUserScripts() && isLoading">
+          @if (blockUserScripts()) {
+            <div class="scripts-blocked">Preview not available because 3rd party scripts are blocked</div>
+          } @else {
+            <iframe
+              class="html-viewer"
+              data-id="htmlViewer"
+              width="400" height="400"
+              referrerpolicy="origin-when-cross-origin"
+              sandbox="allow-scripts sallow-popups allow-same-origin allow-storage-access-by-user-activation"
+              [src]="source | safe: 'url'"
+              (load)="iframeLoaded($event)"
+            ></iframe>
+          }
         </div>
         <div *ngIf="!noHoverEffects" class="toolbar">
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
@@ -80,13 +84,15 @@
                (cbOnSuccess)="copyToClipboardSuccess(true)">
             <i class="al-icon al-ico-copy-to-clipboard sm"></i>
           </div>
-          <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-               smTooltip="Open URL in a new Tab"
-               data-id="openURLInNewTab"
-               (click)="openInNewTab(source)"
-          >
-            <i class="al-icon al-ico-export sm"></i>
-          </div>
+          @if(!blockUserScripts()) {
+            <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                 smTooltip="Open URL in a new Tab"
+                 data-id="openURLInNewTab"
+                 (click)="openInNewTab(source)">
+              <i class="al-icon al-ico-export sm"></i>
+            </div>
+          }
+
         </div>
       </div>
 

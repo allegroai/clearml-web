@@ -14,6 +14,9 @@ import {
 } from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
+import {
+  createExperimentDialogResult
+} from '@common/experiments/containers/create-experiment-dialog/create-experiment-dialog.component';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
@@ -302,4 +305,16 @@ export const toggleCompareScalarSettings = createAction(
 export const prepareTableForDownload = createAction(
   EXPERIMENTS_PREFIX + ' [prepareTableForDownload]',
   props<{ entityType: OrganizationPrepareDownloadForGetAllRequest.EntityTypeEnum }>()
+);
+export const createExperiment = createAction(
+  EXPERIMENTS_PREFIX + ' [create experiment]',
+  props<{data: createExperimentDialogResult}>()
+);
+export const createExperimentSuccess = createAction(
+  EXPERIMENTS_PREFIX + ' [create experiment success]',
+  props<{data: createExperimentDialogResult, project: string}>()
+);
+export const openExperiment = createAction(
+  EXPERIMENTS_PREFIX + ' [open experiment]',
+  props<{id: string; project: string}>()
 );

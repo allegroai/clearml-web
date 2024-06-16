@@ -1,4 +1,9 @@
-<mat-button-toggle-group [formControl]="formControl" name="fontStyle" aria-label="Font Style">
+<mat-button-toggle-group
+  [class.no-background]="noBackground"
+  [formControl]="formControl"
+  [hideSingleSelectionIndicator]="true"
+  name="fontStyle"
+  aria-label="Font Style">
   <mat-button-toggle
     *ngFor="let option of options; trackBy: trackByValue"
     [value]="option.value"

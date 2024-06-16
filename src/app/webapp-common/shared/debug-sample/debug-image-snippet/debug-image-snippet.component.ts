@@ -19,6 +19,7 @@ import {MESSAGES_SEVERITY, ThemeEnum} from '@common/constants';
 import {isHtmlPage} from '@common/shared/utils/is-html-page';
 import {isTextFileURL} from '@common/shared/utils/is-text-file';
 import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
+import {selectBlockUserScript} from '@common/core/reducers/projects.reducer';
 
 // import {Event} from '@common/debug-images/debug-images-types';
 
@@ -32,6 +33,7 @@ export class DebugImageSnippetComponent implements OnDestroy{
   public source$: Observable<string>;
   private _frame: any;
   public themeEnum = ThemeEnum;
+  blockUserScripts = this.store.selectSignal(selectBlockUserScript);
 
   @Input() theme: ThemeEnum = ThemeEnum.Light;
   @Input() noHoverEffects: boolean;

@@ -8,7 +8,7 @@ import {deactivateLoader} from '@common/core/actions/layout.actions';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {requestFailed} from '@common/core/actions/http.actions';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
-import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {selectCurrentUser, selectShowOnlyUserWork,} from '@common/core/reducers/users-reducer';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {selectRouterConfig} from "@common/core/reducers/router-reducer";
 

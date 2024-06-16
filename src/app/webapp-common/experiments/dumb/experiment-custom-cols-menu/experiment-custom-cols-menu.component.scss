@@ -23,15 +23,24 @@
     width: 50%;
     white-space: nowrap;
 
-    &.only-metrics {
+    &.only-one-section {
       width: 100%;
     }
 
     .caption {
       margin-top: 4px;
     }
-    &:first-child:not(.only-metrics) {
+    &:first-child:not(.only-one-section) {
       border-right: 1px solid $blue-200;
+    }
+  }
+}
+
+.dark {
+  .custom-column-buttons .metrics-button {
+    color: $blue-300;
+    &:hover {
+      color: $blue-200;
     }
   }
 }
@@ -59,12 +68,6 @@
 .disabled {
   opacity: 0.5;
   cursor: default;
-}
-
-sm-select-metric-for-custom-col {
-  display: block;
-  height: 640px;
-  max-height: calc(100vh - 120px);
 }
 
 .custom-columns-disabled {

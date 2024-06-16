@@ -21,7 +21,7 @@ import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {ModelsInfoEffects} from '@common/models/effects/models-info.effects';
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 
 
 @Component({
@@ -158,7 +158,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
 
   maximize() {
     const last = this.route.snapshot.firstChild.url[0].path;
-    this.store.dispatch(setContextMenu({contextMenu: null}));
+    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
     return this.router.navigate(['output', last], {relativeTo: this.route, queryParamsHandling: 'preserve'});
   }
 

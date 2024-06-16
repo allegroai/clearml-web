@@ -51,6 +51,7 @@ import {TableModule} from 'primeng/table';
 import {MatInputModule} from '@angular/material/input';
 import {OrchestrationComponent} from "~/features/workers-and-queues/orchestration.component";
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
 
 @NgModule({
   imports: [
@@ -84,7 +85,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     VerticalLabeledRowComponent,
     TableModule,
     MatInputModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    RefreshButtonComponent
   ],
   declarations: [
     OrchestrationComponent,

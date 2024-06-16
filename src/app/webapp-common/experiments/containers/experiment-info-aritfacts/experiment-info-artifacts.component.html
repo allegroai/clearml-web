@@ -6,10 +6,13 @@
     editable: editable$ | async
   }" [ngTemplateOutlet]="selfie" #selfie>
   <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-  <as-split [unit]="'pixel'"
+  <as-split 
+    class="light-theme"
+    [unit]="'pixel'" 
+    [gutterSize]=1
     *ngIf="(modelInfo?.output?.length) || (modelInfo?.input?.length) || (modelInfo?.artifacts?.length) || editable; else noData"
   >
-    <as-split-area [size]="minimized ? 250 : 360" [minSize]="50">
+    <as-split-area [size]="minimized ? 250 : 360" [minSize]="150">
       <sm-experiment-artifacts-navbar
         [class.minimized]="minimized"
         [artifacts]="modelInfo?.artifacts"

@@ -20,6 +20,7 @@
     align-items: center;
     text-align: center;
     border-bottom: 1px solid $blue-200;
+    min-height: 48px;
     h3 {
       color: $blue-400;
       font-size: 14px;
@@ -28,15 +29,18 @@
     }
   }
 
-  sm-search {
+  ::ng-deep sm-search {
     display: block;
-    padding: 0 12px;
+    padding: 0 4px;
+    margin-bottom: 4px;
+    .search-input {
+      padding: 0 6px 0 12px;
+    }
   }
 
 }
 
 .list-container {
-  padding-left: 12px;
   overflow: auto;
 }
 
@@ -44,8 +48,26 @@
   text-align: center;
   margin: auto;
   color: $blue-300;
+  font-size: 14px;
 }
 
 .spinner {
   margin: auto;
 }
+
+
+:host-context(.dark) {
+  .head {
+    border-bottom-color: $blue-500;
+    h3 {
+      color: $blue-200;
+    }
+    .al-icon {
+      color: $blue-300;
+      &:hover {
+        color: $blue-200;
+      }
+    }
+  }
+}
+

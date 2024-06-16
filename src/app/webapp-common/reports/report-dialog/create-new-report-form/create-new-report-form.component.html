@@ -1,9 +1,9 @@
 <form (submit)="reportForm.invalid && send()" #reportForm='ngForm' class="d-flex flex-column">
-  <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
+  <mat-form-field appearance="outline" class="mat-light">
     <mat-label>Report name</mat-label>
-    <mat-error *ngIf="name.touched && name.errors?.required">*Please add name.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.uniqueName">*Report name already exists.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.minlength">*Report name should contain more than 3 characters.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.required">Please add name.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.uniqueName">Report name already exists.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.minlength">Report name should contain more than 3 characters.</mat-error>
     <input name="reportName"
            [(ngModel)]="report.name"
            #name="ngModel"
@@ -68,8 +68,8 @@
     </mat-autocomplete>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" hideRequiredMarker>
-    <mat-error *ngIf="description?.touched && description?.invalid">*Please add description.
+  <mat-form-field appearance="outline">
+    <mat-error *ngIf="description?.touched && description?.invalid">Please add description.
     </mat-error>
     <mat-label>Description</mat-label>
     <textarea class="report-description"

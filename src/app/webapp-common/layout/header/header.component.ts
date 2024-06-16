@@ -1,11 +1,9 @@
-import {ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser} from '../../core/reducers/users-reducer';
-import {Observable, Subscription} from 'rxjs';
 import {logout} from '../../core/actions/users.actions';
 import {addMessage, openAppsAwarenessDialog} from '../../core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
-import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {distinctUntilKeyChanged, filter} from 'rxjs/operators';
@@ -17,7 +15,7 @@ import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {UsersGetInvitesResponseInvites} from '~/business-logic/model/users/usersGetInvitesResponseInvites';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'sm-header',
@@ -25,61 +23,49 @@ import {UsersGetInvitesResponseInvites} from '~/business-logic/model/users/users
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HeaderComponent implements OnInit, OnDestroy {
-  @Input() isShareMode: boolean;
-  @Input() isLogin: boolean;
-  @Input() hideMenus: boolean;
-  showLogo: boolean;
-  profile: boolean;
-  userFocus: boolean;
-  public environment$ = this.configService.getEnvironment();
-  public user: Observable<GetCurrentUserResponseUserObject>;
-  public activeWorkspace: GetCurrentUserResponseUserObjectCompany;
-  public url: Observable<string>;
-  public invitesPending$: Observable<UsersGetInvitesResponseInvites[]>;
-  private sub = new Subscription();
-  public userNotificationPath$: Observable<string>;
+export class HeaderComponent {
+  private store = inject(Store);
+  private dialog = inject(MatDialog);
+  public tipsService = inject(TipsService);
+  private loginService = inject(LoginService);
+  private router = inject(Router);
+  private activeRoute = inject(ActivatedRoute);
+  private configService = inject(ConfigurationService);
+
+  isShareMode = input<boolean>();
+  isLogin = input<boolean>();
+  hideMenus = input<boolean>();
+
+  protected environment = toSignal(this.configService.getEnvironment());
+  protected url = this.store.selectSignal(selectRouterUrl);
+  protected user = this.store.selectSignal(selectCurrentUser);
+  protected userNotificationPath = this.store.selectSignal(selectUserSettingsNotificationPath);
+  protected invitesPending = this.store.selectSignal(selectInvitesPending);
+  protected userFocus = signal<boolean>(false);
+  protected hideSideNav = signal<boolean>(false);
+  protected dashboard = signal<boolean>(false);
+  protected showLogo = computed<boolean>(() => this.hideSideNav() || this.dashboard());
+  public activeWorkspace = toSignal<GetCurrentUserResponseUserObjectCompany>(this.store.select(selectActiveWorkspace)
+    .pipe(
+      filter(workspace => !!workspace),
+      distinctUntilKeyChanged('id')
+    )
+  );
 
   constructor(
-    private store: Store,
-    private dialog: MatDialog,
-    private tipsService: TipsService,
-    private loginService: LoginService,
-    private router: Router,
-    private activeRoute: ActivatedRoute,
-    private configService: ConfigurationService
   ) {
-    this.url = this.store.select(selectRouterUrl);
-
-    this.user = this.store.select(selectCurrentUser);
-    this.userNotificationPath$ = this.store.select(selectUserSettingsNotificationPath);
-    this.invitesPending$ = this.store.select(selectInvitesPending);
-    this.sub.add(this.store.select(selectActiveWorkspace)
-      .pipe(
-        filter(workspace => !!workspace),
-        distinctUntilKeyChanged('id')
-      )
-      .subscribe(workspace => {
-        this.activeWorkspace = workspace;
-      }));
-
-    this.sub.add(this.router.events
-    .pipe(filter((event) => event instanceof NavigationEnd))
-    .subscribe(() => this.getRouteData()));
-
-  }
-
-  ngOnInit(): void {
-    this.getRouteData();
+    this.router.events
+    .pipe(
+      takeUntilDestroyed(),
+      filter((event) => event instanceof NavigationEnd)
+    )
+    .subscribe(() => this.getRouteData());
   }
 
   getRouteData() {
-    this.userFocus = !!this.activeRoute?.firstChild?.snapshot.data?.userFocus;
-    this.showLogo = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard' || this.activeRoute?.firstChild?.snapshot.data.hideSideNav;
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+    this.userFocus.set(!!this.activeRoute?.firstChild?.snapshot.data?.userFocus);
+    this.hideSideNav.set(this.activeRoute?.firstChild?.snapshot.data.hideSideNav);
+    this.dashboard.set(this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard');
   }
 
   logout() {

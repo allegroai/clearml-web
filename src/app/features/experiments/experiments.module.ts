@@ -87,6 +87,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
 
 
 @NgModule({
@@ -149,7 +150,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     MatInputModule,
     MatSelectModule,
     HesitateDirective,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    SelectQueueModule,
   ],
   declarations: [
     ExperimentsComponent,

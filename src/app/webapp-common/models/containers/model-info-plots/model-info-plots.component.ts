@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subject, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
@@ -27,6 +27,7 @@ import {setExperimentSettings} from '@common/experiments/actions/common-experime
 })
 export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   public graphs: { [key: string]: any[] };
+  public plotsList$ = new Subject<Array<SelectableListItem>>();
   public plotsList: Array<SelectableListItem>;
   public searchTerm: string;
   public minimized = true;
@@ -39,6 +40,8 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
   public listOfHidden$: Observable<any>;
+  private plots$: Observable<MetricsPlotEvent[]>;
+  public selectedMetrics: string[];
 
   constructor(
     private store: Store,
@@ -50,12 +53,23 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
     // this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
     this.modelsFeature = !!this.route.snapshot?.parent?.parent?.data?.setAllProject;
+    this.plots$ = this.store.select(selectModelPlots);
     this.listOfHidden$ = this.store.select(selectModelSettingsHiddenPlot)
       .pipe(distinctUntilChanged(isEqual));
   }
 
   ngOnInit(): void {
     this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
+
+    this.sub.add(combineLatest([this.listOfHidden$, this.plots$, this.plotsList$])
+      .pipe(filter(() => !!this.plotsList))
+      .subscribe(([hiddenList]) => {
+        this.selectedMetrics = hiddenList.length === 0 ?
+          this.plotsList.map( name => name.name) :
+          this.plotsList.map( name => name.name).filter(metric => !hiddenList.includes(metric));
+        this.cdr.markForCheck();
+      }));
+
     this.sub.add(this.store.select(selectSelectedModel)
       .pipe(
         filter(model => !!model),
@@ -91,6 +105,7 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
         this.plotsList = this.preparePlotsList(groupedPlots);
+        this.plotsList$.next(this.plotsList);
         const {graphs, parsingError} = convertPlots({plots: groupedPlots, id: this.modelId});
         this.graphs = graphs;
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
@@ -117,8 +132,11 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   }
 
   hiddenListChanged(hiddenList: string[]) {
-    this.store.dispatch(setExperimentSettings({id: this.modelId, changes: {hiddenMetricsPlot: hiddenList}}));
+    this.store.dispatch(setExperimentSettings({
+      id: this.modelId,
+      changes: {hiddenMetricsPlot: this.plotsList.map( name => name.name).filter(metric => !hiddenList.includes(metric))}}));
   }
+
   searchTermChanged(searchTerm: string) {
     this.searchTerm = searchTerm;
   }

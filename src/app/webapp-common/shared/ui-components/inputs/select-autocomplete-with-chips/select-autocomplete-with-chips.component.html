@@ -1,5 +1,5 @@
 <form #autoSelectForm='ngForm'>
-  <mat-form-field [appearance]="appearance" hideRequiredMarker [class]="formFieldClass" smNochedFormField>
+  <mat-form-field [appearance]="appearance" [class]="formFieldClass" smNochedFormField>
       <mat-chip-grid #chipList aria-label="Fruit selection" [disabled]="disabled" [class.single]="!multiple">
         <sm-chips
         *ngFor="let item of val; trackBy: trackByValue"
@@ -24,7 +24,7 @@
          matSuffix
          class="al-icon me-2"
          data-id="filterBylabelDropdownIcon"
-        [class]="!!val && !(multiple && clearable) ? 'al-ico-dialog-x pointer' : 'al-ico-dropdown-arrow'"
+        [class]="!!val && !(multiple && clearable) ? 'al-ico-dialog-x sm-md pointer' : 'al-ico-dropdown-arrow sm-md'"
         (click)="$event.stopPropagation(); !!val && !(multiple && clearable) ? clear() : openDropdown()"
         smClickStopPropagation></i>
     <mat-autocomplete

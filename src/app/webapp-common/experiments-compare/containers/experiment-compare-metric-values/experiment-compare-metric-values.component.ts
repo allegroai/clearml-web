@@ -289,16 +289,23 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   }
 
   exportToCSV() {
+    const headers = this.experiments.map(ex => ex.name);
     const options = mkConfig({
       filename: `Scalars compare table`,
       showColumnHeaders: true,
-      columnHeaders: ['Metric', 'Variant'].concat(this.experiments.map(ex => ex.name))
+      columnHeaders: ['Metric', 'Variant'].concat(headers)
     });
-    const csv = generateCsv(options)(this.dataTableFiltered.map(row => ({
-      Metric: row.metric,
-      Variant: row.variant,
-      ...Object.values(row.values).map(value => value?.[this.valuesMode.key] ?? '')
-    })));
+    const csv = generateCsv(options)(this.dataTableFiltered.map(row => {
+      const values = Object.values(row.values).map(value => value?.[this.valuesMode.key] ?? '');
+      return {
+        Metric: row.metric,
+        Variant: row.variant,
+        ...headers.reduce( (acc, header, i) => {
+          acc[header] = values[i]
+          return acc;
+        }, {})
+      }
+    }));
     download(options)(csv);
   }
 

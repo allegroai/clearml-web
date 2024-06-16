@@ -171,6 +171,10 @@
 
 :host {
   // dark theme
+  ::ng-deep md-editor.scripts-blocked .md-layout .preview-panel{
+    height: 100% !important;
+  }
+
   ::ng-deep .md-layout {
 
     @media (max-width: 990px) {
@@ -356,7 +360,7 @@
             }
           }
         }
-  
+
         // code block
         code {
           white-space: pre;

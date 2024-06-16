@@ -2,86 +2,101 @@
   <div class="d-flex">
     <sm-breadcrumbs
       class="spacer"
-      [class.flex-grow-1]="!(userFocus)"
-      [class.user-focus]="userFocus "
-      [class.share-view]="isShareMode"
-      [activeWorkspace]="activeWorkspace">
+      [class.flex-grow-1]="!userFocus()"
+      [class.user-focus]="userFocus()"
+      [class.share-view]="isShareMode()"
+      [activeWorkspace]="activeWorkspace()">
     </sm-breadcrumbs>
-    <sm-show-only-user-work *ngIf="userFocus" class="ms-3"></sm-show-only-user-work>
+    @if (userFocus()) {
+      <sm-show-only-user-work class="ms-3"></sm-show-only-user-work>
+    }
   </div>
 
-  <div *ngIf="showLogo && !isLogin" class="logo-full middle"
-       [class.make-room-for-slogan]="(environment$ | async).whiteLabelSlogan">
-    <img *ngIf="!(environment$ | async).whiteLabelLogo; else: whiteLabel" alt="logo"
-         [priority]="true"
-         [ngSrc]="(environment$ | async).branding.logo"
-         width="130" height="42">
-    <ng-template #whiteLabel>
-      <div class="slogan">{{(environment$ | async).whiteLabelSlogan}}</div>
-      <div *ngIf="isLogin" class="logo-full">
-        <img alt="logo" [priority]="true" ngSrc="assets/logo-white.svg" width="130" height="42">
-      </div>
-    </ng-template>
-  </div>
-  <sm-header-navbar-tabs
-    *ngIf="!showLogo && !isLogin"
-  ></sm-header-navbar-tabs>
+  @if (showLogo() && !isLogin()) {
+    <div class="logo-full middle"
+      [class.make-room-for-slogan]="environment().whiteLabelSlogan">
+      @if (!environment().whiteLabelLogo) {
+        <img alt="logo"
+          [priority]="true"
+          [ngSrc]="environment().branding.logo"
+          width="130" height="42">
+      } @else {
+        <div class="slogan">{{environment().whiteLabelSlogan}}</div>
+        @if (isLogin()) {
+          <div class="logo-full">
+            <img alt="logo" [priority]="true" ngSrc="assets/logo-white.svg" width="130" height="42">
+          </div>
+        }
+      }
+    </div>
+  }
+  @if (!showLogo() && !isLogin()) {
+    <sm-header-navbar-tabs
+    ></sm-header-navbar-tabs>
+  }
 
-  <div *ngIf="isLogin" class="spacer"></div>
+  @if (isLogin()) {
+    <div class="spacer"></div>
+  }
 
-  <div class="right-buttons" data-id="rightSideHeaderpanel" *ngIf="!hideMenus">
-    <sm-common-search #search [class.share-view]="isShareMode"></sm-common-search>
-
-    <span class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
-      <i class="al-icon al-ico-help-outlined" data-id="help Icon"></i>
-    </span>
-    <span class="pointer menu-trigger position-relative" data-id="Avatar" [matMenuTriggerFor]="profileMenu">
-      <img alt="avatar" class="avatar"  *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
-      <ng-template #iconAvatar>
-        <div class="user-icon">
-          <i class="al-icon al-ico-account sm-md"></i>
-        </div>
-      </ng-template>
-      <div *ngIf="(userNotificationPath$ | async) || (invitesPending$ | async)?.length" class="user-notification"></div>
-    </span>
-
-    <mat-menu #profileMenu="matMenu" class="user-menu">
-      <button mat-menu-item [routerLink]="'settings/' + (userNotificationPath$ | async)" data-id="Settings Button">
-        <i class="al-icon icon sm-md" [class]="(userNotificationPath$ | async) ? 'al-ico-settings-alert' : 'al-ico-settings'">
-          <span class="path1"></span><span class="path2"></span>
-        </i>Settings
-      </button>
-      <sm-header-user-menu-actions></sm-header-user-menu-actions>
-      <button mat-menu-item (click)="logout()" data-id="Logout">
-        <i class="al-ico-logout al-icon icon sm-md"></i>Logout
-      </button>
-    </mat-menu>
-
-    <mat-menu #resourcesMenu="matMenu" class="user-menu light-theme" panelClass="light-theme">
-      <button mat-menu-item (click)="openWelcome($event)" data-id="Python Package setup Option">
-        <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
-      </button>
-      <a mat-menu-item href="https://www.youtube.com/c/ClearML/featured" target="_blank" data-id="Youtube Option">
-        <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
-      </a>
-      <a mat-menu-item [href]="(environment$ | async).docsLink" target="_blank" data-id="Online Documentation Option">
-        <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
-      </a>
-      <button mat-menu-item (click)="openTip()" data-id="Pro Tips Option">
-        <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
-      </button>
-      <ng-container *smCheckPermission="'applications'">
-        <button mat-menu-item
-                *ngIf="(environment$ | async)?.appsYouTubeIntroVideoId && $any((environment$ | async)).appAwarenessMenu !== false"
-                (click)="openAppsAwareness($event)" data-id="Apps Introduction Option"
-        >
-          <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
+  @if (!hideMenus()) {
+    <div class="right-buttons" data-id="rightSideHeaderpanel">
+      <sm-common-search #search [class.share-view]="isShareMode()"></sm-common-search>
+      <span class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
+        <i class="al-icon al-ico-help-outlined" data-id="help Icon"></i>
+      </span>
+      <span class="pointer menu-trigger position-relative" data-id="Avatar" [matMenuTriggerFor]="profileMenu">
+        @if (user().avatar; as avatar) {
+          <img alt="avatar" class="avatar"  [src]="avatar">
+        } @else {
+          <div class="user-icon">
+            <i class="al-icon al-ico-account sm-md"></i>
+          </div>
+        }
+        @if (userNotificationPath() || invitesPending()?.length) {
+          <div class="user-notification"></div>
+        }
+      </span>
+      <mat-menu #profileMenu="matMenu" class="user-menu">
+        <button mat-menu-item [routerLink]="'settings/' + userNotificationPath()" data-id="Settings Button">
+          <i class="al-icon icon sm-md" [class]="userNotificationPath() ? 'al-ico-settings-alert' : 'al-ico-settings'">
+            <span class="path1"></span><span class="path2"></span>
+          </i>Settings
         </button>
-      </ng-container>
-      <a mat-menu-item href="mailto:support@clear.ml" data-id="Contact Us">
-        <i class="al-icon sm-md al-ico-email"></i>Contact Us
-      </a>
-    </mat-menu>
-  </div>
+        <sm-header-user-menu-actions></sm-header-user-menu-actions>
+        <button mat-menu-item (click)="logout()" data-id="Logout">
+          <i class="al-ico-logout al-icon icon sm-md"></i>Logout
+        </button>
+      </mat-menu>
+      <mat-menu #resourcesMenu="matMenu" class="user-menu light-theme" panelClass="light-theme">
+        <button mat-menu-item (click)="openWelcome($event)" data-id="Python Package setup Option">
+          <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
+        </button>
+        <a mat-menu-item href="https://www.youtube.com/c/ClearML/featured" target="_blank" data-id="Youtube Option">
+          <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
+        </a>
+        <a mat-menu-item [href]="environment().docsLink" target="_blank" data-id="Online Documentation Option">
+          <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
+        </a>
+        @if (tipsService.hasTips()) {
+          <button mat-menu-item (click)="openTip()" data-id="Pro Tips Option">
+            <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
+          </button>
+        }
+        <ng-container *smCheckPermission="'applications'">
+          @if (environment()?.appsYouTubeIntroVideoId && $any(environment()).appAwarenessMenu !== false) {
+            <button mat-menu-item
+              (click)="openAppsAwareness($event)" data-id="Apps Introduction Option"
+              >
+              <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
+            </button>
+          }
+        </ng-container>
+        <a mat-menu-item href="mailto:support@clear.ml" data-id="Contact Us">
+          <i class="al-icon sm-md al-ico-email"></i>Contact Us
+        </a>
+      </mat-menu>
+    </div>
+  }
 </div>
 <ng-content></ng-content>

@@ -46,6 +46,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
 
 export const routes: Routes = [
   {
@@ -109,7 +110,8 @@ export const routes: Routes = [
     MatInputModule,
     MatExpansionModule,
     MatMenuModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    SelectQueueModule,
   ],
   providers: [
     ControllersComponent,

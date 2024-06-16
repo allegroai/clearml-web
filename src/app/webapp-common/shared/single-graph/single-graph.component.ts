@@ -17,9 +17,8 @@ import {SmoothTypeEnum, getSmoothedLine} from '@common/shared/single-graph/singl
 import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
 import {download} from '@common/shared/utils/download';
-import {wordWrap} from '@common/tasks/tasks.utils';
 import {TinyColor} from '@ctrl/tinycolor';
-import {select} from 'd3-selection';
+import {select, Selection} from 'd3-selection';
 import {cloneDeep, escape} from 'lodash-es';
 import plotly from 'plotly.js';
 import {Subject} from 'rxjs';
@@ -73,7 +72,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() isDarkTheme: boolean;
   @Input() showLoaderOnDraw = true;
   @Input() hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
-  @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
+  @Input() legendConfiguration: Partial<ExtLegend> = {};
   @Input() yAxisType: plotly.AxisType = 'linear';
   private previousHoverMode: 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
 
@@ -173,6 +172,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() exportForReport = false;
   @Input() hideDownloadButtons = false;
   @Input() noMargins = false;
+  @Input() graphTitle: string;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
   @Output() createEmbedCode = new EventEmitter<{ xaxis: ScalarKeyEnum; domRect: DOMRect }>();
   @Output() maximizeClicked = new EventEmitter();
@@ -624,6 +624,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   private getTitle(graph: ExtFrame) {
+    if(this.hideTitle && this.graphTitle){
+      return this.graphTitle;
+    }
     if (graph.layout.title) {
       const title = (typeof graph.layout.title === 'string') ? graph.layout.title : graph.layout.title.text;
       return this.addIterationString(title?.trim(), graph.iter);
@@ -688,9 +691,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }
         const genColorKey = this.generateColorKey(graph, i);
         this.singleColorKey = genColorKey;
-        const wrappedText = this.legendConfiguration.noTextWrap || this.scaleFactor === 100 ?
-          graph.data[i].name :
-          wordWrap(graph.data[i].name, this.legendStringLength / 2);
+        const wrappedText = (this.scaleFactor === 100 || this.isSmooth) ? graph.data[i].name : `${graph.data[i].name}      `;
         const orgColor = this.isCompare ? undefined : this.getOriginalColor(i);
         graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${genColorKey}" data-origin-color="${orgColor}"></span>`;
       }
@@ -725,7 +726,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   public generateColorKey(graph: ExtFrame, i: number) {
-    const variant = graph.data[i].colorHash || graph.data[i].colorKey || graph.data[i].name;
+    const variant = graph.data[i].colorKey || graph.data[i].name;
     if (!this.isCompare) {
       return `${variant}?`;  // "?" to adjust desired colors (legend title is removing this ?)
     } else {
@@ -737,13 +738,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   private resmoothDataset(data: ExtData, color, hidden: boolean) {
     return {
       ...data,
-      line: {...data.line, color: `rgb(${color[0]},${color[1]},${color[2]})`},
+      line: {width: 1, ...data.line, color: `rgb(${color[0]},${color[1]},${color[2]})`},
       legendgroup: data.name,
-      name: `${data.name} (Smoothed)`,
+      name: `${data.name} (Smoothed)${this.scaleFactor === 100 ? '' : '      '}`,
       showlegend: true,
       isSmoothed: true,
       ...(hidden && {visible: 'legendonly'}),
-      hovertext: data.hovertext ? data.hovertext + '(Smoothed)' : '(Smoothed)',
       hoverinfo: 'all',
       y: getSmoothedLine(data.y, this.smoothWeight, this.smoothType)
     } as ExtData;

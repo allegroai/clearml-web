@@ -116,7 +116,7 @@
   #tagMenu
   class="light-theme"
   [tags]="experiment?.tags"
-  [tagsFilterByProject]="!allProjects && tagsFilterByProject"
+  [tagsFilterByProject]="!allProjects() && tagsFilterByProject"
   [projectTags]="projectTags"
   [companyTags]="companyTags"
   (tagSelected)="tagSelected.emit($event)">

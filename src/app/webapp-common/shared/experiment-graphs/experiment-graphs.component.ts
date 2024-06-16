@@ -97,7 +97,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   @Input() minimized: boolean;
   @Input() isDarkTheme: boolean;
   @Input() showLoaderOnDraw = true;
-  @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
+  @Input() legendConfiguration: Partial<ExtLegend> = {};
   @Input() breakPoint: number = 700;
   @Input() isCompare: boolean = false;
   @Input() hoverMode: ChartHoverModeEnum;

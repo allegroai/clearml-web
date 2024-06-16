@@ -10,7 +10,7 @@ import {
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {uniqBy} from 'lodash-es';
 import {
-  SelectionEvent
+  SelectionEvent, SelectMetricForCustomColComponent
 } from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
@@ -32,8 +32,9 @@ import {MetricValueTypeStrings} from '@common/shared/utils/tableParamEncode';
     SelectMetadataKeysCustomColsComponent,
     MetricVariantToNamePipe,
     TooltipDirective,
-    ShowTooltipIfEllipsisDirective
-],
+    ShowTooltipIfEllipsisDirective,
+    SelectMetricForCustomColComponent
+  ],
   templateUrl: './metric-variant-selector.component.html',
   styleUrl: './metric-variant-selector.component.scss'
 })
@@ -55,5 +56,5 @@ export class MetricVariantSelectorComponent {
   protected readonly trackByIndex = trackByIndex;
 
   protected readonly MetricValueTypeStrings = MetricValueTypeStrings;
-  searchText: string;
+   searchText: string;
 }

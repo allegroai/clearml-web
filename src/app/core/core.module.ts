@@ -30,7 +30,6 @@ import {projectSyncedKeys} from '~/features/projects/projects.module';
 import {authReducer} from '~/features/settings/containers/admin/auth.reducers';
 import {AdminService} from '~/shared/services/admin.service';
 import {UserEffects} from './effects/users.effects';
-import {sourcesReducer} from './reducers/sources-reducer';
 import {usageStatsReducer} from './reducers/usage-stats.reducer';
 import {usersReducer} from './reducers/users.reducer';
 import {viewReducer} from './reducers/view.reducer';
@@ -47,7 +46,6 @@ export const reducers = {
   messages: messagesReducer,
   recentTasks: recentTasksReducer,
   views: viewReducer,
-  sources: sourcesReducer,
   users: usersReducer,
   login: loginReducer,
   rootProjects: projectsReducer,
@@ -67,18 +65,18 @@ const syncedKeys = [
   'rootProjects.defaultNestedModeForFeature',
   'views.availableUpdates',
   'views.showSurvey',
-  'views.neverShowPopupAgain',
-  'views.tableCardsCollapsed'
+  'views.tableCardsCollapsed',
+  'views.contextMenuActiveFeature',
 ];
 const key = '_saved_state_';
 
-const actionsPrefix = [AUTH_PREFIX, USERS_PREFIX, VIEW_PREFIX, ROOT_PROJECTS_PREFIX];
+const actionsPrefix = [AUTH_PREFIX, USERS_PREFIX, ROOT_PROJECTS_PREFIX, VIEW_PREFIX];
 
 if (!localStorage.getItem(key)) {
   localStorage.setItem(key, '{}');
 }
 
-export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<any> =>
+export const localStorageReducer = (reducer: ActionReducer<string>): ActionReducer<any> =>
   (state, action) => {
     let nextState = reducer(state, action);
     // TODO: lil hack to fix ngrx bug in preload strategy that dispatch store/init multiple times.
@@ -100,14 +98,12 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] =>
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden', 'hideExamples', 'defaultNestedModeForFeature'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden', 'hideExamples', 'defaultNestedModeForFeature', 'blockUserScript'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain', 'redactedArguments', 'hideRedactedArguments'], [VIEW_PREFIX], userPreferences, reducer),
   localStorageReducer,
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('projects', projectSyncedKeys, [PROJECTS_PREFIX], userPreferences, reducer),
-  (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('compare-experiments', compareSyncedKeys, [EXPERIMENTS_COMPARE_METRICS_CHARTS_], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('colorsPreference', colorSyncedKeys, [CHOOSE_COLOR_PREFIX], userPreferences, reducer)
 ];

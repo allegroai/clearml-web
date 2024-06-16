@@ -1,24 +1,20 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewContainerRef
+  Component, computed, effect, ElementRef, inject, input,
+  viewChild,
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Subscription} from 'rxjs';
+import {interval, combineLatest, switchMap, fromEvent} from 'rxjs';
 import {Queue} from '~/business-logic/model/queues/queue';
-import {getStats, setStats, setStatsParams} from '../../actions/queues.actions';
+import {queueActions} from '../../actions/queues.actions';
 import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
-import {filter} from 'rxjs/operators';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
-import {Topic} from '@common/shared/utils/statistics';
+import {formatDistance} from 'date-fns'
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {debounceTime, map} from 'rxjs/operators';
 
 @Component({
   selector: 'sm-queue-stats',
@@ -26,15 +22,10 @@ import {Topic} from '@common/shared/utils/statistics';
   styleUrls: ['./queue-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QueueStatsComponent implements OnInit, OnDestroy {
-  private chartDataSubscription: Subscription;
-  private chartParamSubscription: Subscription;
-  public statsError$ = this.store.select(selectStatsErrorNotice);
-  public selectedQueue: Queue;
-  public refreshChart = true;
-  public waitChartData: Topic[];
-  public lenChartData: Topic[];
+export class QueueStatsComponent {
+  private readonly store = inject(Store);
 
+  private selectedQueueId: string;
   public timeFrameOptions: IOption[] = [
     {label: '3 Hours', value: (3 * TIME_INTERVALS.HOUR).toString()},
     {label: '6 Hours', value: (6 * TIME_INTERVALS.HOUR).toString()},
@@ -43,76 +34,50 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     {label: '1 Week', value: (TIME_INTERVALS.WEEK).toString()},
     {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}];
 
-  @ViewChild('waitchart', {read: ViewContainerRef, static: true}) waitChartRef: ViewContainerRef;
-  private intervaleHandle: number;
-  public currentTimeFrame: string;
-  public trackByFn = (index: number, option: IOption) => option.value;
+  queue = input<Queue>();
+  protected waitChartRef = viewChild<ElementRef<HTMLDivElement>>('waitchart');
+  protected timeFrame = this.store.selectSignal(selectQueuesStatsTimeFrame);
+  protected queueStats = this.store.selectSignal(selectQueueStats);
+  protected refreshChart = computed(() => !(this.queueStats().wait || this.queueStats().length));
+  protected statsError = this.store.selectSignal(selectStatsErrorNotice);
 
-  @Input() set queue(queue: Queue) {
-    if (this.selectedQueue !== queue) {
-      this.selectedQueue = queue;
-      this.updateChart();
-    }
-  }
+  timeFormatter = (value: number) => formatDistance(0, value * 1000, { includeSeconds: true });
 
-  constructor(public store: Store, private cdr: ChangeDetectorRef) {
-  }
+  constructor() {
+    effect(() => {
+      this.store.dispatch(queueActions.getStats({maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));
+    }, {allowSignalWrites: true});
 
-  ngOnInit() {
-    this.chartParamSubscription = this.store.select(selectQueuesStatsTimeFrame)
-      .pipe(filter((timeFrame: string) => !!timeFrame))
-      .subscribe((timeFrame) => {
-        this.currentTimeFrame = timeFrame;
-        this.updateChart();
-        this.cdr.detectChanges();
-      });
-    this.chartDataSubscription = this.store.select(selectQueueStats).subscribe(
-      (data) => {
-        if (data && (data.wait || data.length)) {
-          this.refreshChart = false;
-          this.waitChartData = data.wait;
-          this.lenChartData = data.length;
-          this.cdr.detectChanges();
-        }
+    effect(() => {
+      if(this.queue()?.id !== this.selectedQueueId) {
+        this.store.dispatch(queueActions.resetStats());
+        this.store.dispatch(queueActions.getStats({maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));
+        this.selectedQueueId = this.queue()?.id;
       }
-    );
+    }, {allowSignalWrites: true});
 
-    this.updateChart();
-  }
-
-  ngOnDestroy() {
-    this.chartDataSubscription.unsubscribe();
-    this.chartParamSubscription.unsubscribe();
-    clearInterval(this.intervaleHandle);
-  }
-
-  updateChart() {
-    clearInterval(this.intervaleHandle);
-    this.refreshChart = true;
-    this.store.dispatch(setStats({data: {wait: null, length: null}}));
-    const range = parseInt(this.currentTimeFrame, 10);
-    let width = this.waitChartRef.element.nativeElement.clientWidth | 1000;
-    width = Math.min(0.8 * width, 1000);
-    const granularity = Math.max(Math.floor(range / width), 5);
-
-    this.store.dispatch(getStats({maxPoints: width}));
-    this.intervaleHandle = window.setInterval(() => {
-      this.store.dispatch(getStats({maxPoints: width}));
-    }, granularity * 1000);
-  }
-
-  tickFormatter(seconds: number) {
-    seconds = Math.floor(seconds);
-    const th = Math.floor(seconds / 3600); // 3,600 seconds in 1 hour
-    seconds = seconds % 3600; // seconds remaining after extracting hours
-    // 3- Extract minutes:
-    const tm = `${Math.floor(seconds / 60) % 100}`.padStart(2, '0'); // 60 seconds in 1 minute
-    // 4- Keep only seconds not extracted to minutes:
-    const ts = `${seconds % 60}`.padStart(2, '0');
-    return `${th}:${tm}:${ts}`;
+    combineLatest([
+      toObservable(this.waitChartRef),
+      this.store.select(selectQueuesStatsTimeFrame),
+      fromEvent(window, 'resize')
+    ])
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(0),
+        map(([waitChartRef, timeFrame]) => {
+          const range = parseInt(timeFrame, 10);
+          let width = waitChartRef?.nativeElement.clientWidth ?? 1000;
+          width = Math.min(0.8 * width, 1000);
+          return Math.max(Math.floor(range / width), 5);
+        }),
+        switchMap(granularity => interval(granularity * 1000))
+      )
+      .subscribe(() => {
+        this.store.dispatch(queueActions.getStats({maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));
+      })
   }
 
   timeFrameChanged(value: string) {
-    this.store.dispatch(setStatsParams({timeFrame: value}));
+    this.store.dispatch(queueActions.setStatsParams({timeFrame: value, maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));
   }
 }

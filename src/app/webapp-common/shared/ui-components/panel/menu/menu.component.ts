@@ -17,6 +17,7 @@ import {FormsModule} from '@angular/forms';
 import {MatListModule} from '@angular/material/list';
 import {NgIf} from '@angular/common';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
   selector: 'sm-menu',
@@ -31,7 +32,8 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     FormsModule,
     MatListModule,
     NgIf,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    ShowTooltipIfEllipsisDirective
   ]
 })
 export class MenuComponent implements AfterViewInit {
@@ -64,7 +66,7 @@ export class MenuComponent implements AfterViewInit {
   public _position;
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
-  @Output() searchValueChanged = new EventEmitter();
+  @Output() searchValueChanged = new EventEmitter<string>();
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
   @ViewChild('menu', {static: true}) menu;
 
@@ -104,6 +106,6 @@ export class MenuComponent implements AfterViewInit {
 
   clearSearch() {
     this.searchValue = '';
-    this.searchValueChanged.emit({target: {value: ''}});
+    this.searchValueChanged.emit('');
   }
 }

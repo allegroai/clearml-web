@@ -3,6 +3,10 @@
     border-bottom: 0;
   }
 
+  mat-chip-grid .mat-mdc-form-field-input-control {
+    height: 26px;
+  }
+
   ng-form, mat-form-field {
     display: block;
   }

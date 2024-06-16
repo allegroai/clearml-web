@@ -1,6 +1,5 @@
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Store} from '@ngrx/store';
 import {filter, take} from 'rxjs/operators';
 import {ICONS} from '@common/constants';
 import {Queue} from '~/business-logic/model/queues/queue';
@@ -25,7 +24,10 @@ import * as experimentsActions from '../../../actions/common-experiments-view.ac
 import {ShareDialogComponent} from '@common/shared/ui-components/overlay/share-dialog/share-dialog.component';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
-import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
+import {
+  CommonDeleteDialogComponent,
+  DeleteData
+} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {
   autoRefreshExperimentInfo,
@@ -49,7 +51,8 @@ import {resetDebugImages} from '@common/debug-images/debug-images-actions';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
+import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 
 
 @Component({
@@ -101,6 +104,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   get selectedExperiments(): IExperimentInfo[] {
     return this._selectedExperiments;
   }
+
   @Output() tagSelected = new EventEmitter<string>();
 
   protected blTaskService: BlTasksService;
@@ -112,11 +116,11 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   constructor() {
     super();
 
-  this.blTaskService = inject(BlTasksService);
-  this.dialog = inject(MatDialog);
-  this.router = inject(Router);
-  this.configService = inject(ConfigurationService);
-  this.route = inject(ActivatedRoute);
+    this.blTaskService = inject(BlTasksService);
+    this.dialog = inject(MatDialog);
+    this.router = inject(Router);
+    this.configService = inject(ConfigurationService);
+    this.route = inject(ActivatedRoute);
   }
 
 
@@ -129,17 +133,31 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     const selectedExperiments = this.selectedExperiments ? selectionDisabledArchive(this.selectedExperiments).selectedFiltered : [this._experiment];
 
     if (selectedExperiments[0].system_tags?.includes('archived')) {
-      this.store.dispatch(commonMenuActions.restoreSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
+      this.store.dispatch(commonMenuActions.restoreSelectedExperiments({
+        selectedEntities: selectedExperiments,
+        entityType
+      }));
     } else {
       this.store.select(selectNeverShowPopups)
         .pipe(take(1))
         .subscribe(neverShow => {
           const showShareWarningDialog = selectedExperiments.find(item => item?.system_tags.includes('shared')) &&
             !neverShow?.includes('archive-shared-task');
+          const showRunningWarningDialog = selectedExperiments.some(experiment =>
+            [TaskStatusEnum.Queued, TaskStatusEnum.InProgress].includes(experiment.status)
+          );
           if (showShareWarningDialog) {
-            this.showConfirmArchiveExperiments(this.store, this.dialog, selectedExperiments, entityType);
+            this.showConfirmArchiveExperiments(selectedExperiments, entityType);
+          }
+          else if (showRunningWarningDialog) {
+            this.showConfirmArchiveExperiments(selectedExperiments, entityType, 'ARCHIVE A RUNNING TASK',
+              'Some of the experiments you are about to archive are running or queued.<br>Archiving running experiments will also <b>RESET</b> them.<br>Archive experiments?',
+              false);
           } else {
-            this.store.dispatch(commonMenuActions.archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
+            this.store.dispatch(commonMenuActions.archiveSelectedExperiments({
+              selectedEntities: selectedExperiments,
+              entityType
+            }));
           }
         });
     }
@@ -147,22 +165,22 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   toggleFullScreen(showFullScreen: boolean) {
     if (showFullScreen) {
-      this.store.dispatch(setContextMenu({contextMenu: null}));
-      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/execution`);
+      this.store.dispatch(headerActions.setTabs({contextMenu: null}));
+      this.router.navigateByUrl(`projects/${this.projectId()}/experiments/${this._experiment.id}/output/execution`);
     } else {
       const part = this.route.firstChild.routeConfig.path;
       if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
-        this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/info-output/${part}`);
+        this.router.navigateByUrl(`projects/${this.projectId()}/experiments/${this._experiment.id}/info-output/${part}`);
       } else {
-        this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/${part}`);
+        this.router.navigateByUrl(`projects/${this.projectId()}/experiments/${this._experiment.id}/${part}`);
       }
     }
   }
 
   enqueuePopup() {
     const selectedExperiments = !(this.activateFromMenuButton || this.useCurrentEntity) ?
-        selectionDisabledEnqueue(this.selectedExperiments).selectedFiltered :
-        [this._experiment];
+      selectionDisabledEnqueue(this.selectedExperiments).selectedFiltered :
+      [this._experiment];
 
     const selectQueueDialog: MatDialogRef<SelectQueueComponent, { confirmed: boolean; queue: Queue }> =
       this.dialog.open(SelectQueueComponent, {
@@ -208,7 +226,11 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   private enqueueExperiment(queue, selectedExperiments) {
-    this.store.dispatch(commonMenuActions.enqueueClicked({selectedEntities: selectedExperiments, queue, verifyWatchers: true}));
+    this.store.dispatch(commonMenuActions.enqueueClicked({
+      selectedEntities: selectedExperiments,
+      queue,
+      verifyWatchers: true
+    }));
   }
 
   private dequeueExperiment(selectedExperiments) {
@@ -222,7 +244,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   public resetPopup() {
     const selectedExperiments = (!(this.activateFromMenuButton || this.useCurrentEntity) && this.selectedExperiments) ? selectionDisabledReset(this.selectedExperiments).selectedFiltered : [this._experiment];
     const devWarning: boolean = selectedExperiments.some(exp => isDevelopment(exp));
-    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+    const confirmDialogRef = this.dialog.open<CommonDeleteDialogComponent, DeleteData, boolean>(CommonDeleteDialogComponent, {
       data: {
         entity: selectedExperiments?.length > 0 ? selectedExperiments?.length === 1 ? selectedExperiments[0] : selectedExperiments : this._experiment,
         numSelected: selectedExperiments?.length ?? this.numSelected,
@@ -317,7 +339,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     const currentProjects = Array.from(new Set(selectedExperiments.map(exp => exp.project?.id).filter(p => p)));
     const dialog = this.dialog.open(ChangeProjectDialogComponent, {
       data: {
-        currentProjects: currentProjects.length > 0 ? currentProjects : [this.projectId],
+        currentProjects: currentProjects.length > 0 ? currentProjects : [this.projectId()],
         defaultProject: this._experiment?.project,
         reference: selectedExperiments.length > 1 ? selectedExperiments : selectedExperiments[0]?.name,
         type: 'experiment'
@@ -353,7 +375,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     }).afterClosed().pipe(
       take(1),
       filter(res => !!res),
-    ).subscribe(res  => {
+    ).subscribe(res => {
       this.cloneExperiment(res);
     });
   }
@@ -372,7 +394,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   deleteExperimentPopup(entityType?: EntityTypeEnum, includeChildren?: boolean) {
     const selectedExperiments = (!(this.activateFromMenuButton || this.useCurrentEntity) && this.selectedExperiments) ? selectionDisabledDelete(this.selectedExperiments).selectedFiltered : [this._experiment];
-    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+    const confirmDialogRef =     this.dialog.open<CommonDeleteDialogComponent, DeleteData, boolean>(CommonDeleteDialogComponent, {
       data: {
         entity: selectedExperiments?.length > 0 ? selectedExperiments?.length === 1 ? selectedExperiments[0] : selectedExperiments : this._experiment,
         numSelected: selectedExperiments?.length ?? this.numSelected,
@@ -391,33 +413,37 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         this.store.dispatch(deactivateEdit());
 
         if (this.activateFromMenuButton || this.selectedExperiments.map(e => e.id).includes(this.selectedExperiment?.id)) {
-          const entityBaseRoute= { [EntityTypeEnum.experiment]: 'projects',[EntityTypeEnum.dataset]: 'datasets/simple', [EntityTypeEnum.controller]:'pipelines' };
-          window.setTimeout(() => this.router.navigate([`${entityBaseRoute[entityType] || 'projects'}/${this.projectId}/experiments`], {queryParamsHandling: 'preserve'}));
+          const entityBaseRoute = {
+            [EntityTypeEnum.experiment]: 'projects',
+            [EntityTypeEnum.dataset]: 'datasets/simple',
+            [EntityTypeEnum.controller]: 'pipelines'
+          };
+          window.setTimeout(() => this.router.navigate([`${entityBaseRoute[entityType] || 'projects'}/${this.projectId()}/experiments`], {queryParamsHandling: 'preserve'}));
         }
       }
     });
   }
 
-  showConfirmArchiveExperiments(store: Store, dialog: MatDialog, selectedExperiments: ISelectedExperiment[], entityType: EntityTypeEnum): void {
-    const confirmDialogRef = dialog.open(ConfirmDialogComponent, {
+  showConfirmArchiveExperiments(selectedExperiments: ISelectedExperiment[], entityType: EntityTypeEnum, title?: string, body?: string, showNeverShowAgain = true): void {
+    this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, {isConfirmed: boolean, neverShowAgain: boolean}>(ConfirmDialogComponent, {
       data: {
-        title: 'ARCHIVE A PUBLICLY SHARED TASK',
-        body: `This task is accessible through a public access link.
+        title: title ?? 'ARCHIVE A PUBLICLY SHARED TASK',
+        body: body ?? `This task is accessible through a public access link.
             Archiving will disable public access`,
         yes: 'OK',
         no: 'Cancel',
         iconClass: 'al-icon al-ico-archive al-color',
-        showNeverShowAgain: true
+        showNeverShowAgain
       }
-    });
-    confirmDialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        store.dispatch(archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
-        if (confirmed.neverShowAgain) {
-          store.dispatch(neverShowPopupAgain({popupId: 'archive-shared-task'}));
+    }).afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.store.dispatch(archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
+          if (confirmed.neverShowAgain) {
+            this.store.dispatch(neverShowPopupAgain({popupId: title ?? 'archive-shared-task'}));
+          }
         }
-      }
-    });
+      });
   }
 
   stopAllChildrenPopup() {
@@ -426,10 +452,10 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   toggleDetails() {
-    this.store.dispatch(experimentsActions.setTableMode({mode:'info'}));
+    this.store.dispatch(experimentsActions.setTableMode({mode: 'info'}));
     this.store.dispatch(experimentsActions.experimentSelectionChanged({
       experiment: this._experiment,
-      project: this.projectId
+      project: this.projectId()
     }));
   }
 }

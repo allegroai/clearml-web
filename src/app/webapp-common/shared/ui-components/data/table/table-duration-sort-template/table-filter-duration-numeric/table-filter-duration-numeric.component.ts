@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
 } from '@angular/core';
 import {
   IDurationThan,
@@ -11,7 +9,6 @@ import {
 } from '../table-duration-sort-base.component';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {distinctUntilChanged, debounceTime, filter} from 'rxjs/operators';
-import {Subscription} from 'rxjs';
 import {isNil} from 'lodash-es';
 import {
   TableFilterDurationErrorComponent
@@ -24,6 +21,7 @@ import {
   KeydownStopPropagationDirective
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 const getDurationValue = (value: IDurationThan) => value.checked ? `${value.value}` : '';
 
@@ -45,28 +43,29 @@ const getDurationValue = (value: IDurationThan) => value.checked ? `${value.valu
   standalone: true
 
 })
-export class TableFilterDurationNumericComponent extends TableDurationSortBaseComponent implements OnInit, OnDestroy {
-  private subscription: Subscription;
+export class TableFilterDurationNumericComponent extends TableDurationSortBaseComponent {
   immediate = new ImmediateErrorStateMatcher();
-  numericPattern = '(|-?(0\\.|\\.|)\\d*)';
+  numericPattern = `^[-+]?\\d*\\.?\\d+$`;
 
   iterationsForm = new FormGroup( {
     greaterThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)]),
     lessThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)])
   });
 
-  ngOnInit(): void {
+  constructor() {
+    super();
     this.iterationsForm.valueChanges
       .pipe(
-        debounceTime(200),
+        takeUntilDestroyed(),
+        debounceTime(500),
         filter(() => this.iterationsForm.valid),
         distinctUntilChanged()
       )
       .subscribe( ({greaterThan, lessThan}) => {
         !!greaterThan != this.greaterThan.checked && this.setCheckBox(!this.greaterThan.checked, 'greaterThan', false);
-        this.timeStampChanged(greaterThan ? parseInt(greaterThan, 10) : greaterThan, 'greaterThan');
+        this.timeStampChanged(greaterThan ? parseFloat(greaterThan) : greaterThan, 'greaterThan');
         !!lessThan != this.lessThan.checked && this.setCheckBox(!this.lessThan.checked, 'lessThan', false);
-        this.timeStampChanged(lessThan ? parseInt(lessThan, 10) : lessThan, 'lessThan');
+        this.timeStampChanged(lessThan ? parseFloat(lessThan) : lessThan, 'lessThan');
       });
   }
 
@@ -82,9 +81,5 @@ export class TableFilterDurationNumericComponent extends TableDurationSortBaseCo
     const lessThan = getDurationValue(this.lessThan);
     this.iterationsForm.get('greaterThan').setValue(greaterThan);
     this.iterationsForm.get('lessThan').setValue(lessThan);
-  }
-
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
   }
 }

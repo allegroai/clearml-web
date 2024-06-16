@@ -13,7 +13,8 @@
         smClickStopPropagation
         (click)="subProjectClicked(subProject.id)"
         [smTooltip]="subProject?.name"
-        [innerHTML]="subProject?.name | purify | breadcrumbsEllipsis"
+        [matTooltipShowDelay]="300"
+        [innerHTML]="subProject?.name| breadcrumbsEllipsis | purify "
       ></a>
     </cdk-virtual-scroll-viewport>
   </div>

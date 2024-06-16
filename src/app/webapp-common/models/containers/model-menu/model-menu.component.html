@@ -12,7 +12,7 @@
 <mat-menu #modelMenu="matMenu" [hasBackdrop]="backdrop" class="light-theme entity-context-menu">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.publish]">
     <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
-      <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
+      <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'" data-id="details"></i>Details
     </button>
     <hr *ngIf="tableMode">
     <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[menuItems.publish].disable" data-id="publishOption">
@@ -43,9 +43,9 @@
     <sm-tags-menu
       #tagsMenu
       [tags]="model?.tags"
-      [projectTags]="allProjects ? companyTags : projectTags"
-      [companyTags]="allProjects ? null : companyTags"
-      [tagsFilterByProject]="allProjects || tagsFilterByProject"
+      [projectTags]="allProjects() ? companyTags : projectTags"
+      [companyTags]="allProjects() ? null : companyTags"
+      [tagsFilterByProject]="allProjects() || tagsFilterByProject"
       (tagSelected)="tagSelected.emit($event)">
     </sm-tags-menu>
     <hr>

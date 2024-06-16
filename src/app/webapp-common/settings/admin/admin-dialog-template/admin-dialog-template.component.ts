@@ -1,3 +1,4 @@
+import {LocationStrategy} from '@angular/common';
 import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
@@ -23,12 +24,13 @@ import {FormsModule} from '@angular/forms';
   ]
 })
 export class AdminDialogTemplateComponent {
+  locationStrategy = inject(LocationStrategy);
   protected configService = inject(ConfigurationService);
 
   public clipboardText: string;
   public label: string;
 
-  WEB_SERVER_URL = window.location.origin;
+  WEB_SERVER_URL = window.location.origin + this.locationStrategy.getBaseHref();
   jupyterCode: string;
 
   @Input() credentialName: string;
@@ -50,7 +52,7 @@ export class AdminDialogTemplateComponent {
   getCopyContent() {
     let res =  'api {\n';
     if (this.credentialsComment) {
-      res += `  ${this.credentialsComment}\n`;
+      res += `  # ${this.credentialsComment}\n`;
     }
     res += `  web_server: ${this.WEB_SERVER_URL}
   api_server: ${this.configService.apiServerUrl()}\n`;

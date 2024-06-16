@@ -17,7 +17,6 @@
     <div class="form-container">
       <mat-form-field class="w-100"
                       appearance="outline"
-                      hideRequiredMarker="true"
                       (mousedown)="!isFocused(projectInputRef) && projectInput.value && projectInput.reset(); projectInputRef.blur(); projectInputRef.focus()">
         <mat-label>Project</mat-label>
         <input matInput type="text"
@@ -80,9 +79,8 @@
         name="forceParent"
         [checked]="forceParent$ | async"
         (change)="formData.forceParent = $event.checked"
-      >Set <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> <span style="white-space: nowrap">as parent</span> </mat-checkbox>
-      <mat-form-field class="w-100" appearance="outline"
-                      hideRequiredMarker="true">
+      >Set<b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined"> {{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }} </b><span style="white-space: nowrap">as parent</span> </mat-checkbox>
+      <mat-form-field class="w-100" appearance="outline">
         <mat-label>Description</mat-label>
         <textarea
           class="clone-description"

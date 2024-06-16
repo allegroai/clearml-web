@@ -44,6 +44,6 @@ export const getFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot, neste
     ...(datasets && getDatasetsRequest(nested, searchQuery, selectedProjectName, selectedProjectId)),
   };
 };
+export const activeFeatureToProjectType = (activeFeature: string) => activeFeature === 'simple' ? 'datasets' : null;
 
-export const getSelfFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot) => ({
-  });
+export const getSelfFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot) => ({ });

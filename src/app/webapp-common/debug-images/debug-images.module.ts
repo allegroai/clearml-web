@@ -19,6 +19,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtual-grid.component';
 
 const declarations = [DebugImagesComponent, DebugImagesViewComponent];
 
@@ -39,7 +40,8 @@ const declarations = [DebugImagesComponent, DebugImagesViewComponent];
     MatInputModule,
     MatSelectModule,
     MatExpansionModule,
-    TooltipDirective
+    TooltipDirective,
+    VirtualGridComponent
   ]
 })
 export class DebugImagesModule {

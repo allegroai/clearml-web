@@ -1,32 +1,35 @@
-<div class="d-flex h-100 p-4">
-  <div class="donut-legend" data-id="annotationPieChart">
-    <div
-      *ngFor="let slice of donutData?.datasets[0].data; let index = index; trackBy: trackById"
-      class="slice"
-      [class.highlight]="index === highlight"
-      [style.--sliceColor]="colors[index]"
-      (mouseenter)="hoverLegend(index)"
-      (mouseleave)="leaveLegend()"
-    >
-      <div
-        #colorButton
-        [smChooseColor]="colors[index]"
-        [stringToColor]="$any(donutData.labels[index])"
-        [colorButtonRef]="colorButton"
-        class="circle"
-        data-id="annotationColorButton"
-      ></div>{{donutData.labels[index]}}<span class="quantity" data-id="annotationCount">({{slice}})</span>
-    </div>
-  </div>
+<div class="content">
   <div class="donut-container">
     <canvas
+      [style.height]="resizing() ? 0 : null"
+      [style.width]="resizing() ? 0 : null"
       baseChart
       class="donut-container"
-      [data]="donutData"
+      [data]="donutData()"
       [type]="doughnutChartType"
       [options]="$any(donutOptions)"
       (chartHover)="chartHovered($event)"
     ></canvas>
-    <div class="percent" [style.opacity]="percent !== null ? 1 : null">{{percent}}%</div>
+    <div class="percent" [style.opacity]="percent() !== null ? 1 : null">{{percent()}}%</div>
+  </div>
+  <div class="donut-legend" data-id="annotationPieChart">
+    @for (slice of donutData().datasets[0].data; track slice; let index = $index) {
+      <div
+        class="slice"
+        [class.highlight]="index === highlight()"
+        [style.--sliceColor]="colors()[index]"
+        (mouseenter)="hoverLegend(index)"
+        (mouseleave)="leaveLegend()"
+      >
+        <div
+          #colorButton
+          [smChooseColor]="colors()[index]"
+          [stringToColor]="$any(donutData().labels[index])"
+          [colorButtonRef]="colorButton"
+          class="circle"
+          data-id="annotationColorButton"
+        ></div>{{donutData().labels[index]}}<span class="quantity" data-id="annotationCount">({{slice}})</span>
+      </div>
+    }
   </div>
 </div>

@@ -24,7 +24,7 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import { setContextMenu } from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -160,7 +160,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       parts.splice(5, 0, 'output');
       this.router.navigateByUrl(parts.join('/'));
     }
-    this.store.dispatch(setContextMenu({contextMenu: null}));
+    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
     this.toMaximize = true;
   }
   onActivate(e, scrollContainer) {

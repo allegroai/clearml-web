@@ -88,7 +88,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.store.dispatch(fetchGraphData());
         this.metricVariantSelection = cols ?? [];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       })
     );
 

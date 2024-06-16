@@ -29,7 +29,7 @@ export const setSelectedWorkspaceTab = createAction(
 
 export const setFilterByUser =  createAction(
   USERS_PREFIX +'SET_FILTERED_BY_USER',
-  props<{showOnlyUserWork: boolean}>()
+  props<{showOnlyUserWork: boolean, feature: string}>()
 );
 
 export const setUserWorkspacesFromUser = createAction(USERS_PREFIX + ' set user workspaces from current user');

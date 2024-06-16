@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import {Component, inject} from '@angular/core';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {Store} from '@ngrx/store';
 import {selectAllowed} from '~/core/reducers/usage-stats.reducer';
-import {Observable} from 'rxjs';
 import { updateUsageStats } from '~/core/actions/usage-stats.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 
@@ -10,19 +9,17 @@ import {ConfigurationService} from '@common/shared/services/configuration.servic
 @Component({
   selector: 'sm-usage-stats',
   templateUrl: './usage-stats.component.html',
-  styleUrls: ['./usage-stats.component.scss']
+  styleUrls: ['./usage-stats.component.scss'],
+  imports: [
+    MatSlideToggle
+  ],
+  standalone: true
 })
-export class UsageStatsComponent implements OnInit {
+export class UsageStatsComponent {
+  private store =inject(Store);
   public shown = true;
   public demo = ConfigurationService.globalEnvironment.demo;
-  public allowed$: Observable<boolean>;
-
-  constructor(private store: Store<any>) {
-    this.allowed$ = this.store.select(selectAllowed);
-  }
-
-  ngOnInit() {
-  }
+  protected allowed = this.store.selectSignal(selectAllowed);
 
   statsChange(toggle: MatSlideToggleChange) {
     this.store.dispatch(updateUsageStats({allowed: toggle.checked}));

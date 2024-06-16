@@ -1,83 +1,93 @@
 <div class="p-3 images-container">
-  <div class="single-debug-images-container"
-       *ngFor="let experimentId of experimentIds | slice :  0 : LIMITED_VIEW_LIMIT; trackBy: trackExperiment;
-       let first = first; let last = last"
-       [class.separator]="experimentIds?.length > 1">
-    <header *ngIf="experimentIds?.length > 1">
-      <sm-experiment-compare-general-data
-        *ngIf="(experiments | itemById: experimentId).name"
-        [experiment]="experiments | itemById: experimentId"
-        [tags]="(experiments | itemById: experimentId)?.tags"
-        (copyIdClicked)="copyIdToClipboard()"
-      ></sm-experiment-compare-general-data>
-    </header>
-    <div class="navigator-container" [class.active]="bindNavigationMode" [class.first]="first"
-         [class.last]="last" [style.display]="isDarkTheme ? 'none' : 'flex'">
-      <div data-id="syncBrowsing" class="connector-icon-container pointer" smTooltip="Sync browsing" [matTooltipShowDelay]="500"
-           [class.active]="bindNavigationMode" [class.hidden]="last" (click)="toggleConnectNavigation()">
-        <i class="al-icon" [class.al-ico-connect]="bindNavigationMode" [class.al-ico-disconnect]="!bindNavigationMode"></i>
+  @for (experimentId of experimentIds | slice :  0 : LIMITED_VIEW_LIMIT; track experimentId) {
+    <div class="single-debug-images-container"
+      [class.separator]="experimentIds?.length > 1">
+      @if (experimentIds?.length > 1) {
+        <header>
+          @if ((experiments | itemById: experimentId).name) {
+            <sm-experiment-compare-general-data
+              [experiment]="experiments | itemById: experimentId"
+              [tags]="(experiments | itemById: experimentId)?.tags"
+              (copyIdClicked)="copyIdToClipboard()"
+            ></sm-experiment-compare-general-data>
+          }
+        </header>
+      }
+      <div class="navigator-container" [class.active]="bindNavigationMode" [class.first]="$first"
+        [class.last]="$last" [style.display]="isDarkTheme ? 'none' : 'flex'">
+        <div data-id="syncBrowsing" class="connector-icon-container pointer" smTooltip="Sync browsing" [matTooltipShowDelay]="500"
+          [class.active]="bindNavigationMode" [class.hidden]="$last" (click)="toggleConnectNavigation()">
+          <i class="al-icon" [class.al-ico-connect]="bindNavigationMode" [class.al-ico-disconnect]="!bindNavigationMode"></i>
+        </div>
+        @if (!thereAreNoMetrics(experimentId) && !disableStatusRefreshFilter) {
+          <div class="metric-bar" [class.minimized]="minimized"
+            data-id="metricBar">
+            <label data-id="metricText">Metric:</label>
+            <mat-form-field appearance="outline" class="no-bottom" [ngClass]="{'dark thin': isDarkTheme}" data-id="metricField">
+              <mat-select
+                #metricSelect
+                (selectionChange)="selectMetric($event, experimentId)"
+                [panelClass]="isDarkTheme ? 'dark black dark-theme': 'light-theme'"
+                [value]="selectedMetrics[experimentId]"
+                >
+                @if (selectedMetrics[experimentId]) {
+                  <mat-option [value]="allImages">{{allImages}}</mat-option>
+                }
+                @for (metric of optionalMetrics[experimentId]; track metric) {
+                  <mat-option [value]="metric">{{metric}}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <label data-id="IterationText">Iterations:</label>
+            <div [class.disabled]="(beginningOfTime$| async)?.[experimentId]"
+              (click)="nextBatch({task: experimentId, metric: metricSelect.value})"
+              class="al-icon al-ico-next-batch al-color blue-300"
+            smTooltip="Older images" data-id="OlderImages"></div>
+            <b class="text-right">{{debugImages?.[experimentId]?.data?.slice(-1)[0].iter}}</b>
+            <div class="al-icon al-ico-between al-color light-blue-grey"></div>
+            <b>{{debugImages?.[experimentId]?.data?.[0].iter}}</b>
+            <div [class.disabled]="(timeIsNow$| async)?.[experimentId]"
+              (click)="previousBatch({task: experimentId, metric: metricSelect.value})"
+              class="al-icon al-ico-prev-batch al-color blue-300"
+            smTooltip="Newer images" data-id="NewerImages"></div>
+            <div [class.disabled]="(timeIsNow$| async)?.[experimentId] && !allowAutorefresh"
+              (click)="backToNow({task: experimentId, metric: metricSelect.value})"
+              class="al-icon al-ico-back-to-top al-color blue-300"
+            smTooltip="Newest samples" data-id="NewestSamples"></div>
+          </div>
+        }
       </div>
-      <div class="metric-bar" [class.minimized]="minimized"
-           *ngIf="!thereAreNoMetrics(experimentId) && !disableStatusRefreshFilter" data-id="metricBar">
-        <label data-id="metricText">Metric:</label>
-        <mat-form-field appearance="outline" class="no-bottom" [ngClass]="{'dark thin': isDarkTheme}" data-id="metricField">
-          <mat-select
-            #metricSelect
-            (selectionChange)="selectMetric($event, experimentId)"
-            [panelClass]="isDarkTheme ? 'dark black dark-theme': 'light-theme'"
-            [value]="selectedMetrics[experimentId]"
-          >
-            <mat-option *ngIf="selectedMetrics[experimentId]" [value]="allImages">{{allImages}}</mat-option>
-            <mat-option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric">{{metric}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <label data-id="IterationText">Iterations:</label>
-
-        <div [class.disabled]="(beginningOfTime$| async)?.[experimentId]"
-             (click)="nextBatch({task: experimentId, metric: metricSelect.value})"
-             class="al-icon al-ico-next-batch al-color blue-300"
-             smTooltip="Older images" data-id="OlderImages"></div>
-
-        <b class="text-right">{{debugImages?.[experimentId]?.data?.slice(-1)[0].iter}}</b>
-        <div class="al-icon al-ico-between al-color light-blue-grey"></div>
-        <b>{{debugImages?.[experimentId]?.data?.[0].iter}}</b>
-
-        <div [class.disabled]="(timeIsNow$| async)?.[experimentId]"
-             (click)="previousBatch({task: experimentId, metric: metricSelect.value})"
-             class="al-icon al-ico-prev-batch al-color blue-300"
-             smTooltip="Newer images" data-id="NewerImages"></div>
-
-        <div [class.disabled]="(timeIsNow$| async)?.[experimentId] && !allowAutorefresh"
-             (click)="backToNow({task: experimentId, metric: metricSelect.value})"
-             class="al-icon al-ico-back-to-top al-color blue-300"
-             smTooltip="Newest samples" data-id="NewestSamples"></div>
-      </div>
-    </div>
-    <div class="no-images no-output" [class.dark]="isDarkTheme" *ngIf="shouldShowNoImagesForExperiment(experimentId)">
-      <svg class="mb-3" xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 300 150">
-        <path opacity="0.1"
+      @if (shouldShowNoImagesForExperiment(experimentId)) {
+        <div class="no-images no-output" [class.dark]="isDarkTheme">
+          <svg class="mb-3" xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 300 150">
+            <path opacity="0.1"
               d="M72.67,79.36a5.39,5.39,0,0,1-1.45,4.32,1.17,1.17,0,0,1-.6.34,1.13,1.13,0,0,1-1.31-.88,1.11,1.11,0,0,1,.28-1,3.19,3.19,0,0,0,.89-2.36c-.22-1.09-1.66-1.73-1.68-1.74A1.12,1.12,0,0,1,69.65,76C69.76,76,72.22,77.07,72.67,79.36ZM46.19,78.1a1.38,1.38,0,0,0-1.06,1.61L47.3,90.38a1.38,1.38,0,0,0,1.61,1.06l4-.82L50.19,77.29Zm30.87.39c-.91-4.54-5.23-7.07-5.41-7.18a1.13,1.13,0,1,0-1.16,1.94s3.63,2.13,4.34,5.68-1.8,7-1.82,7a1.12,1.12,0,0,0,.25,1.56,1.11,1.11,0,0,0,.86.2,1.12,1.12,0,0,0,.68-.43C75,87.09,78,83,77.06,78.49Zm-3.57-12a1.12,1.12,0,0,0-1,2,12.48,12.48,0,0,1,2.91,2.24,13.87,13.87,0,0,1,3.88,7.28,14.19,14.19,0,0,1-.78,8.27,13,13,0,0,1-1.83,3.22,1.11,1.11,0,0,0,1.06,1.82h0a1,1,0,0,0,.63-.36,16.47,16.47,0,0,0,3.13-13.38A16.18,16.18,0,0,0,73.49,66.53Zm-9.28,1a1.35,1.35,0,0,0-1.6-1.06h0a1.45,1.45,0,0,0-.71.4L52.2,76.93l2.7,13.24,12.82,5.52a1.36,1.36,0,0,0,1.79-.7,1.33,1.33,0,0,0,.09-.81ZM261.4,76.66l-3.77,21.62-8.28-8.4-.47,2.7a4.13,4.13,0,0,1-4.76,3.35l-25.67-4.48a4.14,4.14,0,0,1-3.35-4.76l2.36-13.51c0-.12,0-.24.08-.35a6.17,6.17,0,1,1,10-3.71,5.62,5.62,0,0,1-.5,1.55l4.49.79a6.37,6.37,0,0,1,.06-1.63,6.15,6.15,0,1,1,11.63,3.65l4.63.81a4,4,0,0,1,3.4,4.53c0,.08,0,.15-.05.23l-.48,2.7ZM225.28,68.1a3.7,3.7,0,0,0-3.52-3.87h-.19a3.79,3.79,0,1,0,3.71,3.87Zm16.29,3A3.7,3.7,0,0,0,238,67.24h-.19a3.79,3.79,0,1,0,3.72,3.86Zm53.2-20.19L281,129.18a17.25,17.25,0,0,1-20,14l-78.27-13.81a17,17,0,0,1-11.13-7.08,17.86,17.86,0,0,1-1-1.69H130.44a17.86,17.86,0,0,1-1,1.69,17,17,0,0,1-11.13,7.08L40.09,143.16a17.25,17.25,0,0,1-20-14L6.26,50.86a17.26,17.26,0,0,1,14-20h0L94.63,17.77A17.24,17.24,0,0,1,110.76,6.58h79.47a17.24,17.24,0,0,1,16.13,11.19l74.38,13.11a17.25,17.25,0,0,1,14,20ZM120.22,119.58h-9.47a17.21,17.21,0,0,1-17.19-17.19V25.1L21.81,37.75a9.55,9.55,0,0,0-7.74,11.06l13.76,78.06a9.57,9.57,0,0,0,11.06,7.71L117,120.81A9.68,9.68,0,0,0,120.22,119.58Zm69.82-7a9.54,9.54,0,0,0,9.52-9.52V24.13a9.53,9.53,0,0,0-9.5-9.55h-79a9.51,9.51,0,0,0-9.51,9.51v79a9.53,9.53,0,0,0,9.51,9.52Zm95.52-70.94a9.49,9.49,0,0,0-6.17-3.93L207.56,25.1v77.33a17.23,17.23,0,0,1-17.21,17.15h-9.49a9.66,9.66,0,0,0,3.28,1.23l78.15,13.77a9.58,9.58,0,0,0,11.07-7.75l13.78-78.06a9.44,9.44,0,0,0-1.58-7.09Zm-109,.43c1.09.64,1,2.34,1,2.34l-.14,37.87a3.33,3.33,0,0,1-3.36,3.3h0l-48.13-.16a3.37,3.37,0,0,1-3.37-3.35l.2-37.39a3.3,3.3,0,0,1,2.11-3l.18-.08h49.68s1.76-.15,1.83.53ZM160.49,53.34a3.8,3.8,0,0,0,7.59,0,3.7,3.7,0,0,0-3.67-3.76h-.12A3.79,3.79,0,0,0,160.49,53.34ZM171.6,74.93l-8.55-9.46-.19-.19a2.49,2.49,0,0,0-3.52.16v0l-4.2,4.63-9.19-10.63a3.05,3.05,0,0,0-1.59-1,2.75,2.75,0,0,0-2.66.95h0l-13.13,15v4.13l43,.14Z"/>
-      </svg>
-      <h4>NO DEBUG SAMPLES</h4>
+          </svg>
+          <h4>NO DEBUG SAMPLES</h4>
+        </div>
+      }
+      @if (debugImages?.[experimentId]?.data) {
+        <sm-debug-images-view
+          [iterations]="debugImages[experimentId].data"
+          [experimentId]="experimentId"
+          [title]="experimentNames && experimentNames[experimentId]"
+          [isMergeIterations]="mergeIterations"
+          [isDarkTheme]="isDarkTheme"
+          [isDatasetVersionPreview]="disableStatusRefreshFilter"
+          (imageClicked)="imageClicked($event, experimentId)"
+          (urlError)="urlError($event)"
+          (createEmbedCode)="createEmbedCode($event, experimentId)"
+        ></sm-debug-images-view>
+      }
     </div>
-    <sm-debug-images-view
-      *ngIf="debugImages?.[experimentId]?.data"
-      [iterations]="debugImages[experimentId].data"
-      [experimentId]="experimentId"
-      [title]="experimentNames && experimentNames[experimentId]"
-      [isMergeIterations]="mergeIterations"
-      [isDarkTheme]="isDarkTheme"
-      [isDatasetVersionPreview]="disableStatusRefreshFilter"
-      (imageClicked)="imageClicked($event, experimentId)"
-      (urlError)="urlError($event)"
-      (createEmbedCode)="createEmbedCode($event, experimentId)"
-    ></sm-debug-images-view>
-  </div>
-  <div *ngIf="experimentIds?.length>LIMITED_VIEW_LIMIT"
-       class="limit-message-container">
-    <div class="limit-message">
-      <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 experiments are available for this view...
+  }
+  @if (experimentIds?.length>LIMITED_VIEW_LIMIT) {
+    <div
+      class="limit-message-container">
+      <div class="limit-message">
+        <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 experiments are available for this view...
+      </div>
     </div>
-  </div>
+  }
 </div>
 

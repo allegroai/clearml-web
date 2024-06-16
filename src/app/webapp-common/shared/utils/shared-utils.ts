@@ -314,3 +314,39 @@ export const convertCamelToSnake = (obj) => {
 };
 
 export const snakeToTitle = (value: string) => value.split('_').map(w => capitalize(w)).join(' ');
+
+export const getLowestFraction = (x0: number) => {
+  const eps = 1.0E-15;
+  let x = x0;
+  let a = Math.floor(x);
+  let h1 = 1;
+  let k1 = 0;
+  let h = a;
+  let k = 1;
+
+  while (x-a > eps*k*k) {
+    x = 1/(x-a);
+    a = Math.floor(x);
+    const h2 = h1;
+    h1 = h;
+    const k2 = k1;
+    k1 = k;
+    h = h2 + a*h1;
+    k = k2 + a*k1;
+  }
+
+  return [h, k];
+}
+
+export const orderJson = (data: unknown) => {
+  if (data !== null && typeof data === 'object') {
+    if (Array.isArray(data)) {
+      return data.map(val => orderJson(val));
+    }
+    return Object.keys(data).sort().reduce((acc, key) => {
+      acc[key] = orderJson(data[key]);
+      return acc;
+    }, {});
+  }
+  return data;
+}

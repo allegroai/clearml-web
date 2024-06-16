@@ -11,51 +11,45 @@
     } </div>
 </div>
 <form #moveToForm="ngForm" (submit)="send()">
-  <mat-form-field class="w-100" appearance="outline" hideRequiredMarker="true" (mousedown)="!isFocused(projectInputRef) && projectInput.value && projectInput.reset(); projectInputRef.blur(); projectInputRef.focus()">
-    <mat-label>Destination</mat-label>
-    <input matInput type="text" [matAutocomplete]="auto" [(ngModel)]="project.parent" name="projectName" placeholder="Search for project path" #projectInputRef #projectInput="ngModel" smUniquePathValidator [currentName]="projectName | shortProjectName" [existingPaths]="projectsNames" smUniqueNameValidator smInvalidPrefixValidator [invalidPrefix]="projectName" [existingNames]="[projectName | projectLocation]" required minlength="3" (keydown.enter)="projectInput.control.markAsTouched()">
-    @if (projectsNames && (projectName !== project.parent) && projectInput.value &&
-    (!isAutoCompleteOpen) && !(projectInput.value | stringIncludedInArray:projectsNames)) {
-      <span matSuffix class="creat-new-suffix">(Create New)</span>
-    }
-    <i matSuffix class="al-icon sm-md search-icon" [class]="project.parent? 'al-ico-dialog-x pointer' : 'al-ico-search'" (click)="project.parent && clear(); projectInputRef.focus()" smClickStopPropagation></i>
-    @if (projectInput?.errors?.required) {
+  <sm-paginated-entity-selector
+    #projectInput="ngModel"
+    name="projectName"
+    [(ngModel)]="project.parent"
+    [data]="allProjects()"
+    label="Destination"
+    placeHolder="Search for project path"
+    [isRequired]="true"
+    [createNewSuffix]="projectsNames && (projectName !== project.parent) && projectInput.value &&
+    (!isAutoCompleteOpen) && !(projectInput.value | stringIncludedInArray:projectsNames)"
+    (getEntities)="loadMore($event, false)"
+    (loadMore)="loadMore($event, true)"
+    (createNewSelected)="createNewSelected($event)"
+    smUniquePathValidator [currentName]="projectName | shortProjectName" [existingPaths]="projectsNames"
+    smUniqueNameValidator [existingNames]="[projectName | projectLocation]"
+    smInvalidPrefixValidator [invalidPrefix]="projectName"
+    required minlength="3"
+  >
+  </sm-paginated-entity-selector>
+  @if (projectInput.touched && projectInput?.errors; as errors) {
+    @if (errors?.required) {
       <mat-error>Please provide a Project</mat-error>
     }
-    @if (projectInput?.errors?.minlength) {
+    @if (errors?.minlength) {
       <mat-error>Please provide a project name longer than 3 characters</mat-error>
     }
-    @if (projectInput?.errors?.uniqueName && !projectInput?.errors?.required) {
+    @if (errors?.uniqueName && !projectInput?.errors?.required) {
       <mat-error>Can't move a project to its current location</mat-error>
     }
-    @if (projectInput?.errors?.invalidPrefix) {
+    @if (errors?.invalidPrefix) {
       <mat-error>Can't move a project to its nested projects</mat-error>
     }
-    @if (projectInput?.errors?.uniquePath) {
+    @if (errors?.uniquePath) {
       <mat-error>{{ projectInput.value }} already contains a project named {{ projectName | shortProjectName }}</mat-error>
     }
-    @if (projectInput.touched && projectInput.errors?.emptyName && !projectInput.errors?.minlength) {
-      <mat-error>*Project name can't contain only spaces.</mat-error>
+    @if (errors?.emptyName && !errors?.minlength) {
+      <mat-error>Project name can't contain only spaces.</mat-error>
     }
-    <mat-autocomplete #auto="matAutocomplete" name="ExperimentProject" (opened)="setIsAutoCompleteOpen(true)" (closed)="setIsAutoCompleteOpen(false)" (optionSelected)="locationSelected($event)" class="light-theme" classList="light-theme" autoActiveFirstOption>
-      @if (projectsNames !== null && projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames)) {
-        <mat-option class="item" [value]="projectInput.value" (onSelectionChange)="createNewSelected($event)">"{{ projectInput.value }}"
-          <span class="new">(Create New)</span></mat-option>
-      }
-      @for (projectName of projectsNames; track projectName) {
-        <mat-option [value]="projectName" [smTooltip]="projectName" smShowTooltipIfEllipsis (onSelectionChange)="optionSelected()">
-          <div [smSearchText]="projectInput.value">{{ projectName }}</div>
-        </mat-option>
-      }
-      @if (projectsNames === null) {
-        <div class="p-4 pe-none">
-          <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
-        </div>
-      }
-      <sm-dots-load-more [class.hidden]="!projects || noMoreOptions" (loadMore)="loadMore(projectInput.value)" [loading]="loading"></sm-dots-load-more>
-      <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
-    </mat-autocomplete>
-  </mat-form-field>
+  }
 </form>
 <div class="buttons d-flex justify-content-center">
   <button [disabled]="projectName === project?.parent || moveToForm.invalid" (click)="send()" cdkFocusInitial data-id="MoveButton" class="btn btn-neon yes-button" #moveButton>

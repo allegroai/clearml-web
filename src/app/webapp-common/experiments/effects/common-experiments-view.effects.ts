@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {cloneDeep, flatten, isEqual} from 'lodash-es';
-import {EMPTY, forkJoin, iif, interval, Observable, of} from 'rxjs';
+import {EMPTY, iif, interval, Observable, of} from 'rxjs';
 import {
   auditTime,
   catchError,
@@ -29,7 +29,7 @@ import {
   selectIsArchivedMode,
   selectIsDeepMode,
   selectRouterProjectId,
-  selectSelectedProject,
+  selectSelectedProjectId,
   selectShowHidden
 } from '../../core/reducers/projects.reducer';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
@@ -109,6 +109,9 @@ import {MetricVariantResult} from '~/business-logic/model/projects/metricVariant
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {EventsGetMultiTaskMetricsResponse} from '~/business-logic/model/events/eventsGetMultiTaskMetricsResponse';
+import {TasksCreateResponse} from '~/business-logic/model/tasks/tasksCreateResponse';
+import {ErrorService} from '@common/shared/services/error.service';
+import * as menuActions from '@common/experiments/actions/common-experiments-menu.actions';
 
 
 @Injectable()
@@ -117,7 +120,7 @@ export class CommonExperimentsViewEffects {
   constructor(
     private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
     private projectsApi: ApiProjectsService, private eventsApi: ApiEventsService, private router: Router,
-    private route: ActivatedRoute, private orgApi: ApiOrganizationService
+    private route: ActivatedRoute, private orgApi: ApiOrganizationService, private errService: ErrorService
   ) {
   }
 
@@ -385,7 +388,7 @@ export class CommonExperimentsViewEffects {
     ]),
     filter(([, , , , tableMode]) => tableMode !== 'table'),
     tap(([, routeConfig, tasks, projectId]) => this.navigateAfterExperimentSelectionChanged(tasks[0] as ITableExperiment, projectId, routeConfig, true)),
-    mergeMap(([, , tasks, , tableMode]) => [exActions.setTableMode({mode: tableMode}), exActions.setSelectedExperiments({experiments: []})])
+    mergeMap(([, , , , tableMode]) => [exActions.setTableMode({mode: tableMode}), exActions.setSelectedExperiments({experiments: []})])
   ));
 
 
@@ -579,12 +582,12 @@ export class CommonExperimentsViewEffects {
     debounce((action) => interval(action.searchValue ? 300 : 0)),
     concatLatestFrom(() => [
       this.store.select(selectIsDeepMode),
-      this.store.select(selectSelectedProject),
+      this.store.select(selectRouterProjectId),
       this.store.select(selectIsCompare),
       this.store.select(selectHyperParamsFiltersPage),
     ]),
-    switchMap(([action, isDeep, selectedProject, isCompare, page]) => {
-      const projectId = action.col.projectId || selectedProject.id;
+    switchMap(([action, isDeep, selectedProjectId, isCompare, page]) => {
+      const projectId = action.col.projectId || selectedProjectId;
       const {section, name} = decodeHyperParam(action.col);
       return this.projectsApi.projectsGetHyperparamValues({
         include_subprojects: isDeep,
@@ -943,4 +946,85 @@ export class CommonExperimentsViewEffects {
       })
     )
   );
+
+  createExperiment = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(exActions.createExperiment),
+      concatLatestFrom(() => this.store.select(selectSelectedProjectId)),
+      switchMap(([action, projectId]) => this.apiTasks.tasksCreate({
+        project: projectId,
+        name: action.data.name,
+        type: 'training',
+        script: {
+          repository: action.data.repo,
+          ...(action.data.type === 'branch' ?
+              {branch: action.data.branch ?? 'master'} :
+              action.data.type === 'tag' ?
+                {tag: action.data.tag} :
+                {version_num: action.data.commit}
+          ),
+          working_dir: action.data.directory,
+          entry_point: action.data.script,
+          binary: action.data.binary,
+          requirements: action.data.requirements === 'manual' ? {pip: action.data.pip} : null,
+        },
+        hyperparams: {
+          Args: action.data.args
+            .filter(arg => arg.key?.length > 0)
+            .reduce((acc, arg) => {
+            const name = arg.key.startsWith('--') ? arg.key.slice(2) : arg.key;
+            acc[name] = {name, value: arg.value, section: 'Args'};
+            return acc;
+          }, {})
+        },
+        ...(action.data.output && {output_dest: action.data.output}),
+        ...((action.data.docker.image || action.data.taskInit) && {
+          container: {
+            image: action.data.docker.image,
+            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venv ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? '-e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`.trimStart(),
+            setup_shell_script: action.data.docker.script
+          }
+        }),
+      }).pipe(
+        map((res: TasksCreateResponse) => exActions.createExperimentSuccess({data: {...action.data, id: res.id}, project: projectId}))
+      )),
+      catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to create experiment.\n${this.errService.getErrorMsg(error.error)}`)])
+    );
+  });
+
+  createExperimentSuccess = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(exActions.createExperimentSuccess),
+      map(action => addMessage(MESSAGES_SEVERITY.SUCCESS, `Successfully created experiment ${action.data.name}`, [{name: 'open experiment', actions: [exActions.openExperiment({id: action.data.id, project: action.project})]}]))
+    );
+  });
+
+  updateExperimentsAfterCreate = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(exActions.createExperimentSuccess),
+      map(() => exActions.refreshExperiments({autoRefresh: false, hideLoader: false}))
+    );
+  });
+
+  openExperiment = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(exActions.openExperiment),
+      map(action => this.router.navigate(['projects', action.project, 'experiments', action.id]),)
+    );
+  }, {dispatch: false});
+
+  enqueueCreateExperiment = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(exActions.createExperimentSuccess),
+      filter(action => !!action.data.queue),
+      switchMap(action => this.apiTasks.tasksEnqueue({
+        queue: action.data.queue.id,
+        task: action.data.id,
+        verify_watched_queue: true,
+      }).pipe(
+        map(res => res.queue_watched === false ? menuActions.openEmptyQueueMessage({queue: action.data.queue, entityName: action.data.name}) : {type: 'EMPTY'}),
+      )),
+      catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to enqueue experiment.\n${this.errService.getErrorMsg(error.error)}`)])
+    );
+  });
 }

@@ -1,35 +1,44 @@
 <div class="chart-container overflow-hidden">
   <div class="header">
     <div class="title">
-      <div class="ellipsis">{{selectedQueue ? selectedQueue.name : 'Overall'}} Experiment Wait Time</div>
-      <i *ngIf="statsError$ | async"
-        class="warnning fas fa-exclamation-triangle"
-        smTooltip="Data temporarily not available">
-      </i>
+      <div class="ellipsis">{{queue()?.name ?? 'Overall'}} Experiment Wait Time</div>
+      @if (statsError()) {
+        <i
+          class="warnning fas fa-exclamation-triangle"
+          smTooltip="Data temporarily not available">
+        </i>
+      }
     </div>
   </div>
   <div #waitchart class="line-chart-container">
-    <sm-line-chart class="h-100" [data]="waitChartData" [showLoadingOverlay]="refreshChart"></sm-line-chart>
+    <sm-line-chart
+      class="h-100"
+      [data]="queueStats().wait"
+      [showLoadingOverlay]="refreshChart()"
+      [yTickFormatter]="timeFormatter"
+    ></sm-line-chart>
   </div>
 </div>
 <div class="chart-container right overflow-hidden">
   <div class="header">
     <div class="title">
-      <div class="ellipsis">{{selectedQueue ? selectedQueue.name : 'Overall'}} Queued Experiments</div>
-      <i *ngIf="statsError$ | async"
-        class="warnning fas fa-exclamation-triangle"
-        smTooltip="Data temporarily not available">
-      </i>
+      <div class="ellipsis">{{queue()?.name ?? 'Overall'}} Queued Experiments</div>
+      @if (statsError()) {
+        <i
+          class="warnning fas fa-exclamation-triangle"
+          smTooltip="Data temporarily not available">
+        </i>
+      }
     </div>
     <mat-form-field appearance="outline" class="dark-outline thin time-selector no-bottom">
-      <mat-select [ngModel]="currentTimeFrame" (ngModelChange)="timeFrameChanged($event)" name="time-frame" panelClass="dark-outline">
-        <mat-option *ngFor="let timeFrame of timeFrameOptions; trackBy: trackByFn" [value]="timeFrame.value">
-          {{timeFrame.label}}
-        </mat-option>
+      <mat-select [value]="timeFrame()" (selectionChange)="timeFrameChanged($event.value)" panelClass="dark-outline">
+        @for (timeFrame of timeFrameOptions; track timeFrame.value) {
+          <mat-option [value]="timeFrame.value">{{timeFrame.label}}</mat-option>
+        }
       </mat-select>
     </mat-form-field>
   </div>
   <div class="line-chart-container">
-    <sm-line-chart class="h-100" [data]="lenChartData" [showLoadingOverlay]="refreshChart"></sm-line-chart>
+    <sm-line-chart class="h-100" [data]="queueStats().length" [showLoadingOverlay]="refreshChart()"></sm-line-chart>
   </div>
 </div>

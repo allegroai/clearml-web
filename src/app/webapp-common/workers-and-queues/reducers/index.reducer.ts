@@ -1,37 +1,40 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
-import {queuesReducer, QueueStoreType} from './queues.reducer';
-import {workersReducer} from './workers.reducer';
-import {statsReducer} from './stats.reducer';
+import {reducer as queuesReducer, State as QueuesState} from './queues.reducer';
+import {workersReducer, WorkersState} from './workers.reducer';
+import {statsReducer, StatsState} from './stats.reducer';
+import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 
-export const reducers: ActionReducerMap<any, any> = {
+interface State {
+  workers: WorkersState,
+  queues: QueuesState,
+  stats: StatsState
+}
+
+export const reducers: ActionReducerMap<State> = {
   workers: workersReducer,
   queues : queuesReducer,
   stats: statsReducer
 };
 
-/**
- * The createFeatureSelector function selects a piece of state from the root of the state object.
- * This is used for selecting feature states that are loaded eagerly or lazily.
- */
 export const workersAndQueues = state => state['workersAndQueues'];
 
-export const queues                      = createSelector(workersAndQueues, state => state.queues as QueueStoreType);
-export const selectQueues                = createSelector(queues, state => state.data);
-export const selectSelectedQueue         = createSelector(queues, state => state.selectedQueue);
-export const selectQueuesTasks           = createSelector(queues, state => state.tasks);
-export const selectQueueStats            = createSelector(queues, state => state.stats);
-export const selectQueuesStatsTimeFrame  = createSelector(queues, state => state.selectedStatsTimeFrame);
-export const selectQueuesTableSortFields = createSelector(queues, state => state.tableSortFields);
+export const selectQueuesState = createSelector(workersAndQueues, state => state.queues as QueuesState);
+export const selectQueues = createSelector(selectQueuesState, state => state.data);
+export const selectSelectedQueueId = createSelector(selectRouterQueryParams, params => params?.id);
+export const selectSelectedQueue = createSelector(selectQueuesState, state => state.selectedQueue);
+export const selectQueuesTasks = createSelector(selectQueuesState, state => state.tasks);
+export const selectQueueStats = createSelector(selectQueuesState, state => state.stats);
+export const selectQueuesStatsTimeFrame  = createSelector(selectQueuesState, state => state.selectedStatsTimeFrame);
+export const selectQueuesTableSortFields = createSelector(selectQueuesState, state => state.tableSortFields);
 
-export const workers                     = createSelector(workersAndQueues, state => state.workers);
-export const selectWorkers               = createSelector(workers, state => state.data);
-export const selectStats                 = createSelector(workers, state => state.stats);
-export const selectStatsRequest          = createSelector(workers, state => state.statsRequest);
-export const selectSelectedWorker        = createSelector(workers, state => state.selectedWorker);
-export const selectWorkersTableSortFields = createSelector(workers, state => state.tableSortFields);
+export const selectWorkersState = createSelector(workersAndQueues, state => state.workers);
+export const selectWorkers = createSelector(selectWorkersState, state => state.data);
+export const selectStats   = createSelector(selectWorkersState, state => state.stats);
+export const selectSelectedWorker  = createSelector(selectWorkersState, state => state.selectedWorker);
+export const selectWorkersTableSortFields = createSelector(selectWorkersState, state => state.tableSortFields);
 
-export const selectStatsParams    = createSelector(workers, state => state.selectedStatsParam);
-export const selectStatsTimeFrame = createSelector(workers, state => state.selectedStatsTimeFrame);
+export const selectStatsParams = createSelector(selectWorkersState, state => state.selectedStatsParam);
+export const selectStatsTimeFrame = createSelector(selectWorkersState, state => state.selectedStatsTimeFrame);
 
-export const stats = createSelector(workersAndQueues, state => state.stats);
-export const selectStatsErrorNotice = createSelector(stats, state => state.showNoStatsNotice);
+export const selectStatsState = createSelector(workersAndQueues, state => state.stats);
+export const selectStatsErrorNotice = createSelector(selectStatsState, state => state.showNoStatsNotice);

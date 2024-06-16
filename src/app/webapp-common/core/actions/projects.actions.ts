@@ -200,6 +200,10 @@ export const setHideExamples = createAction(
   PROJECTS_PREFIX + ' [set hide examples]',
   props<{ hide: boolean }>()
 );
+export const setBlockUserScript = createAction(
+  PROJECTS_PREFIX + ' [set block users scripts]',
+  props<{ block: boolean }>()
+);
 
 export const setDefaultNestedModeForFeature = createAction(
   PROJECTS_PREFIX + ' [set defaultNestedModeForFeature]',

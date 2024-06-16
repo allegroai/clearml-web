@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, TemplateRef} from '@angular/core';
+import {Component, computed, EventEmitter, input, OnInit, Output, TemplateRef} from '@angular/core';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -8,6 +8,7 @@ import {Option} from '@common/shared/ui-components/inputs/button-toggle/button-t
 import {trackByValue} from '@common/shared/utils/forms-track-by';
 import {resourceToIconMap} from '~/features/experiments/experiments.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
 
 @Component({
   selector   : 'sm-experiment-header',
@@ -15,29 +16,27 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   styleUrls  : ['./experiment-header.component.scss']
 })
 export class ExperimentHeaderComponent extends BaseEntityHeaderComponent implements OnInit{
-  private _tableCols: ISmCol[];
+
+  protected readonly customColumnModeEnum = CustomColumnMode;
+  customColumnMode: CustomColumnMode;
   toggleButtons: Option[];
-  @Input() isArchived: boolean;
-  @Input() metricVariants: Array<MetricVariantResult>;
-  @Input() hyperParams: any[];
-  @Input() minimizedView: boolean;
-  @Input() isMetricsLoading: boolean;
-  @Input() tableFilters: { [s: string]: FilterMetadata };
-  @Input() sharedView: boolean;
-  @Input() showNavbarLinks: boolean;
-  @Input() tableMode: 'table' | 'info' | 'compare';
-  @Input() compareView: 'scalars' | 'plots';
-  @Input() showCompareScalarSettings: boolean;
-  @Input() rippleEffect: boolean;
-  @Input() addButtonTemplate: TemplateRef<{smallScreen: boolean}>;
 
-  @Input() set tableCols(tableCols) {
-    this._tableCols = tableCols?.filter(col => col.header !== '');
-  }
+  isArchived = input<boolean>();
+  metricVariants = input<Array<MetricVariantResult>>();
+  hyperParams = input<any[]>();
+  minimizedView = input<boolean>();
+  isMetricsLoading = input<boolean>();
+  tableFilters = input<{ [s: string]: FilterMetadata }>();
+  sharedView = input<boolean>();
+  showNavbarLinks = input<boolean>();
+  tableMode = input<'table' | 'info' | 'compare'>();
+  compareView = input<'scalars' | 'plots'>();
+  showCompareScalarSettings = input<boolean>();
+  rippleEffect = input<boolean>();
+  addButtonTemplate = input<TemplateRef<{smallScreen: boolean}>>();
 
-  get tableCols() {
-    return this._tableCols;
-  }
+  tableCols = input<ISmCol[]>();
+  tableColsWithHeader = computed(() => this.tableCols()?.filter(col => col.header !== ''));
 
   @Output() isArchivedChanged        = new EventEmitter<boolean>();
   @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();

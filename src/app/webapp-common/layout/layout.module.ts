@@ -3,8 +3,6 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {LoggedOutAlertComponent} from './logged-out-alert/logged-out-alert.component';
-import {StoreModule} from '@ngrx/store';
-import {LayoutReducer} from './layout.reducer';
 import {ServerNotificationDialogContainerComponent} from './server-notification-dialog-container/server-notification-dialog-container.component';
 import {CommonSearchModule} from '../common-search/common-search.module';
 import {HeaderComponent} from './header/header.component';
@@ -35,7 +33,6 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
     ReactiveFormsModule,
     CommonSearchModule,
     RouterModule,
-    StoreModule.forFeature('layout', LayoutReducer),
     YouTubePlayerModule,
     NgOptimizedImage,
     BreadcrumbsComponent,

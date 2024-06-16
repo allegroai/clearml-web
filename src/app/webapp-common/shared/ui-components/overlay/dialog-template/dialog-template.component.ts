@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {booleanAttribute, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {NgClass, NgIf} from '@angular/common';
 import {CdkScrollableModule} from '@angular/cdk/scrolling';
@@ -17,8 +17,8 @@ import {CdkScrollableModule} from '@angular/cdk/scrolling';
 export class DialogTemplateComponent {
 
 
-  @Input() displayX: boolean = true;
-  @Input() closeOnX: boolean = true;
+  @Input({transform: booleanAttribute}) displayX: boolean = true;
+  @Input({transform: booleanAttribute}) closeOnX: boolean = true;
 
   @Input() theme: string = 'light-theme';
   @Input() containerClass: string;

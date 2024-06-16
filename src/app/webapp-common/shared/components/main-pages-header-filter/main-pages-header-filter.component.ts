@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {setFilterByUser} from '@common/core/actions/users.actions';
-import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {setMainPageTagsFilter, setMainPageTagsFilterMatchMode} from '@common/core/actions/projects.actions';
@@ -10,7 +9,6 @@ import {
 } from '@common/core/reducers/projects.reducer';
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
 import {cleanTag} from '@common/shared/utils/helpers.util';
-import {selectProjectType} from '~/core/reducers/view.reducer';
 import {MatMenuModule} from '@angular/material/menu';
 import {AsyncPipe, NgIf} from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
@@ -20,6 +18,8 @@ import {
 } from '@common/shared/ui-components/panel/checkbox-three-state-list/checkbox-three-state-list.component';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {FormsModule} from '@angular/forms';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {selectProjectType} from '@common/core/reducers/view.reducer';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -56,7 +56,7 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
       this.tagsLabelValue = allTags?.map(tag => ({label: tag, value: tag}));
       this.sortTags();
     }
-  };
+  }
 
   public showOnlyUserWork$: Observable<boolean>;
   private tagsFilterMatchMode$: Observable<string>;
@@ -72,7 +72,7 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
 
 
   switchUserFocus() {
-    this.store.dispatch(setFilterByUser({showOnlyUserWork: !this.showOnlyUserWork}));
+    this.store.dispatch(setFilterByUser({showOnlyUserWork: !this.showOnlyUserWork, feature: this.currentFeature}));
   }
 
   setSearchTerm($event) {
@@ -132,6 +132,6 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   clearAll() {
     this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined, feature: this.currentFeature}));
     this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature}));
-    this.store.dispatch(setFilterByUser({showOnlyUserWork: false}));
+    this.store.dispatch(setFilterByUser({showOnlyUserWork: false, feature: this.currentFeature}));
   }
 }

@@ -19,9 +19,6 @@ $type-colors: (
 .ngx-json-viewer {
   height: 100%;
   overflow: auto;
-
-  font-family: $font-family-monospace;
-  font-size: 13px;
   position: relative;
 
   .segment {
@@ -124,7 +121,8 @@ $type-colors: (
   }
 
   mat-tree-node {
-    font-size: 13px;
+    --mat-tree-node-text-size: 13px;
+    --mat-tree-node-text-font: #{$font-family-monospace};
     line-height: normal;
   }
 }

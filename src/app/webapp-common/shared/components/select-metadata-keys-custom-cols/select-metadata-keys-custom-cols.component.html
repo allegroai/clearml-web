@@ -1,31 +1,38 @@
 <div smClickStopPropagation class="meta-container ">
   <div class="head">
     <i (click)="goBack.emit()" data-id="customBackButton" class="al-icon sm-md al-ico-back pointer m-auto" smClickStopPropagation></i>
-    <h3>SELECT METADATA KEY TO DISPLAY</h3>
+    <h3>{{title() ?? 'SELECT METADATA KEY TO DISPLAY'}}</h3>
   </div>
   <sm-search
     class="underline-search"
-    [value]="searchText"
+    [value]="searchText()"
     [minimumChars]="0"
     [debounceTime]="0"
     placeholder="Search metadata key"
     (valueChanged)="searchQ($event)"
   ></sm-search>
-  <div *ngIf="metadataKeys?.length > 0; else noData " class="list-container">
-    <sm-menu-item
-      *ngFor="let key of metadataKeys | simpleFilter: searchText"
-      #metaKey
-      [itemLabel]="key"
-      [checked]="metadataColsIds.includes(key)"
-      [selectable]="true"
-      [itemValue]="key"
-      (itemClicked)="addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked})"
-    ></sm-menu-item>
-  </div>
-  <ng-template #noData>
-    <div class="d-flex h-100 flex-1">
-      <mat-spinner *ngIf="!metadataKeys" class="spinner" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
-      <div *ngIf="metadataKeys && metadataKeys.length === 0" class="empty-state">No data to show</div>
+  @if ((metadataKeys() | simpleFilter: searchText())?.length > 0) {
+    <div class="list-container">
+      @for (key of metadataKeys() | simpleFilter: searchText(); track key) {
+        <sm-menu-item
+          #metaKey
+          [itemLabel]="key"
+          [checked]="metadataColsIds()?.includes(key)"
+          [selectable]="!singleSelect()"
+          [itemValue]="key"
+          [enableTooltip]="true"
+          (itemClicked)="singleSelect() ? addMetadataKey.emit(key) : addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked})"
+        ></sm-menu-item>
+      }
     </div>
-  </ng-template>
+  } @else {
+    <div class="d-flex h-100 flex-grow-1">
+      @if (!metadataKeys()) {
+        <mat-spinner class="spinner" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      }
+      @if (metadataKeys()) {
+        <div class="empty-state">No data to show</div>
+      }
+    </div>
+  }
 </div>

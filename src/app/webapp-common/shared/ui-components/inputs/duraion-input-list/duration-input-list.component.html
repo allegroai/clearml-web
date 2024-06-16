@@ -1,7 +1,7 @@
 <ng-form #templateForm="ngForm">
   <div class="inputs-container d-flex align-items-center"
        [class.active]="!hasNoValues">
-      <ng-container *ngFor="let input of data; trackBy: trackBy; let index = index; let last = last;">
+      <ng-container *ngFor="let input of data; trackBy: trackByIndex; let index = index; let last = last;">
         <input #inputRef
                [class]="'text-center max-length-' + input.maxLength"
                matInput
@@ -18,7 +18,7 @@
                smKeyDownStopPropagation
                (focus)="inputRef.select()"
                [smTooltip]="input.type.charAt(0).toUpperCase() + input.type.slice(1)"
-               
+
                [readonly]="readonly"
         >
         <i class="al-icon al-ico-time-colon" *ngIf="!last"></i>

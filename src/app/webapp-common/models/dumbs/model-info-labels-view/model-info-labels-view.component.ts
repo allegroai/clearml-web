@@ -26,7 +26,7 @@ export class ModelInfoLabelsViewComponent implements AfterViewInit, OnDestroy {
   public editable = false;
   public columns: ISmCol[] = [
     {id: 'label', header: 'Label'},
-    {id: 'id', header: 'Id'}
+    {id: 'id', header: 'ID'}
   ];
 
   private unsavedValue: { label: string; id: number }[];

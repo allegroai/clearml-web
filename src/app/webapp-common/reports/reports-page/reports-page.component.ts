@@ -35,7 +35,6 @@ import {
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode
 } from '../../core/reducers/projects.reducer';
-import {selectShowOnlyUserWork} from '../../core/reducers/users-reducer';
 import {debounceTime, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {setBreadcrumbsOptions, setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
 import {isEqual} from 'lodash-es';
@@ -44,6 +43,7 @@ import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 
 @Component({
   selector: 'sm-reports-page',
@@ -211,7 +211,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
     }));
   }
 
-  protected override getName(): string {
+  protected override getName() {
     return EntityTypeEnum.report;
   }
 }

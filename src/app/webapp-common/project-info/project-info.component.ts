@@ -4,6 +4,7 @@ import {combineLatest, Observable, Subscription} from 'rxjs';
 import {filter, take} from 'rxjs/operators';
 import 'ngx-markdown-editor';
 import {
+  selectBlockUserScript,
   selectIsDeepMode,
   selectSelectedMetricVariantForCurrProject,
   selectSelectedProject
@@ -23,6 +24,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 })
 export class ProjectInfoComponent implements OnInit, OnDestroy {
   private selectedProject$: Observable<Project>;
+  public blockUserScripts$: Observable<boolean>;
   public info: string;
   public editMode: boolean;
   public loading: boolean;
@@ -35,6 +37,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   private selectedVariantSub: Subscription;
 
   constructor(private store: Store, private cdr: ChangeDetectorRef,private contextMenuService: ContextMenuService) {
+    this.blockUserScripts$ = this.store.select(selectBlockUserScript);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.loading = true;
     this.selectedProject$

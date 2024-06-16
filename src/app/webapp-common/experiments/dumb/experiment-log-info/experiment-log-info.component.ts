@@ -15,7 +15,6 @@ import Convert from 'ansi-to-html';
 import {Log} from '../../actions/common-experiment-output.actions';
 
 import hasAnsi from 'has-ansi';
-import DOMPurify from 'dompurify';
 
 interface LogRow {
   timestamp?: string;
@@ -191,8 +190,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
           .filter(msg => !!msg)
           .forEach((msg: string, index) => {
             const msgHasAnsi = this.hasAnsi(msg);
-            const converted = msg ? (msgHasAnsi ? DOMPurify.sanitize(this.convert.toHtml(msg)) :
-              msg) : '';
+            const converted = msg ? (msgHasAnsi ? this.convert.toHtml(msg) : msg) : '';
             if (!index) {
               this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: msgHasAnsi});
             } else {

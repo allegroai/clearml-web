@@ -18,10 +18,10 @@ import {
   setProjectsSearchQuery,
   updateProject
 } from '../../common-projects.actions';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {ActivatedRoute, Router} from '@angular/router';
+import {MatDialog} from '@angular/material/dialog';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
-import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
+import {ProjectDialogComponent, ProjectDialogConfig} from '@common/shared/project-dialog/project-dialog.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {
   debounceTime,
@@ -43,16 +43,20 @@ import {
   popupEntitiesListConst,
   readyForDeletionFilter
 } from '~/features/projects/projects-page.utils';
-import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {Project} from '~/business-logic/model/projects/project';
-import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
+import {
+  CommonDeleteDialogComponent,
+  DeleteData
+} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {isExample} from '@common/shared/utils/shared-utils';
-import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {selectRouterProjectId, selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {concatLatestFrom} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -91,7 +95,6 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public allExamples: boolean;
   /* eslint-enable @typescript-eslint/naming-convention */
   protected readonly searchQuery$: Observable<SearchState['searchQuery']>;
-  private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
   public selectedProject$: Observable<Project>;
   public projectId: string;
   public subs = new Subscription();
@@ -106,7 +109,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectsOrderBy$ = this.store.select(selectProjectsOrderBy);
     this.projectsSortOrder$ = this.store.select(selectProjectsSortOrder);
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
-    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => params?.projectId));
+    this.selectedProjectId$ = this.store.select(selectRouterProjectId);
     this.selectedProject$ = this.store.select(selectSelectedProject).pipe(tap(selectedProject => this.selectedProject = selectedProject));
 
     this.projectsList$ = combineLatest([
@@ -114,7 +117,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       this.store.select(selectSelectedProject)
     ]).pipe(
       debounceTime(50),
-      concatLatestFrom(()=> [this.selectedProjectId$, this.searchQuery$, this.store.select(selectRouterConfig)]),
+      concatLatestFrom(() => [this.selectedProjectId$, this.searchQuery$, this.store.select(selectRouterConfig)]),
       map(([[projectsList, selectedProject = {} as Project], selectedProjectId, searchQuery, config]) => {
         this.searching = searchQuery?.query.length > 0;
         this.allExamples = projectsList?.length > 0 && projectsList?.every(project => isExample(project));
@@ -143,7 +146,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldReRoute(selectedProject, config) {
     return false;
-  };
+  }
 
   protected getExtraProjects(selectedProjectId, selectedProject) {
     return [{
@@ -167,7 +170,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
     this.subs.add(this.selectedProjectId$.pipe(
     ).subscribe((projectId) => {
-      this.projectId = projectId;
+        this.projectId = projectId;
       }
     ));
 
@@ -205,7 +208,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     return 'experiment';
   }
 
-  setupBreadcrumbsOptions(){
+  setupBreadcrumbsOptions() {
     this.subs.add(this.selectedProject$.pipe().subscribe((selectedProject) => {
       this.store.dispatch(coreProjectsActions.setBreadcrumbsOptions({
         breadcrumbOptions: {
@@ -228,7 +231,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
   private showConfirmDialog(readyForDeletion: CommonProjectReadyForDeletion) {
     const name = this.getName();
-    const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
+    this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, boolean>(ConfirmDialogComponent, {
       data: {
         title: `Unable to Delete ${name[0].toUpperCase()}${name.slice(1)}`,
         body: `You cannot delete ${name} "<b>${readyForDeletion.project.name.split('/').pop()}</b>" with un-archived ${name === 'project' ? popupEntitiesListConst : this.getDeletePopupEntitiesList()}s. <br/>
@@ -241,14 +244,14 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         no: 'OK',
         iconClass: 'i-alert',
       }
-    });
-    confirmDialogRef.afterClosed().subscribe(() => {
-      this.store.dispatch(resetReadyToDelete());
-    });
+    }).afterClosed()
+      .subscribe(() => {
+        this.store.dispatch(resetReadyToDelete());
+      });
   }
 
   private showDeleteDialog(readyForDeletion) {
-    this.dialog.open(CommonDeleteDialogComponent, {
+    this.dialog.open<CommonDeleteDialogComponent, DeleteData, boolean>(CommonDeleteDialogComponent, {
       data: {
         entity: readyForDeletion.project,
         numSelected: 1,
@@ -259,12 +262,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       disableClose: true
     }).afterClosed()
       .subscribe((confirmed) => {
-      if (confirmed) {
-        this.store.dispatch(resetProjects());
-        this.store.dispatch(getAllProjectsPageProjects());
-      }
-      this.store.dispatch(resetDeleteState());
-    });
+        if (confirmed) {
+          this.store.dispatch(resetProjects());
+          this.store.dispatch(getAllProjectsPageProjects());
+        }
+        this.store.dispatch(resetDeleteState());
+      });
   }
 
   ngOnDestroy() {
@@ -319,22 +322,21 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
 
   openProjectDialog(mode?: string, project?: Project) {
-    this.projectDialog = this.dialog.open(ProjectDialogComponent, {
+    this.dialog.open<ProjectDialogComponent, ProjectDialogConfig, boolean>(ProjectDialogComponent, {
       data: {
         mode,
         project: project ?? this.selectedProject
       }
-    });
-    this.projectDialog.afterClosed().subscribe(projectHasBeenUpdated => {
-      if (projectHasBeenUpdated) {
+    }).afterClosed()
+      .pipe(filter(projectHasBeenUpdated => projectHasBeenUpdated))
+      .subscribe(() => {
         this.store.dispatch(resetProjectsSearchQuery());
         this.store.dispatch(getAllProjectsPageProjects());
         this.store.dispatch(coreProjectsActions.getAllSystemProjects());
-      }
-    });
+      });
   }
 
-  protected getName(): string {
+  protected getName() {
     return EntityTypeEnum.project;
   }
 }

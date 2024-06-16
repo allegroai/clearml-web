@@ -1,126 +1,92 @@
-<form #projectForm='ngForm' class="d-flex flex-column">
-  <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
+<form [formGroup]="projectForm" class="d-flex flex-column">
+  <mat-form-field appearance="outline" class="mat-light">
     <mat-label>Project name</mat-label>
-    @if (name.touched && name.errors?.required) {
-      <mat-error>*Please add name.</mat-error>
-    }
-    @if (name.touched && name.errors?.uniqueProject) {
-      <mat-error>*Project name in this path already exists.</mat-error>
-    }
-    @if (name.touched && name.errors?.minlength) {
-      <mat-error>*Project name should contain more than 3 characters.</mat-error>
-    }
-    @if (name.touched && name.errors?.emptyName && !name.errors?.minlength) {
-      <mat-error>*Project name can't contain only spaces.</mat-error>
-    }
-    @if (name.touched && name.errors?.pattern &&  !name.errors?.minlength) {
-      <mat-error>*Project name can't contain slash (/)</mat-error>
-    }
     <input name="projectName"
-      [(ngModel)]="project.name"
-      #name="ngModel"
-      matInput
-      autocomplete="off"
-      smUniqueProjectValidator
-      smUniqueNameValidator
-      [existingNames]="[]"
-      [parent]="targetFolder.value"
-      pattern="^[^\/]*$"
-      required minlength="3" >
+           formControlName="name"
+           matInput
+           autocomplete="off"
+           smUniqueProjectValidator
+           smUniqueNameValidator
+           [existingNames]="[]"
+           [parent]="projectForm.controls.parent.value"
+           pattern="^[^\/]*$"
+    >
+    @if (projectForm.controls.name.invalid && projectForm.controls.name.errors; as errors) {
+      <mat-error>
+        @if (errors?.required) {
+          Please add name.
+        }
+        @if (errors?.uniqueProject) {
+          Project name in this path already exists.
+        }
+        @if (errors?.minlength) {
+          Project name should contain more than 3 characters.
+        }
+        @if (errors?.emptyName && !errors?.minlength) {
+          Project name can't contain only spaces.
+        }
+        @if (errors?.pattern &&  !errors?.minlength) {
+          Project name can't contain slash (/)
+        }
+      </mat-error>
+    }
   </mat-form-field>
 
-  <mat-form-field appearance="outline" hideRequiredMarker
-    (mousedown)="!isFocused(locationRef) && targetFolder.value && targetFolder.reset(); locationRef.blur(); locationRef.focus()">
-    @if (targetFolder.touched && targetFolder.errors?.required) {
-      <mat-error>*Please add location.</mat-error>
-    }
-    @if (targetFolder?.errors?.minlength) {
-      <mat-error>Please provide a name longer than 3 characters</mat-error>
-    }
+  <sm-paginated-entity-selector
+    name="projectName"
+    formControlName="parent"
+    [data]="allProjects()"
+    label="Create in"
+    placeHolder="Search for project path"
+    [isRequired]="true"
+    [createNewSuffix]="projectsNames() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
+    (getEntities)="loadMore($event, false)"
+    (loadMore)="loadMore($event, true)"
+  >
+  </sm-paginated-entity-selector>
+  @if (projectForm.controls.parent.touched && projectForm.controls.parent.invalid && projectForm.controls.parent.errors; as errors) {
+    <mat-error>
+      @if (errors?.required) {
+        Please add name.
+      }
+      @if (errors?.minlength) {
+        Project name should contain more than 3 characters.
+      }
+    </mat-error>
+  }
 
-    <mat-label>Create in</mat-label>
-    <input type="text"
-      matInput
-      #targetFolder="ngModel"
-      #locationRef
-      name="location"
-      [(ngModel)]="project.parent"
-      [matAutocomplete]="auto"
-      placeholder="Search for project path"
-      required
-      minlength="3">
-    @if (projects && targetFolder.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)) {
-      <span matSuffix
-      class="creat-new-suffix">(Create New)</span>
+  <mat-form-field appearance="outline">
+    <mat-label>Description</mat-label>
+    <textarea class="project-description"
+              name="description"
+              matInput
+              formControlName="description"
+    ></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Default output destination</mat-label>
+    <input class="project-output-dest"
+           matInput
+           name="default_output_destination"
+           formControlName="default_output_destination"
+           [pattern]="outputDestPattern"
+           placeholder="e.g. s3://bucket. gs://bucket"
+    >
+    @if (projectForm.controls.parent.invalid && projectForm.controls.parent.errors; as errors) {
+      <mat-error>
+        @if (errors?.required) {
+          Please add default destination.
+        }
+        @if (errors?.pattern) {
+          Illegal output destination (e.g. s3://bucket. gs://bucket)
+        }
+      </mat-error>
     }
-    <i matSuffix class="al-icon sm-md search-icon" [class]="targetFolder.value? 'al-ico-dialog-x pointer':'al-ico-search'"
-      (click)="targetFolder.value && targetFolder.reset(); locationRef.focus()"
-    smClickStopPropagation></i>
-    <mat-autocomplete
-      (opened)="setIsAutoCompleteOpen(true)"
-      (closed)="setIsAutoCompleteOpen(false)"
-      (optionSelected)="locationSelected($event)"
-      #auto="matAutocomplete" autoActiveFirstOption
-      class="light-theme"
-      classList="light-theme"
-      >
-      @if (projectsNames !== null && targetFolder.value && !(targetFolder.value | stringIncludedInArray:projectsNames)) {
-        <mat-option
-          class="item"
-          [value]="targetFolder.value"
-          >"{{targetFolder.value}}" <span class="new">(Create New)</span></mat-option>
-        }
-        @for (projectName of projectsNames; track projectName) {
-          <mat-option
-            [value]="projectName" [smTooltip]="projectName"  smShowTooltipIfEllipsis
-            >
-            <div [smSearchText]="targetFolder.value">{{projectName}}</div>
-          </mat-option>
-        }
-        @if (!projects) {
-          <div class="p-4 pe-none">
-            <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
-          </div>
-        }
-          <sm-dots-load-more [class.hidden]="!projects || noMoreOptions" [loading]="loading" (loadMore)="loadMore(targetFolder.value)"></sm-dots-load-more>
-        <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
-      </mat-autocomplete>
-    </mat-form-field>
-    <mat-form-field appearance="outline" hideRequiredMarker>
-      @if (description?.touched && description?.invalid) {
-        <mat-error>*Please add description.
-        </mat-error>
-      }
-      <mat-label>Description</mat-label>
-      <textarea class="project-description"
-        name="description"
-        matInput
-        [(ngModel)]="project.description"
-        #description="ngModel"
-      ></textarea>
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      @if (default_output_destination?.touched && default_output_destination?.errors?.required) {
-        <mat-error>*Please add
-          default destination.
-        </mat-error>
-      }
-      @if (default_output_destination?.touched && default_output_destination?.errors?.pattern) {
-        <mat-error>*Illegal
-          output destination (e.g. s3://bucket. gs://bucket)
-        </mat-error>
-      }
-      <mat-label>Default output destination</mat-label>
-      <input class="project-output-dest"
-        matInput
-        name="default_output_destination"
-        [(ngModel)]="project.default_output_destination"
-        #default_output_destination="ngModel"
-        [pattern]="outputDestPattern"
-        placeholder="e.g. s3://bucket. gs://bucket">
-      </mat-form-field>
-      <div class="w-100 create-project-button">
-        <button class="btn btn-dark-fill center" data-id="Create Project" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
-        </button>
-      </div>
-    </form>
+  </mat-form-field>
+
+  <div class="w-100 create-project-button">
+    <button class="btn btn-dark-fill center" data-id="Create Project" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
+    </button>
+  </div>
+</form>

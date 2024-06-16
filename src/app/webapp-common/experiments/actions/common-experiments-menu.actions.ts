@@ -15,7 +15,7 @@ export const publishClicked = createAction(
 
 export const stopClicked = createAction(
   EXPERIMENTS_INFO_PREFIX + 'stop experiments',
-  props<{ selectedEntities: ISelectedExperiment[] }>()
+  props<{ selectedEntities: ISelectedExperiment[], includePipelineSteps?: boolean}>()
 );
 export const startPipeline = createAction(
   EXPERIMENTS_INFO_PREFIX + 'start pipeline',

@@ -21,4 +21,8 @@ export interface PipelinesDeleteRunsRequest {
      * Pipeline project ids. When deleting at least one run should be left
      */
     project: string;
+    /**
+     * If set then for the passed pipeline controller tasks also delete the pipeline   steps
+     */
+    include_pipeline_steps?: boolean;
 }

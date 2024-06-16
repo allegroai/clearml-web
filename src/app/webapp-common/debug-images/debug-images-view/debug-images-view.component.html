@@ -1,18 +1,34 @@
-<mat-expansion-panel *ngFor="let iteration of iterations; let first = first; trackBy:trackKey"
-                     class="images-section" [class.dark-theme]="isDarkTheme" togglePosition="before" [expanded]="first">
-  <mat-expansion-panel-header class="debug-header" [collapsedHeight]="null" *ngIf="!isDatasetVersionPreview" data-id="debugHeader">
-    <mat-panel-title> {{iteration.iter}}</mat-panel-title>
-  </mat-expansion-panel-header>
-  <ng-template matExpansionPanelContent>
-    <div class="d-flex justify-content flex-wrap sample-row">
-      <sm-debug-image-snippet
-        *ngFor="let frame of iteration.events; trackBy:trackFrame"
-        [frame]="frame"
-        [theme]="isDarkTheme? themeEnum.Dark: themeEnum.Light"
-        (imageError)="imageUrlError({frame, experimentId})"
-        (imageClicked)="imageClicked.emit({frame})"
-        (createEmbedCode)="createEmbedCode.emit({metrics: [frame.metric], variants: [frame.variant], domRect:$event});">
-      </sm-debug-image-snippet>
-    </div>
-  </ng-template>
-</mat-expansion-panel>
+@for (iteration of iterations; track iteration.iter) {
+  <mat-expansion-panel
+    class="images-section"
+    [class.dark-theme]="isDarkTheme"
+    togglePosition="before"
+    [expanded]="$first"
+    (afterExpand)="resize()"
+  >
+    @if (!isDatasetVersionPreview) {
+      <mat-expansion-panel-header class="debug-header" [collapsedHeight]="null" data-id="debugHeader">
+        <mat-panel-title> {{iteration.iter}}</mat-panel-title>
+      </mat-expansion-panel-header>
+    }
+    <ng-template matExpansionPanelContent>
+      <sm-virtual-grid
+        [items]="iteration.events"
+        [cardTemplate]="snippetTemplate"
+        [cardHeight]="180"
+        [cardWidth]="180"
+        [padding]="0"
+        [trackFn]="trackFrame"
+      ></sm-virtual-grid>
+      <ng-template #snippetTemplate let-frame>
+        <sm-debug-image-snippet
+          [frame]="frame"
+          [theme]="isDarkTheme? themeEnum.Dark: themeEnum.Light"
+          (imageError)="imageUrlError({frame, experimentId})"
+          (imageClicked)="imageClicked.emit({frame})"
+          (createEmbedCode)="createEmbedCode.emit({metrics: [frame.metric], variants: [frame.variant], domRect:$event});">
+        </sm-debug-image-snippet>
+      </ng-template>
+    </ng-template>
+  </mat-expansion-panel>
+}

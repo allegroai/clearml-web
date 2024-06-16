@@ -1,7 +1,8 @@
-import {Component, Input, Output} from '@angular/core';
+import {Component, Input, Output, viewChildren} from '@angular/core';
 import {EventEmitter} from '@angular/core';
 import {ThemeEnum} from '@common/constants';
 import {DebugSampleEvent, Iteration} from '@common/debug-images/debug-images-types';
+import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtual-grid.component';
 
 @Component({
   selector: 'sm-debug-images-view',
@@ -11,8 +12,7 @@ import {DebugSampleEvent, Iteration} from '@common/debug-images/debug-images-typ
 export class DebugImagesViewComponent {
   public themeEnum = ThemeEnum;
 
-  public trackKey = (index: number, item: any) => item.iter;
-  public trackFrame = (index: number, item: any) => `${item?.key} ${item?.timestamp}`;
+  public trackFrame = item => `${item?.key} ${item?.timestamp}`;
 
   @Input() experimentId;
   @Input() isMergeIterations;
@@ -25,7 +25,14 @@ export class DebugImagesViewComponent {
   @Output() createEmbedCode = new EventEmitter<{metrics?: string[]; variants?: string[]; domRect: DOMRect}>();
   @Output() urlError = new EventEmitter<{ frame: DebugSampleEvent; experimentId: string }>();
 
+  private gridList = viewChildren(VirtualGridComponent);
+
+
   public imageUrlError(data: { frame: DebugSampleEvent; experimentId: string }) {
     this.urlError.emit(data);
+  }
+
+  resize() {
+    this.gridList().forEach(grid => grid.resize(2))
   }
 }

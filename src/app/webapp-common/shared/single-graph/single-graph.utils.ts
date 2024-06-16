@@ -1,4 +1,4 @@
-import * as smoothing from 'taira';
+import smoothing from 'taira';
 
 export type SmoothTypeEnum = 'runningAverage' | 'exponential' | 'gaussian' | 'any';
 export const smoothTypeEnum = {
@@ -9,7 +9,7 @@ export const smoothTypeEnum = {
 };
 
 export const averageDebiased = (arr, weight) => {
-  let last = !!arr?.length ? 0 : NaN;
+  let last = arr?.length ? 0 : NaN;
   let validPoints = 0;
   return arr.map((d, i) => {
     if (!isFinite(last)) {

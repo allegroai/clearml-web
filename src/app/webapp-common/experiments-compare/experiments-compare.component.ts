@@ -11,7 +11,6 @@ import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {TitleCasePipe} from '@angular/common';
 import {resetSelectModelState} from '@common/select-model/select-model.actions';
-import {selectProjectType} from '~/core/reducers/view.reducer';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -28,8 +27,9 @@ import {
   EXPERIMENTS_COMPARE_ROUTES,
   MODELS_COMPARE_ROUTES
 } from '@common/experiments-compare/experiments-compare.constants';
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 import {isEqual} from 'lodash-es';
+import {selectProjectType} from '@common/core/reducers/view.reducer';
 
 const toCompareEntityType = {
   [EntityTypeEnum.controller]: EntityTypeEnum.experiment,
@@ -87,7 +87,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
     this.store.dispatch(resetSelectCompareHeader({fullReset: true}));
     this.store.dispatch(setGlobalLegendData({data: null}));
-    this.store.dispatch(setContextMenu({contextMenu: null}));
+    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
     this.store.dispatch(resetSelectModelState({fullReset: true}));
   }
 
@@ -239,6 +239,6 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
         isActive: ((route.featureLink ?? route.header) === entitiesType)
       };
     });
-    this.store.dispatch(setContextMenu({contextMenu}));
+    this.store.dispatch(headerActions.setTabs({contextMenu}));
   }
 }

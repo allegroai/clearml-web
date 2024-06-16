@@ -14,7 +14,6 @@ import {
   selectIsExperimentInEditMode,
   selectMetricVariantForView,
   selectMetricVariants,
-  selectMetricVariantsPlots,
   selectNoMoreExperiments,
   selectSelectedExperiments,
   selectSelectedExperimentsDisableAvailable,
@@ -40,14 +39,6 @@ import {SearchState, selectSearchQuery} from '../common-search/common-search.red
 import {ITableExperiment} from './shared/common-experiment-model.model';
 import {selectIsSharedAndNotOwner, selectMetricsLoading, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as experimentsActions from './actions/common-experiments-view.actions';
-import {
-  addProjectsTag,
-  getSelectedExperiments,
-  setCompareView,
-  setTableCols,
-  tableFilterChanged,
-  toggleCompareScalarSettings
-} from './actions/common-experiments-view.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
@@ -83,11 +74,12 @@ import {ExperimentMenuExtendedComponent} from '~/features/experiments/containers
 import {INITIAL_EXPERIMENT_TABLE_COLS} from './experiment.consts';
 import {selectIsPipelines} from '@common/experiments-compare/reducers';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
-import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
-import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {rootProjectsPageSize} from '@common/constants';
 import {SelectionEvent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {
+  CreateExperimentDialogComponent
+} from '@common/experiments/containers/create-experiment-dialog/create-experiment-dialog.component';
 
 @Component({
   selector: 'sm-common-experiments',
@@ -217,7 +209,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
 
   override ngOnInit() {
     super.ngOnInit();
-    this.store.dispatch(setTableCols({cols: this.tableCols}));
+    this.store.dispatch(experimentsActions.setTableCols({cols: this.tableCols}));
     let prevQueryParams: Params;
     this.sub.add(this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))).subscribe(() =>
       this.store.dispatch(resetAceCaretsPositions())));
@@ -400,7 +392,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
       tag,
       experiments: this.singleRowContext ? [contextExperiment] : this.selectedExperiments.filter(_selected => !isReadOnly(_selected))
     }));
-    this.store.dispatch(addProjectsTag({tag}));
+    this.store.dispatch(experimentsActions.addProjectsTag({tag}));
   }
 
   setContextMenuStatus(menuStatus: boolean) {
@@ -442,7 +434,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
             this.entities = experiments;
             const experimentsIds = this.route.snapshot.firstChild?.params?.ids?.split(',').filter(id => !!id);
             if (mode === 'compare' && experimentsIds?.length > 0 && this.selectedExperiments.length === 0) {
-              this.store.dispatch(getSelectedExperiments({ids: experimentsIds}));
+              this.store.dispatch(experimentsActions.getSelectedExperiments({ids: experimentsIds}));
             }
             if (!experimentId && this.shouldOpenDetails && this.firstExperiment && mode === 'info') {
               this.shouldOpenDetails = false;
@@ -652,7 +644,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
 
   clearTableFiltersHandler(tableFilters: { [s: string]: FilterMetadata }) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
-    this.store.dispatch(tableFilterChanged({filters, projectId: this.selectedProjectId}));
+    this.store.dispatch(experimentsActions.tableFilterChanged({filters, projectId: this.selectedProjectId}));
   }
 
   onContextMenuOpen({x, y, single, backdrop}: { x: number; y: number; single?: boolean; backdrop?: boolean }) {
@@ -700,15 +692,11 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   newExperiment() {
-    this.dialog.open(WelcomeMessageComponent, {
-      width: '720px',
-      height: '764px',
-      data: {
-        showTabs: true,
-        step: 2,
-        newExperimentYouTubeVideoId: ConfigurationService.globalEnvironment.newExperimentYouTubeVideoId
-      }
-    });
+    this.dialog.open(CreateExperimentDialogComponent, {
+      width: '800px',
+    }).afterClosed()
+      .pipe(filter(res => !!res))
+      .subscribe(data => this.store.dispatch(experimentsActions.createExperiment({data})));
   }
 
   downloadTableAsCSV() {
@@ -754,11 +742,33 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   showCompareSettingsChanged() {
-    this.store.dispatch(toggleCompareScalarSettings());
+    this.store.dispatch(experimentsActions.toggleCompareScalarSettings());
   }
 
   compareViewChanged(compareView: 'scalars' | 'plots') {
-    this.store.dispatch(setCompareView({mode: compareView}));
+    this.store.dispatch(experimentsActions.setCompareView({mode: compareView}));
     return this.router.navigate(['compare'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+  }
+
+  override filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean }}) {
+    super.filterSearchChanged({colId, value});
+    if (colId === 'parent.name') {
+      // No pagination in BE - setting same list will set noMoreOptions to true
+      if (value.loadMore) {
+        this.store.dispatch(experimentsActions.setParents({parents: [...this.parents]}));
+      } else {
+        this.store.dispatch(experimentsActions.resetTablesFilterParentsOptions());
+        this.store.dispatch(experimentsActions.getParents({searchValue: value.value}));
+      }
+    } else if (colId.startsWith('hyperparams.')) {
+      if (!value.loadMore) {
+        this.store.dispatch(experimentsActions.hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
+        this.store.dispatch(experimentsActions.setHyperParamsFiltersPage({page: 0}));
+      }
+      this.store.dispatch(experimentsActions.hyperParamSelectedExperiments({
+        col: {id: colId, getter: `${colId}.value`},
+        searchValue: value.value
+      }));
+    }
   }
 }

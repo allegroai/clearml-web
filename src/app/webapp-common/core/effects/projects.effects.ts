@@ -56,13 +56,13 @@ import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/proj
 import {rootProjectsPageSize} from '@common/constants';
 import {HTTP} from '~/app.constants';
 import {cleanTag} from '@common/shared/utils/helpers.util';
-import {selectProjectType} from '~/core/reducers/view.reducer';
 import {selectExperimentsTableFilters} from '@common/experiments/reducers';
 import {Params} from '@angular/router';
 import {selectCompareAddTableFilters} from '@common/experiments-compare/reducers';
 import {selectTableFilters} from '@common/models/reducers';
 import {selectSelectModelTableFilters} from '@common/select-model/select-model.reducer';
 import {TagColorMenuComponent} from '@common/shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
+import {selectProjectType} from '@common/core/reducers/view.reducer';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
