@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
+import {Credentials, selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {updateS3Credential} from '@common/core/actions/common-auth.actions';
 import {AdminService} from '~/shared/services/admin.service';
 
@@ -9,17 +9,14 @@ import {AdminService} from '~/shared/services/admin.service';
   templateUrl: './profile-key-storage.component.html',
   styleUrls: ['./profile-key-storage.component.scss']
 })
-export class ProfileKeyStorageComponent implements OnInit {
+export class ProfileKeyStorageComponent {
 
   public s3BucketCredentials$ = this.store.select(selectS3BucketCredentials);
 
   constructor(private store: Store,
               private adminService: AdminService) { }
 
-  ngOnInit(): void {
-  }
-
-  onS3BucketCredentialsChanged(formData) {
+  onS3BucketCredentialsChanged(formData: {bucketCredentials: Credentials[]}) {
     this.adminService.resetS3Services();
     this.store.dispatch(updateS3Credential({s3BucketCredentials: formData}));
   }

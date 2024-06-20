@@ -1,4 +1,4 @@
-import {createFeatureSelector, createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
+import {ActionCreator, createFeatureSelector, createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
 import {Task} from '~/business-logic/model/tasks/task';
 import {User} from '~/business-logic/model/users/user';
@@ -23,7 +23,7 @@ export const dashboardInitState: DashboardState = {
 export const commonDashboardReducers = [
   on(setRecentProjects, (state, action) => ({...state, recentProjects: action.projects})),
   on(setRecentExperiments, (state, action) => ({...state, recentTasks: action.experiments})),
-] as ReducerTypes<DashboardState, any>[];
+] as ReducerTypes<DashboardState, ActionCreator[]>[];
 
 export const commonDashboardReducer = createReducer(
   dashboardInitState,

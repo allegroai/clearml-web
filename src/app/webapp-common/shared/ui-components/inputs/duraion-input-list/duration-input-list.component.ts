@@ -1,12 +1,10 @@
 import {
-  AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
-  ContentChildren,
   ElementRef, EventEmitter,
   forwardRef,
   Input, OnChanges,
-  OnInit, Output, QueryList, SimpleChanges,
+  Output, QueryList, SimpleChanges,
   ViewChildren
 } from '@angular/core';
 import {FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -18,6 +16,7 @@ import {
   KeydownStopPropagationDirective
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
 import {NgForOf, NgIf} from '@angular/common';
+import {trackByIndex} from '@common/shared/utils/forms-track-by';
 
 export type DURATION_INPUT_TYPE = 'hours' | 'seconds' | 'ms' | 'days' | 'minutes';
 
@@ -86,7 +85,7 @@ export function durationInputFactory(values: Array<DURATION_INPUT_TYPE | Duratio
     NgForOf
   ]
 })
-export class DurationInputListComponent extends DurationInputBase implements OnInit, AfterViewInit, OnChanges {
+export class DurationInputListComponent extends DurationInputBase implements OnChanges {
   @ViewChildren('inputRef') private elReference: QueryList<ElementRef>;
 
   @Input() set inputs(inputs: Array<DURATION_INPUT_TYPE | DurationInput | DurationInputInterface> ) {
@@ -98,18 +97,6 @@ export class DurationInputListComponent extends DurationInputBase implements OnI
 
   @Output() onResetIcon = new EventEmitter<null>();
   data: Array<DurationInput>;
-
-
-  trackBy(index, item) {
-    return index;
-  }
-  constructor(eRef: ElementRef, cdr: ChangeDetectorRef) {
-    super(eRef, cdr);
-  }
-
-  ngOnInit(): void {}
-
-  ngAfterViewInit(): void {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.durationValue) {
@@ -153,5 +140,7 @@ export class DurationInputListComponent extends DurationInputBase implements OnI
       this.cdr?.detectChanges();
     }
   }
+
+  protected readonly trackByIndex = trackByIndex;
 }
 

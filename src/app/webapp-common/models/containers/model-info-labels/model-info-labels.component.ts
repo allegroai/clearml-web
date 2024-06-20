@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {SelectedModel} from '../../shared/models.model';
-import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {Observable} from 'rxjs';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
 import {filter} from 'rxjs/operators';

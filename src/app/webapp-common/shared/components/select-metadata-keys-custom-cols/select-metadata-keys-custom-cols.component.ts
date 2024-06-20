@@ -1,8 +1,7 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {ISmCol} from '../../ui-components/data/table/table.consts';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
-import {NgForOf, NgIf} from '@angular/common';
 import {SimpleFilterPipe} from '@common/shared/pipes/simple-filter.pipe';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
@@ -12,30 +11,29 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   templateUrl: './select-metadata-keys-custom-cols.component.html',
   styleUrls: ['./select-metadata-keys-custom-cols.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SearchComponent,
     MenuItemComponent,
-    NgForOf,
     SimpleFilterPipe,
     MatProgressSpinnerModule,
-    NgIf,
     ClickStopPropagationDirective
-  ]
+]
 })
 export class SelectMetadataKeysCustomColsComponent {
-  searchText: string;
-  @Input() metadataKeys: string[];
-  metadataColsIds: string[];
+  searchText = signal<string>('');
+  title = input<string>();
+  metadataKeys = input<string[]>();
+  singleSelect = input<boolean>();
+  tableCols = input<ISmCol[]>()
+  metadataColsIds = computed(() => this.tableCols()?.filter(col => col.type === 'metadata' || col.type==='hdmd').map(col => col.key))
 
-  @Input() set tableCols(cols: ISmCol[]) {
-    this.metadataColsIds = cols.filter(col => col.type === 'metadata' || col.type==='hdmd').map(col => col.key);
-  }
-
-  @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{ key: string; show: boolean }>();
-  @Output() goBack = new EventEmitter();
+  addMetadataKey = output<string>();
+  addOrRemoveMetadataKeyFromColumns = output<{ key: string; show: boolean }>();
+  goBack = output<void>();
 
   searchQ(search: string) {
-    this.searchText = search;
+    this.searchText.set(search);
   }
 
 }

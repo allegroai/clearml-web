@@ -1,25 +1,36 @@
-<div class="queues-header" *ngIf="queuesManager">
-  <button  class="btn btn-cml-primary d-flex align-items-center" (click)="addQueue()">
-    <i class="al-icon al-ico-add sm"></i> <span> &nbsp; NEW QUEUE</span>
-  </button>
+<div class="queues-header">
+  @if (queuesManager) {
+    <button  class="btn btn-cml-primary d-flex align-items-center" (click)="addQueue()">
+      <i class="al-icon al-ico-add sm me-2"></i><span>NEW QUEUE</span>
+    </button>
+  }
+  <sm-refresh-button (setAutoRefresh)="setAutoRefresh($event)"></sm-refresh-button>
 </div>
-<sm-queue-stats [queue]="selectedQueue$ | async"></sm-queue-stats>
-<as-split class="flex-grow-1" (transitionEnd)="table.table.resize(); table.afterTableInit()">
+<sm-queue-stats [queue]="selectedQueue()"></sm-queue-stats>
+<as-split class="flex-grow-1" (transitionEnd)="table.table.resize(); table.afterTableInit()" [gutterSize]=1>
   <as-split-area [size]="50">
     <sm-queues-table
       #table class="mt-2"
-      [queues]="queues$ | async"
-      [selectedQueue]="selectedQueue$ | async"
+      [queues]="queues()"
+      [selectedQueue]="selectedQueue()"
       (sortedChanged)="sortedChanged($event)"
-      [tableSortFields]="tableSortFields$ | async"
-      [tableSortOrder]="tableSortOrder$ | async"
+      [tableSortFields]="tableSortFields()"
       (deleteQueue)="deleteQueue($event)"
       (renameQueue)="renameQueue($event)"
       (clearQueue)="clearQueue($event)"
       (queueSelected)="selectQueue($event)"
     ></sm-queues-table>
   </as-split-area>
-  <as-split-area [size]="50" [visible]="!!(selectedQueue$| async)">
-    <sm-queue-info [selectedQueue]="selectedQueue$ | async" [queues]="queues$ | async" (moveExperimentToTopOfQueue)="moveExperimentToTopOfQueue($event)" (moveExperimentToBottomOfQueue)="moveExperimentToBottomOfQueue($event)" (removeExperimentFromQueue)="removeExperimentFromQueue($event)" (moveExperimentToOtherQueue)="moveExperimentToOtherQueue($event)" (moveExperimentInQueue)="moveExperimentInQueue($event)" (deselectQueue)="selectQueue(null)"></sm-queue-info>
+  <as-split-area [size]="50" [visible]="!!selectedQueue()">
+    <sm-queue-info
+      [selectedQueue]="selectedQueue()"
+      [queues]="queues()"
+      (moveExperimentToTopOfQueue)="moveExperimentToTopOfQueue($event)"
+      (moveExperimentToBottomOfQueue)="moveExperimentToBottomOfQueue($event)"
+      (removeExperimentFromQueue)="removeExperimentFromQueue($event)"
+      (moveExperimentToOtherQueue)="moveExperimentToOtherQueue($event)"
+      (moveExperimentInQueue)="moveExperimentInQueue($event)"
+      (deselectQueue)="selectQueue(null)"
+    ></sm-queue-info>
   </as-split-area>
 </as-split>

@@ -74,11 +74,15 @@ export class DeleteDialogEffectsBase {
   }
 
   deleteEntityApi(entityType: EntityTypeEnum, entities: any[], deleteArtifacts?: boolean,
-                  resetMode?: boolean, projectId?: string): Observable<{ failed: any[]; urlsToDelete: string[]; succeeded?: TasksResetManyResponseSucceeded[] }> {
+                  resetMode?: boolean, projectId?: string, includeChildren?: boolean): Observable<{
+    failed: any[];
+    urlsToDelete: string[];
+    succeeded?: TasksResetManyResponseSucceeded[]
+  }> {
     const ids = entities.map(entity => entity.id as string);
     switch (entityType) {
       case EntityTypeEnum.controller:
-        return this.pipelinesService.pipelinesDeleteRuns({ids, project: projectId || entities[0]?.project?.id})
+        return this.pipelinesService.pipelinesDeleteRuns({ids, project: projectId || entities[0]?.project?.id, include_pipeline_steps: includeChildren })
           .pipe(
             map((res: PipelinesDeleteRunsResponse) => ({
               failed: res.failed,
@@ -118,7 +122,11 @@ export class DeleteDialogEffectsBase {
       case EntityTypeEnum.pipeline:
       case EntityTypeEnum.simpleDataset:
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        return this.projectsApi.projectsDelete({project: entities[0].id, delete_contents: true, delete_external_artifacts: deleteArtifacts}).pipe(
+        return this.projectsApi.projectsDelete({
+          project: entities[0].id,
+          delete_contents: true,
+          delete_external_artifacts: deleteArtifacts
+        }).pipe(
           map((res: TasksDeleteResponse) => ({
             urlsToDelete: [...res.urls.model_urls, ...res.urls.artifact_urls, ...res.urls.event_urls],
             failed: []
@@ -163,45 +171,50 @@ export class DeleteDialogEffectsBase {
         this.store.select(this.getEntitySelector(action.entityType)),
       ),
       map(([, entities]) => action.entity ? [action.entity] : entities),
-      switchMap(entities => action.includeChildren ? getChildrenExperiments(this.tasksApi, entities)
-        .pipe(map((children: Task[]) => [...children, ...entities])) : of(entities)),
+      // switchMap(entities => action.includeChildren ? getChildrenExperiments(this.tasksApi, entities)
+      //   .pipe(map((children: Task[]) => [...children, ...entities])) : of(entities)),
       withLatestFrom(this.store.select(selectSelectedProjectId)),
       switchMap(([entities, projectId]) => this.deleteEntityApi(
           action.entityType,
           entities,
           action.deleteArtifacts,
           action.resetMode,
-          projectId
+          projectId,
+          action.includeChildren
         )
-        .pipe(
-          map(({failed, succeeded, urlsToDelete}) => [
-            this.parseErrors(failed, entities),
-            this.getUrlsPerProvider(action.deleteArtifacts ? urlsToDelete : []),
-            succeeded
-          ]),
-          mergeMap(([failed, /*urlsPerSource*/, succeeded]: [{ id: string; name: string; message: string }[], { [provider in CloudProviders]: string[] }, TasksResetManyResponseSucceeded[]]) => [
-              ...this.pauseAutorefresh(action.entityType),
-              setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
-              setFailedDeletedEntities({failedEntities: failed}),
-              // deleteFileServerSources({files: urlsPerSource['fs']}), // Currently deleting only in BE
-              // deleteS3Sources({files: urlsPerSource['s3']}),
-              // deleteGoogleCloudeSource(urlsPerSource['gc']),
-              // deleteAzure(urlsPerSource['azure']),
-              // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
-              action.resetMode ? updateManyExperiment({changeList: succeeded}) : emptyAction()
-            ]
-          ),
-          catchError(error => {
-            if (this.errorService.lastRunError(error.error)) {
-              return this.handleLastRun(projectId || entities[0]?.project?.id);
-            }
-            return [
-              requestFailed(error),
-              deactivateLoader(action.type),
-              setServerError(error, null, `Can't delete ${action.entityType} ${error?.meta?.error_data?.id || ''}`)
-            ];
-          })
-        )
+          .pipe(
+            map(({failed, succeeded, urlsToDelete}) => [
+              this.parseErrors(failed, entities),
+              this.getUrlsPerProvider(action.deleteArtifacts ? urlsToDelete : []),
+              succeeded
+            ]),
+            mergeMap(([failed, /*urlsPerSource*/, succeeded]: [{
+                id: string;
+                name: string;
+                message: string
+              }[], { [provider in CloudProviders]: string[] }, TasksResetManyResponseSucceeded[]]) => [
+                ...this.pauseAutorefresh(action.entityType),
+                setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
+                setFailedDeletedEntities({failedEntities: failed}),
+                // deleteFileServerSources({files: urlsPerSource['fs']}), // Currently deleting only in BE
+                // deleteS3Sources({files: urlsPerSource['s3']}),
+                // deleteGoogleCloudeSource(urlsPerSource['gc']),
+                // deleteAzure(urlsPerSource['azure']),
+                // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
+                action.resetMode ? updateManyExperiment({changeList: succeeded}) : emptyAction()
+              ]
+            ),
+            catchError(error => {
+              if (this.errorService.lastRunError(error.error)) {
+                return this.handleLastRun(projectId || entities[0]?.project?.id);
+              }
+              return [
+                requestFailed(error),
+                deactivateLoader(action.type),
+                setServerError(error, null, `Can't delete ${action.entityType} ${error?.meta?.error_data?.id || ''}`)
+              ];
+            })
+          )
       )
     )),
   ));
@@ -294,25 +307,25 @@ export class DeleteDialogEffectsBase {
   }
 
   private handleLastRun(project: string) {
-      return this.dialog.open(ConfirmDialogComponent, {
-        data: {
-          title: 'Delete Pipeline',
-          body: 'Deleting the last run of a pipeline will also delete the pipeline',
-          iconClass: 'i-alert',
-          yes: 'Delete',
-          no: 'Cancel'
-        } as ConfirmDialogConfig
-      }).afterClosed()
-        .pipe(
-          tap(confirm => !confirm && this.dialog.closeAll()),
-          filter(confirm => !!confirm),
-          tap(() => this.router.navigate(['pipelines'])),
-          switchMap(() => [
-            deleteEntities({
-              entityType: EntityTypeEnum.project,
-              entity: {id: project},
-              deleteArtifacts: true
-            })])
-        );
+    return this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Pipeline',
+        body: 'Deleting the last run of a pipeline will also delete the pipeline',
+        iconClass: 'i-alert',
+        yes: 'Delete',
+        no: 'Cancel'
+      } as ConfirmDialogConfig
+    }).afterClosed()
+      .pipe(
+        tap(confirm => !confirm && this.dialog.closeAll()),
+        filter(confirm => !!confirm),
+        tap(() => this.router.navigate(['pipelines'])),
+        switchMap(() => [
+          deleteEntities({
+            entityType: EntityTypeEnum.project,
+            entity: {id: project},
+            deleteArtifacts: true
+          })])
+      );
   }
 }

@@ -1,11 +1,5 @@
 import {ActionCreator, createSelector, on, ReducerTypes} from '@ngrx/store';
-import {
-  logout,
-  setFilterByUser,
-  setApiVersion,
-  fetchCurrentUser,
-  setCurrentUserName
-} from '../actions/users.actions';
+import {fetchCurrentUser, logout, setApiVersion, setCurrentUserName, setFilterByUser} from '../actions/users.actions';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {
   GetCurrentUserResponseUserObjectCompany
@@ -17,6 +11,8 @@ import {GettingStarted} from '~/core/actions/users.action';
 import {UsersGetCurrentUserResponseSettings} from '~/business-logic/model/users/usersGetCurrentUserResponseSettings';
 import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
 import RoleEnum = AuthEditUserRequest.RoleEnum;
+import {selectProjectType} from '@common/core/reducers/view.reducer';
+
 
 export interface UsersState {
   currentUser: GetCurrentUserResponseUserObject;
@@ -24,7 +20,7 @@ export interface UsersState {
   userWorkspaces: OrganizationGetUserCompaniesResponseCompanies[];
   selectedWorkspaceTab: GetCurrentUserResponseUserObjectCompany;
   workspaces: GetCurrentUserResponseUserObjectCompany[];
-  showOnlyUserWork: boolean;
+  showOnlyUserWork: { [key: string]: boolean };
   serverVersions: { server: string; api: string };
   gettingStarted: GettingStarted;
   settings: UsersGetCurrentUserResponseSettings;
@@ -36,7 +32,7 @@ export const initUsers: UsersState = {
   userWorkspaces: [],
   selectedWorkspaceTab: null,
   workspaces: [],
-  showOnlyUserWork: false,
+  showOnlyUserWork: {},
   serverVersions: null,
   gettingStarted: null,
   settings: null,
@@ -52,7 +48,6 @@ export const selectActiveWorkspaceTier = createSelector(selectActiveWorkspace, w
 export const selectUserWorkspaces = createSelector(users, state => state.userWorkspaces);
 export const selectSelectedWorkspaceTab = createSelector(users, state => state.selectedWorkspaceTab);
 export const selectWorkspaces = createSelector(users, state => state.workspaces);
-export const selectShowOnlyUserWork = createSelector(users, state => state.showOnlyUserWork);
 export const selectServerVersions = createSelector(users, state => state.serverVersions);
 export const selectGettingStarted = createSelector(users, state => state.gettingStarted);
 export const selectWorkspaceOwner = createSelector(selectActiveWorkspace, selectUserWorkspaces, (active, workspaces) => {
@@ -62,6 +57,7 @@ export const selectWorkspaceOwner = createSelector(selectActiveWorkspace, select
   }
   return null;
 });
+export const selectShowOnlyUserWork = createSelector(users, selectProjectType, (state, projectType) => projectType? state.showOnlyUserWork[projectType]: false);
 
 export const usersReducerFunctions = [
   on(fetchCurrentUser, state => ({...state})),
@@ -75,7 +71,7 @@ export const usersReducerFunctions = [
     currentUser: null
   })),
   on(setFilterByUser, (state, action) => {
-    return ({...state, showOnlyUserWork: action.showOnlyUserWork});
+    return ({...state, showOnlyUserWork: {...state.showOnlyUserWork, [action.feature]: action.showOnlyUserWork}});
   }),
   on(setApiVersion, (state, action) => ({...state, serverVersions: action.serverVersions}))
 ] as ReducerTypes<UsersState, ActionCreator[]>[];

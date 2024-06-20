@@ -8,11 +8,7 @@ export const initialState: StatsState = {
   showNoStatsNotice: false
 };
 
-const _statsReducer = createReducer(initialState,
-  on(showStatsErrorNotice, (state: StatsState) => ({...state, showNoStatsNotice: true})),
-  on(hideNoStatsNotice, (state: StatsState) => ({...state, showNoStatsNotice: false}))
+export const statsReducer = createReducer(initialState,
+  on(showStatsErrorNotice, (state: StatsState): StatsState => ({...state, showNoStatsNotice: true})),
+  on(hideNoStatsNotice, (state: StatsState): StatsState => ({...state, showNoStatsNotice: false}))
 );
-
-export function statsReducer(state, action) {
-  return _statsReducer(state, action);
-}

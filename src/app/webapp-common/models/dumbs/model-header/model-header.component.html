@@ -1,44 +1,48 @@
 <div class="d-flex justify-content-between header-container align-items-center"
-     [ngClass]="{'archive-mode': isArchived}">
+     [class.archive-mode]="isArchived()">
   <div class="d-flex-center">
-    <sm-toggle-archive
-      *ngIf="!hideArchiveToggle"
-      [class.hide-item]="sharedView"
-      [showArchived]="isArchived"
-      [minimize]="(isSmallScreen$ | async).matches"
-      (toggleArchived)="onIsArchivedChanged($event)"></sm-toggle-archive>
+    @if (!hideArchiveToggle()) {
+      <sm-toggle-archive
+        [class.hide-item]="sharedView()"
+        [showArchived]="isArchived()"
+        [minimize]="(isSmallScreen$ | async).matches"
+        (toggleArchived)="onIsArchivedChanged($event)"></sm-toggle-archive>
+    }
     <sm-button-toggle
       class="ms-3"
-      [disabled]="!tableMode || noData"
+      [disabled]="!tableMode() || noData"
       [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
-      [value]="!noData && tableMode"
-      [rippleEffect]="rippleEffect"
+      [value]="!noData && tableMode()"
+      [rippleEffect]="rippleEffect()"
       (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
   </div>
   <div class="d-flex justify-content-end align-items-center right-buttons">
-    <sm-clear-filters-button
-      *ngIf="!minimizedView"
-      [tableFilters]="tableFilters"
-      (clearTableFilters)="clearTableFilters.emit(tableFilters)"
-    ></sm-clear-filters-button>
+    @if (!minimizedView()) {
+      <sm-clear-filters-button
+        [tableFilters]="tableFilters()"
+        (clearTableFilters)="clearTableFilters.emit(tableFilters())"
+      ></sm-clear-filters-button>
+    }
     <sm-menu class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
              [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSVButton">
       <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
       <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()" [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
     </sm-menu>
-    <sm-model-custom-cols-menu
-      *ngIf="!minimizedView || sharedView"
-      [isLoading]="isLoadingMetadataKeys"
-      [metadataKeys]="metadataKeys"
-      [metricVariants]="metricVariants"
-      [tableCols]="tableCols"
-      [skipValueType]="tableMode === 'compare'"
-      (removeColFromList)="removeColFromList.emit($event)"
-      (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
-      (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged.emit($event)"
-      (selectedMetricToShow)="selectedMetricToShow.emit($event)"
-      (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns.emit($event)"
-    ></sm-model-custom-cols-menu>
+    @if (!minimizedView() || sharedView()) {
+      <sm-custom-cols-menu
+        [sections]="[{name: 'metrics', options: metricVariants(), template: metricsTemplate}, {name: 'metadata', options: metadataKeys(), template: metadataTemplate}]"
+        menuTooltip="Customize table"
+        [topTitle]="'CUSTOMIZE COLUMNS'"
+        [sectionsTitle]="'ADD CUSTOM COLUMN'"
+        [tableCols]="tableCols2()"
+        [isLoading]="false"
+        [disabled]="tableMode() === 'compare' && metricVariants()?.length === 0"
+        [(customColumnMode)]="customColumnMode"
+        (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
+        (getMetricsToDisplay)="selectMetadataKeysActiveChanged.emit({customMode: customColumnMode})"
+        (removeColFromList)="removeColFromList.emit($event)"
+      ></sm-custom-cols-menu>
+    }
     <sm-refresh-button
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     >
@@ -46,3 +50,20 @@
   </div>
 </div>
 
+<ng-template #metadataTemplate let-sectionData>
+  <sm-select-metadata-keys-custom-cols
+    [tableCols]="tableCols2()"
+    [metadataKeys]="sectionData.options"
+    (goBack)="customColumnMode = customColumnModeEnum.Standard"
+    (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns.emit($event)">
+  </sm-select-metadata-keys-custom-cols>
+</ng-template>
+<ng-template #metricsTemplate let-sectionData>
+  <sm-select-metric-for-custom-col
+    [tableCols]="tableCols2()"
+    [metricVariants]="sectionData.options"
+    [skipValueType]="tableMode() === 'compare'"
+    (goBack)="customColumnMode  = customColumnModeEnum.Standard"
+    (selectedMetricToShow)="selectedMetricToShow.emit($event)">
+  </sm-select-metric-for-custom-col>
+</ng-template>

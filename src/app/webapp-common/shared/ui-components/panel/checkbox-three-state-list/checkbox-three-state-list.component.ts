@@ -7,7 +7,7 @@ import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {NgForOf, NgIf} from '@angular/common';
+
 import {MatMenuModule} from '@angular/material/menu';
 
 
@@ -38,10 +38,8 @@ export enum CheckboxState {
     TooltipDirective,
     ShowTooltipIfEllipsisDirective,
     MatProgressSpinnerModule,
-    NgIf,
-    MatMenuModule,
-    NgForOf
-  ]
+    MatMenuModule
+]
 })
 export class CheckboxThreeStateListComponent {
   @Input() options: Array<{ label: string; value: string; tooltip?: string }>;

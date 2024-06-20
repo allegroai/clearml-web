@@ -1,56 +1,49 @@
-import {Component, OnDestroy} from '@angular/core';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
+import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {neverShowPopupAgain, setHideRedactedArguments} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
-import {popupId} from '@common/shared/services/tips.service';
+import {popupId, TipsService} from '@common/shared/services/tips.service';
 import {selectHideRedactedArguments, selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {filter} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
 import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
-import RoleEnum = AuthEditUserRequest.RoleEnum;
 import {MatDialog} from '@angular/material/dialog';
 import {RedactedArgumentsDialogComponent} from '../redacted-arguments-dialog/redacted-arguments-dialog.component';
-import {
-  selectHideExamples,
-  selectShowHiddenUserSelection
-} from '@common/core/reducers/projects.reducer';
-import {setHideExamples, setShowHidden} from '@common/core/actions/projects.actions';
+import {selectBlockUserScript, selectHideExamples, selectShowHiddenUserSelection} from '@common/core/reducers/projects.reducer';
+import {setBlockUserScript, setHideExamples, setShowHidden} from '@common/core/actions/projects.actions';
+import RoleEnum = AuthEditUserRequest.RoleEnum;
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-stats/usage-stats.component';
 
 @Component({
   selector: 'sm-profile-preferences',
   templateUrl: './profile-preferences.component.html',
-  styleUrls: ['./profile-preferences.component.scss']
+  styleUrls: ['./profile-preferences.component.scss'],
+  standalone: true,
+  imports: [
+    MatSlideToggle,
+    TooltipDirective,
+    UsageStatsComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfilePreferencesComponent implements OnDestroy {
+export class ProfilePreferencesComponent {
+
+  private store = inject(Store);
+  private dialog = inject(MatDialog);
+  public tipsService = inject(TipsService);
   public featuresEnum = FeaturesEnum;
   public supportReScaling = window['chrome'] || window['safari'];
   public disableHidpiChanged: boolean = false;
   public popupId = popupId;
   public disableHidpi = window.localStorage.getItem('disableHidpi') === 'true';
-  public neverShowTipsAgain$ = this.store.select(selectNeverShowPopups);
-  public show$: Observable<boolean>;
-  public admin: boolean;
-  private sub = new Subscription();
-  public hideRedactedArguments$: Observable<{ key: string }[]>;
-  public hideExamples$: Observable<boolean>;
-
-  constructor(private store: Store, private dialog: MatDialog) {
-    this.hideRedactedArguments$ = this.store.select(selectHideRedactedArguments);
-
-    this.show$ = store.select(selectShowHiddenUserSelection);
-    this.hideExamples$ = store.select(selectHideExamples);
-
-    this.sub.add(store.select(selectCurrentUser)
-      .pipe(filter(user => !!user))
-      .subscribe(user => this.admin = user.role === RoleEnum.Admin)
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
+  public neverShowTipsAgain = this.store.selectSignal(selectNeverShowPopups);
+  public blockUserScripts = this.store.selectSignal(selectBlockUserScript);
+  public show = this.store.selectSignal(selectShowHiddenUserSelection);
+  public admin = computed(() => this.currentUser()?.role === RoleEnum.Admin);
+  public hideRedactedArguments = this.store.selectSignal(selectHideRedactedArguments);
+  public hideExamples= this.store.selectSignal(selectHideExamples);
+  private currentUser= this.store.selectSignal(selectCurrentUser);
 
   hidpiChange(event: MatSlideToggleChange) {
     window.localStorage.setItem('disableHidpi', JSON.stringify(event.checked));
@@ -83,5 +76,9 @@ export class ProfilePreferencesComponent implements OnDestroy {
 
   toggleExamples(toggle: MatSlideToggleChange) {
     this.store.dispatch(setHideExamples({hide: toggle.checked}));
+  }
+
+  toggleBlockUserScript(toggle: MatSlideToggleChange) {
+    this.store.dispatch(setBlockUserScript({block: toggle.checked}));
   }
 }

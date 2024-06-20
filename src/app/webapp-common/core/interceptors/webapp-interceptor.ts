@@ -6,20 +6,16 @@ import {catchError} from 'rxjs/operators';
 import { Router } from '@angular/router';
 import {selectCurrentUser} from '../reducers/users-reducer';
 import {Store} from '@ngrx/store';
-import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {resetCurrentUser} from '~/core/actions/users.action';
+import {MatDialog} from '@angular/material/dialog';
 
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {
-  protected user: GetCurrentUserResponseUserObject;
-  protected router: Router;
-  protected store: Store;
+  protected router = inject(Router);
+  protected store = inject(Store);
+  protected dialog = inject(MatDialog);
+  protected user = this.store.selectSignal(selectCurrentUser);
 
-  constructor() {
-    this.router = inject(Router);
-    this.store = inject(Store);
-    this.store.select(selectCurrentUser).subscribe(user => this.user = user);
-  }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     request = request.clone({
@@ -43,11 +39,12 @@ export class WebappInterceptor implements HttpInterceptor {
     if (err.status === 401 && (
       ['/dashboard'].includes(redirectUrl) ||
       !environment.autoLogin ||
-      (environment.autoLogin && this.user)
+      (environment.autoLogin && this.user())
     )) {
       if (redirectUrl.indexOf('/signup') === -1 && redirectUrl.indexOf('/login') === -1) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         this.store.dispatch(resetCurrentUser());
+        this.dialog.closeAll();
         this.router.navigate(['login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
       }
       return throwError(() => err);

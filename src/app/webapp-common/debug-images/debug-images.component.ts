@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   ElementRef,
   EventEmitter,
   Input,
@@ -9,7 +9,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges
+  SimpleChanges, viewChildren
 } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, Params} from '@angular/router';
@@ -29,7 +29,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {getSignedUrl} from '../core/actions/common-auth.actions';
+import {getSignedUrl, signUrls} from '../core/actions/common-auth.actions';
 import {addMessage} from '../core/actions/layout.actions';
 import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
@@ -46,6 +46,11 @@ import {
   selectTaskNames,
   selectTimeIsNow
 } from './debug-images-reducer';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {DebugImagesViewComponent} from '@common/debug-images/debug-images-view/debug-images-view.component';
+import {selectSplitSize} from '@common/experiments/reducers';
+import {DebugImagesResponseIterations} from '~/business-logic/model/events/debugImagesResponseIterations';
+import {MetricsImageEvent} from '~/business-logic/model/events/metricsImageEvent';
 
 @Component({
   selector: 'sm-debug-images',
@@ -59,6 +64,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   @Input() disableStatusRefreshFilter = false;
   @Input() selected: Task;
   @Output() copyIdClicked = new EventEmitter();
+
+  private sampleViews = viewChildren(DebugImagesViewComponent);
 
   private debugImagesSubscription: Subscription;
   private taskNamesSubscription: Subscription;
@@ -99,6 +106,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     private elRef: ElementRef,
     private refresh: RefreshService,
     private reportEmbed: ReportCodeEmbedService,
+    private destroyRef: DestroyRef
   ) {
     this.tasks$ = this.store.select(selectTaskNames);
     this.optionalMetrics$ = this.store.select(selectOptionalMetrics);
@@ -115,26 +123,32 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
       .pipe(
         map(([, debugImages, metricForTask]) => !debugImages ? {} : Object.entries(debugImages).reduce(((acc, val: [string, EventsDebugImagesResponse]) => {
           const id = val[0];
-          const iterations = val[1].metrics.find(m => m.task === id).iterations;
+          const iterations: DebugImagesResponseIterations[] = val[1].metrics.find(m => m.task === id).iterations;
           if (iterations?.length === 0) {
             return {[id]: {}};
           }
+          const metrics = val[1].metrics.map((metric) => metric?.['metric'] || metric.iterations[0].events[0].metric);
           acc[id] = {
             data: iterations.map(iteration => ({
               iter: iteration.iter,
-              events: iteration.events.map(event => {
-                this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
+              events: iteration.events.map((event: MetricsImageEvent) => {
                 return {
                   ...event,
                   url: event.url,
-                  variantAndMetric: (this.selectedMetric === ALL_IMAGES || metricForTask[id] === ALL_IMAGES ) ? `${event.metric}/${event.variant}` : ''
+                  variantAndMetric: (this.selectedMetrics[id] === ALL_IMAGES || metricForTask[id] === ALL_IMAGES ) ? `${event.metric}/${event.variant}` : ''
                 };
               })
-            }))
+            })),
+            metrics,
+            metric: metrics[0],
+            scrollId: val[1].scroll_id,
           };
-          acc[id].metrics = val[1].metrics.map((metric: any) => metric.metric || metric.iterations[0].events[0].metric);
-          acc[id].metric = acc[id].metrics[0];
-          acc[id].scrollId = val[1].scroll_id;
+          this.store.dispatch(signUrls({sign: iterations.map(iteration =>
+              iteration.events.map((event: MetricsImageEvent) =>
+                ({url: event.url, config: {disableCache: event.timestamp}})
+              )
+            ).flat()
+          }));
           return acc;
         }), {}))
       )
@@ -213,6 +227,14 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
           this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
           this.changeDetection.markForCheck();
         });
+
+      if (this.minimized) {
+        this.store.select(selectSplitSize)
+          .pipe(
+            takeUntilDestroyed(this.destroyRef)
+          )
+          .subscribe(() => this.sampleViews().forEach(view => view.resize()))
+      }
     }
 
 
@@ -301,10 +323,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
   private isTaskRunning(tasks: Partial<Task>[]) {
     return tasks.some(task => [TaskStatusEnum.InProgress, TaskStatusEnum.Queued].includes(task.status));
-  }
-
-  trackExperiment(index: number, experimentID: string) {
-    return experimentID;
   }
 
   selectMetric(change: {value: string}, taskId) {

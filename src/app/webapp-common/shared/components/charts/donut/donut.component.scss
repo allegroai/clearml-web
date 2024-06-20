@@ -17,58 +17,60 @@
   }
 }
 
-.donut-legend {
-  display: flex;
-  height: fit-content;
-  max-height: 100%;
-  width: 40%;
-  flex-wrap: wrap;
+.content {
+  display: grid;
+  grid-auto-rows: 1fr minmax(auto, 33%);
+  height: 100%;
+  width: 100%;
   gap: 16px;
+}
+
+.donut-legend {
+  width: 100%;
+  min-height: 48px;
+  text-align: center;
   overflow: auto;
 
   .slice {
+    margin: 6px 12px;
     color: $blue-300;
-    position: relative;
-    margin-left: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 
     &.highlight {
       color: $blue-200;
 
       .circle {
-        width: 14px;
-        height: 14px;
-        top: 4px;
-        left: -21px;
+        box-shadow: 0 0 0 2px $blue-950, 0 0 0 3px var(--sliceColor);
       }
     }
   }
 
   .circle {
-    display: block;
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    top: 5px;
-    left: -20px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background-color: var(--sliceColor);
-
-    &:hover {
-      cursor: url(../../../../assets/icons/pallete-cursor.png) 6 0, pointer;
+    box-shadow: 0 0 0 2px $blue-950, 0 0 0 3px transparent;
+    cursor: url(../../../../assets/icons/pallete-cursor.svg) 6 0, pointer;
+    transition: box-shadow 0.2s;
+    &::after {
+      content: "";
+      display: block;
+      transform: translate(-4px, -4px);
+      padding: 10px;
     }
   }
 
   .quantity {
     color: $blue-200;
-    margin-left: 6px;
   }
 }
 
 .donut-container {
-  height: 100%;
-  width: 60%;
-  padding: 0 12px;
   position: relative;
+  width: 100%;
 
   .percent {
     text-align: center;

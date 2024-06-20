@@ -18,8 +18,8 @@ export abstract class TemplateFormSectionBaseDirective implements ControlValueAc
   set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
     if (this.valueFromInherit && val !== undefined && !isEqual(val, this.val)) {
       this.val = val;
-      this.onChange(val);
-      this.onTouch(val);
+      this.onChange && this.onChange(val);
+      this.onTouch && this.onTouch(val);
     }
   }
 

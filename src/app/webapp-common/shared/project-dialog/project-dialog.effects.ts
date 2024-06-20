@@ -1,11 +1,12 @@
 import * as newProjectActions from './project-dialog.actions';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './project-dialog.reducer';
-import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
@@ -13,6 +14,7 @@ import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {ShortProjectNamePipe} from '../pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '../pipes/project-location.pipe';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {MatDialog} from '@angular/material/dialog';
 
 @Injectable()
 export class ProjectDialogEffects {
@@ -21,6 +23,7 @@ export class ProjectDialogEffects {
     private projectsApiService: ApiProjectsService,
     private router: Router,
     private store: Store,
+    private dialog: MatDialog,
   ) {
   }
 
@@ -37,9 +40,10 @@ export class ProjectDialogEffects {
 
   createProject = createEffect(() => this.actions.pipe(
     ofType(newProjectActions.createNewProject),
-    withLatestFrom(this.store.select(selectActiveWorkspace)),
+    concatLatestFrom(() => this.store.select(selectActiveWorkspace)),
     switchMap(([action]) => this.projectsApiService.projectsCreate({...action.req})
       .pipe(
+        tap(() => this.dialog.getDialogById(action.dialogId).close(true)),
         mergeMap(() => [
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
@@ -54,10 +58,11 @@ export class ProjectDialogEffects {
 
   moveProject = createEffect(() => this.actions.pipe(
     ofType(newProjectActions.moveProject),
-    withLatestFrom(this.store.select(selectActiveWorkspace)),
+    concatLatestFrom(() => this.store.select(selectActiveWorkspace)),
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(([action]) => this.projectsApiService.projectsMove({project: action.project, new_location: action.new_location})
       .pipe(
+        tap(() => this.dialog.getDialogById(action.dialogId).close(true)),
         mergeMap(() => [
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),

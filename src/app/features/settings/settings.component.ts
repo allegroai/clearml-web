@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 import {Store} from '@ngrx/store';
 
 @Component({
@@ -10,7 +10,7 @@ import {Store} from '@ngrx/store';
 export class SettingsComponent {
 private store = inject(Store)
   constructor() {
-    this.store.dispatch(setContextMenu({contextMenu: null}));
+    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
   }
 
 }

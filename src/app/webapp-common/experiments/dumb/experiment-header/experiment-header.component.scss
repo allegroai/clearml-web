@@ -33,7 +33,7 @@
     }
   }
 
-  sm-experiment-custom-cols-menu {
+  sm-custom-cols-menu {
     margin-right: 25px;
   }
 
@@ -62,6 +62,10 @@
   .compare-view-select {
     margin-right: 24px;
   }
-
 }
 
+sm-select-metric-for-custom-col {
+  display: block;
+  height: 640px;
+  max-height: calc(100vh - 120px);
+}

@@ -1,7 +1,7 @@
 import {CanDeactivateFn} from '@angular/router';
 import {inject} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 import {PROJECTS_FEATURES} from '~/features/projects/projects.consts';
 
 export const resetContextMenuGuard: CanDeactivateFn<any> = (component,
@@ -10,7 +10,7 @@ export const resetContextMenuGuard: CanDeactivateFn<any> = (component,
                                                             nextState) => {
   const store = inject(Store);
   if (!(nextState.url.includes('projects') && (PROJECTS_FEATURES.some((ent)=> nextState.url.includes(ent))))){
-    store.dispatch(setContextMenu({contextMenu: null}));
+    store.dispatch(headerActions.setTabs({contextMenu: null}));
   }
   return true;
 };

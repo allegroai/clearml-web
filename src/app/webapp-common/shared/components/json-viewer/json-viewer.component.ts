@@ -3,6 +3,7 @@ import {MatTreeFlatDataSource, MatTreeFlattener, MatTreeModule} from '@angular/m
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatButtonModule} from '@angular/material/button';
 import {NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {orderJson} from '@common/shared/utils/shared-utils';
 
 export interface Segment {
   key: string;
@@ -44,7 +45,7 @@ export class JsonViewerComponent {
 
   @Input() set json(json: any) {
     if (json) {
-      this.dataSource.data = [{key: null, value: json}];
+      this.dataSource.data = [{key: null, value: orderJson(json)}];
       this.treeControl.expandAll();
     }
   }

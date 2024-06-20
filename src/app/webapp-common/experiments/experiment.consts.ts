@@ -49,6 +49,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     headerType: ColHeaderTypeEnum.sortFilter,
     filterable: true,
     searchableFilter: true,
+    paginatedFilterPageSize: 100,
     sortable: false,
     header: 'TAGS',
     style: {width: '300px'},

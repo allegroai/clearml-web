@@ -2,6 +2,17 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inp
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {MatExpansionPanel, MatExpansionPanelContent, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
+import {IsEmptyPipe} from '@common/shared/pipes/is-empty.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {AdvancedFilterPipe} from '@common/shared/pipes/advanced-filter.pipe';
+import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
+import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
+import {FormsModule} from '@angular/forms';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 export interface SelectionEvent {
   variant: MetricVariantResult;
@@ -10,10 +21,28 @@ export interface SelectionEvent {
 }
 
 @Component({
-  selector   : 'sm-select-metric-for-custom-col',
+  selector: 'sm-select-metric-for-custom-col',
   templateUrl: './select-metric-for-custom-col.component.html',
-  styleUrls  : ['./select-metric-for-custom-col.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./select-metric-for-custom-col.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SearchComponent,
+    ClickStopPropagationDirective,
+    MatProgressSpinner,
+    MatExpansionPanel,
+    IsEmptyPipe,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    TooltipDirective,
+    AdvancedFilterPipe,
+    CheckboxControlComponent,
+    MatExpansionPanelContent,
+    ShowTooltipIfEllipsisDirective,
+    MatRadioButton,
+    MatRadioGroup,
+    FormsModule
+  ],
+  standalone: true
 })
 export class SelectMetricForCustomColComponent {
   public metricTree: {[metricName: string]: MetricVariantResult[]};
@@ -23,8 +52,6 @@ export class SelectMetricForCustomColComponent {
   public searchText: string;
   public entriesLimit = 300;
   public moreResults: number;
-  trackByMetric = (index, entry: [string, MetricVariantResult[]]) => entry[1][0].metric_hash;
-  trackByVariant = (index, variant: MetricVariantResult) => variant.variant_hash;
   private debounceTimer: number;
 
   @Input() set metricVariants(metricVar: Array<MetricVariantResult>) {

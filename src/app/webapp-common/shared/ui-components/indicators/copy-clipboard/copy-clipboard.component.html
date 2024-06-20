@@ -11,6 +11,6 @@
         [disabled]="disabled"
         (cbOnSuccess)="copyToClipboard()"
 >
-  <i class="al-icon sm-md" [class]="copied ? 'al-ico-success' : copyIcon || 'al-ico-copy-to-clipboard'" [class.me-2]="label"></i>
+  <i class="al-icon sm-md" [class]="copied ? 'al-ico-success' : copyIcon || 'al-ico-copy-to-clipboard'" [class.me-2]="label" data-id="copyToClipboard"></i>
   <span>{{label}}</span>
 </button>

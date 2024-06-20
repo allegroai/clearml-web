@@ -1,48 +1,62 @@
 <div class="toggles">
   <sm-usage-stats #usage [class.hidden]="!usage.shown"></sm-usage-stats>
-  <mat-slide-toggle
-    *ngIf="admin || usage.shown"
-    (change)="statsChange($event)"
-    [checked]="show$ | async"
-    color="accent"
-  ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ms-2"></i></span>
-  </mat-slide-toggle>
+  @if (admin() || usage.shown) {
+    <mat-slide-toggle
+      (change)="statsChange($event)"
+      [checked]="show()"
+      color="accent"
+      ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ms-2"></i></span>
+    </mat-slide-toggle>
+  }
   <mat-slide-toggle
     (change)="toggleExamples($event)"
-    [checked]="hideExamples$ | async"
+    [checked]="hideExamples()"
     color="accent"
-  >Don’t show ClearML examples
+    >Don’t show ClearML examples
   </mat-slide-toggle>
-  <mat-slide-toggle
-    *ngIf="supportReScaling"
-    (change)="hidpiChange($event)"
-    [checked]="disableHidpi"
-    color="accent"
-  >Disable HiDPI browser scale override
-    <i class="al-icon al-ico-info-circle sm info align-middle ms-3 me-3"
+  @if (supportReScaling) {
+    <mat-slide-toggle
+      (change)="hidpiChange($event)"
+      [checked]="disableHidpi"
+      color="accent"
+      >Disable HiDPI browser scale override
+      <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
         data-id="hidpiInfoIcon"
-       smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
-    ></i>
-    <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
-  </mat-slide-toggle>
+        smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
+      ></i>
+      <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
+    </mat-slide-toggle>
+  }
+  @if (tipsService.hasTips()) {
+    <mat-slide-toggle
+      (change)="setNeverShowTipsAgain($event)"
+      [checked]="neverShowTipsAgain()?.includes(popupId)"
+      color="accent"
+      >Don’t show pro tips periodically
+    </mat-slide-toggle>
+  }
   <mat-slide-toggle
-    (change)="setNeverShowTipsAgain($event)"
-    [checked]="(neverShowTipsAgain$ | async)?.includes(popupId)"
+    (change)="toggleBlockUserScript($event)"
+    [checked]="blockUserScripts()"
     color="accent"
-  >Don’t show pro tips periodically
+    >Block running user's scripts in the browser
+    <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
+       data-id="blockScriptsInfoIcon"
+       smTooltip="Block any user and 3rd party scripts from running anywhere in the WebApp. Note that if this is turned on, you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports."
+    ></i>
   </mat-slide-toggle>
   <div class="d-flex">
     <mat-slide-toggle
       (change)="hideSpecificContainerArguments($event)"
-      [checked]="!!(hideRedactedArguments$ | async)"
+      [checked]="!!hideRedactedArguments()"
       color="accent"
-    >Hide specific container arguments
-      <i class="al-icon al-ico-info-circle sm info align-middle ms-3 me-3"
-      data-id="hideSpecificargInfoIcon"
-         smTooltip="Redact the values for the specified container environment variables in the experiment execution page"
+      >Hide specific container arguments
+      <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
+        data-id="hideSpecificargInfoIcon"
+        smTooltip="Redact the values for the specified container environment variables in the experiment execution page"
       ></i>
+      <span class="reload highlight pointer ms-3" data-id="editButton" (click)="$event.preventDefault(); editHideSpecificContainerArguments()">Edit</span>
     </mat-slide-toggle>
-    <span class="reload highlight pointer" data-id="editButton" (click)="editHideSpecificContainerArguments()">Edit</span>
   </div>
 
 </div>

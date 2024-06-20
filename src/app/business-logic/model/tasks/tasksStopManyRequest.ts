@@ -29,4 +29,8 @@ export interface TasksStopManyRequest {
      * If not true, call fails if the task status is not \'in_progress\'
      */
     force?: boolean;
+    /**
+     * If set then for the passed pipeline controller tasks also delete the pipeline   steps
+     */
+    include_pipeline_steps?: boolean;
 }

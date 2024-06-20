@@ -29,4 +29,12 @@ export interface TasksEnqueueRequest {
      * Extra information regarding status change
      */
     status_message?: string;
+    /**
+     * The name of the queue. If the queue does not exist then it is auto-created.   Cannot be used together with the queue id
+     */
+    queue_name?: string;
+    /**
+     * If passed then check wheter there are any workers watiching the queue
+     */
+    verify_watched_queue?: boolean;
 }

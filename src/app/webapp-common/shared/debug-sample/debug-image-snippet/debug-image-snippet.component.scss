@@ -110,6 +110,14 @@
       visibility: visible;
     }
   }
+
+  .scripts-blocked {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+  }
 }
 
 

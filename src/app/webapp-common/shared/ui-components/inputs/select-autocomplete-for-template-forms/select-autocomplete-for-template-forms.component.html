@@ -1,28 +1,26 @@
-<ng-form #autoSelectForm='ngForm'>
-  <mat-form-field [appearance]="appearance" hideRequiredMarker [class]="formFieldClass">
-      <input
-        #autocompleteInput
-        matInput
-        [matAutocomplete]="auto"
-        [name]="name"
-        [ngModel]="val"
-        [placeholder]="placeholder"
-        (ngModelChange)="optionSelected($event)"
-      >
-    <mat-autocomplete #auto="matAutocomplete"
-                      [displayWith]="displayFn"
-                      [class]="formFieldClass"
-                      [classList]="formFieldClass"
-                      autoActiveFirstOption
+<mat-form-field [appearance]="appearance()" [class]="formFieldClass()">
+  <input
+    matInput
+    [formControl]="control"
+    [matAutocomplete]="auto"
+    [placeholder]="placeholder()"
     >
+  <mat-autocomplete #auto="matAutocomplete"
+    [displayWith]="displayFn"
+    [class]="formFieldClass()"
+    [classList]="formFieldClass()"
+    autoActiveFirstOption
+    >
+    @if (filterText && isNewName && optionAddable()) {
       <mat-option
         class="item ellipsis"
-        *ngIf="filterText && isNewName && optionAddable"
         [value]="{label:filterText, value:filterText}"
         (onSelectionChange)= "customOptionSelected($event)"
-      >"{{filterText}}" <span class="new">(Add item)</span></mat-option>
-      <mat-option *ngFor="let option of (filteredItems | async)" [value]="option">{{option.label}}</mat-option>
+        >"{{filterText}}" <span class="new">(Add item)</span></mat-option>
+      }
+      @for (option of filteredItems(); track option) {
+        <mat-option [value]="option">{{option.label}}</mat-option>
+      }
     </mat-autocomplete>
     <ng-content></ng-content>
   </mat-form-field>
-</ng-form>

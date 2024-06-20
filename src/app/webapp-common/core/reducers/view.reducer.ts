@@ -4,13 +4,14 @@ import {apiRequest, requestFailed} from '@common/core/actions/http.actions';
 import {Ace} from 'ace-builds';
 import {IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {
+  headerActions,
   setBreadcrumbs,
-  setContextMenu,
-  setContextMenuActiveFeature,
   setTypeBreadcrumbs
 } from '@common/core/actions/router.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
+import {activeFeatureToProjectType, routeConfToProjectType} from '~/features/projects/projects-page.utils';
 
 export interface ViewState {
   loading: { [endpoint: string]: boolean };
@@ -37,6 +38,7 @@ export interface ViewState {
   contextMenu: HeaderNavbarTabConfig[];
   tableCardsCollapsed: {[entity: string]: boolean};
   contextMenuActiveFeature: string;
+  workspaceNeutral: boolean;
 }
 
 export const initViewState: ViewState = {
@@ -66,7 +68,8 @@ export const initViewState: ViewState = {
   breadcrumbs: [[{}]],
   tableCardsCollapsed: {},
   contextMenu: null,
-  contextMenuActiveFeature: null
+  contextMenuActiveFeature: null,
+  workspaceNeutral: false,
 };
 
 export const views = state => state.views as ViewState;
@@ -98,6 +101,9 @@ export const selectBreadcrumbs = createSelector(views, state => state && state.b
 export const selectTableCardsCollapsed = (entityType: EntityTypeEnum) => createSelector(views, state => state.tableCardsCollapsed[entityType]);
 export const selectContextMenu = createSelector(views, state => state && state.contextMenu);
 export const selectActiveFeature = createSelector(views, state => state && state.contextMenuActiveFeature);
+export const selectWorkspaceNeutral= createSelector(views, state => state?.workspaceNeutral);
+export const selectProjectType = createSelector(selectRouterConfig, selectActiveFeature,
+  (config, activeFeature) => (config && routeConfToProjectType(config)) ?? activeFeatureToProjectType(activeFeature));
 
 
 export const viewReducers = [
@@ -154,13 +160,13 @@ export const viewReducers = [
     ...state,
     neverShowPopupAgain: action.reset ? state.neverShowPopupAgain.filter(popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))
   })),
-  on(setBreadcrumbs, (state, action) => ({
-    ...state, breadcrumbs: action.breadcrumbs
+  on(setBreadcrumbs, (state, action): ViewState => ({
+    ...state, breadcrumbs: action.breadcrumbs, ...(action.workspaceNeutral !== undefined && {workspaceNeutral: action.workspaceNeutral})
   })),
-  on(setContextMenu, (state, action) => ({
+  on(headerActions.setTabs, (state, action) => ({
     ...state, contextMenu: action.contextMenu
   })),
-  on(setContextMenuActiveFeature, (state, action) => ({
+  on(headerActions.setActiveTab, (state, action) => ({
     ...state, contextMenuActiveFeature: action.activeFeature
   })),
   on(setTypeBreadcrumbs, (state, action) => ({

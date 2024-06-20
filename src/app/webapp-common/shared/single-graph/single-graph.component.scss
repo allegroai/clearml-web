@@ -87,7 +87,7 @@
   }
 
   ::ng-deep .legendlines path, ::ng-deep .legendpoints path {
-    cursor: url('../../assets/icons/pallete-cursor.png') 6 0, pointer;
+    cursor: url(../../assets/icons/pallete-cursor.svg) 6 0, pointer;
   }
 
   ::ng-deep .legendpoints path:not(.scatterpts) {
@@ -179,7 +179,7 @@
         }
       }
 
-      .hoverlayer .spikeline:nth-child(2) {
+      .hoverlayer .spikeline:nth-child(even) {
         stroke: $blue-300 !important;
       }
 

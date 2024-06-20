@@ -88,7 +88,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   private settingsLoaded: boolean;
 
   public selectedItemsListMapper(data) {
-    return data;
+    return decodeURIComponent(data);
   }
 
   @ViewChild('searchMetric') searchMetricRef: ElementRef;
@@ -149,7 +149,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
             }
             return acc;
           }, {});
-        const selectedHyperParams = this.selectedHyperParams?.filter(selectedParam => has(this.hyperParams, selectedParam));
+        const selectedHyperParams = this.selectedHyperParams?.filter(selectedParam => has(this.hyperParams, selectedParam.split('.').slice(0,1).join('.')));
         selectedHyperParams && this.updateServer(this.selectedMetric, selectedHyperParams);
         this.cdr.detectChanges();
       }));
@@ -197,7 +197,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       }
 
       if (queryParams.params) {
-        this.selectedHyperParams = Array.isArray(queryParams.params) ? queryParams.params : [queryParams.params];
+        this.selectedHyperParams = Array.isArray(queryParams.params) ? queryParams.params.map(this.selectedItemsListMapper) : [queryParams.params].map(this.selectedItemsListMapper);
       }
       this.cdr.detectChanges();
     }));
@@ -266,7 +266,12 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
 
-  updateServer(selectedMetric?: SelectedMetricVariant, selectedParams?: string[], skipNavigation?: boolean, valueType?: SelectedMetricVariant['valueType'], selectedMetrics?: SelectedMetricVariant[], force?: boolean) {
+  updateServer(selectedMetric?: SelectedMetricVariant,
+               selectedParams?: string[],
+               skipNavigation?: boolean,
+               valueType?: SelectedMetricVariant['valueType'],
+               selectedMetrics?: SelectedMetricVariant[],
+               force?: boolean) {
     (this.routeWasLoaded || force) && !skipNavigation && this.router.navigate([], {
       queryParams: {
         metricPath: selectedMetric ? `${selectedMetric?.metric_hash}.${selectedMetric?.variant_hash}` : undefined,
@@ -318,7 +323,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   selectedParamsForHoverChanged({param}) {
-    const newSelectedParamsList = this.selectedParamsHoverInfo.includes(param) ? this.selectedParamsHoverInfo.filter(i => i !== param) : [...this.selectedParamsHoverInfo, param];
+    const newSelectedParamsList = this.selectedParamsHoverInfo.includes(param) ? this.selectedParamsHoverInfo.filter(i => i !== param) : [...this.selectedParamsHoverInfo, param].map(this.selectedItemsListMapper);
     this.store.dispatch(setParamsHoverInfo({paramsHoverInfo: newSelectedParamsList}));
 
   }

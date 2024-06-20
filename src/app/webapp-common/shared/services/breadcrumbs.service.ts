@@ -1,37 +1,56 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {combineLatest, Subscription} from 'rxjs';
-import {selectRouterConfig} from '@common/core/reducers/router-reducer';
+import {combineLatest} from 'rxjs';
 import {selectBreadcrumbOptions, selectProjectAncestors} from '@common/core/reducers/projects.reducer';
-import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
-import {setBreadcrumbs} from '@common/core/actions/router.actions';
+import {debounceTime, distinctUntilChanged, filter, startWith} from 'rxjs/operators';
+import {setBreadcrumbs, setWorkspaceNeutral} from '@common/core/actions/router.actions';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {CrumbTypeEnum, IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {selectFeatureParam, selectHasProjectId} from '@common/layout/layout.selectors';
 
 @Injectable({
   providedIn: 'root'
 })
-export class BreadcrumbsService implements OnDestroy {
-  private sub = new Subscription();
+export class BreadcrumbsService {
+  private store = inject(Store);
+  private router = inject(Router);
+  public route = inject(ActivatedRoute);
+  protected staticBreadcrumb = signal(null)
 
-  constructor(private store: Store) {
-    this.sub.add(this.store.select(selectRouterConfig)
+  constructor() {
+    combineLatest([
+      this.store.select(selectHasProjectId).pipe(startWith(false)),
+      this.router.events.pipe(filter((event) => event instanceof NavigationEnd))
+    ])
+      .pipe(takeUntilDestroyed())
+      .subscribe(([hasProjectId]) => {
+        this.setCrumbs(hasProjectId);
+      });
+
+
+    this.store.select(selectFeatureParam)
       .pipe(
-        map(conf => conf?.[0]),
+        takeUntilDestroyed(),
         distinctUntilChanged()
       )
       .subscribe(() => {
           this.store.dispatch(setBreadcrumbsOptions({breadcrumbOptions: null}));
         }
-      ));
-    this.sub.add(combineLatest([
-        this.store.select(selectProjectAncestors),
-        this.store.select(selectBreadcrumbOptions)
-      ]).pipe(
-        filter(([projectAncestors, breadcrumbOptions]) => !!breadcrumbOptions && (!breadcrumbOptions.showProjects || projectAncestors !== null)),
+      );
+
+    combineLatest([
+      this.store.select(selectProjectAncestors),
+      this.store.select(selectBreadcrumbOptions)
+    ])
+      .pipe(
+        takeUntilDestroyed(),
         debounceTime(200),
-      ).subscribe(([projectAncestors, breadcrumbOptions]) => {
+        filter(([projectAncestors, breadcrumbOptions]) => !!breadcrumbOptions && (!breadcrumbOptions.showProjects || projectAncestors !== null)),
+      )
+      .subscribe(([projectAncestors, breadcrumbOptions]) => {
         const crumbAfterProject = breadcrumbOptions.subFeatureBreadcrumb &&
           (!breadcrumbOptions.subFeatureBreadcrumb.onlyWithProject || projectAncestors?.length > 0);
         const projectCrumb = breadcrumbOptions.projectsOptions?.selectedProjectBreadcrumb;
@@ -56,20 +75,30 @@ export class BreadcrumbsService implements OnDestroy {
               )
             ]),
             ...(projectCrumb && !(projectCrumb.url && projectAncestors && crumbAfterProject) ?
-              [[breadcrumbOptions.projectsOptions.selectedProjectBreadcrumb]] : []
+                [[breadcrumbOptions.projectsOptions.selectedProjectBreadcrumb]] : []
             ),
             ...(breadcrumbOptions.subFeatureBreadcrumb && (!breadcrumbOptions.subFeatureBreadcrumb.onlyWithProject || projectAncestors?.length > 0) ?
-              [[breadcrumbOptions.subFeatureBreadcrumb]] : []
+                [[breadcrumbOptions.subFeatureBreadcrumb]] : []
             ),
           ]
         }));
-      })
-    );
+      });
   }
 
-  ngOnDestroy() {
-    this.sub.unsubscribe();
+  private setCrumbs(hasProjectId: boolean) {
+    let route = this.route.snapshot;
+    let neutral = false;
+    while (route.firstChild) {
+      route = route.firstChild;
+      if (route.data.workspaceNeutral !== undefined) {
+        neutral = route.data.workspaceNeutral;
+      }
+    }
+    const staticBreadcrumb = route?.data?.staticBreadcrumb;
+    if (!hasProjectId && staticBreadcrumb) {
+      this.store.dispatch(setBreadcrumbs({breadcrumbs: staticBreadcrumb, workspaceNeutral: neutral}));
+    } else {
+      this.store.dispatch(setWorkspaceNeutral({neutral}));
+    }
   }
-
-
 }

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 import {Store} from '@ngrx/store';
 import {PROJECT_ROUTES} from '~/features/projects/projects.consts';
 
@@ -24,13 +24,10 @@ export class ContextMenuService {
           isActive: route.header === entitiesType
         };
       });
-    this.store.dispatch(setContextMenu({contextMenu}));
+    this.store.dispatch(headerActions.setTabs({contextMenu}));
   }
 
-
-
-
   resetContextMenu(){
-    this.store.dispatch(setContextMenu({contextMenu: null}))
+    this.store.dispatch(headerActions.setTabs({contextMenu: null}))
   }
 }

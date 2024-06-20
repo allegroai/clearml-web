@@ -94,7 +94,7 @@ export class CommonProjectsEffects {
       this.store.select(selectSelectedProject),
     ]),
     switchMap(([action, routerProjectId, projectId, selectedProject]) =>
-      (selectedProject || !projectId && !routerProjectId ? of(selectedProject) : this.projectsApi.projectsGetAllEx({
+      ((selectedProject && selectedProject.id === routerProjectId) || !projectId && !routerProjectId ? of(selectedProject) : this.projectsApi.projectsGetAllEx({
         id: routerProjectId || projectId,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: ['name']
@@ -159,7 +159,7 @@ export class CommonProjectsEffects {
                   ...(showOnlyUserWork && {active_users: [user?.id]}),
                   ...((showHidden) && {search_hidden: true}),
                   ...(hideExamples && {allow_public: false}),
-                  order_by: ['featured', sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
+                  order_by: ['featured', ...(orderBy ? [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy] : [])],
                   only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'basename', 'system_tags']
                     .concat(pipelines || datasets ? ['tags', 'last_update'] : []),
                   ...(searchQuery?.query && {

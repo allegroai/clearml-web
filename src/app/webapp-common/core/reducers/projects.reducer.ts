@@ -8,11 +8,10 @@ import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {IBreadcrumbsLink, IBreadcrumbsOptions} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {selectProjectType} from '~/core/reducers/view.reducer';
 import {uniqBy} from 'lodash-es';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {map} from 'rxjs/operators';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {selectProjectType} from '@common/core/reducers/view.reducer';
 
 
 export interface ScatterPlotPoint {
@@ -60,6 +59,7 @@ export interface RootProjects {
   extraUsers: User[];
   showHidden: boolean;
   hideExamples: boolean;
+  blockUserScript: boolean;
   mainPageTagsFilter: { [Feature: string]: { tags: string[]; filterMatchMode: string } };
   mainPageTagsFilterMatchMode: string;
   defaultNestedModeForFeature: { [feature: string]: boolean };
@@ -90,6 +90,7 @@ const initRootProjects: RootProjects = {
   extraUsers: [],
   showHidden: false,
   hideExamples: false,
+  blockUserScript: false,
   defaultNestedModeForFeature: {},
   selectedSubFeature: null,
   breadcrumbOptions: null,
@@ -242,6 +243,7 @@ export const projectsReducer = createReducer(
   on(projectsActions.setProjectExtraUsers, (state, action): RootProjects => ({...state, extraUsers: action.users})),
   on(projectsActions.setShowHidden, (state, action): RootProjects => ({...state, showHidden: action.show})),
   on(projectsActions.setHideExamples, (state, action): RootProjects => ({...state, hideExamples: action.hide})),
+  on(projectsActions.setBlockUserScript, (state, action): RootProjects => ({...state, blockUserScript: action.block})),
   on(projectsActions.setDefaultNestedModeForFeature, (state, action): RootProjects => ({
     ...state,
     defaultNestedModeForFeature: {...state.defaultNestedModeForFeature, [action.feature]: action.isNested}
@@ -261,5 +263,6 @@ export const selectShowHidden = createSelector(projects, selectSelectedProject,
   (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));
 
 export const selectHideExamples = createSelector(projects, state => state?.hideExamples);
+export const selectBlockUserScript = createSelector(projects, state => state?.blockUserScript);
 export const selectDefaultNestedModeForFeature = createSelector(projects, state => state?.defaultNestedModeForFeature);
 export const selectProjectsOptionsScrollId = createSelector(projects, state => state?.projectsOptionsScrollId);

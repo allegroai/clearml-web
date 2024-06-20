@@ -7,18 +7,18 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
   standalone: true,
 })
 export class UniqueInListSyncValidatorDirective implements Validator {
-  @Input('prefix') prefix: string;
+  @Input() prefix: string;
 
   validate(control: AbstractControl): ValidationErrors | null {
-    const existingNames = Object.keys(control.value).filter(key => key.startsWith(this.prefix)).map(key => control.value[key] && control.value[key].value);
-    return existingNames ? uniqueNameValidator(existingNames)(control) : null;
+    return uniqueInListValidator(this.prefix)(control);
   }
 }
 
-export function uniqueNameValidator(existingNames): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
+export function uniqueInListValidator(prefix: string): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const existingNames = control.value.map(c => c[prefix]?.value ?? c[prefix]);
     const forbidden = hasDuplicates(existingNames);
-    return forbidden ? {'uniqueName': duplicatesMap(existingNames)} : null;
+    return existingNames && forbidden ? {[`uniqueName-${prefix}`]: duplicatesMap(existingNames)} : null;
   };
 }
 

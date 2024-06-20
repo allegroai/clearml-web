@@ -1,8 +1,8 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
+  Component, computed, effect,
+  EventEmitter, input,
   Input,
   OnChanges, OnDestroy,
   Output,
@@ -11,7 +11,6 @@ import {
 import {Project} from '~/business-logic/model/projects/project';
 import {FormsModule, NgForm} from '@angular/forms';
 import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {MatOptionSelectionChange} from '@angular/material/core';
 import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
 import {Subscription} from 'rxjs';
@@ -30,6 +29,9 @@ import {InvalidPrefixValidatorDirective} from '@common/shared/ui-components/temp
 import {UniquePathValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-path-validator.directive';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {
+  PaginatedEntitySelectorComponent
+} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
 
 
 @Component({
@@ -56,11 +58,11 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
     InvalidPrefixValidatorDirective,
     UniquePathValidatorDirective,
     LabeledFormFieldDirective,
-    DotsLoadMoreComponent
-
+    DotsLoadMoreComponent,
+    PaginatedEntitySelectorComponent,
   ]
 })
-export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnDestroy {
+export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterViewInit {
   public readonly projectsRoot = 'Projects root';
   public rootFiltered: boolean;
   public projectName: string;
@@ -70,13 +72,51 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
   public project = {
     parent: null
   };
-  private _projects: Project[];
   private newProjectName: string;
   private subs = new Subscription();
-  @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
   public loading: boolean;
   public noMoreOptions: boolean;
   private previousLength: number | undefined;
+
+  @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
+  @ViewChild('projectForm') public form: NgForm;
+  projects = input<Project[]>();
+  protected allProjects = computed(() => ([
+    ...(this.rootFiltered ? [] : [{name: this.projectsRoot, id: '999999999999999'}]),
+    ...this.projects() ?? []
+  ]));
+
+  constructor() {
+    effect(() => {
+      const projects = this.projects();
+      this.loading = false;
+      this.noMoreOptions = projects?.length === this.previousLength || projects?.length < rootProjectsPageSize;
+      this.previousLength = projects?.length;
+
+      if (projects) {
+        this.projectsNames = [
+          ...(this.rootFiltered ? [] : [this.projectsRoot]),
+          ...projects.map(project => project.name)
+        ];
+      }
+    });
+  }
+
+  @Input() baseProject;
+
+  @Output() filterSearchChanged = new EventEmitter<{ value: string; loadMore?: boolean }>();
+  @Output() moveProject = new EventEmitter<{ location: string; name: string; fromName: string; toName: string; projectName: string }>();
+  @Output() dismissDialog = new EventEmitter();
+
+  send() {
+    this.moveProject.emit({
+      location: this.project.parent,
+      name: this.newProjectName,
+      projectName: new ShortProjectNamePipe().transform(this.projectName),
+      fromName: new ProjectLocationPipe().transform(this.projectName),
+      toName: this.project.parent
+    });
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -89,45 +129,8 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
     });
   }
 
-
-  @Input() set projects(projects) {
-    this.loading = false;
-    this.noMoreOptions = projects?.length === this.previousLength || projects?.length < rootProjectsPageSize;
-    this.previousLength = projects?.length;
-
-    this._projects = projects;
-    if (!projects) {
-      return;
-    }
-    this.projectsNames = [
-      ...(this.rootFiltered ? [] : [this.projectsRoot]),
-      ...projects.map(project => project.name)
-    ];
-  }
-
-  get projects(): Project[] {
-    return this._projects;
-  }
-
-  @Input() baseProject;
-
-  @Output() filterSearchChanged = new EventEmitter<{ value: string; loadMore?: boolean }>();
-  @Output() moveProject = new EventEmitter<{ location: string; name: string; fromName: string; toName: string; projectName: string }>();
-  @Output() dismissDialog = new EventEmitter();
-  @ViewChild('projectForm') public form: NgForm;
-
-  send() {
-    this.moveProject.emit({
-      location: this.project.parent,
-      name: this.newProjectName,
-      projectName: new ShortProjectNamePipe().transform(this.projectName),
-      fromName: new ProjectLocationPipe().transform(this.projectName),
-      toName: this.project.parent
-    });
-  }
-
   ngOnChanges() {
-    if (this.projects?.length > 0 && this.baseProject) {
+    if (this.projects()?.length > 0 && this.baseProject) {
       this.projectName = this.baseProject?.name ?? this.projectsRoot;
       // if (this.baseProject && this.project.parent === null) {
       //   this.project.parent = this.baseProject.name;
@@ -152,8 +155,8 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
     this.dismissDialog.emit();
   }
 
-  createNewSelected($event: MatOptionSelectionChange<string>) {
-    this.newProjectName = $event.source.value;
+  createNewSelected(value: string) {
+    this.newProjectName = value;
   }
 
   optionSelected() {
@@ -166,9 +169,9 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
     searchString !== null && this.filterSearchChanged.emit({value: searchString});
   }
 
-  loadMore(searchString) {
+  loadMore(searchString, loadMore) {
     this.loading = true;
-    this.filterSearchChanged.emit({value: searchString || '', loadMore: true});
+    this.filterSearchChanged.emit({value: searchString || '', loadMore});
   }
 
   isFocused(locationRef: HTMLInputElement) {

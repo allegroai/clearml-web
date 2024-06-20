@@ -10,6 +10,8 @@ import {ProjectsEffects} from '~/features/projects/projects.effect';
 import {CommonProjectsEffects} from './common-projects.effects';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
+import {StoreModule} from '@ngrx/store';
+import {projectsReducer} from '~/features/projects/projects.reducer';
 
 @NgModule({
   imports: [
@@ -18,6 +20,7 @@ import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-c
     ReactiveFormsModule,
     ProjectDialogModule,
     ProjectsSharedModule,
+    StoreModule.forFeature('projects', projectsReducer),
     EffectsModule.forFeature([ProjectsEffects, CommonProjectsEffects]),
     LabeledFormFieldDirective,
     ProjectCardComponent,

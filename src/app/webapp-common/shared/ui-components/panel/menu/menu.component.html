@@ -9,10 +9,10 @@
        (menuOpened)="menuOpened.emit()"
   >
     <i [class]="prefixIconClass" *ngIf="prefixIconClass"></i>
-    {{header}}
+    <div class="ellipsis me-auto" [smTooltip]="header" smShowTooltipIfEllipsis>{{header}}</div>
      <i *ngIf="showCart" [class]="iconClass" data-id="OpenMenu"></i>
   </div>
- 
+
 <mat-menu
   #menu="matMenu"
   class="sm-menu"
@@ -22,7 +22,7 @@
   (closed)="menuClosed.emit()"
 >
   <mat-form-field appearance="fill" *ngIf="enableSearch" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
-    <input matInput [placeholder]="searchPlaceholder" (input)="searchValueChanged.emit($event)" [(ngModel)]="searchValue" autocomplete="off">
+    <input matInput [placeholder]="searchPlaceholder" (input)="searchValueChanged.emit($any($event.target).value)" [(ngModel)]="searchValue" autocomplete="off">
     <i matSuffix class="fa me-3" [class]="searchValue ? 'fa-times pointer' : 'fa-search'" (click)="searchValue && clearSearch()"></i>
   </mat-form-field>
   <div class="results" [class.search-results]="enableSearch">

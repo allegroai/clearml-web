@@ -29,7 +29,7 @@
       </button>
       <button
         *ngIf="draft"
-        class="btn btn-neon px-3 d-flex-center"
+        class="btn btn-neon px-3 d-flex-center narrow"
         [disabled]="!this.report.report?.trim()"
         [smTooltip]="!this.report.report?.trim() ? 'Can\'t publish an empty report' : ''"
         (click)="publish()"
@@ -96,6 +96,7 @@
         [readOnly]="!draft || example"
         [resources]="resources"
         [handleUpload]="handleUpload"
+        [blockUserScripts]="blockUserScripts$ | async"
         (saveInfo)="save($event)"
         (editModeChanged)="editModeChanged();"
         (dirtyChanged)="dirtyChanged($event);"

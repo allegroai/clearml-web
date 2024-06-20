@@ -1,17 +1,22 @@
-import {Injectable} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Store} from '@ngrx/store';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
-import {combineLatest, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
-import {TipOfTheDayModalComponent} from '../../layout/tip-of-the-day-modal/tip-of-the-day-modal.component';
+import {combineLatest, of} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
+import {
+  TipOfTheDayModalComponent,
+  TipsModalData
+} from '../../layout/tip-of-the-day-modal/tip-of-the-day-modal.component';
 import {selectFirstLogin, selectNeverShowPopups} from '../../core/reducers/view.reducer';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
 import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
 import {DeviceDetectorService} from 'ngx-device-detector';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
 
 interface Tips {
   [url: string]: Tip[];
@@ -32,32 +37,74 @@ export const popupId = 'tip-of-the-day';
   providedIn: 'root'
 })
 export class TipsService {
-  private routerConfigSubscription: Subscription;
-  private neverShowAgainSub: Subscription;
-  private tipsConfig: Tips = {global: []};
+  private httpClient = inject(HttpClient);
+  private store = inject(Store);
+  private matDialog = inject(MatDialog);
+  private deviceService = inject(DeviceDetectorService);
+
+  private tipsConfig = signal<Tips>({global: []});
   private nextTimeToShowTips: Date;
-  private modalRef: MatDialogRef<TipOfTheDayModalComponent, any>;
   private neverShowAgain: boolean;
   private firstTime: boolean = true;
-  private mobile: boolean;
+  private mobile = this.deviceService.isMobile();
+  public hasTips = computed(() => Object.keys(this.tipsConfig()).length > 0);
 
   constructor(
-    private httpClient: HttpClient,
-    private store: Store,
-    private matDialog: MatDialog,
-    private deviceService: DeviceDetectorService
   ) {
-    this.mobile = deviceService.isMobile();
+    combineLatest([
+      this.store.select(selectRouterConfig),
+      this.store.select(selectCurrentUser),
+      this.store.select(selectFirstLogin),
+      this.store.select(selectTermsOfUse)
+    ])
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(1000),
+        filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
+        distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
+      .subscribe(([routerConfig]) => {
+        const urlConfig = routerConfig?.join('/');
+        if (this.tipsConfig()?.['global'].length || this.tipsConfig()?.[urlConfig]) {
+          const allTips = [...this.tipsConfig()['global']];
+          if (this.tipsConfig()[urlConfig]) {
+            allTips.concat(this.tipsConfig()[urlConfig]);
+          }
+          if (this.shouldDisplayTips()) {
+            this.showTipsModal(allTips);
+          }
+        }
+      });
+
+    this.store.select(selectNeverShowPopups)
+      .pipe(
+        takeUntilDestroyed(),
+        map((neverShowAgain) => neverShowAgain.includes(popupId)),
+        distinctUntilChanged()
+      )
+      .subscribe(neverShowAgain => {
+        this.neverShowAgain = neverShowAgain;
+        if (!this.firstTime) {
+          if (!neverShowAgain) {
+            this.nextTimeToShowTips = new Date();
+            window.localStorage.removeItem('nextTimeToShowTips');
+          }
+        }
+        this.firstTime = false;
+      });
   }
 
   initTipsService(showAllTips = true) {
     this.nextTimeToShowTips = new Date(window.localStorage.getItem('nextTimeToShowTips') || new Date().getTime());
 
     this.httpClient.get('onboarding.json')
-      .pipe(withLatestFrom(this.store.select(selectFeatures)))
+      .pipe(
+        filter((tipsConfig: { onboarding: Tip[] }) => !!tipsConfig?.onboarding && ConfigurationService.globalEnvironment.displayTips !== false),
+        withLatestFrom(this.store.select(selectFeatures)),
+        catchError(() => of([{}, []]))
+      )
       .subscribe(([tipsConfig, features]: [{ onboarding: Tip[] }, FeaturesEnum[]]) => {
-        const tipsFiltered = tipsConfig.onboarding.filter(tip => !tip.feature || !features || features.includes(tip.feature) || showAllTips);
-        this.tipsConfig = {
+        const tipsFiltered = tipsConfig.onboarding?.filter(tip => !tip.feature || !features || features.includes(tip.feature) || showAllTips) ?? [];
+        this.tipsConfig.set({
           global: [], ...tipsFiltered.reduce((acc, curr) => {
             const context = curr.context || 'global';
             if (acc[context]) {
@@ -67,68 +114,30 @@ export class TipsService {
             }
             return acc;
           }, {} as Tips)
-        };
+        });
       });
-
-    this.neverShowAgainSub = this.store.select(selectNeverShowPopups).pipe(
-      map( (neverShowAgain) => neverShowAgain.includes(popupId)),
-      distinctUntilChanged()
-    ).subscribe(neverShowAgain => {
-      this.neverShowAgain = neverShowAgain;
-      if (!this.firstTime) {
-        if (!neverShowAgain) {
-          this.nextTimeToShowTips = new Date();
-          window.localStorage.removeItem('nextTimeToShowTips');
-        }
-      }
-      this.firstTime = false;
-    });
-
-    this.routerConfigSubscription = combineLatest([
-      this.store.select(selectRouterConfig),
-      this.store.select(selectCurrentUser),
-      this.store.select(selectFirstLogin),
-      this.store.select(selectTermsOfUse)
-    ])
-      .pipe(
-        debounceTime(1000),
-        filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
-        distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
-      .subscribe(([routerConfig]) => {
-        const urlConfig = routerConfig?.join('/');
-        if (this.tipsConfig?.['global'].length || this.tipsConfig?.[urlConfig]) {
-          const allTips = [...this.tipsConfig['global']];
-          if (this.tipsConfig[urlConfig]) {
-            allTips.concat(this.tipsConfig[urlConfig]);
-          }
-          if (this.isTimeHavePassed()) {
-            this.showTipsModal(allTips);
-          }
-        }
-      });
-
   }
 
   public showTipsModal(allTips?: Tip[], hideDontShow?: boolean) {
     const visitedIndex = parseInt(window.localStorage.getItem('tipVisitedIndex'), 10) || 0;
-    allTips = allTips ? allTips : (Object.values(this.tipsConfig) as any).flat();
-    this.modalRef = this.matDialog.open(TipOfTheDayModalComponent, {
+    allTips = allTips ? allTips : (Object.values(this.tipsConfig()) as any).flat();
+    this.matDialog.open<TipOfTheDayModalComponent, TipsModalData, boolean>(TipOfTheDayModalComponent, {
       data: {
         tips: allTips,
         visitedIndex,
         hideDontShow: this.neverShowAgain || hideDontShow
       }
-    });
-    this.modalRef.afterClosed().subscribe((neveShowAgain) => {
-      if (neveShowAgain) {
-        this.store.dispatch(neverShowPopupAgain({popupId}));
-      }
-      this.nextTimeToShowTips = new Date(new Date().getTime() + tipsCooldownTime);
-      window.localStorage.setItem('nextTimeToShowTips', this.nextTimeToShowTips.toISOString());
-    });
+    }).afterClosed()
+      .subscribe((neveShowAgain) => {
+        if (neveShowAgain) {
+          this.store.dispatch(neverShowPopupAgain({popupId}));
+        }
+        this.nextTimeToShowTips = new Date(new Date().getTime() + tipsCooldownTime);
+        window.localStorage.setItem('nextTimeToShowTips', this.nextTimeToShowTips.toISOString());
+      });
   }
 
-  private isTimeHavePassed() {
+  private shouldDisplayTips() {
     return this.nextTimeToShowTips <= new Date();
   }
 }

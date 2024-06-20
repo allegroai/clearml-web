@@ -27,6 +27,7 @@
 <div class="experiment-body"
      [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
   <as-split #split
+            [gutterSize]=1
             [useTransition]="true"
             [gutterDblClickDuration]="400"
             (gutterClick)="clickOnSplit()"
@@ -34,10 +35,14 @@
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
             (transitionEnd)="experimentsTable.table?.resize(); experimentsTable.afterTableInit()"
+            [class.opened]="minimizedView && (selectSplitSize$ | async) <= 1"
+            [class.closed]="minimizedView && (selectSplitSize$ | async) >= 99"
   >
     <as-split-area
       [size]="100 - (splitInitialSize)"
       [order]="1"
+      [minSize]="1"
+      [maxSize]="99"
     >
       <sm-experiments-table
         #experimentsTable

@@ -1,4 +1,4 @@
-import {createSelector, on, ReducerTypes, select, Store} from '@ngrx/store';
+import {ActionCreator, createSelector, on, ReducerTypes, select, Store} from '@ngrx/store';
 import {filter, map, takeWhile, timeout} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {
@@ -6,7 +6,7 @@ import {
   cancelS3Credentials,
   removeCredential, removeSignedUrl, resetCredential, resetCredentials,
   resetDontShowAgainForBucketEndpoint,
-  saveS3Credentials, setCredentialLabel, setS3Credentials, setSignedUrl,
+  saveS3Credentials, setCredentialLabel, setS3Credentials, setSignedUrl, setSignedUrls,
   showLocalFilePopUp,
   updateAllCredentials,
   updateS3Credential
@@ -150,9 +150,16 @@ export const commonAuthReducer = [
     credentials: {[action.credentials[0]?.company || action.workspace]: action.credentials, ...action.extra}, revokeSucceed: false
   })),
   on(setSignedUrl, (state, action) => ({...state, signedUrls: {...state.signedUrls, [action.url]: {signed: action.signed, expires: action.expires}}})),
+  on(setSignedUrls, (state, action) => ({...state, signedUrls: {
+      ...state.signedUrls,
+      ...action.signed.reduce((acc, res) => {
+        acc[res.url] = {signed: res.signed, expires: res.expires};
+        return acc;
+      }, {})
+    }})),
   on(removeSignedUrl, (state, action) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {[action.url]: remove, ...rest} = state.signedUrls;
     return {...state, signedUrls: rest};
   }),
-] as ReducerTypes<AuthState, any>[];
+] as ReducerTypes<AuthState, ActionCreator[]>[];

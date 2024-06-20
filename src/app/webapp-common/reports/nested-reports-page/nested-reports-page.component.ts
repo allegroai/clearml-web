@@ -19,7 +19,7 @@ import {CircleCounterComponent} from '@common/shared/ui-components/indicators/ci
     ProjectsSharedModule,
     AsyncPipe,
     NgIf,
-    CircleCounterComponent
+    CircleCounterComponent,
   ],
   standalone: true
 })

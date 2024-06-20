@@ -6,14 +6,20 @@
     [style.--gridGap]="gridGap + 'px'"
     [style.--padding]="snippetsMode ? padding + 'px' : null"
     *cdkVirtualFor="let row of itemRows$ | async; let rowIndex = index"
-  >
-    <ng-container *ngFor="let item of row; let itemIndex = index; trackBy: trackByFn">
-      <ng-container *ngTemplateOutlet="cardTemplate; context: {$implicit: item, index: itemIndex + rowIndex * cardsInRow}"></ng-container>
-    </ng-container>
-    <div *ngFor="let blankItem of [].constructor(cardsInRow - row.length)"></div>
+    >
+    @for (item of row; track trackFn(item) + cardHeight) {
+      <ng-container *ngTemplateOutlet="cardTemplate; context: {$implicit: item, index: $index + rowIndex * cardsInRow}"></ng-container>
+    }
+    @for (blankItem of [].constructor(cardsInRow - row.length); track blankItem) {
+      <div></div>
+    }
   </div>
-  <div class="load-more" *ngIf="showLoadMoreButton && (itemRows$ | async)?.length"  (smScrollEnd)="autoLoadMore && !loading && autoLoad()">
-    <button (click)="loadMoreClicked.emit()" class="btn btn-cml-primary load-more-btn">
-      <i *ngIf="loading" class="load-spinner"></i>LOAD MORE</button>
-  </div>
-</cdk-virtual-scroll-viewport>
+  @if (showLoadMoreButton && (itemRows$ | async)?.length) {
+    <div class="load-more"  (smScrollEnd)="autoLoadMore && !loading && autoLoad()">
+      <button (click)="loadMoreClicked.emit()" class="btn btn-cml-primary load-more-btn">
+        @if (loading) {
+          <i class="load-spinner"></i>
+        }LOAD MORE</button>
+      </div>
+    }
+  </cdk-virtual-scroll-viewport>

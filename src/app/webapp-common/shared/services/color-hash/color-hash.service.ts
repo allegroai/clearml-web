@@ -6,6 +6,7 @@ import {selectColorPreferences} from '../../ui-components/directives/choose-colo
 import {addUpdateColorPreferences, ColorPreference} from '../../ui-components/directives/choose-color/choose-color.actions';
 import stc from 'string-to-color';
 import { TinyColor } from '@ctrl/tinycolor';
+import {toSignal} from '@angular/core/rxjs-interop';
 export interface ColorCache {[label: string]: number[]}
 export const DOT_PLACEHOLDER = '--DOT--';
 
@@ -39,10 +40,10 @@ export class ColorHashService {
     if (colorCache) {
       return colorCache;
     }
-    const tColor = new TinyColor(stc(label));
+    let tColor = new TinyColor(stc(label));
     const tLum = tColor.getLuminance();
     if (tLum < 0.3 && lighten) {
-      tColor.lighten(30 - tLum * 100);
+      tColor = tColor.lighten(30 - tLum * 100);
     }
     const {r, g, b} = tColor.toRgb();
     const color = initColor ? initColor : [r, g, b];
@@ -58,6 +59,10 @@ export class ColorHashService {
     return this.getColorCache();
   }
 
+  get colorsSignal() {
+    return toSignal(this._colorCache);
+  }
+
   private batchUpdateColorCache(colors: ColorPreference) {
     const newColorCache = {...this._colorCache.getValue(), ...colors};
     const filteredCache = {};
@@ -69,16 +74,10 @@ export class ColorHashService {
     this.setColorCache(filteredCache);
   }
 
-  private updateColorCache(str: string, color: number[]) {
-    const newColorCache = this._colorCache.getValue();
-    newColorCache[str]  = color;
-    this.setColorCache(newColorCache);
-  }
-
-  setColorForString(str: string, color: number[], savePreference: boolean = true) {
+  setColorForString(key: string, color: number[], savePreference: boolean = true) {
     if (savePreference) {
-      this.updateColorCache(str, color);
-      this.store.dispatch(addUpdateColorPreferences({[str]: color}));
+      this.setColorCache({...this._colorCache.getValue(), [key]: color});
+      this.store.dispatch(addUpdateColorPreferences({[key]: color}));
     }
   }
 

@@ -2,10 +2,11 @@ import {Component} from '@angular/core';
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs';
-import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
 import {AsyncPipe} from '@angular/common';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {selectProjectType} from '@common/core/reducers/view.reducer';
 
 @Component({
   selector: 'sm-show-only-user-work',
@@ -21,12 +22,14 @@ import {AsyncPipe} from '@angular/common';
 export class ShowOnlyUserWorkComponent {
   public isUserMenuOpened: boolean;
   public showOnlyUserWork$: Observable<boolean>;
+  currentFeature$ = this.store.selectSignal(selectProjectType);
+
   constructor(private store: Store) {
     this.showOnlyUserWork$ = this.store.select(selectShowOnlyUserWork);
   }
 
   userFilterChanged(userFiltered: boolean) {
-    this.store.dispatch(setFilterByUser({showOnlyUserWork: userFiltered}));
+    this.store.dispatch(setFilterByUser({showOnlyUserWork: userFiltered, feature: this.currentFeature$()}));
   }
 
   userFilterMenuOpened(isUserMenuOpened: boolean) {

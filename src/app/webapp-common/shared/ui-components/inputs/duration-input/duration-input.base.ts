@@ -105,7 +105,7 @@ export abstract class DurationInputBase  extends TemplateFormSectionBaseDirectiv
     this.msToHMSMS(ms);
     this.val = ms;
     const res = ms / this.returnFactor
-    this.onChange(res);
+    // this.onChange(res);
     this.onDurationChanged.emit(res)
   }
 
@@ -123,7 +123,7 @@ export abstract class DurationInputBase  extends TemplateFormSectionBaseDirectiv
     this.msToHMSMS(ms);
     this.val = ms;
     const res = ms / this.returnFactor;
-    this.onChange(res);
+    // this.onChange(res);
     this.onDurationChanged.emit(res);
   }
 

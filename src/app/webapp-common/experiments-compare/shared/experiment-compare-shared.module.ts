@@ -1,9 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ExperimentSettingsComponent} from '../../shared/components/experiment-settings/experiment-settings';
-import {
-  SelectMetricForCustomColComponent
-} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {MatRadioModule} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -18,7 +15,6 @@ import {IsEmptyPipe} from '@common/shared/pipes/is-empty.pipe';
 
 const declarations = [
   ExperimentSettingsComponent,
-  SelectMetricForCustomColComponent,
 ];
 
 @NgModule({

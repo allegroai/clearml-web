@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {TABLE_SORT_ORDER} from '../../data/table/table.consts';
 import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgClass, NgIf} from '@angular/common';
+import { NgClass } from '@angular/common';
 import {MatMenuModule} from '@angular/material/menu';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
@@ -15,9 +15,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     TooltipDirective,
     NgClass,
     MatMenuModule,
-    NgIf,
     ShowTooltipIfEllipsisDirective
-  ],
+],
   standalone: true
 })
 export class MenuItemComponent {

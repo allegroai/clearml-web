@@ -19,10 +19,12 @@ import {fetchCurrentUser} from '@common/core/actions/users.actions';
 import {Store} from '@ngrx/store';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {Router} from '@angular/router';
+import {LocationStrategy} from '@angular/common';
 
-export type LoginMode = 'simple' | 'password' | 'ssoOnly';
+export type LoginMode = 'simple' | 'password' | 'ssoOnly' | 'error';
 
 export const loginModes = {
+  error: 'error' as LoginMode,
   simple: 'simple' as LoginMode,
   password: 'password' as LoginMode,
   ssoOnly: 'ssoOnly' as LoginMode
@@ -32,7 +34,17 @@ export const loginModes = {
   providedIn: 'root'
 })
 export class BaseLoginService {
+  protected httpClient = inject(HttpClient);
+  public loginApi = inject(ApiLoginService);
+  protected dialog = inject(MatDialog);
+  protected configService = inject(ConfigurationService);
+  protected store = inject(Store);
+  protected router = inject(Router);
+  protected userPreferences = inject(UserPreferences);
+  protected locationStrategy = inject(LocationStrategy);
+
   signupMode: boolean;
+  onlyPasswordLogin: boolean;
   protected basePath = HTTP.API_BASE_URL;
   private userKey: string;
   private userSecret: string;
@@ -40,13 +52,7 @@ export class BaseLoginService {
   private _loginMode: LoginMode;
   private _guestUser: { enabled: boolean; username: string; password: string };
   private environment: Environment;
-  protected httpClient: HttpClient;
-  public loginApi: ApiLoginService;
-  protected dialog: MatDialog;
-  protected configService: ConfigurationService;
-  protected store: Store;
-  protected router: Router;
-  protected userPreferences: UserPreferences;
+
   get guestUser() {
     return clone(this._guestUser);
   }
@@ -56,16 +62,10 @@ export class BaseLoginService {
   }
 
   constructor() {
-    this.httpClient = inject(HttpClient);
-    this.loginApi = inject(ApiLoginService);
-    this.dialog = inject(MatDialog);
-    this.configService = inject(ConfigurationService);
-    this.store = inject(Store);
-    this.router = inject(Router);
-    this.userPreferences = inject(UserPreferences);
     this.configService.globalEnvironmentObservable.subscribe(env => {
       const firstLogin = !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin);
       this.environment = env;
+      this.onlyPasswordLogin = env.onlyPasswordLogin;
       this.signupMode = !!this.environment.communityServer && firstLogin;
     });
   }
@@ -113,7 +113,7 @@ export class BaseLoginService {
           filter(res => !this.shouldOpenServerError(res?.server_errors)),
           tap((res: LoginModeResponse) => {
             this._authenticated = res.authenticated;
-            this._loginMode = res.basic.enabled ? loginModes.password : res.sso_providers?.length > 0 ? loginModes.ssoOnly : loginModes.simple;
+            this._loginMode = res.basic.enabled ? loginModes.password : res.sso_providers?.length > 0 ? loginModes.ssoOnly : this.onlyPasswordLogin ? loginModes.error : loginModes.simple;
             this._guestUser = res.basic.guest;
           }),
           map(() => this._loginMode)
@@ -245,7 +245,11 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     }
     const redirectToLogin = (status) => {
       if (status === 401) {
-        const redirectUrl: string = window.location.pathname + window.location.search;
+        let pathname = window.location.pathname;
+        if (this.locationStrategy.getBaseHref() && this.locationStrategy.getBaseHref() !== '/') {
+          pathname = pathname.replace(this.locationStrategy.getBaseHref(), '');
+        }
+        const redirectUrl: string = pathname + window.location.search;
         if (
           !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl) &&
           (this.guestUser?.enabled || ConfigurationService.globalEnvironment.autoLogin)

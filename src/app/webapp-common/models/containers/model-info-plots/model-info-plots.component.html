@@ -1,13 +1,13 @@
 <mat-drawer-container autosize class="light-theme h-100">
   <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
-    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
+    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()" data-id="closeFindPlot"></i>
     <div class="list-container">
       <sm-selectable-filter-list
         *ngIf="plotsList !== undefined"
         checkAllIcon="al-ico-show"
         placeholder="Find plots"
         [list]="plotsList"
-        [checkedList]="listOfHidden$ | async"
+        [checkedList]="selectedMetrics"
         [searchTerm]="searchTerm"
         (itemSelect)="metricSelected($event)"
         (hiddenChanged)="hiddenListChanged($event)"
@@ -23,13 +23,13 @@
         (click)="drawer.open()"
         smTooltip="Toggle Graphs"
       >
-        <i class="al-icon al-ico-eye-outline"></i>
+        <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
       </button>
     </div>
     <sm-experiment-graphs
       [class.dark-theme]="dark"
       [isGroupGraphs]="true"
-      [hiddenList]="listOfHidden$ | async"
+      [hiddenList]="selectedMetrics"
       [metrics]="graphs"
       [legendStringLength]="minimized ? 14 : 19"
       [minimized]="minimized"

@@ -3,15 +3,15 @@
 :host {
   display: flex !important;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   height: 100%;
 
   .queues-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
     padding: 0 24px;
-
-    button {
-      margin-left: auto;
-    }
   }
 
   sm-queue-stats {

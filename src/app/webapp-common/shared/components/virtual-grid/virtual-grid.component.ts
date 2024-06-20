@@ -15,7 +15,7 @@ import {chunk} from 'lodash-es';
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
-import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 
 
@@ -29,12 +29,10 @@ import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
-    NgForOf,
     NgTemplateOutlet,
-    NgIf,
     ScrollEndDirective,
     AsyncPipe
-  ]
+]
 })
 export class VirtualGridComponent implements OnChanges{
   private items$ = new BehaviorSubject<any[]>(null);
@@ -74,10 +72,10 @@ export class VirtualGridComponent implements OnChanges{
   @Input() padding = 64 + 24 + 24;
   @Input() showLoadMoreButton = false;
   @Input() autoLoadMore = false;
+  @Input() trackFn = item => item.id;
   @Output() itemClicked = new EventEmitter<any>();
   @Output() loadMoreClicked = new EventEmitter();
   @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
-  trackByFn = (index, item) => item.id + this.cardHeight;
 
 
   constructor(private store: Store, private ref: ElementRef) {

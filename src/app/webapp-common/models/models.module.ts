@@ -24,7 +24,6 @@ import {AngularSplitModule} from 'angular-split';
 import {FeatureModelsModule} from '~/features/models/feature-models.module';
 import {SmFormBuilderService} from '../core/services/sm-form-builder.service';
 import {MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW, MODELS_STORE_KEY} from './models.consts';
-import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model-custom-cols-menu.component';
 import {ModelHeaderComponent} from '~/webapp-common/models/dumbs/model-header/model-header.component';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
 import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
@@ -90,6 +89,8 @@ import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
@@ -189,7 +190,9 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ShowTooltipIfEllipsisDirective,
     CdkVirtualScrollViewport,
     CdkVirtualForOf,
-    CdkFixedSizeVirtualScroll
+    CdkFixedSizeVirtualScroll,
+    SelectMetricForCustomColComponent,
+    ExperimentCustomColsMenuComponent
   ],
     providers: [
         SmFormBuilderService, DatePipe,
@@ -202,7 +205,6 @@ const getInitState = (userPreferences: UserPreferences) => ({
         ModelViewNetworkComponent, ModelInfoNetworkComponent,
         ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
         ModelGeneralInfoComponent, ModelHeaderComponent,
-        ModelCustomColsMenuComponent,
         ModelInfoMetadataComponent,
         ModelInfoExperimentsComponent,
         ModelExperimentsTableComponent,

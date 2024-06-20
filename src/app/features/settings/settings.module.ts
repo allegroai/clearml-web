@@ -8,7 +8,6 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {WebappConfigurationComponent} from '@common/settings/webapp-configuration/webapp-configuration.component';
 import {WorkspaceConfigurationComponent} from '@common/settings/workspace-configuration/workspace-configuration.component';
 import {ProfileKeyStorageComponent} from '@common/settings/admin/profile-key-storage/profile-key-storage.component';
-import {ProfilePreferencesComponent} from '@common/settings/admin/profile-preferences/profile-preferences.component';
 import {ProfileNameComponent} from '@common/settings/admin/profile-name/profile-name.component';
 import {AdminFooterComponent} from '@common/settings/admin/admin-footer/admin-footer.component';
 import {S3AccessComponent} from '@common/settings/admin/s3-access/s3-access.component';
@@ -16,7 +15,6 @@ import {AdminCredentialTableComponent} from '@common/settings/admin/admin-creden
 import {AdminFooterActionsComponent} from '~/features/settings/containers/admin/admin-footer-actions/admin-footer-actions.component';
 import {UserCredentialsComponent} from '~/features/settings/containers/admin/user-credentials/user-credentials.component';
 import {UserDataComponent} from '~/features/settings/containers/admin/user-data/user-data.component';
-import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-stats/usage-stats.component';
 import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-arguments-dialog/redacted-arguments-dialog.component';
 import {LayoutModule} from '~/layout/layout.module';
@@ -39,13 +37,13 @@ import {LabelValuePipe} from '@common/shared/pipes/label-value.pipe';
 import {AdminDialogTemplateComponent} from '@common/settings/admin/admin-dialog-template/admin-dialog-template.component';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {ProfilePreferencesComponent} from '@common/settings/admin/profile-preferences/profile-preferences.component';
 
 
 
 @NgModule({
   declarations: [
     SettingsComponent,
-    UsageStatsComponent,
     UserDataComponent,
     UserCredentialsComponent,
     AdminFooterActionsComponent,
@@ -54,7 +52,6 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     CreateCredentialDialogComponent,
     AdminFooterComponent,
     ProfileNameComponent,
-    ProfilePreferencesComponent,
     ProfileKeyStorageComponent,
     WorkspaceConfigurationComponent,
     WebappConfigurationComponent,
@@ -87,11 +84,11 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     AdminDialogTemplateComponent,
     TimeAgoPipe,
     ShowTooltipIfEllipsisDirective,
+    ProfilePreferencesComponent,
   ],
   exports: [
     UserCredentialsComponent,
     AdminFooterComponent,
-    ProfilePreferencesComponent,
     ProfileNameComponent,
     WebappConfigurationComponent,
   ]

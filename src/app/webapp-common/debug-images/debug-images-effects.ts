@@ -48,7 +48,7 @@ export class DebugImagesEffects {
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(debugActions.fetchExperiments, debugActions.refreshMetric, debugActions.refreshDebugImagesMetrics),
-    filter(action => !(action as any).autoRefresh),
+    filter(action => !(action as {autoRefresh?: boolean}).autoRefresh),
     map(action => activeLoader(action.type))
   ));
 
@@ -73,6 +73,8 @@ export class DebugImagesEffects {
             const actionsToShoot = [deactivateLoader(action.type)] as Action[];
             if (res.metrics[0].iterations && res.metrics[0].iterations.length > 0) {
               actionsToShoot.push(debugActions.setDebugImages({res, task: action.payload.task}));
+              // actionsToShoot.push(debugActions.setDebugImages({res: {...res,
+              //     metrics: [{...res.metrics[0], iterations: [{...res.metrics[0].iterations[0], events: res.metrics[0].iterations[0].events.slice(0, 50)}]}]}, task: action.payload.task}));
               switch (action.type) {
                 case debugActions.getNextBatch.type:
                   actionsToShoot.push(debugActions.setTimeIsNow({task: action.payload.task, timeIsNow: false}));

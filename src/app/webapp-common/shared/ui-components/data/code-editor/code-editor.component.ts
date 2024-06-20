@@ -43,6 +43,7 @@ export class CodeEditorComponent implements AfterViewInit {
   }
 
   @Input() readonly = false;
+  @Input() placeholder: string;
   @Output() codeChanged = new EventEmitter<string>();
   @Input() showCopyButton = false;
   private _code: string;
@@ -78,6 +79,7 @@ export class CodeEditorComponent implements AfterViewInit {
       this.aceEditor = aceEditor;
       aceEditor.setOptions({
         readOnly: this.readonly,
+        placeholder: this.placeholder,
         showLineNumbers: false,
         showGutter: false,
         fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',

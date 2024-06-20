@@ -1,14 +1,22 @@
 <div class="d-flex align-items-center" mat-menu-item (click)="buttonClickedEvent($event)" [disabled]="disabled">
-  <sm-checkbox-control *ngIf="selectable"
-                       [formData]="checked"
-                       [fieldName]="itemValue"
-                       (formDataChanged)="itemClickedEvent()"
-  >
-  </sm-checkbox-control>
-  <i *ngIf="enableIcon && iconClass" class="sm-md" [class]="iconClass"></i>
+  @if (selectable) {
+    <sm-checkbox-control
+      [formData]="checked"
+      [fieldName]="itemValue"
+      (formDataChanged)="itemClickedEvent()"
+      >
+    </sm-checkbox-control>
+  }
+  @if (enableIcon && iconClass) {
+    <i class="sm-md" [class]="iconClass"></i>
+  }
   <div class="item-label" [class.placeForIcon]="enableIcon">
     <div class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="enableTooltip? (itemTooltip || itemLabel): ''" data-id="sortByOption">{{itemLabel}}</div>
-    <i *ngIf="sortOrder" class="ms-2 al-icon sm-md" [ngClass]="sortOrder === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' " data-id="orderTypeIcon"></i>
+    @if (sortOrder) {
+      <i class="ms-2 al-icon sm-md" [ngClass]="sortOrder === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' " data-id="orderTypeIcon"></i>
+    }
   </div>
-  <div *ngIf="removable" (click)="removeItem($event)" class="remove-button"><i data-id="Delete Icon" class="al-icon al-ico-trash sm-md al-color blue-300 pointer m-0"></i></div>
+  @if (removable) {
+    <div (click)="removeItem($event)" class="remove-button"><i data-id="Delete Icon" class="al-icon al-ico-trash sm-md al-color blue-300 pointer m-0"></i></div>
+  }
 </div>

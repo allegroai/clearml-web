@@ -1,4 +1,4 @@
-import {createAction, props} from '@ngrx/store';
+import {createActionGroup, emptyProps, props} from '@ngrx/store';
 import {Queue as BLQueue} from '~/business-logic/model/queues/queue';
 import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
@@ -7,117 +7,27 @@ export interface Queue extends Omit<BLQueue, 'id'> {
   id: string;
 }
 
-
-const queuesPrefix = 'QUEUES_';
-export const GET_QUEUES = queuesPrefix + 'GET_QUEUES';
-export const SET_QUEUES = queuesPrefix + 'SET_QUEUES';
-// export const GET_QUEUES_TASKS = queuesPrefix + 'SET_QUEUES_TASKS';
-// export const SET_QUEUES_TASKS = queuesPrefix + 'SET_QUEUES_TASKS';
-// export const ADD_QUEUES_TASKS = queuesPrefix + 'ADD_QUEUES_TASKS';
-export const MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE';
-export const MOVE_EXPERIMENT_TO_TOP_OF_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_TO_TOP_OF_QUEUE';
-export const MOVE_EXPERIMENT_IN_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_IN_QUEUE';
-export const REMOVE_EXPERIMENT_FROM_QUEUE = queuesPrefix + 'REMOVE_EXPERIMENT_FROM_QUEUE';
-export const MOVE_EXPERIMENT_TO_OTHER_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_TO_OTHER_QUEUE';
-export const ADD_EXPERIMENT_TO_QUEUE = queuesPrefix + 'ADD_EXPERIMENT_TO_QUEUE';
-export const SET_SELECTED_QUEUE = queuesPrefix + 'SET_SELECTED_QUEUE';
-export const QUEUES_TABLE_SET_SORT = queuesPrefix + 'QUEUES_TABLE_SET_SORT';
-export const CLEAR_QUEUE = queuesPrefix + 'CLEAR_QUEUE';
-export const REFRESH_SELECTED_QUEUE = queuesPrefix + 'REFRESH_SELECTED_QUEUE';
-export const SET_SELECTED_QUEUE_FROM_SERVER = queuesPrefix + 'SET_SELECTED_QUEUE_FROM_SERVER';
-export const SYNC_SPECIFIC_QUEUE_IN_TABLE = queuesPrefix + 'SYNC_SPECIFIC_QUEUE_IN_TABLE';
-export const DELETE_QUEUE = queuesPrefix + 'DELETE_QUEUE';
-export const GET_STATS = queuesPrefix + 'GET_STATS';
-export const SET_STATS = queuesPrefix + 'SET_STATS';
-export const SET_STATS_PARAMS = queuesPrefix + 'SET_STATS_PARAMS';
-
-export const getQueues = createAction(GET_QUEUES);
-
-export const setQueues = createAction(
-  SET_QUEUES,
-  props<{ queues: Array<Queue> }>()
-);
-
-export const queuesTableSortChanged = createAction(
-  queuesPrefix + 'QUEUES_TABLE_SORT_CHANGED',
-  props<{ colId: string; isShift: boolean }>()
-);
-
-
-export const queuesTableSetSort = createAction(
-  QUEUES_TABLE_SET_SORT,
-  props<{ orders: SortMeta[] }>()
-);
-
-export const setSelectedQueue = createAction(
-  SET_SELECTED_QUEUE,
-  props<{ queue?: Queue }>()
-);
-export const clearQueue = createAction(
-  CLEAR_QUEUE,
-  props<{ queue?: any }>()
-);
-
-export const refreshSelectedQueue = createAction(
-  REFRESH_SELECTED_QUEUE
-);
-
-export const setSelectedQueueFromServer = createAction(
-  SET_SELECTED_QUEUE_FROM_SERVER,
-  props<{ queue?: Queue }>()
-);
-
-export const syncSpecificQueueInTable = createAction(
-  SYNC_SPECIFIC_QUEUE_IN_TABLE,
-  props<{ queue?: Queue }>()
-);
-
-export const deleteQueue = createAction(
-  DELETE_QUEUE,
-  props<{ queue: Queue }>()
-);
-
-export const moveExperimentToBottomOfQueue = createAction(
-  MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE,
-  props<{ task: string }>()
-);
-
-export const moveExperimentToTopOfQueue = createAction(
-  MOVE_EXPERIMENT_TO_TOP_OF_QUEUE,
-  props<{ task: string }>()
-);
-
-export const moveExperimentInQueue = createAction(
-  MOVE_EXPERIMENT_IN_QUEUE,
-  props<{ task: string; count: number }>()
-);
-
-export const removeExperimentFromQueue = createAction(
-  REMOVE_EXPERIMENT_FROM_QUEUE,
-  props<{ task: string }>()
-);
-
-export const moveExperimentToOtherQueue = createAction(
-  MOVE_EXPERIMENT_TO_OTHER_QUEUE,
-  props<{ task: string; queue: string }>()
-);
-
-export const addExperimentToQueue = createAction(
-  ADD_EXPERIMENT_TO_QUEUE,
-  props<{ task: string; queue: string }>()
-);
-
-export const getStats = createAction(
-  GET_STATS,
-  props<{ maxPoints?: number }>()
-);
-
-export const setStats = createAction(
-  SET_STATS,
-  props<{ data: { wait?: Topic[]; length?: Topic[] } }>()
-);
-
-export const setStatsParams = createAction(
-  SET_STATS_PARAMS,
-  props<{ timeFrame: string }>()
-);
+export const queueActions = createActionGroup({
+  source: 'Queues',
+  events: {
+    'get queues': emptyProps(),
+    'set queues': props<{ queues: Array<Queue> }>(),
+    'queues table sort changed': props<{ colId: string; isShift: boolean }>(),
+    'queues table set sort': props<{ orders: SortMeta[] }>(),
+    'set selected queue': props<{ queue?: Queue }>(),
+    'clear queue': props<{ queue?: Queue }>(),
+    'refresh selected queue': props<{autoRefresh?: boolean}>(),
+    'set selected queue from server': props<{ queue?: Queue }>(),
+    'delete queue': props<{ queue?: Queue }>(),
+    'move experiment to bottom of queue': props<{ task: string }>(),
+    'move experiment to top of queue': props<{ task: string }>(),
+    'move experiment in queue': props<{ task: string; count: number }>(),
+    'remove experiment from queue': props<{ task: string }>(),
+    'move experiment to other queue': props<{ task: string; queue: string }>(),
+    'add experiment to queue': props<{ task: string; queue: string }>(),
+    'get stats': props<{ maxPoints?: number }>(),
+    'set stats': props<{ data: { wait: Topic[]; length: Topic[] } }>(),
+    'reset stats': emptyProps(),
+    'set stats params': props<{ timeFrame: string; maxPoints?: number }>(),
+  }
+});

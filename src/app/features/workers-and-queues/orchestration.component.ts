@@ -7,7 +7,7 @@ import {ContextMenuService} from '@common/shared/services/context-menu.service';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {ORCHESTRATION_ROUTES} from '~/features/workers-and-queues/workers-and-queues.consts';
-import {setContextMenu} from '@common/core/actions/router.actions';
+import {headerActions} from '@common/core/actions/router.actions';
 
 @Component({
   selector: 'sm-orchestration',
@@ -44,12 +44,12 @@ export class OrchestrationComponent implements OnInit, OnDestroy {
           isActive: route.header === entitiesType
         };
       });
-    this.store.dispatch(setContextMenu({contextMenu}));
+    this.store.dispatch(headerActions.setTabs({contextMenu}));
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    this.store.dispatch(setContextMenu({contextMenu: null}));
+    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
   }
 
 }

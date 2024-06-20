@@ -16,6 +16,16 @@ import {takeUntil, tap} from 'rxjs/operators';
 import {CommonReadyForDeletion} from '@common/projects/common-projects.reducer';
 import DOMPurify from 'dompurify';
 
+export interface DeleteData {
+  numSelected: number;
+  entity: {id: string; name?: string};
+  entityType: EntityTypeEnum;
+  projectStats?: CommonReadyForDeletion;
+  useCurrentEntity?: boolean;
+  includeChildren?: boolean;
+  resetMode?: boolean;
+  devWarning?: boolean;
+}
 
 @Component({
   selector: 'sm-delete-dialog',
@@ -52,16 +62,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store,
-    @Inject(MAT_DIALOG_DATA) data: {
-      numSelected: number;
-      entity: Task;
-      entityType: EntityTypeEnum;
-      projectStats: CommonReadyForDeletion;
-      useCurrentEntity: boolean;
-      includeChildren: boolean;
-      resetMode: boolean;
-      devWarning: boolean;
-    },
+    @Inject(MAT_DIALOG_DATA) data: DeleteData,
     public dialogRef: MatDialogRef<CommonDeleteDialogComponent>
   ) {
     this.filesNumber$ = this.store.select(selectNumberOfSourcesToDelete);

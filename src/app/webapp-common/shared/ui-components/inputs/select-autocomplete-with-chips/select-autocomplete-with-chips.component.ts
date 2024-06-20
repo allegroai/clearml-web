@@ -141,6 +141,10 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
 
   add(event: MatChipInputEvent) {
     const value = (event.value || '').trim();
+    if (!this.optionAddable || this.multiple && this.val.find(option => option.value === value)) {
+      return
+    }
+
     if (value) {
       this.value = this.multiple ? this.val.concat([value]) : [value];
       this.chipCtrl.setValue(null);

@@ -8,6 +8,7 @@ import {selectAceCaretPosition} from '@common/core/reducers/view.reducer';
 import {filter, Observable} from 'rxjs';
 import {map, take} from 'rxjs/operators';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {orderJson} from '@common/shared/utils/shared-utils';
 
 declare const ace;
 export interface EditJsonData {
@@ -84,7 +85,7 @@ export class EditJsonComponent implements AfterViewInit{
       this.textData = undefined;
     } else if (this.typeJson && typeof data.textData !== 'string') {
       if (data.reorder) {
-        this.textData = jsonPipe.transform(this.orderJson(data.textData));
+        this.textData = jsonPipe.transform(orderJson(data.textData));
       } else {
         this.textData = jsonPipe.transform(data.textData);
       }
@@ -166,18 +167,5 @@ export class EditJsonComponent implements AfterViewInit{
       this.aceEditor.scrollToLine(position?.row || 0, true, false, () => {
       });
     });
-  }
-
-  private orderJson(data) {
-    if (data !== null && typeof data === 'object') {
-      if (Array.isArray(data)) {
-        return data.map(val => this.orderJson(val));
-      }
-      return Object.keys(data).sort().reduce((acc, key) => {
-        acc[key] = this.orderJson(data[key]);
-        return acc;
-      }, {});
-    }
-    return data;
   }
 }

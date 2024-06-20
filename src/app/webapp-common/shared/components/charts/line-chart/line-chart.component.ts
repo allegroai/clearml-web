@@ -1,19 +1,20 @@
 import {
   Component,
-  Input,
   ChangeDetectionStrategy,
-  ViewChild,
-  ChangeDetectorRef,
+  viewChild,
+  input, computed, signal, effect,
 } from '@angular/core';
-import {BaseChartDirective, NgChartsModule} from 'ng2-charts';
+import {BaseChartDirective} from 'ng2-charts';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {
   ChartData,
   ChartOptions,
   ChartType,
-  Plugin
+  Plugin, TooltipItem
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import {fileSizeConfigCount} from '@common/shared/pipes/filesize.pipe';
+import {filesize} from 'filesize';
 
 
 declare module 'chart.js' {
@@ -35,14 +36,6 @@ interface Topic {
   dates: { value: number; date: string }[];
 }
 
-export interface LineChartFlatData {
-  topicName: string;
-  name: string;
-  originalDate: number;
-  date: string;
-  value: number;
-}
-
 export interface concatLatestFrom {
   dataByTopic?: Topic[];
 }
@@ -54,16 +47,61 @@ export interface concatLatestFrom {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgChartsModule,
+    BaseChartDirective,
     MatProgressSpinnerModule
   ]
 })
 export class LineChartComponent {
+  lineChartPlugins: Plugin<'line'>[] =  [{
+    id: 'hoverLine',
+    afterDatasetsDraw: (chart, _, opts) => {
+      const {
+        ctx,
+        tooltip,
+        chartArea: { top, bottom}
+      } = chart;
 
-  public loading     = false;
-  public chartData: ChartData<'line', Topic['dates']>;
+      if (tooltip.opacity) {
+        ctx.lineWidth = opts.width || 0;
+        ctx.setLineDash(opts.dash || []);
+        ctx.strokeStyle = opts.color || 'black';
 
-  public lineChartOptions: ChartOptions<'line'> = {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(tooltip.caretX, bottom);
+        ctx.lineTo(tooltip.caretX, top);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.setLineDash([]);
+      }
+    }
+  }];
+  public lineChartType: ChartType = 'line';
+
+  private chart = viewChild(BaseChartDirective);
+  animationDuration = signal(500);
+
+  colorScheme= input(['#a4a1fb', '#ff8a15']);
+  yTickFormatter = input<(value: number) => string>(val => filesize(val, fileSizeConfigCount));
+  yLabel = input<string>();
+  showLoadingOverlay = input(false);
+  data = input<Topic[]>();
+
+  chartData = computed<ChartData<'line', Topic['dates']>>(() => {
+    const topics = this.data();
+    if (topics && !(topics?.length > 0)) {
+      return null;
+    }
+
+    return {
+      datasets: topics?.map((topic, index) => this.createDataset(topic, index)) ?? [],
+    };
+  });
+
+  lineChartOptions = computed(() => ({
+    animation: {
+      duration: this.animationDuration(),
+    },
     maintainAspectRatio: false,
     layout: {
       padding: {top: 12, bottom: 12}
@@ -98,13 +136,16 @@ export class LineChartComponent {
         },
       },
       y: {
+        title: {display: !!this.yLabel(), text: this.yLabel(), color: '#c1cdf3'},
         position: 'left',
         suggestedMin: 0,
+        beginAtZero: true,
         ticks: {
           autoSkip: true,
-          stepSize: 2,
           count: 5,
+          precision: 0,
           color: '#c1cdf3',
+          callback: value => typeof value === 'number' ? this.yTickFormatter()(value) : value
         },
         grid: {
           display: true,
@@ -133,95 +174,22 @@ export class LineChartComponent {
         bodyFont: {weight: 'normal', size: 12},
         padding: 12,
         usePointStyle: true,
+        callbacks: {
+          label: (item: TooltipItem<'line'>) => `${item.dataset.label}: ${this.yTickFormatter()((item.dataset.data[item.dataIndex] as unknown as Topic['dates'][0]).value)}`
+        }
       },
       hoverLine: {
         dash: [6, 6],
         color: '#8492c2',
         width: 1,
-      }
+      },
     },
 
     parsing: {
       xAxisKey: 'date',
       yAxisKey: 'value'
     }
-  };
-
-  lineChartPlugins: Plugin<'line'>[] =  [{
-    id: 'hoverLine',
-    afterDatasetsDraw: (chart, _, opts) => {
-      const {
-        ctx,
-        tooltip,
-        chartArea: { top, bottom}
-      } = chart;
-
-      if (tooltip.opacity) {
-        ctx.lineWidth = opts.width || 0;
-        ctx.setLineDash(opts.dash || []);
-        ctx.strokeStyle = opts.color || 'black';
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(tooltip.caretX, bottom);
-        ctx.lineTo(tooltip.caretX, top);
-        ctx.stroke();
-        ctx.closePath();
-        ctx.setLineDash([]);
-      }
-    }
-  }];
-  public lineChartType: ChartType = 'line';
-
-  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-
-  @Input() yTickFormatter: (number) => number;
-
-  @Input() set yLabel(label: string) {
-    this.lineChartOptions.scales.y.title = {display: !!label, text: label, color: '#c1cdf3'};
-  }
-
-  @Input() set showLoadingOverlay(show: boolean) {
-    if (!show) {
-      setTimeout(() => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      });
-    } else {
-      this.loading  = true;
-    }
-  }
-
-  @Input() set data(topics: Topic[]) {
-    if (topics && !(topics?.length > 0)) {
-      this.chartData = undefined;
-      return;
-    }
-
-    if (this.chartData?.datasets?.length > 0) {
-      const topicsLabels = topics?.map(topic => topic.topicName) ?? [];
-      for(let i = 0; i < this.chartData.datasets.length; i++) {
-        if (!topicsLabels.includes(this.chartData.datasets[i].label)) {
-          this.chartData.datasets.splice(i, 1);
-          i--;
-        }
-      }
-      topics?.forEach((topic) => {
-        const index = this.chartData.datasets.findIndex(ds => ds.label === topic.topicName);
-        if (index > -1) {
-          this.chartData.datasets[index].data = topic.dates;
-        } else {
-          this.chartData.datasets.push(this.createDataset(topic, this.chartData.datasets.length));
-        }
-      });
-      this.chart?.update();
-    } else {
-      this.chartData = {
-        datasets: topics?.map((topic, index) => this.createDataset(topic, index)),
-      };
-    }
-  }
-
+  } as ChartOptions<'line'>))
   private createDataset(topic: Topic, index: number) {
     return {
       data: topic.dates,
@@ -230,14 +198,19 @@ export class LineChartComponent {
       pointBorderColor: '#1a1e2c',
       borderWidth: 2,
       lineTension: 0.1,
-      pointBackgroundColor: this.colorScheme[index % this.colorScheme.length],
-      borderColor: this.colorScheme[index % this.colorScheme.length],
-      backgroundColor: this.colorScheme[index % this.colorScheme.length]
+      pointBackgroundColor: this.colorScheme()[index % this.colorScheme.length],
+      borderColor: this.colorScheme()[index % this.colorScheme().length],
+      backgroundColor: this.colorScheme()[index % this.colorScheme().length]
     };
   }
 
-  @Input() colorScheme= ['#a4a1fb', '#ff8a15'];
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor() {
+    effect(() => {
+      if (this.data()?.[0]?.dates.length > 0) {
+        this.animationDuration.set(0);
+        this.chart().update();
+      }
+    }, {allowSignalWrites: true});
   }
 }

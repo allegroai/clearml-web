@@ -36,6 +36,7 @@ export class ButtonToggleComponent {
 
   @Input() options: Option[];
   @Input() disabled: boolean;
+  @Input() noBackground: boolean;
   @Input() rippleEffect: boolean;
 
   @Input() set value(value: any) {

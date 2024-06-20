@@ -37,15 +37,9 @@ import {neverShowPopupAgain, toggleCardsCollapsed} from '../../core/actions/layo
 import {selectNeverShowPopups, selectTableCardsCollapsed} from '../../core/reducers/view.reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
-import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
-import {
-  hyperParamSelectedExperiments,
-  hyperParamSelectedInfoExperiments,
-  setHyperParamsFiltersPage,
-  setParents
-} from '@common/experiments/actions/common-experiments-view.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {ContextMenuService} from '@common/shared/services/context-menu.service';
+import {selectProjectId} from '@common/models/reducers';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -108,6 +102,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   protected refresh = inject(RefreshService);
   protected contextMenuService = inject(ContextMenuService);
 
+  protected projectId$ = this.store.selectSignal(selectProjectId);
 
   protected constructor() {
 
@@ -320,39 +315,19 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
-    switch (colId) {
-      case 'project.name':
-        if ((this.projectId || this.selectedProjectId) === '*') {
-          !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-          this.store.dispatch(getTablesFilterProjectsOptions({
-            searchString: value.value || '',
-            loadMore: value.loadMore
-          }));
-        } else {
-          this.store.dispatch(setTablesFilterProjectsOptions({
-            projects: this.selectedProject ? [this.selectedProject,
-              ...(this.selectedProject?.sub_projects ?? [])] : [], scrollId: null
-          }));
-        }
-        break;
-      case 'parent.name':
-        // No pagination in BE - setting same list will set noMoreOptions to true
-        if (value.loadMore) {
-          this.store.dispatch(setParents({parents: [...this.parents]}));
-        } else {
-          this.store.dispatch(experimentsActions.resetTablesFilterParentsOptions());
-          this.store.dispatch(experimentsActions.getParents({searchValue: value.value}));
-        }
-    }
-    if (colId.startsWith('hyperparams.')) {
-      if (!value.loadMore) {
-        this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
-        this.store.dispatch(setHyperParamsFiltersPage({page: 0}));
+    if (colId === 'project.name') {
+      if ((this.projectId || this.selectedProjectId) === '*') {
+        !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
+        this.store.dispatch(getTablesFilterProjectsOptions({
+          searchString: value.value || '',
+          loadMore: value.loadMore
+        }));
+      } else {
+        this.store.dispatch(setTablesFilterProjectsOptions({
+          projects: this.selectedProject ? [this.selectedProject,
+            ...(this.selectedProject?.sub_projects ?? [])] : [], scrollId: null
+        }));
       }
-      this.store.dispatch(hyperParamSelectedExperiments({
-        col: {id: colId, getter: `${colId}.value`},
-        searchValue: value.value
-      }));
     }
   }
 

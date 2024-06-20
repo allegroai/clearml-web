@@ -15,6 +15,7 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 
 @NgModule({
   declarations: [ProjectInfoComponent, ProjectStatsComponent, MetricForStatsDialogComponent],
@@ -30,6 +31,7 @@ import {
     TooltipDirective,
     DialogTemplateComponent,
     ShowTooltipIfEllipsisDirective,
+    SelectMetricForCustomColComponent
   ]
 })
 export class ProjectInfoModule {

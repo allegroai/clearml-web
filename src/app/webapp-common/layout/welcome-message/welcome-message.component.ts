@@ -1,3 +1,4 @@
+import {LocationStrategy} from '@angular/common';
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {setSelectedWorkspaceTab} from '@common/core/actions/users.actions';
@@ -60,7 +61,7 @@ export class WelcomeMessageComponent {
   public workspace: GetCurrentUserResponseUserObjectCompany;
 
 
-  WEB_SERVER_URL = window.location.origin;
+  WEB_SERVER_URL = window.location.origin + this.locationStrategy.getBaseHref();
   GETTING_STARTED_STEPS: StepObject[] = [{
     id: 1,
     header: 'Get started in a jiffy:',
@@ -108,7 +109,8 @@ export class WelcomeMessageComponent {
     private dialogRef: MatDialogRef<WelcomeMessageComponent>,
     @Inject(MAT_DIALOG_DATA) public data: WelcomeMessageData,
     protected configService: ConfigurationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private locationStrategy: LocationStrategy
   ) {
     this.dialogRef.beforeClosed().subscribe(res =>
       this.doNotShowAgain && !res? this.dialogRef.close(this.doNotShowAgain) : false);
@@ -240,7 +242,7 @@ export class WelcomeMessageComponent {
   getCopyConfig() {
     let res =  'api {\n';
     if (this.credentialsComment) {
-      res += `  ${this.credentialsComment}\n`;
+      res += `  # ${this.credentialsComment}\n`;
     }
     res += `  web_server: ${this.WEB_SERVER_URL}
   api_server: ${this.configService.apiServerUrl()}\n`;

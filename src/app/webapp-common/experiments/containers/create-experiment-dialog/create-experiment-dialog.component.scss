@@ -1,0 +1,87 @@
+@import "variables";
+
+:host {
+  ::ng-deep .generic-container {
+    padding: 32px 24px 0 !important;
+  }
+}
+
+form {
+  height: calc(94vh - 345px);
+  max-height: 520px;
+  overflow: auto;
+  padding: 0 24px;
+}
+
+h5 {
+  font-size: 14px;
+  font-weight: normal;
+  color: $blue-500;
+  margin: 24px 0 6px;
+}
+
+section {
+  border-top: 1px solid $blue-300;
+  padding-bottom: 24px;
+}
+
+code {
+  font-family: $font-family-monospace;
+  background-color: $blue-50;
+  border: 1px solid $blue-100;
+  border-radius: 4px;
+  margin: 0 4px;
+  padding: 2px 4px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field, sm-paginated-entity-selector {
+  display: block;
+  padding-top: 16px;
+}
+
+.mat-mdc-radio-button ~ .mat-mdc-radio-button {
+  margin-left: 16px;
+}
+
+.git .mat-mdc-form-field:first-child {
+  width: 150px;
+}
+
+.checkbox {
+  margin: 24px 0 12px -6px;
+}
+
+.terminal {
+  resize:  none;
+  font-family: $font-family-monospace;
+  font-size: 13px !important;
+  line-height: 1.6;
+  padding: 6px;
+}
+
+.te {
+  color: $blue-100;
+  background-color: $blue-900;
+}
+
+.args-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 40px;
+  align-items: end;
+  gap: 12px;
+}
+
+.d-flex.gap {
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.buttons {
+  margin: 24px 0 12px;
+  display: flex;
+  gap: 12px;
+}

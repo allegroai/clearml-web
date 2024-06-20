@@ -24,10 +24,10 @@ import {isExample} from '../shared/utils/shared-utils';
 import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
 import {IReport} from '@common/reports/reports.consts';
 import {isEqual} from 'lodash-es';
 import { Task } from '~/business-logic/model/tasks/task';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 
 @Component({
   selector: 'sm-dashboard-search-base',

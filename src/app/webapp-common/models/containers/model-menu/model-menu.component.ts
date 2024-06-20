@@ -19,7 +19,10 @@ import {
   setTableMode
 } from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
-import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
+import {
+  CommonDeleteDialogComponent,
+  DeleteData
+} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {cancelModelEdit} from '../../actions/models-info.actions';
 import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
@@ -155,7 +158,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   };
 
   deleteModelPopup() {
-    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+    const confirmDialogRef =     this.dialog.open<CommonDeleteDialogComponent, DeleteData, boolean>(CommonDeleteDialogComponent, {
       data: {
         entity: this._model,
         numSelected: this.numSelected,
@@ -168,7 +171,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.store.dispatch(setSelectedModels({models: []}));
-        this.store.dispatch(modelSelectionChanged({model: null, project: this.projectId || this.model?.project?.id || '*'}));
+        this.store.dispatch(modelSelectionChanged({model: null, project: this.projectId() || this.model?.project?.id || '*'}));
         this.store.dispatch(fetchModelsRequested());
         this.store.dispatch(cancelModelEdit());
       }
@@ -179,7 +182,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     this.store.dispatch(setTableMode({mode:'info'}));
     this.store.dispatch(modelSelectionChanged({
       model: this._model,
-      project: this.projectId
+      project: this.projectId()
     }));
   }
 }

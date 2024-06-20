@@ -19,8 +19,9 @@
     <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
     <md-editor #editorComponent
                name="Content"
-               [(ngModel)]="data"
                height="100%"
+               [class.scripts-blocked]="blockUserScripts && editMode"
+               [(ngModel)]="data"
                [mode]="editMode ? 'editor' : 'preview'"
                [options]="options"
                [postRender]="postRender"

@@ -181,6 +181,7 @@
 
   --mdc-filled-text-field-label-text-color: #{$blue-400};
   --mdc-outlined-text-field-label-text-color: #{$blue-400};
+  --mat-select-placeholder-text-color: #{$blue-300};
 
   mat-option {
     --mat-option-hover-state-layer-color: #{$blue-50};
@@ -217,6 +218,11 @@
 
 
   .mat-mdc-form-field, .mat-mdc-form-field.notched {
+
+    mat-label {
+      color: $blue-400;
+    }
+
     .mdc-notched-outline__notch {
       clip-path: unset;
     }
@@ -292,9 +298,8 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
   .mat-mdc-option {
     --mdc-theme-text-primary-on-background: #{$blue-200};
     border-radius: 4px;
-    height: 40px;
     min-height: 40px;
-    line-height: 40px;
+    line-height: normal;
     margin-bottom: 2px;
 
     &:last-child {
@@ -370,6 +375,7 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
     --mdc-switch-unselected-icon-size: 8px;
     --mdc-switch-handle-width: 14px;
     --mdc-switch-handle-height: 14px;
+    --mat-switch-with-icon-handle-size: 14px;
     --mdc-switch-track-width: 30px;
     --mdc-switch-state-layer-size: 32px;
 }

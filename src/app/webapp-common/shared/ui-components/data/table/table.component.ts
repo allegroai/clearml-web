@@ -225,14 +225,14 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
         width *= this.scaleFactor / 100;
       }
       let totalWidth = 0;
+      this.table.destroyStyleElement();
       if (this.minView) {
         // if (this.table?.styleElement) {
         //   this.table.styleElement.innerHTML = '';
         // }
-        totalWidth = width;
-        this.table.columnWidthsState = `${totalWidth - 4}`;
+        totalWidth = Math.max(width, 300);
+        this.table.columnWidthsState = `${totalWidth - (this.isChrome ? 13 : 4)}`;
       } else {
-        this.table.destroyStyleElement();
         this.table.createStyleElement();
         this.table.columnWidthsState = this.columns.map((col, index) => {
           let colWidth: number;

@@ -120,6 +120,7 @@ export const convertScalars = (scalars: GroupedList, experimentId: string): { [k
       .map(([, data]: [string, any]) => ({
         task: experimentId,
         ...data,
+        line: {width: 1, ...data.line},
         type: 'scatter'
       }));
 
@@ -135,9 +136,11 @@ export const convertScalars = (scalars: GroupedList, experimentId: string): { [k
     return acc;
   }, {});
 
-function onlySdkFields(parsePlots: { data: any; layout: any; config?: any }[]) {
+function onlySdkFields(parsePlots: { data: any; layout: any; config?: any; metric: string }[]): {[metrics: string]: boolean} {
   const sdkFields = ['mode', 'name', 'text', 'type', 'x', 'y'];
-  return parsePlots.every(plot => plot.data.every( data => isEqual(sdkFields, Object.keys(data).sort())));
+  const onlySdk = {};
+  parsePlots.forEach(plot => onlySdk[plot.metric] = plot.data.every(data => Object.keys(data).every(field => sdkFields.includes(field))));
+  return onlySdk;
 }
 
 export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: ExtMetricsPlotEvent[] } => {
@@ -146,9 +149,10 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: E
   }
 
   const sortedPlots = sortBy(plots, 'iter');
-  const parsePlots = sortedPlots.map(plot => tryParseJson(plot.plot_str));
-  const sdkPlots = onlySdkFields(parsePlots) && shouldBeMerged(parsePlots);
-  let previousPlotIsMergable = sdkPlots;
+  const parsePlots = sortedPlots.map((plot, i) => ({...tryParseJson(plot.plot_str), metric: sortedPlots[i].metric}));
+  const onlySdk = onlySdkFields(parsePlots)
+  const shouldMerge = shouldBeMerged(parsePlots);
+  let previousPlotIsMergable = true;
   return sortedPlots
     .reduce((groupedPlots, plot, i) => {
       const metric = plot.metric;
@@ -165,7 +169,7 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: E
       } else {
         groupedPlots[metric].push({...plot, plot_str: JSON.stringify(plotParsed), variants: [plot.variant]});
       }
-      previousPlotIsMergable = sdkPlots && (index > -1 || (index === -1 && ['scatter', 'bar'].includes(plotParsed.data[0]?.type)));
+      previousPlotIsMergable = onlySdk[metric] && shouldMerge[metric] && (index > -1 || (index === -1 && ['scatter', 'bar'].includes(plotParsed.data[0]?.type)));
       return groupedPlots;
     }, {});
 };
@@ -202,7 +206,7 @@ export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
   Object.keys(metrics ?? {}).forEach(metric => {
     Object.keys(metrics[metric]).forEach(variant => {
       const chartData = Object.entries(metrics[metric][variant])
-        .map(([task, data]: [string, ExtData]): ExtData => ({...data, type: 'scatter', task}));
+        .map(([task, data]: [string, ExtData]): ExtData => ({line: {width: 1, ...data.line}, ...data, type: 'scatter', task}));
       graphsMap[metric + variant] = [prepareGraph(chartData, {
         type: 'multiScalar',
         title: metric + ' / ' + variant
@@ -214,6 +218,7 @@ export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
 
 export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFrame[] } => {
   const graphsMap = {};
+  const onlyOneGraph = Object.keys(metrics).length === 1 && Object.values(metrics).length === 1
   Object.keys(metrics).forEach(metric => {
 
     //Search for duplicates names across all metrics and variants
@@ -230,6 +235,7 @@ export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFr
           ...data,
           type: 'scatter',
           task: taskId,
+          colorKey: `${onlyOneGraph ? '' : variant + '.' || ''}${data.name}.${taskId.substring(0, 6)}`,
           name: `${variant || '[no name]'} - ${data.name}${duplicateNamesObject[data.name] ? '.' + taskId.substring(0, 6) : ''}`
         }))
       );
@@ -298,6 +304,7 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experimentName
       variantPlot.colorKey = experimentName;
       variantPlot.task = experimentId;
     } else if (variantPlot.type === 'table') {
+      variantPlot.name = experiment;
       fullName = `${metricVariant} - ${experiment}`;
       variantPlot.task = experimentId;
     } else {
@@ -316,7 +323,7 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experimentName
     }
     charts[metricName][fullName].layout = Object.assign({}, {...charts[metricName][fullName].layout}) as Layout;
     // charts[metricName][fullName].layout.title = isMultipleTasks ? variantPlot.seriesName ?? '' : `${experiment} (iteration ${iteration})`;
-    charts[metricName][fullName].layout.title = variantPlot.seriesName ?? '';
+    charts[metricName][fullName].layout.title = variantPlot.seriesName ?? (isMultipleTasks ? '' : variantPlot.name) ?? '';
     charts[metricName][fullName].layout.name = charts[metricName][fullName].layout.name ? `${charts[metricName][fullName].layout.name} - ${experiment}` : fullName;
     charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
     charts[metricName][fullName].layout.showlegend = isMultipleTasks ? true : charts[metricName][fullName].layout.showlegend;
@@ -329,18 +336,20 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experimentName
 };
 
 function shouldBeMergedObj(experimentsPlots: { [expId: string]: { data: ExtData[], layout: ExtLayout, config?: plotly.Config } }) {
-  const values = Object.values(experimentsPlots);
+  const values = Object.values(experimentsPlots).map(plot => ({...plot, metric: ''}));
   return shouldBeMerged(values);
 }
 
-function shouldBeMerged(experimentsPlots: { data: ExtData[], layout: ExtLayout, config?: plotly.Config }[]) {
+function shouldBeMerged(experimentsPlots: { data: ExtData[], layout: ExtLayout, config?: plotly.Config; metric: string }[]): {[metric: string]: boolean} {
   const allowedMergedTypes = ['scatter', 'scattergl', 'bar', 'scatter3d'];
-  return experimentsPlots.every((plot) => plot.data.length > 0 && plot.data.every(data => allowedMergedTypes.includes(data.type))) &&
-    experimentsPlots.every((plot) => {
-      const cleanFirstPlotLayout = {...experimentsPlots[0].layout, title: '', xaxis: {...experimentsPlots[0].layout.xaxis, title: ''}, yaxis: {...experimentsPlots[0].layout.yaxis, title: ''}};
-      const cleanPlotLayout = {...plot.layout, title: '', xaxis: {...plot.layout.xaxis, title: ''}, yaxis: {...plot.layout.yaxis, title: ''}};
-      return isEqual(cleanFirstPlotLayout, cleanPlotLayout);
-    });
+  const shouldMerge = {};
+  experimentsPlots.forEach((plot) => shouldMerge[plot.metric] = plot.data.length > 0 && plot.data.every(data => allowedMergedTypes.includes(data.type)));
+  experimentsPlots.forEach((plot) => {
+    const cleanFirstPlotLayout = {...experimentsPlots[0].layout, title: '', xaxis: {...experimentsPlots[0].layout.xaxis, title: ''}, yaxis: {...experimentsPlots[0].layout.yaxis, title: ''}};
+    const cleanPlotLayout = {...plot.layout, title: '', xaxis: {...plot.layout.xaxis, title: ''}, yaxis: {...plot.layout.yaxis, title: ''}};
+    shouldMerge[plot.metric] = shouldMerge[plot.metric] || isEqual(cleanFirstPlotLayout, cleanPlotLayout);
+  });
+  return shouldMerge;
 }
 
 export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients, duplicateNamesObject: { [name: string]: boolean }): { charts: IMultiplot; parsingError: boolean } => {
@@ -457,40 +466,6 @@ export function createMultiSingleValuesChart(singleValues: EventsGetTaskSingleVa
 export const _testWhite = (x) => {
   const white = new RegExp(/^[\s\-_]$/);
   return white.test(x.charAt(0));
-};
-
-export const wordWrap = (str, maxWidth) => {
-
-  if (str.length <= maxWidth) {
-    return str;
-  }
-  const newLineStr = '<br>';
-  let done = false;
-  let found;
-  let res = '';
-  do {
-    found = false;
-    // Inserts new line at first whitespace of the line
-    for (let i = maxWidth - 1; i >= 0; i--) {
-      if (i > 0 && _testWhite(str.charAt(i))) {
-        res = res + [str.slice(0, i), newLineStr].join('');
-        str = str.slice(i + 1 || 1);
-        found = true;
-        break;
-      }
-    }
-    // Inserts new line at maxWidth position, the word is too long to wrap
-    if (!found) {
-      res += [str.slice(0, maxWidth), newLineStr].join('');
-      str = str.slice(maxWidth);
-    }
-
-    if (str.length < maxWidth) {
-      done = true;
-    }
-  } while (!done);
-
-  return res + str;
 };
 
 export const stripHtml = (s) => s.replace(/<[^>]*>?/gm, '');

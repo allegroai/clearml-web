@@ -53,7 +53,7 @@ import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {Actions, ofType} from '@ngrx/effects';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
-import {selectDefaultNestedModeForFeature, selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {selectBlockUserScript, selectDefaultNestedModeForFeature, selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 
 const replaceSlash = (part) => part
@@ -98,6 +98,7 @@ export class ReportComponent implements OnInit, OnDestroy {
   public showDescription = false;
   public resources: { unused: boolean; url: string }[];
   public menuPosition = { x: 0, y: 0 };
+  public blockUserScripts$: Observable<boolean>;
 
   @ViewChild(MarkdownEditorComponent) mdEditor: MarkdownEditorComponent;
   @ViewChild('printHiddenButton') printHiddenButton: ElementRef;
@@ -117,6 +118,7 @@ export class ReportComponent implements OnInit, OnDestroy {
       .pipe(map(state => state.matches));
     this.editMode$ = this.store.select(selectEditingReport);
     this.reportTags$ = this.store.select(selectReportsTags);
+    this.blockUserScripts$ = this.store.select(selectBlockUserScript);
 
     this.store.dispatch(getReportsTags());
 

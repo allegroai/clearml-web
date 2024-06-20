@@ -8,11 +8,11 @@ import {
 } from '@angular/core';
 import {ScatterPlotSeries} from '@common/core/reducers/projects.reducer';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {NgChartsModule} from 'ng2-charts';
 import {Chart, ChartData, ChartOptions, ChartType, TooltipItem} from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-date-fns';
 import {TinyColor} from '@ctrl/tinycolor';
+import {BaseChartDirective} from 'ng2-charts';
 
 Chart.register(zoomPlugin);
 
@@ -24,7 +24,7 @@ Chart.register(zoomPlugin);
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatProgressSpinnerModule,
-    NgChartsModule
+    BaseChartDirective,
   ],
   standalone: true
 })
@@ -152,7 +152,7 @@ export class ScatterPlotComponent implements OnChanges {
 
   @Input() set showLoadingOverlay(loading: boolean) {
     this.loading = loading;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   @Input() set xAxisType(type: 'linear' | 'logarithmic' | 'category' | 'time' | 'timeseries') {

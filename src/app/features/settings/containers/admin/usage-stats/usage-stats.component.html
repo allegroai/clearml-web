@@ -1,5 +1,5 @@
-<ng-container *ngIf="!demo">
+@if(!demo) {
   <mat-slide-toggle
     (change)="statsChange($event)"
-    [checked]="allowed$ | async">Send anonymous usage data (Global setting)</mat-slide-toggle>
-</ng-container>
+    [checked]="allowed()">Send anonymous usage data (Global setting)</mat-slide-toggle>
+}

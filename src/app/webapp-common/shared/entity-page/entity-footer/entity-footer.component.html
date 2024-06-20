@@ -40,8 +40,8 @@
           <button
             [matMenuTriggerFor]="tagsMenu.matMenu"
             [disabled]="footerItemState.disable"
-            (menuOpened)="tagMenuOpened(tagMenu)"
-            (menuClosed)="tagMenuClosed(tagMenu)"
+            (menuOpened)="tagMenuOpened(tagMenu())"
+            (menuClosed)="tagMenuClosed(tagMenu())"
           ><i data-id="AddTagOption" class="al-icon sm-md pt-1" [class]="icons.TAG"></i></button>
         </span>
 

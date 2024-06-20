@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
+  Component, computed, effect,
+  EventEmitter, input,
   Input,
-  Output
+  Output, signal
 } from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
@@ -52,41 +52,18 @@ export class TableFilterSortTemplateComponent {
   public readonly TABLE_SORT_ORDER = TABLE_SORT_ORDER;
 
   public formControl = new UntypedFormControl();
-  header;
-  enableSort = true;
-  enableFilter: boolean;
-  enableSearch = false;
   isSorted: boolean;
-  filterType: ColHeaderFilterTypeEnum;
-  supportAndFilter: boolean;
-  supportExcludeFilter: boolean;
-  columnExplain: string;
   searching: boolean = true;
   private _value: string[];
   public loading: boolean;
 
   FILTER_TYPE = ColHeaderFilterTypeEnum;
   @Input() sortOrder: { index: number; field: string; order: TableSortOrderEnum };
-  private _options: Array<{ label: string; value: string; tooltip?: string }>;
   public previousLength: number | undefined;
-  public noMoreOptions: boolean;
-  public filterPageSize: number;
-  private previousSearchValue: { label: string; value: string; tooltip?: string } | undefined;
+  private previousSearchValue: string;
   private isOpen: boolean;
+  private pageNumber = signal(1);
 
-  @Input() set column(col: ISmCol) {
-    this.header = col.header;
-    this.enableSort = col.sortable;
-    this.enableFilter = col.filterable;
-    this.enableSearch = col.searchableFilter;
-    this.filterType = col.filterType;
-    this.supportAndFilter = col.andFilter;
-    this.supportExcludeFilter = col.excludeFilter;
-    this.columnExplain = col.columnExplain;
-    this.filterPageSize = col.paginatedFilterPageSize;
-  }
-
-  @Input() searchValue;
   @Input() fixedOptionsSubheader;
 
   @Input() set value(filters: Array<string>) {
@@ -107,20 +84,15 @@ export class TableFilterSortTemplateComponent {
   @Input() subValue: string[] = [];
   @Input() andFilter: boolean = null;
 
-  @Input() set options(options: Array<{ label: string; value: string; tooltip?: string }>) {
-    if (options && this.isOpen) {
-      this.noMoreOptions = options?.length < this.filterPageSize || options?.length === this.previousLength && this.searchValue === this.previousSearchValue;
-      this.previousLength = options?.length;
-      this.previousSearchValue = this.searchValue;
-      this.searching = false;
-      this.loading = false;
-    }
-    this._options = options;
-  }
-
-  get options() {
-    return this._options;
-  }
+  column = input<ISmCol>();
+  searchValue = input<string>();
+  options = input<{ label: string; value: string; tooltip?: string}[]>();
+  protected paginatedOptions = computed(() => this.column().paginatedFilterPageSize ?
+    this.options()?.slice(0, this.column().paginatedFilterPageSize * this.pageNumber()) : this.options()
+  );
+  protected noMoreOptions = computed(() => this.column().asyncFilter ?
+    this.options()?.length < this.column().paginatedFilterPageSize || this.options()?.length === this.previousLength && this.searchValue() === this.previousSearchValue :
+  this.paginatedOptions()?.length === this.options()?.length);
 
   @Input() subOptions: Array<{ label: string; value: string }>;
   @Input() tooltip: boolean = false;
@@ -132,6 +104,20 @@ export class TableFilterSortTemplateComponent {
   @Output() searchValueChanged = new EventEmitter<{ value: string; loadMore?: boolean }>();
 
   constructor() {
+    effect(() => {
+      if (this.options() && this.isOpen) {
+        this.previousLength = this.options()?.length;
+        this.searching = false;
+        this.loading = false;
+      }
+    }, );
+
+    effect(() => {
+      if (this.searchValue() && this.previousSearchValue !== this.searchValue()) {
+        this.pageNumber.set(1);
+      }
+      this.previousSearchValue = this.searchValue();
+    }, {allowSignalWrites: true});
   }
 
   switchSortOrder($event: MouseEvent) {
@@ -177,13 +163,18 @@ export class TableFilterSortTemplateComponent {
 
   loadMore() {
     this.loading = true;
-    this.searchValueChanged.emit({value: this.searchValue || '', loadMore: true});
+    this.pageNumber.set(this.pageNumber() + 1);
+    if (!this.column().asyncFilter) {
+      window.setTimeout(() => this.loading = false, 300);
+    }
+    this.searchValueChanged.emit({value: this.searchValue() || '', loadMore: true});
   }
 
   onMenuClose() {
-    if (!this.noMoreOptions) {
+    if (!this.noMoreOptions()) {
       this.previousLength = 0;
     }
+    this.pageNumber.set(1);
     this.menuClosed.emit();
     this.isOpen = false;
   }
@@ -191,5 +182,10 @@ export class TableFilterSortTemplateComponent {
   onMenuOpen() {
     this.isOpen = true;
     this.menuOpened.emit();
+  }
+
+  searchChanged(value: string) {
+    this.searching = true;
+    this.searchValueChanged.emit({value});
   }
 }

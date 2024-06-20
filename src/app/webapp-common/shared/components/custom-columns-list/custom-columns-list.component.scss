@@ -1,9 +1,21 @@
 @import 'variables';
 
+:host-context(.dark-theme) {
+  .list-container {
+    border-bottom: 1px solid $blue-500;
+  }
+}
+
+:host-context(.light-theme) {
+  .list-container {
+    border-bottom: 1px solid $blue-200;
+  }
+}
+
 .list-container {
   overflow: auto;
   max-height: 60vh;
-  border-bottom: 1px solid $blue-200;
+  padding: 4px 0;
 }
 
 .loader {

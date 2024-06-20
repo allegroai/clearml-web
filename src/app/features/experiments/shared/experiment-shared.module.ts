@@ -4,7 +4,6 @@ import {ExperimentConverterService} from './services/experiment-converter.servic
 import { ExperimentMenuComponent } from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {ExperimentMenuExtendedComponent} from '../containers/experiment-menu-extended/experiment-menu-extended.component';
 import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
-import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/select-hyper-params-for-custom-col/select-hyper-params-for-custom-col.component';
 import {ExperimentExecutionParametersComponent} from '@common/experiments/dumb/experiment-execution-parameters/experiment-execution-parameters.component';
 import {CloneDialogComponent} from '@common/experiments/shared/components/clone-dialog/clone-dialog.component';
 import {ExperimentSystemTagsComponent} from '@common/experiments/shared/components/experiments-system-tags/experiment-system-tags.component';
@@ -12,7 +11,6 @@ import {AbortAllChildrenDialogComponent} from '@common/experiments/shared/compon
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
 import {ExperimentOutputPlotsComponent} from '@common/experiments/containers/experiment-output-plots/experiment-output-plots.component';
-import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
 import {EffectsModule} from '@ngrx/effects';
 import {CommonExperimentsMenuEffects} from '@common/experiments/effects/common-experiments-menu.effects';
 import {CommonExperimentOutputEffects} from '@common/experiments/effects/common-experiment-output.effects';
@@ -78,6 +76,9 @@ import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
+import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/select-hyper-params-for-custom-col/select-hyper-params-for-custom-col.component';
 
 export const experimentSyncedKeys = [
   'view.projectColumnsSortOrder',
@@ -132,8 +133,6 @@ const DECLARATIONS = [
   ExperimentExecutionParametersComponent,
   ExperimentsTableComponent,
   ExperimentHeaderComponent,
-  ExperimentCustomColsMenuComponent,
-  SelectHyperParamsForCustomColComponent,
   ExperimentOutputPlotsComponent,
 ];
 
@@ -196,6 +195,9 @@ const DECLARATIONS = [
     ShowTooltipIfEllipsisDirective,
     MatCheckboxModule,
     DotsLoadMoreComponent,
+    ExperimentCustomColsMenuComponent,
+    SelectMetricForCustomColComponent,
+    SelectHyperParamsForCustomColComponent,
   ],
   declarations   : [...DECLARATIONS],
   providers      : [

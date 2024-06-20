@@ -1,13 +1,23 @@
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, forwardRef, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/templateFormSectionBase';
-import {FormsModule, NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component, computed, effect,
+  EventEmitter,
+  forwardRef,
+  input,
+  Output,
+} from '@angular/core';
+import {
+  ControlValueAccessor,
+  FormControl,
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
+  ReactiveFormsModule, ValidationErrors, Validator
+} from '@angular/forms';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {filter, map, startWith} from 'rxjs/operators';
-import {Observable, asyncScheduler} from 'rxjs';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatOptionSelectionChange} from '@angular/material/core';
 import {MatInputModule} from '@angular/material/input';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 
 export interface IOption {
@@ -23,89 +33,78 @@ export interface IOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    FormsModule,
     MatInputModule,
     MatAutocompleteModule,
-    AsyncPipe,
-    NgForOf,
-    NgIf
-  ],
+    ReactiveFormsModule
+],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectAutocompleteForTemplateFormsComponent),
       multi: true
-    }]
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => SelectAutocompleteForTemplateFormsComponent),
+      multi: true
+    }
+  ]
 })
 
-export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSectionBaseDirective implements OnInit {
-  private _items: { label: string; value: string }[];
-  private _focusIt: any;
+export class SelectAutocompleteForTemplateFormsComponent implements ControlValueAccessor, Validator  {
   public loading = true;
   separatorKeysCodes: number[] = [ENTER, COMMA];
   filterText = '';
   isNewName = false;
-  @Input() errorMsg: string;
-  @Input() multiple = true;
-  @Input() name: string;
-  @Output() customOptionAdded = new EventEmitter();
-  @Input() formFieldClass: string;
-  @Input() appearance: 'outline' | 'fill' = 'outline';
+  onChange: (any) => void;
+  onTouch: () => void;
+  onValidate: () => void;
 
-  public filteredItems: Observable<{ label: string; value: string }[]>;
+  protected control = new FormControl();
 
-  @Input() set isDisabled(disabled: boolean) {
-    this.disabled = disabled;
-  }
-
-  @Input() set items(items: { label: string; value: string }[]) {
-    this.loading = false;
-    this._items = items;
-  }
-
-  get items() {
-    return this._items || [];
-  }
-
-  // @Input() required: boolean = false;
-  @Input() clearable = true;
-  @Input() placeholder = '';
-  @Input() optionAddable = false;
-  @Input() autofocus = false;
-
-  @Input() set focusIt(isFocus) {
-    if (isFocus && this.autofocus === true) {
-      this._focusIt = isFocus;
-    } else {
-      this._focusIt = false;
+  errorMsg = input<string>();
+  multiple = input(true);
+  name = input<string>();
+  formFieldClass = input<string>();
+  appearance = input<'outline' | 'fill'>('outline');
+  items = input<{ label: string; value: string }[]>();
+  clearable = input(true);
+  placeholder = input('');
+  optionAddable = input(false);
+  autofocus = input(false);
+  focusIt = input(false);
+  shouldFocus = computed(() => this.autofocus() === true && this.focusIt())
+  value = toSignal(this.control.valueChanges);
+  filteredItems = computed(() => {
+    const value = this.value();
+    if (value !== undefined && value !== null) {
+      return this._filter(typeof value === 'string' ? value : value.label);
     }
+    return this.items();
+  });
+
+  constructor() {
+    effect(() => {
+      if(this.items()) {
+        this.loading = false;
+      }
+    });
+    effect(() => {
+      const value = this.value();
+      this.onChange && this.onChange(this.control.value);
+      this.onTouch && this.onTouch();
+      this.onValidate && this.onValidate();
+    });
   }
 
-  get focusIt() {
-    return this._focusIt;
-  }
-
-  @ViewChild('autoSelectForm', {static: true}) autoSelectForm: NgForm;
-  @ViewChild('autocompleteInput') autocompleteInput: ElementRef<HTMLInputElement>;
-
-  ngOnInit() {
-    setTimeout(() => {
-      this.filteredItems = this.autoSelectForm.controls[this.name].valueChanges
-        .pipe(
-          filter(value => value !== undefined),
-          map(value => typeof value === 'string' ? value : value.label),
-          map(value => this._filter(value)),
-          startWith(this.items, asyncScheduler)
-        );
-    }, 0);
-  }
+  @Output() customOptionAdded = new EventEmitter();
 
   private _filter(value: string) {
     this.filterText = value;
-    const itemsLabels = this.items.map(item => item.label);
+    const itemsLabels = this.items().map(item => item.label);
     this.isNewName = !itemsLabels.includes(value);
     const filterValue = value?.toLowerCase();
-    return this.items.filter((item: any) => item.label?.toLowerCase().includes(filterValue));
+    return this.items().filter((item: any) => item.label?.toLowerCase().includes(filterValue));
   }
 
   displayFn(item: any): string {
@@ -113,14 +112,31 @@ export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSec
   }
 
 
-  optionSelected($event: MatAutocompleteSelectedEvent) {
-    if (typeof $event === 'string') {
-      return;
-    }
-    this.writeValue($event);
-  }
-
   customOptionSelected($event: MatOptionSelectionChange) {
     this.customOptionAdded.emit($event.source.value.label);
+  }
+
+  registerOnChange(fn: (any) => void) {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void) {
+    this.onTouch = fn;
+  }
+
+  writeValue(value) {
+    this.control.patchValue(value, {emitEvent: false});
+  }
+
+  setDisabledState?(isDisabled: boolean) {
+    isDisabled ? this.control.disable() : this.control.enable();
+  }
+
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidate = fn;
+  }
+
+  validate(): ValidationErrors | null {
+    return this.control.errors;
   }
 }

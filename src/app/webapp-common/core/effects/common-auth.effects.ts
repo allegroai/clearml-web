@@ -1,27 +1,33 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import * as authActions from '../actions/common-auth.actions';
-import {setCredentialLabel} from '../actions/common-auth.actions';
+import {setCredentialLabel, setSignedUrls} from '../actions/common-auth.actions';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {catchError, filter, finalize, map, mergeMap, switchMap, throttleTime} from 'rxjs/operators';
 import {AuthGetCredentialsResponse} from '~/business-logic/model/auth/authGetCredentialsResponse';
-import {Store} from '@ngrx/store';
+import {Action, Store} from '@ngrx/store';
 import {selectCurrentUser} from '../reducers/users-reducer';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {AdminService} from '~/shared/services/admin.service';
-import {selectDontShowAgainForBucketEndpoint, selectS3BucketCredentialsBucketCredentials, selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
-import {EMPTY, of} from 'rxjs';
+import {
+  selectDontShowAgainForBucketEndpoint,
+  selectS3BucketCredentialsBucketCredentials,
+  selectSignedUrl,
+  selectSignedUrls
+} from '@common/core/reducers/common-auth-reducer';
+import {EMPTY, forkJoin, of} from 'rxjs';
 import {S3AccessDialogData, S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
 import {isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
 import {isFileserverUrl} from '~/shared/utils/url';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
+import {concatLatestFrom} from '@ngrx/operators';
 
 @Injectable()
 export class CommonAuthEffects {
-  private signAfterPopup: (ReturnType<typeof authActions.getSignedUrl>)[] = [];
+  private signAfterPopup: Action[] = [];
   private openPopup: { [bucketName: string]: boolean } = {};
 
   constructor(
@@ -148,6 +154,55 @@ export class CommonAuthEffects {
     )
   ));
 
+  signUrls = createEffect(() => {
+    return this.actions.pipe(
+      ofType(authActions.signUrls),
+      filter(action => action.sign.length > 0),
+      concatLatestFrom(() => this.store.select(selectSignedUrls)),
+      mergeMap(([action, prevSigns]) =>
+        forkJoin(action.sign.map(req =>
+          of(action).pipe(
+            switchMap(() => this.adminService.signUrlIfNeeded(req.url, req.config, prevSigns[req.url])),
+            map(res => ({res, orgUrl: req.url}))
+          )
+        )).pipe(
+          switchMap((responses) => {
+            const groups = responses
+              .filter(res => !!res.res)
+              .reduce((acc, res) => {
+                if (Object.hasOwn(acc, res.res.type)) {
+                  acc[res.res.type].push(res);
+                } else {
+                  acc[res.res.type] = [res];
+                }
+                return acc;
+              }, {});
+            return Object.keys(groups).map(type => {
+              switch (type) {
+                case 'popup': {
+                  this.signAfterPopup.push(action);
+                  const res = groups[type][0].res;
+                  return [authActions.showS3PopUp({
+                    credentials: res.bucket,
+                    provider: res.provider,
+                    credentialsError: null
+                  })];
+                }
+                case 'sign':
+                  return setSignedUrls({signed: groups['sign'].map((res: {res: SignResponse, orgUrl: string}) =>
+                      ({url: res.orgUrl, signed: res.res.signed, expires: res.res.expires}))});
+                default:
+                  return null;
+              }
+            })
+              .filter(a => !!a)
+              .flat();
+          })
+        )
+      ),
+    )
+  });
+
   s3popup = createEffect(() => this.actions.pipe(
     ofType(authActions.showS3PopUp),
     concatLatestFrom(() => this.store.select(selectDontShowAgainForBucketEndpoint)),
@@ -163,16 +218,17 @@ export class CommonAuthEffects {
       return this.matDialog.open(S3AccessResolverComponent, {data: action as S3AccessDialogData, maxWidth: 700}).afterClosed().pipe(
         concatLatestFrom(() => this.store.select(selectS3BucketCredentialsBucketCredentials)),
         switchMap(([data, bucketCredentials]) => {
-          window.setTimeout(() => this.signAfterPopup = []);
+          const actions = [...this.signAfterPopup];
+          this.signAfterPopup = [];
           if (data) {
             if (!data.success) {
               const emptyCredentials = bucketCredentials.find((cred => cred?.Bucket === data.bucket)) === undefined;
               const dontAskAgainForBucketName = emptyCredentials ? '' : data.bucket + data.endpoint;
               return [authActions.cancelS3Credentials({dontAskAgainForBucketName})];
             }
-            return [authActions.saveS3Credentials({newCredential: data}), ...this.signAfterPopup];
+            return [authActions.saveS3Credentials({newCredential: data}), ...actions];
           }
-          return [...this.signAfterPopup];
+          return actions;
         }),
         finalize(() => action?.credentials?.Bucket && delete this.openPopup[action.credentials.Bucket])
       );

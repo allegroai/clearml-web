@@ -466,11 +466,11 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   selectMetadataKeysActiveChanged(mode: { customMode: CustomColumnMode }) {
-    if (mode.customMode === CustomColumnMode.Metadata) {
+    // if (mode.customMode === CustomColumnMode.Metadata) {
       this.store.dispatch(modelsActions.getMetadataKeysForProject());
-    } else if (mode.customMode === CustomColumnMode.Metrics) {
+    // } else if (mode.customMode === CustomColumnMode.Metrics) {
       this.store.dispatch(modelsActions.getCustomMetrics());
-    }
+    // }
   }
 
 

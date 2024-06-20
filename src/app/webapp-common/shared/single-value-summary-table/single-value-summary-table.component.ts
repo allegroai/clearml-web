@@ -1,8 +1,11 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {
+  EventsGetTaskSingleValueMetricsResponseValues
+} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {download} from '../utils/download';
 import {NgForOf, NgIf} from '@angular/common';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {SortPipe} from '@common/shared/pipes/sort.pipe';
 
 @Component({
   selector: 'sm-single-value-summary-table',
@@ -11,7 +14,8 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgForOf,
-    NgIf
+    NgIf,
+    SortPipe
   ],
   standalone: true
 })

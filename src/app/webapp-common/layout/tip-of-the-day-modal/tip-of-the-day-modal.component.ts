@@ -5,6 +5,13 @@ import {addMessage} from '../../core/actions/layout.actions';
 import {Tip} from '../../shared/services/tips.service';
 import {MESSAGES_SEVERITY} from '@common/constants';
 
+export interface TipsModalData {
+  tips: Tip[];
+  visitedIndex: number;
+  hideDontShow: boolean
+}
+
+
 @Component({
   selector: 'sm-tip-of-the-day-modal',
   templateUrl: './tip-of-the-day-modal.component.html',
@@ -18,7 +25,7 @@ export class TipOfTheDayModalComponent {
   public hideDontShow: boolean;
 
   constructor(public matDialogRef: MatDialogRef<TipOfTheDayModalComponent>, private store: Store,
-              @Inject(MAT_DIALOG_DATA) public data: { tips: Tip[]; visitedIndex: number; hideDontShow: boolean }) {
+              @Inject(MAT_DIALOG_DATA) public data: TipsModalData) {
     this.tips = data.tips;
     this.hideDontShow = data.hideDontShow;
     this.visitedIndex = data.visitedIndex % this.tips.length;

@@ -1,5 +1,5 @@
 import {NAVIGATION_PREFIX} from '~/app.constants';
-import {createAction, props} from '@ngrx/store';
+import {createAction, createActionGroup, props} from '@ngrx/store';
 import {Params} from '@angular/router';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
@@ -7,7 +7,6 @@ import {CrumbTypeEnum, IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadc
 import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
 
 export const BREADCRUMBS_PREFIX = 'BREADCRUMBS_';
-export const CONTEXT_MENU_PREFIX = 'CONTEXT_';
 
 
 export const navigationEnd = createAction(NAVIGATION_PREFIX + 'NAVIGATION_END');
@@ -39,7 +38,7 @@ export const setURLParams = createAction(
 
 export const setBreadcrumbs = createAction(
   BREADCRUMBS_PREFIX + 'SET_BREADCRUMBS',
-  props<{ breadcrumbs: IBreadcrumbsLink[][]}>()
+  props<{ breadcrumbs: IBreadcrumbsLink[][], workspaceNeutral?: boolean}>()
 );
 
 export const setTypeBreadcrumbs = createAction(
@@ -47,13 +46,15 @@ export const setTypeBreadcrumbs = createAction(
   props<{ breadcrumb: IBreadcrumbsLink; type?: CrumbTypeEnum }>()
 );
 
-export const setContextMenu = createAction(
-  CONTEXT_MENU_PREFIX + 'SET_CONTEXT_MENU',
-  props<{ contextMenu: HeaderNavbarTabConfig[]}>()
+export const setWorkspaceNeutral = createAction(
+  BREADCRUMBS_PREFIX + 'SET_TYPE_BREADCRUMBS',
+  props<{ neutral: boolean }>()
 );
 
-export const setContextMenuActiveFeature = createAction (
-  CONTEXT_MENU_PREFIX + 'SET_CONTEXT_MENU_ACTIVE_FEATURE',
-  props<{ activeFeature: string}>()
-);
-
+export const headerActions = createActionGroup({
+  source: 'header tabs',
+  events: {
+    setTabs: props<{ contextMenu: HeaderNavbarTabConfig[]}>(),
+    setActiveTab: props<{ activeFeature: string}>()
+  }
+});

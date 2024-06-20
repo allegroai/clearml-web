@@ -77,9 +77,27 @@ export const getSignedUrl = createAction(
     error?: boolean;
   }}>()
 );
+export const signUrls = createAction(
+  AUTH_PREFIX + '[sign urls]',
+  props<{sign: {
+    url: string;
+    config?: {
+      skipLocalFile?: boolean;
+      skipFileServer?: boolean;
+      disableCache?: number;
+      dprsUrl?: string | boolean;
+      error?: boolean;
+    }
+  }[]}>()
+);
 export const setSignedUrl = createAction(
   AUTH_PREFIX + '[set signed url]',
   props<{url: string; signed: string; expires: number}>()
+);
+
+export const setSignedUrls = createAction(
+  AUTH_PREFIX + '[set signed urls]',
+  props<{signed: {url: string; signed: string; expires: number}[]}>()
 );
 
 export const removeSignedUrl = createAction(

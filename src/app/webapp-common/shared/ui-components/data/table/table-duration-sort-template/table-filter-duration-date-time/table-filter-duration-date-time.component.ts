@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {DurationParameters, TableDurationSortBaseComponent} from '../table-duration-sort-base.component';
 import {TIME_IN_MILLI} from '../../../../../utils/time-util';
-import {MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
+import {MAT_DATE_FORMATS, MAT_DATE_LOCALE, provideNativeDateAdapter} from '@angular/material/core';
 import {isNil} from 'lodash-es';
 import {hasValue} from '../../../../../utils/helpers.util';
 import {FormsModule} from '@angular/forms';
@@ -9,7 +9,11 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {
   KeydownStopPropagationDirective
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
-import {MatDatepickerModule} from '@angular/material/datepicker';
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerToggle
+} from '@angular/material/datepicker';
 import {
   DurationInputListComponent
 } from '@common/shared/ui-components/inputs/duraion-input-list/duration-input-list.component';
@@ -18,7 +22,6 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {
   TableFilterDurationErrorComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
-import {MatInputModule} from '@angular/material/input';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -75,8 +78,8 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
   styleUrls: ['./table-filter-duration-date-time.component.scss'],
   providers: [
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
-    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS}
-
+    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS},
+    provideNativeDateAdapter()
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
@@ -84,13 +87,13 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
     FormsModule,
     ClickStopPropagationDirective,
     KeydownStopPropagationDirective,
-    MatDatepickerModule,
-    MatNativeDateModule,
     DurationInputListComponent,
     TooltipDirective,
     TableFilterDurationErrorComponent,
-    MatInputModule
-]
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatDatepicker
+  ]
 })
 export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent {
   _selectedDate: Date;
