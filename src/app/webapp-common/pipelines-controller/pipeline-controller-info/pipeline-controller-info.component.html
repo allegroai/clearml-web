@@ -32,6 +32,7 @@
       <g
         *ngFor="let arrow of arrows; trackBy: trackArrows"
         [class.selected]="arrow.selected"
+        [class.outgoing]="arrow.outgoing"
       >
         <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
         <polygon

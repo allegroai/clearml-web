@@ -136,12 +136,16 @@ $log-header-height: 48px;
     left: 0;
     top: 0;
     pointer-events: none;
-    stroke: $blue-400;
-    fill: $blue-400;
+    stroke: $blue-800;
+    fill: $blue-800;
 
     .selected {
       stroke: $blue-200;
       fill: $blue-200;
+    }
+    .outgoing {
+      stroke: $blue-400;
+      fill: $blue-400;
     }
   }
 }
