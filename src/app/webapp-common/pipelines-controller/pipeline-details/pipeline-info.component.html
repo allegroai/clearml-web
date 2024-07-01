@@ -37,7 +37,7 @@
         <ng-container *ngIf="(entity?.last_metrics | keyvalue)?.length > 0; else emptyMsg">
           <ng-container *ngFor="let metric of entity.last_metrics | keyvalue">
             <div *ngFor="let variant of $any($any(metric.value) | keyvalue) | filterMonitorMetric" class="param">
-              <div class="key" [smTooltip]="$any(variant.value).metric" smShowTooltipIfEllipsis>{{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
+              <div class="key" [smTooltip]="$any(variant.value).metric + '/' + $any(variant.value).variant" smShowTooltipIfEllipsis>{{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
               <div class="value" [smTooltip]="$any(variant.value).value" smShowTooltipIfEllipsis>{{$any(variant.value).value}}</div>
             </div>
           </ng-container>
