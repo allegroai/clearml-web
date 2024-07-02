@@ -24,6 +24,7 @@
       ></sm-pipeline-controller-step>
     </div>
     <svg class="arrows"
+         [class.selected]="selectedEntity?.id"
          *ngIf="chartWidth"
          [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
          [style.width.px]="chartWidth"
