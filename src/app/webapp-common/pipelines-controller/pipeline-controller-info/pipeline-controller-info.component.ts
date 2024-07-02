@@ -65,9 +65,9 @@ export interface Arrow {
   path2?: string;
   headTransform: string;
   selected: boolean;
-  targetId: string;
+  targetId: number;
+  sourceId: number;
   outgoing?: boolean;
-  sourceId?: number;
 }
 
 export enum StatusOption {
@@ -319,7 +319,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
               selected: false,
               outgoing: false,
               sourceId: parentId,
-              targetId: pipeLineItem.id
+              targetId: pipeLineItem.stepId,
             });
           }
         }
@@ -422,7 +422,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
   protected highlightArrows() {
     this.arrows = this.arrows?.map(arrow => {
-      const isTarget = arrow.targetId === this.selectedEntity?.id;
+      const isTarget = arrow.targetId === this.selectedEntity?.stepId;
       const isSource = arrow.sourceId === this.selectedEntity?.stepId;
       return {...arrow, selected: isTarget || isSource, outgoing: isSource};
     }).sort((a, b) => (a.selected === b.selected) ? 0 : a.selected ? 1 : -1);
