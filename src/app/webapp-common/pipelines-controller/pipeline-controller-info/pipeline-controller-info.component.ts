@@ -65,7 +65,9 @@ export interface Arrow {
   path2?: string;
   headTransform: string;
   selected: boolean;
-  targetId: string;
+  targetId: number;
+  sourceId: number;
+  outgoing?: boolean;
 }
 
 export enum StatusOption {
@@ -315,7 +317,9 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
               path: `M${sx} ${sy} C${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`,
               headTransform: `translate(${ex},${ey}) rotate(${ae})`,
               selected: false,
-              targetId: pipeLineItem.id
+              outgoing: false,
+              sourceId: parentId,
+              targetId: pipeLineItem.stepId,
             });
           }
         }
@@ -417,9 +421,11 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   }
 
   protected highlightArrows() {
-    this.arrows = this.arrows
-      ?.map(arrow => ({...arrow, selected: arrow.targetId === this.selectedEntity?.id}))
-      .sort((a, b) => a.selected && !b.selected ? 1 : -1);
+    this.arrows = this.arrows?.map(arrow => {
+      const isTarget = arrow.targetId === this.selectedEntity?.stepId;
+      const isSource = arrow.sourceId === this.selectedEntity?.stepId;
+      return {...arrow, selected: isTarget || isSource, outgoing: isSource};
+    }).sort((a, b) => (a.selected === b.selected) ? 0 : a.selected ? 1 : -1);
   }
 
   protected getTreeObject(task) {
