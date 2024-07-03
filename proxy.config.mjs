@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 const targets = [
-  'http://localhost:8081',     // 1
+ 'http://localhost:8008',     // 1
 ];
 
 const PROXY_CONFIG = {

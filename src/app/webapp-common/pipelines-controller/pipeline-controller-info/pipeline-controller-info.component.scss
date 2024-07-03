@@ -139,9 +139,17 @@ $log-header-height: 48px;
     stroke: $blue-400;
     fill: $blue-400;
 
+    &.selected {
+      stroke: $blue-600;
+      fill: $blue-600;
+    }
     .selected {
       stroke: $blue-200;
       fill: $blue-200;
+    }
+    .outgoing {
+      stroke: $blue-300;
+      fill: $blue-300;
     }
   }
 }

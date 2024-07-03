@@ -24,6 +24,7 @@
       ></sm-pipeline-controller-step>
     </div>
     <svg class="arrows"
+         [class.selected]="selectedEntity?.id"
          *ngIf="chartWidth"
          [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
          [style.width.px]="chartWidth"
@@ -32,6 +33,7 @@
       <g
         *ngFor="let arrow of arrows; trackBy: trackArrows"
         [class.selected]="arrow.selected"
+        [class.outgoing]="arrow.outgoing"
       >
         <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
         <polygon
