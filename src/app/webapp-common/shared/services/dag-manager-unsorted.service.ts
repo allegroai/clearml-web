@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DagManagerService, DagModelItem } from '@ngneat/dag';
+import {maxInArray} from '@common/shared/utils/helpers.util';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +42,7 @@ export class DagManagerUnsortedService<T extends DagModelItem> extends DagManage
     });
 
     // Sort nodes by level and position them
-    const maxLevel = Math.max(...nodeLevels.values());
+    const maxLevel = maxInArray(Array.from(nodeLevels.values()));
     itemsArray.forEach(item => {
       const level = maxLevel - nodeLevels.get(item.stepId);
       if (!result[level]) {
