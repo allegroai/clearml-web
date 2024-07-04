@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import {DagManagerService, DagModelItem} from '@ngneat/dag';
+import { DagManagerService, DagModelItem } from '@ngneat/dag';
+import { maxInArray } from '@common/shared/utils/helpers.util';
 
 @Injectable({
   providedIn: 'root'
@@ -7,35 +8,49 @@ import {DagManagerService, DagModelItem} from '@ngneat/dag';
 export class DagManagerUnsortedService<T extends DagModelItem> extends DagManagerService<T> {
 
   override convertArrayToDagModel(itemsArray: Array<T>): Array<Array<T>> {
-    const result = [];
-    const levels = {};
+    const result: Array<Array<T>> = [];
+    const nodeLevels = new Map<number, number>();
+    const nodeChildren = new Map<number, number[]>();
 
-    const modify = (data, pid = 0, level = 0) =>
-      data
-        .filter(({ parentIds, stepId }) => {
-          if (levels[level] && levels[level].includes(stepId)) {
-            return false;
-          }
-          return parentIds.includes(pid);
-        })
-        .forEach((e) => {
-          if (!levels[level]) {
-            levels[level] = [];
-          }
-          levels[level].push(e.stepId);
+    // Initialize nodeChildren
+    itemsArray.forEach(item => {
+      item.parentIds.forEach(pid => {
+        if (!nodeChildren.has(pid)) {
+          nodeChildren.set(pid, []);
+        }
+        nodeChildren.get(pid).push(item.stepId);
+      });
+    });
 
-          if (this.findInDoubleArray(e.stepId, result) === -1) {
-            if (!result[level]) {
-              result[level] = [e];
-            } else {
-              result[level].push(e);
-            }
-          }
-
-          modify(data, e.stepId, level + 1);
+    // Function to assign levels
+    const assignLevels = (item, currentLevel) => {
+      const existingLevel = nodeLevels.get(item.stepId);
+      if (existingLevel === undefined || existingLevel < currentLevel) {
+        nodeLevels.set(item.stepId, currentLevel);
+        const parents = itemsArray.filter(i => item.parentIds.includes(i.stepId));
+        parents.forEach(parent => {
+          assignLevels(parent, currentLevel + 1);
         });
+      }
+    };
 
-    modify(itemsArray);
+    // Start from leaf nodes and work upwards
+    itemsArray.forEach(item => {
+      if (!nodeChildren.has(item.stepId)) {
+        assignLevels(item, 0);
+      }
+    });
+
+    // Sort nodes by level and position them
+    const maxLevel = maxInArray(Array.from(nodeLevels.values()));
+    itemsArray.forEach(item => {
+      const level = maxLevel - nodeLevels.get(item.stepId);
+      if (!result[level]) {
+        result[level] = [];
+      }
+      result[level].push(item);
+    });
+
     return result;
   }
 }
