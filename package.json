@@ -32,7 +32,7 @@
     "@angular/router": "^17.3.7",
     "@angular/service-worker": "^17.3.7",
     "@angular/youtube-player": "^17.3.7",
-    "@aws-sdk/client-s3": "^3.569.0",
+    "@aws-sdk/client-s3": "^3.651.1",
     "@aws-sdk/s3-request-presigner": "^3.569.0",
     "@ctrl/ngx-github-buttons": "^9.0.0",
     "@ctrl/tinycolor": "^4.1.0",
