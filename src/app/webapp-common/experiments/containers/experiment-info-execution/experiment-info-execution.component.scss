@@ -5,12 +5,16 @@
   height: 100%;
   overflow: auto;
 
+  .clear-all {
+    margin-left: auto;
+  }
+
   mat-sidenav-container {
     height: 100%;
     position: static;
   }
 
-  mat-sidenav-content  {
+  mat-sidenav-content {
     position: static;
   }
 
@@ -100,23 +104,28 @@
         top: 0;
         bottom: 0;
       }
-      ::ng-deep sm-section-header  {
+
+      ::ng-deep sm-section-header {
         width: 155px;
+
         h4 {
           font-weight: 500;
           color: #71758A;
           font-size: 11px;
         }
       }
+
       sm-scroll-textarea {
         position: relative;
         flex: 1;
+
         span.no-changes {
           font-size: 11px;
         }
       }
     }
   }
+
   .terminal.toggle {
     color: $neon-yellow;
   }
@@ -124,6 +133,7 @@
   .requirements-header {
     display: flex;
     gap: 24px;
+    align-items: center;
   }
 
   .requirements-selector {

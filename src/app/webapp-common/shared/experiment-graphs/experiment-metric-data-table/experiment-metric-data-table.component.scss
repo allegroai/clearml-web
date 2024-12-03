@@ -1,0 +1,14 @@
+@import "variables";
+
+
+:host {
+  display: block;
+  height: 100%;
+  flex-grow: 1;
+  --cell-width: 120px;
+
+  .experiment-header {
+    font-size: 12px;
+    color: $blue-400;
+  }
+}

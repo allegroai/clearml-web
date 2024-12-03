@@ -1,7 +1,7 @@
 <sm-model-view-network
-  [model]="(selectedModel$ | async)"
-  [isSharedAndNotOwner]="isSharedAndNotOwner$ | async"
-  [saving]="(saving$ | async)"
+  [model]="(selectedModel$ | ngrxPush)"
+  [isSharedAndNotOwner]="isSharedAndNotOwner$ | ngrxPush"
+  [saving]="(saving$ | ngrxPush)"
   (saveFormData)="saveFormData($event)"
   (cancelClicked)="cancelClicked()"
   (activateEditClicked)="activateEditClicked()"

@@ -124,6 +124,9 @@
     &.completed {
       background-color: $pipeline-completed;
     }
+    &.published {
+      background-color: $pipeline-published;
+    }
   }
 
   .empty-msg {

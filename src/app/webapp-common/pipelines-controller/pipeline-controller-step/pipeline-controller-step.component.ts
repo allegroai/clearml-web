@@ -1,17 +1,13 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  Output
+  inject, output, input, effect, computed, signal, DestroyRef
 } from '@angular/core';
 import {
   PipelineItem,
-  StepStatusEnum
 } from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {interval, Subscription} from 'rxjs';
+import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
 
 @Component({
   selector: 'sm-pipeline-controller-step',
@@ -19,39 +15,37 @@ import {interval, Subscription} from 'rxjs';
   styleUrls: ['./pipeline-controller-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PipelineControllerStepComponent implements OnDestroy {
-  protected _step: PipelineItem;
-  public runTime: number;
+export class PipelineControllerStepComponent {
+  private destroyRef = inject(DestroyRef);
+  protected runTime = signal<number>(null);
   private timeSub: Subscription;
 
-  constructor(private cdr: ChangeDetectorRef) { }
+  step = input<PipelineItem>();
+  selected = input<boolean>();
+  openConsole = output();
+  protected stepWithStatus = computed(() =>
+    ({...this.step(), data: {...this.step().data, status: this. step().data?.status || StepStatusEnum.pending}})
+  );
 
-  @Input() set step(step: PipelineItem) {
-    this._step = {...step, data: {...step.data, status: step.data?.status || StepStatusEnum.pending}};
-    this.timeSub?.unsubscribe();
-    if (step?.data?.job_ended) {
-      this.runTime = step.data.job_ended - step?.data?.job_started;
-    } else if (step?.data?.job_started && step.data.status === 'running') {
-      this.timeSub = interval(1000)
-        .subscribe(() => this.updateRunningTime())
-      this.updateRunningTime();
-    } else {
-      this.runTime = null;
-    }
-  }
+  constructor() {
+    effect(() => {
+      const step = this.step();
+      this.timeSub?.unsubscribe();
+      if (step?.data?.job_ended) {
+        this.runTime.set(step.data.job_ended - step?.data?.job_started);
+      } else if (step?.data?.job_started && step.data.status === 'running') {
+        this.timeSub = interval(1000)
+          .subscribe(() => this.updateRunningTime())
+        this.updateRunningTime();
+      } else {
+        this.runTime.set(null);
+      }
+    }, {allowSignalWrites: true});
 
-  get step() {
-    return this._step;
+    this.destroyRef.onDestroy(() => this.timeSub?.unsubscribe());
   }
-  @Input() selected: boolean;
-  @Output() openConsole = new EventEmitter();
 
   updateRunningTime() {
-    this.runTime = (Date.now() / 1000) - this.step.data.job_started;
-    this.cdr.detectChanges();
-  }
-
-  ngOnDestroy(): void {
-    this.timeSub?.unsubscribe();
+    this.runTime.set((Date.now() / 1000) - this.step().data.job_started);
   }
 }

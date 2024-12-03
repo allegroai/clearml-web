@@ -251,7 +251,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.paramsSubscription.unsubscribe();
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: false}));
-    this.store.dispatch(resetExperiments());
+    this.store.dispatch(resetExperiments({skipResetMetric: true}));
     this.store.dispatch(resetGlobalFilter());
     this.store.dispatch(resetSelectCompareHeader({fullReset: false}));
   }

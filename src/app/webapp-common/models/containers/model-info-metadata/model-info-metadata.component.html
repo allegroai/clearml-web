@@ -1,65 +1,75 @@
 <sm-editable-section #metadataSection
-                     [editable]="(selectedModel$|async)?.company?.id && ((isSharedAndNotOwner$ |async)===false)"
-                     [saving]="saving$ | async"
-                     [disableSave]="metadataForm.invalid"
-                     (cancelClicked)="cancelModelMetaDataChange()"
-                     (saveClicked)="saveFormData()"
-                     (activateEditClicked)="activateEditChanged('metadata')">
+  [editable]="(selectedModel$ | ngrxPush)?.company?.id && ((isSharedAndNotOwner$ |ngrxPush)===false)"
+  [saving]="saving$ | ngrxPush"
+  [disableSave]="metadataForm.invalid"
+  (cancelClicked)="cancelModelMetaDataChange()"
+  (saveClicked)="saveFormData()"
+  (activateEditClicked)="activateEditChanged('metadata')">
   <sm-section-header label="Metadata"></sm-section-header>
-  <div class="content" [hidden]="!inEdit && (saving$ | async)===false">
+  <div class="content" [hidden]="!inEdit && (saving$ | ngrxPush)===false">
     <ng-form #metadataForm="ngForm" smUniqueInListSyncValidator2 prefix2="metadataItemKey-"
-    >
-      <div *ngFor="let metadataItem of metadata ; let i = index; trackBy:trackByFn" class="d-flex align-items-center me-3 mb-2">
-        <mat-form-field [hintLabel]="metadataItemKey.invalid && metadataItemKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
-          <input #metadataItemKey="ngModel"
-                 placeholder="key"
-                 required
-                 [(ngModel)]="metadataItem.key"
-                 [name]="'metadataItemKey-'| uuid"
-                 matInput>
-          <mat-error *ngIf="metadataItemKey.touched && metadataItemKey.invalid && metadataItemKey?.errors?.required">
-            Required
-          </mat-error>
-          <span *ngIf="metadataForm?.errors?.uniqueName2 && metadataForm?.errors?.uniqueName2[i]" class="outside-error">Key must be unique.
-          </span>
-        </mat-form-field>
-        <mat-form-field [hintLabel]="metadataItemType.invalid && metadataItemType?.errors?.required? '*Required': ''"
-                        appearance="outline" class="strength w-100">
-          <input #metadataItemType="ngModel"
-                 [(ngModel)]="metadataItem.type"
-                 placeholder="type"
-                 required
-                 [name]="'metadataItemType-' | uuid"
-                 matInput>
-          <mat-error *ngIf="metadataItemType.touched && metadataItemType.invalid && metadataItemType?.errors?.required">
-            Required
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="w-100">
-          <input #metadataItemKey="ngModel"
-                 [(ngModel)]="metadataItem.value"
-                 placeholder="value"
-                 [name]="'metadataItemValue-'| uuid"
-                 matInput>
-        </mat-form-field>
-        <i (click)="removeRow(i)" class="remove-row al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon" data-id="deleteIcon"></i>
-      </div>
+      >
+      @for (metadataItem of metadata ; track metadataItem.id) {
+        <div class="d-flex align-items-center me-3 mb-2">
+          <mat-form-field [hintLabel]="metadataItemKey.invalid && metadataItemKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
+            <input #metadataItemKey="ngModel"
+              placeholder="key"
+              required
+              [(ngModel)]="metadataItem.key"
+              [name]="'metadataItemKey-'| uuid"
+              matInput>
+            @if (metadataItemKey.touched && metadataItemKey.invalid && metadataItemKey?.errors?.required) {
+              <mat-error>
+                Required
+              </mat-error>
+            }
+            @if (metadataForm?.errors?.uniqueName2 && metadataForm?.errors?.uniqueName2[$index]) {
+              <span class="outside-error">Key must be unique.
+              </span>
+            }
+          </mat-form-field>
+          <mat-form-field [hintLabel]="metadataItemType.invalid && metadataItemType?.errors?.required? '*Required': ''"
+            appearance="outline" class="strength w-100">
+            <input #metadataItemType="ngModel"
+              [(ngModel)]="metadataItem.type"
+              placeholder="type"
+              required
+              [name]="'metadataItemType-' | uuid"
+              matInput>
+            @if (metadataItemType.touched && metadataItemType.invalid && metadataItemType?.errors?.required) {
+              <mat-error>
+                Required
+              </mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-100">
+            <input #metadataItemKey="ngModel"
+              [(ngModel)]="metadataItem.value"
+              placeholder="value"
+              [name]="'metadataItemValue-'| uuid"
+              matInput>
+          </mat-form-field>
+          <i (click)="removeRow($index)" class="remove-row al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon" data-id="deleteIcon"></i>
+        </div>
+      }
       <button class="btn btn-cml-primary plus mt-2" (click)="addRow()"  data-id="addMetaDataButton"><i
-        class="al-icon al-color blue-400 sm al-ico-plus d-flex align-items-center"></i>
-      </button>
-    </ng-form>
-  </div>
+      class="al-icon al-color blue-400 sm al-ico-plus d-flex align-items-center"></i>
+    </button>
+  </ng-form>
+</div>
+@if (!inEdit && (saving$ | ngrxPush)===false) {
   <sm-table
-    class="content" *ngIf="!inEdit && (saving$ | async)===false"
+    class="content"
     [columns]="cols"
     [tableData]="metadata"
     [resizableColumns]="false"
     [scrollable]="true"
     [selectionMode]="null"
-  >
+    >
     <ng-template let-col let-row="rowData" pTemplate="body">
       {{row?.[col.id]}}
     </ng-template>
   </sm-table>
+}
 </sm-editable-section>
 

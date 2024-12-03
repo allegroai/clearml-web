@@ -1,0 +1,31 @@
+@import "variables";
+
+.no-data-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  align-items: center;
+}
+.al-icon {
+  color: $blue-600;
+}
+
+.message {
+  font-size: 20px;
+  font-weight: 500;
+  color: $blue-100;
+}
+
+.sub-message {
+  color: $blue-250;
+}
+
+a[href] {
+  color: $neon-yellow;
+
+  &:hover {
+    color: $neon-yellow;
+  }
+
+}

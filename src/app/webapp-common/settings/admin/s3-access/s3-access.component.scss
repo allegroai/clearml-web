@@ -10,19 +10,20 @@
   grid-gap: 6px;
   grid-template-columns: minmax(60px, 20%) minmax(40px, 15%) minmax(60px, 20%) minmax(40px, 10%) minmax(40px, 10%) minmax(60px, 20%) 50px;
   padding: 6px 0;
-  border-bottom: $blue-500 solid 1px;
-
-  input {
-    color: $blue-100;
-  }
 
   &:last-child {
     padding-bottom: 8px;
   }
+
+  .value {
+    line-height: 30px;
+    padding: 0 10px;
+    border: 1px solid;
+    border-radius: 4px;
+  }
 }
 
 .header {
-  color: $blue-400;
   border-bottom: solid 1px;
   padding-bottom: 6px;
   margin-bottom: 10px;
@@ -38,12 +39,6 @@
 .delete-button {
   display: flex;
   align-items: center;
-  .al-icon {
-    color: $blue-300;
-    &:hover {
-      color: $blue-200;
-    }
-  }
 }
 
 .alert-icon {
@@ -60,13 +55,44 @@
 .add-button {
   display: inline-block;
   margin: 12px 0 24px;
-  color: $blue-280;
-
-  &:hover {
-    color: $white;
-  }
 
   .al-icon {
    vertical-align: middle;
+  }
+}
+
+:host.dark-theme {
+  .s3-row {
+    border-bottom: $blue-500 solid 1px;
+
+    input {
+      color: $blue-100;
+    }
+
+    .value {
+      background-color: $black;
+      border-color: $blue-500;
+    }
+  }
+
+  .header {
+    color: $blue-400;
+  }
+
+  .delete-button {
+    .al-icon {
+      color: $blue-300;
+      &:hover {
+        color: $blue-200;
+      }
+    }
+  }
+
+  .add-button {
+    color: $blue-280;
+
+    &:hover {
+      color: $white;
+    }
   }
 }

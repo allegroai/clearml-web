@@ -7,6 +7,7 @@ import {selectModelReducer} from './select-model.reducer';
 import {SelectModelEffects} from './select-model.effects';
 import {ModelSharedModule} from '../models/shared/model-shared.module';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {PushPipe} from '@ngrx/component';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
     EffectsModule.forFeature([SelectModelEffects]),
     StoreModule.forFeature('selectModel', selectModelReducer),
     DialogTemplateComponent,
+        PushPipe,
   ],
   providers: [],
   declarations: [SelectModelComponent],

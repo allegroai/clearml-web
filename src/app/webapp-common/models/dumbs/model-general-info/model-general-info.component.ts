@@ -61,7 +61,6 @@ export class ModelGeneralInfoComponent {
     return this._model;
   }
 
-  @Output() showModel = new EventEmitter();
   @Output() commentChanged = new EventEmitter<string>();
 
   commentValueChanged(value) {
@@ -70,10 +69,6 @@ export class ModelGeneralInfoComponent {
 
   public canShowModel() {
     return !!this.model && !'Custom'.includes(this.model.framework);
-  }
-
-  onShowModel() {
-    this.showModel.emit(this.model);
   }
 
   editExperimentComment(edit) {

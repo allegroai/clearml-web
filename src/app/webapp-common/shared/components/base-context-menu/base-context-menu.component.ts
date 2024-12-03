@@ -1,12 +1,8 @@
 import {
   Component, computed,
   ElementRef,
-  EventEmitter,
   HostListener,
-  inject,
-  Input,
-  Output, viewChild,
-} from '@angular/core';
+  inject, viewChild, input, output } from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
@@ -32,12 +28,12 @@ export class BaseContextMenuComponent {
 
   protected tagMenu = viewChild(TagsMenuComponent);
   protected trigger = viewChild(MatMenuTrigger);
-  @Input() selectedDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {};
-  @Input() selectedDisableAvailableIsMultiple = true;
-  @Input() tableMode: boolean;
-  @Input() backdrop: boolean;
-  @Output() menuOpened = new EventEmitter();
-  @Output() menuClosed = new EventEmitter();
+  selectedDisableAvailable = input<Record<string, CountAvailableAndIsDisableSelectedFiltered>>({});
+  selectedDisableAvailableIsMultiple = input(true);
+  tableMode = input<boolean>();
+  backdrop = input<boolean>();
+  menuOpened = output();
+  menuClosed = output();
 
   @HostListener('document:click', ['$event'])
   clickOut(event) {
@@ -64,7 +60,11 @@ export class BaseContextMenuComponent {
       this.store.dispatch(activateEdit('tags'));
       this.store.dispatch(activateModelEdit('tags'));
     }, 200);
-    tagMenuRef ? tagMenuRef.focus() : this.tagMenu()?.focus();
+    if (tagMenuRef) {
+      tagMenuRef.focus();
+    } else {
+      this.tagMenu()?.focus();
+    }
   }
 
   tagMenuClosed(tagMenuRef?: TagsMenuComponent) {
@@ -72,6 +72,10 @@ export class BaseContextMenuComponent {
       this.store.dispatch(deactivateEdit());
       this.store.dispatch(cancelModelEdit());
     }, 200);
-    tagMenuRef ? tagMenuRef.clear() : this.tagMenu()?.clear();
+    if (tagMenuRef) {
+      tagMenuRef.clear();
+    } else {
+      this.tagMenu()?.clear();
+    }
   }
 }

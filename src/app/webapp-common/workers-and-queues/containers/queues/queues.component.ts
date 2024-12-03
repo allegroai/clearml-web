@@ -108,7 +108,7 @@ export class QueuesComponent {
   }
 
   moveExperimentToOtherQueue($event) {
-    this.store.dispatch(queueActions.moveExperimentToOtherQueue({task: $event.task.id, queue: $event.queue.id}));
+    this.store.dispatch(queueActions.moveExperimentToOtherQueue({task: $event.task.id, queueId: $event.queue.id, queueName: $event.queue.name}));
   }
 
   moveExperimentInQueue({task, count}) {

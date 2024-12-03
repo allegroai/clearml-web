@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
@@ -19,6 +19,7 @@ interface RowData extends Row {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleDatasetVersionContentComponent {
+  private readonly ref = inject(ElementRef);
   public columns: ISmCol[];
   public tableData: RowData[];
   public command: string;
@@ -26,7 +27,7 @@ export class SimpleDatasetVersionContentComponent {
 
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   copySuccess: boolean;
-  private colSizes = {} as { [colId: string]: number };
+  private colSizes = {} as Record<string, number>;
 
   @Input() set id(id: string) {
     this.command = `clearml-data get --id ${id}`;
@@ -68,8 +69,6 @@ export class SimpleDatasetVersionContentComponent {
     }
 
   }
-
-  constructor(private readonly ref: ElementRef){}
 
   openMenu() {
     this.trigger.openMenu();

@@ -14,28 +14,21 @@
         (click)="subProjectClicked(subProject.id)"
         [smTooltip]="subProject?.name"
         [matTooltipShowDelay]="300"
-        [innerHTML]="subProject?.name| breadcrumbsEllipsis | purify "
+        [innerHTML]="subProject?.name | breadcrumbsEllipsis"
       ></a>
     </cdk-virtual-scroll-viewport>
   </div>
   <div header-content class="d-flex justify-content-between align-items-center card-name">
-    <sm-inline-edit #projectName
-                    class="title edit-name dark"
-                    [originalText]="project.basename"
-                    [editable]="true"
-                    [minLength]="2"
-                    [required]="true"
-                    pattern="^[^\/]{2,}$"
-                    [forbiddenString]="projectsNames"
-                    [inlineDisabled]="true"
-                    (textChanged)="prepareProjectNameForChange($event)"
-    >
-      <span class="project-name"
+    <div class="title edit-name dark">
+      <span class="project-name me-2"
             [smTooltip]="project.name"
             smShowTooltipIfEllipsis
-            [showAlwaysTooltip] = "(project.name?.includes('/'))"
-      >{{project.basename}}</span>
-    </sm-inline-edit>
+            [showAlwaysTooltip]="(project.name?.includes('/'))"
+      >{{ project.basename }}</span>
+      @if (!hideMenu && project.default_output_destination) {
+        <i class="al icon al-ico-info-circle sm" [smTooltip]="'Default output destination: ' + project.default_output_destination"></i>
+      }
+    </div>
     <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>
     <sm-project-card-menu-extended
       class="menu-wrapper"
@@ -44,6 +37,7 @@
       (moveToClicked)="moveToClicked.emit($event)"
       (newProjectClicked)="newProjectClicked.emit($event)"
       (projectNameInlineActivated)="projectName.inlineActivated()"
+      (projectEditClicked)="projectEditClicked.emit($event)"
       [project]="project"
     >
     </sm-project-card-menu-extended>
@@ -66,7 +60,7 @@
   <div class="d-flex-center" footer>
     <div class="tag"><i *ngIf="hidden" class="al-icon al-ico-ghost sm-md"></i></div>
     <div class="footer-title" *ngIf="project?.stats">
-      COMPUTE TIME: {{computeTime}}
+      COMPUTE TIME: {{ computeTime }}
     </div>
     <div class="tag"></div>
   </div>

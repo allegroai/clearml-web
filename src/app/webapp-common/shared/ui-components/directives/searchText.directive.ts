@@ -32,12 +32,13 @@ export class SearchTextDirective implements AfterViewInit {
     const originalTerm = text.match(re)?.[0];
     this.el.nativeElement.innerHTML = '';
     if (originalTerm) {
+      const seperators = text.match(re);
       text.split(re).forEach((part, index, arr) => {
         this.renderer.appendChild(this.el.nativeElement, this.renderer.createText(part));
         if (index < arr.length - 1) {
           const span = this.renderer.createElement('span');
           this.renderer.addClass(span, this.highlightClass)
-          span.innerText = this.term;
+          span.innerText = seperators[index];
           this.renderer.appendChild(this.el.nativeElement, span);
         }
       });

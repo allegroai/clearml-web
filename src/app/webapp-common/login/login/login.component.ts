@@ -10,8 +10,8 @@ import {
 import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {EMPTY, Observable, of, Subscription} from 'rxjs';
-import {finalize, map, startWith, take, filter, mergeMap, catchError, switchMap} from 'rxjs/operators';
+import {EMPTY, Observable, Subscription} from 'rxjs';
+import {finalize, map, startWith, take, filter, mergeMap, catchError, switchMap, tap} from 'rxjs/operators';
 import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
 import {LoginMode, loginModes} from '../../shared/services/login.service';
 import {selectInviteId} from '../login-reducer';
@@ -23,6 +23,7 @@ import {UserPreferences} from '../../user-preferences';
 import {setBreadcrumbs} from '@common/core/actions/router.actions';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -79,6 +80,16 @@ export class LoginComponent implements OnInit, OnDestroy {
     effect(() => {
       this.nameInput()?.nativeElement.focus();
     });
+
+    this.store.select(selectCurrentUser)
+      .pipe(
+        takeUntilDestroyed(),
+        filter(user => !!user),
+      )
+      .subscribe(() => {
+        this.openLoginNotice();
+        this.router.navigateByUrl(this.getNavigateUrl());
+      });
   }
 
   get buttonCaption() {
@@ -91,12 +102,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         name: 'Login',
         type: CrumbTypeEnum.Feature
       }]]}));
-    this.store.select(selectCurrentUser)
-      .pipe(
-        filter(user => !!user),
-        take(1)
-      )
-      .subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
+
     this.store.select(selectInviteId).pipe(
       filter(invite => !!invite),
       take(1),
@@ -212,25 +218,16 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private afterLogin() {
+
     return this.userPreferences.loadPreferences()
       .pipe(
         take(1),
-        catchError(() => this.router.navigateByUrl(this.getNavigateUrl())),
-        finalize( () => {
-          this.store.dispatch(fetchCurrentUser());
-          this.cdr.detectChanges();
+        catchError(() => {
+          return this.router.navigateByUrl(this.getNavigateUrl());
         }),
-        switchMap(res => {
-          this.store.dispatch(setPreferences({payload: res}));
-          this.openLoginNotice();
-          return of(this.router.navigateByUrl(this.getNavigateUrl()));
-        })
+        map(res => this.store.dispatch(setPreferences({payload: res}))),
+        tap(() => this.store.dispatch(fetchCurrentUser())),
       );
-      // .subscribe(res => {
-      //   this.store.dispatch(setPreferences({payload: res}));
-      //   this.router.navigateByUrl(this.getNavigateUrl());
-      //   this.openLoginNotice();
-      // });
   }
 
   private _filter(value: string): string[] {

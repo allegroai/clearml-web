@@ -14,7 +14,7 @@ export const setDebugImages = createAction(
 );
 export const getDebugImagesMetrics = createAction(
   DEBUG_IMAGES_PREFIX + 'get debug images metrics',
-  props<{ tasks: string[] }>()
+  props<{ tasks: string[]; autoRefresh?: boolean }>()
 );
 
 export const refreshDebugImagesMetrics = createAction(

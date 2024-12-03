@@ -5,6 +5,7 @@
       (deleteProjectClicked)="deleteProjectClicked.emit($event)"
       (projectCardClicked)="projectCardClicked.emit($event)"
       (newProjectClicked)="createNewProjectClicked.emit($event)"
+      (projectEditClicked)="projectEditClicked.emit($event)"
       (projectNameChanged)="projectNameChanged.emit({id: project.id, name:$event})"
       (moveToClicked)="moveToClicked.emit($event)"
       *ngIf="index + totalVirtualCards < projects.length || noMoreProjects || showLast"
@@ -16,6 +17,10 @@
   </ng-container>
 
   <div class="load-more" *ngIf="!noMoreProjects && projects?.length > 0">
-    <button (click)="loadMore.emit()" class="btn btn-cml-primary load-more-btn" data-id="Load More" >LOAD MORE</button>
+    <sm-dots-load-more
+      [loading]="loading"
+      (loadMore)="loadMoreAction()"
+      class="mx-auto my-2"
+    ></sm-dots-load-more>
   </div>
 </div>

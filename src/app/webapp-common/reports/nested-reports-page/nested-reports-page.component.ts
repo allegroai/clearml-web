@@ -10,6 +10,7 @@ import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '@comm
 import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, skip} from 'rxjs/operators';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-nested-reports-page',
@@ -20,6 +21,7 @@ import {CircleCounterComponent} from '@common/shared/ui-components/indicators/ci
     AsyncPipe,
     NgIf,
     CircleCounterComponent,
+    PushPipe,
   ],
   standalone: true
 })

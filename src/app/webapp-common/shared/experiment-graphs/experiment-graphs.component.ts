@@ -13,7 +13,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {sortMetricsList} from '../../tasks/tasks.utils';
+import {allowedMergedTypes, sortMetricsList} from '../../tasks/tasks.utils';
 import {SingleGraphComponent} from '../single-graph/single-graph.component';
 import {
   ChartHoverModeEnum,
@@ -51,10 +51,11 @@ import {maxInArray} from '@common/shared/utils/helpers.util';
 export class ExperimentGraphsComponent implements OnDestroy {
   readonly experimentGraphidPrefix = EXPERIMENT_GRAPH_ID_PREFIX;
   readonly singleGraphidPrefix = SINGLE_GRAPH_ID_PREFIX;
-  public graphList: Array<any> = [];
-  public noGraphs: boolean = false;
-  public graphsData: { [group: string]: VisibleExtFrame[] };
-  public visibleGraphsData: { [graphId: string]: boolean } = {};
+  public graphList: string[] = [];
+  public noGraphs = false;
+  public graphsData: Record<string, VisibleExtFrame[]>;
+  protected numIterations = 0;
+  public visibleGraphsData: Record<string, boolean> = {};
   private observer: IntersectionObserver;
   private _xAxisType: ScalarKeyEnum;
   @ViewChild('allMetrics', {static: true}) allMetrics: ElementRef;
@@ -63,10 +64,10 @@ export class ExperimentGraphsComponent implements OnDestroy {
   public plotlyReady$ = this.store.select(selectPlotlyReady);
   public plotlyReady: boolean;
   private subs = new Subscription();
-  public height: number = 450;
+  public height = 450;
   public width: number;
   private graphsPerRow: number;
-  private minWidth: number = 350;
+  private minWidth = 350;
   private resizeTextElement: HTMLDivElement;
   private graphsNumberLimit: number;
   public activeResizeElement: HTMLDivElement;
@@ -98,11 +99,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
   @Input() isDarkTheme: boolean;
   @Input() showLoaderOnDraw = true;
   @Input() legendConfiguration: Partial<ExtLegend> = {};
-  @Input() breakPoint: number = 700;
-  @Input() isCompare: boolean = false;
+  @Input() breakPoint = 700;
+  @Input() isCompare = false;
   @Input() hoverMode: ChartHoverModeEnum;
-  @Input() disableResize: boolean = false;
-  @Input() singleValueData: Array<EventsGetTaskSingleValueMetricsResponseValues>;
+  @Input() disableResize = false;
+  @Input() singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
   @Input() multipleSingleValueData: ExtFrame;
   @Input() experimentName: string;
 
@@ -138,12 +139,13 @@ export class ExperimentGraphsComponent implements OnDestroy {
   ) {
 
     this.subs.add(this.store.select(selectRouterParams).pipe(
-      map(params => params?.experimentId),
+      map(params => params?.experimentId ?? params?.modelId),
       distinctUntilChanged(),
       skip(1) // don't need first null->expId
     ).subscribe(() => {
       this.store.dispatch(setGraphsPerRow({graphsPerRow: 2}));
       this.graphsData = null;
+      this.numIterations = 0;
       this.graphList = [];
       this.visibleGraphsData = {};
     }));
@@ -173,13 +175,14 @@ export class ExperimentGraphsComponent implements OnDestroy {
   }
 
 
-  @Input() set metrics(graphGroups: { [label: string]: ExtFrame[] }) {
+  @Input() set metrics(graphGroups: Record<string, ExtFrame[]>) {
     this.noGraphs = (graphGroups !== undefined) && (graphGroups !== null) && Object.keys(graphGroups).length === 0;
     if (!graphGroups) {
       this.graphList = [];
       return;
     }
     this.graphsData = this.addId(this.sortGraphsData(graphGroups));
+    this.numIterations = Array.from(new Set(Object.values(this.graphsData).reduce((acc, frames) => [...acc, ...frames.map(frame => frame.iter)], []).flat())).filter(a => Number.isInteger(a)).length;
 
     this.graphsPerRow = (this.disableResize || this.allGroupsSingleGraphs()) ? 1 : this.graphsPerRow;
     this.maxUserHeight = maxInArray(Object.values(this.graphsData).flat().map((chart: ExtFrame) => chart.layout?.height || 0));
@@ -275,7 +278,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     });
   }
 
-  sortGraphsData = (data: { [label: string]: ExtFrame[] }) =>
+  sortGraphsData = (data: Record<string, ExtFrame[]>) =>
     Object.entries(data).reduce((acc, [label, graphs]) =>
       ({
         ...acc,
@@ -289,11 +292,10 @@ export class ExperimentGraphsComponent implements OnDestroy {
               sensitivity: 'base'
             });
         })
-      }), {} as { [label: string]: ExtFrame[] });
+      }), {} as Record<string, ExtFrame[]>);
 
-  trackByFn = (index: number, item) => item;
 
-  trackByIdFn = (index: number, item: ExtFrame) =>
+  trackByIdFn = (item: ExtFrame) =>
     `${item.layout.title} ${item.data?.length} ${(this.isDarkTheme ? '' : item.iter ?? '')}`;
 
   isWidthBigEnough() {
@@ -404,7 +406,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   }
 
 
-  private addId(sortGraphsData1: { [p: string]: ExtFrame[] }): { [p: string]: VisibleExtFrame[] } {
+  private addId(sortGraphsData1: Record<string, ExtFrame[]>): Record<string, VisibleExtFrame[]> {
     return Object.entries(sortGraphsData1).reduce((acc, [label, graphs]) =>
       ({
         ...acc,
@@ -413,7 +415,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
           id: v4(),
           visible: this.visibleGraphsData[this.generateIdentifier(graph)]
         }))
-      }), {} as { [label: string]: VisibleExtFrame[] });
+      }), {} as Record<string, VisibleExtFrame[]>);
   }
 
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
@@ -446,7 +448,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   }
 
   checkIfLegendToTitle(chartItem: ExtFrame) {
-    return this.isGroupGraphs && chartItem.data?.length === 1 && (!chartItem.data[0].name || chartItem.data[0].name === chartItem.layout?.title) && ['scatter', 'scattergl', 'bar', 'scatter3d'].includes(chartItem?.data[0]?.type);
+    return this.isGroupGraphs && chartItem.data?.length === 1 && (!chartItem.data[0].name || chartItem.data[0].name === chartItem.layout?.title) && allowedMergedTypes.includes(chartItem?.data[0]?.type);
   }
 
   inHiddenList = (metric: string) => this.isCompare ? !this.hiddenList?.some(m => m.startsWith(metric)) : !this.hiddenList?.includes(metric);

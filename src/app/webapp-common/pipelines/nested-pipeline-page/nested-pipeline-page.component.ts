@@ -9,6 +9,7 @@ import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.acti
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-nested-pipeline-page',
@@ -20,7 +21,8 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     NgIf,
     CircleCounterComponent,
     TagListComponent,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    PushPipe
   ],
   standalone: true
 })

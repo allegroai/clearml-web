@@ -1,10 +1,12 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, viewChild, ViewChild} from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
 import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
 
@@ -14,13 +16,18 @@ export const EXPERIMENT_COMMENT = 'ExperimentComment';
   styleUrls: ['./experiment-general-info.component.scss']
 })
 export class ExperimentGeneralInfoComponent {
-  constructor(private store: Store) {}
+  private table: TableComponent<{ id: string }>;
+
+  constructor(private store: Store) {
+  }
 
   commentControl = new UntypedFormControl();
   experimentCommentText: string;
   experimentCommentOriginal: string;
 
   @ViewChild('experimentDescriptionSection') experimentDescriptionSection: EditableSectionComponent;
+  descriptionElement = viewChild<ElementRef<HTMLTextAreaElement>>('description');
+
   @Input() experiment: IExperimentInfo;
   @Input() editable: boolean;
   @Input() isExample: boolean;
@@ -33,6 +40,7 @@ export class ExperimentGeneralInfoComponent {
 
   @Output() commentChanged = new EventEmitter<string>();
   timeFormatString = TIME_FORMAT_STRING;
+
 
   rebuildCommentControl(comment) {
     this.commentControl = new UntypedFormControl(comment);
@@ -54,5 +62,11 @@ export class ExperimentGeneralInfoComponent {
     } else {
       this.store.dispatch(deactivateEdit());
     }
+  }
+
+
+
+  onDescriptionEditMode() {
+    this.descriptionElement().nativeElement.focus();
   }
 }

@@ -29,7 +29,6 @@ export const setTableSort = createAction(`${SELECT_MODEL_PREFIX} 'set table sort
 export const showArchive = createAction(`${SELECT_MODEL_PREFIX} show archive`, props<{showArchive: boolean}>());
 export const clearTableFilter = createAction(`${SELECT_MODEL_PREFIX} table filter clear`);
 export const tableFilterChanged = createAction(`${SELECT_MODEL_PREFIX} table filter changed`, props<{ col: ISmCol; value: any }>());
-
 export const globalFilterChanged = createAction(`${SELECT_MODEL_PREFIX} global filter changed`, props<{ filter: string }>());
 
 export const setCurrentScrollId = createAction(SELECT_MODEL_PREFIX + 'set current scrollId', props<{ scrollId: string }>());
@@ -37,3 +36,8 @@ export const setCurrentScrollId = createAction(SELECT_MODEL_PREFIX + 'set curren
 export const setViewMode = createAction(`${SELECT_MODEL_PREFIX} set view mode`, props<{ viewMode: ModelsViewModesEnum }>());
 
 export const resetSelectModelState = createAction(`${SELECT_MODEL_PREFIX} reset state`, props<{fullReset: boolean}>());
+
+export const getFrameworks = createAction(`${SELECT_MODEL_PREFIX} get frameworks`);
+export const setFrameworks = createAction(`${SELECT_MODEL_PREFIX} set frameworks`, props<{ frameworks: string[] }>());
+export const getTags = createAction(`${SELECT_MODEL_PREFIX} get tags`);
+export const setTags = createAction(`${SELECT_MODEL_PREFIX} set tags`, props<{ tags: string[] }>());

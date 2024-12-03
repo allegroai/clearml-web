@@ -1,10 +1,13 @@
 <div class="table-card" data-id="cardPanel"
-     [class.two-columns]="!hasTypeIcon"
+     [class.two-columns]="!hasTypeIcon && !noSelection"
+     [class.no-selection]="noSelection"
      [class]="{'selected':selected, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
 
-  <div class="cbx">
-    <ng-content select="sm-checkbox-control"></ng-content>
-  </div>
+  @if(!noSelection) {
+    <div class="cbx">
+      <ng-content select="sm-checkbox-control"></ng-content>
+    </div>
+  }
   @if(hasTypeIcon) {
     <div class="type-icon">
       <ng-content select="sm-experiment-type-icon-label"></ng-content>
@@ -19,6 +22,7 @@
     <div class="d-flex ms-auto">
       <ng-content select="sm-experiment-system-tags"></ng-content>
       <ng-content select="sm-status-icon-label"></ng-content>
+      <ng-content select=".uptime"></ng-content>
     </div>
   </div>
   @if(tagsTemplate) {

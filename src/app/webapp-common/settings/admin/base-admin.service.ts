@@ -1,20 +1,18 @@
-import {inject, Injectable} from '@angular/core';
+import {effect, inject, Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {from, fromEvent, Observable, of, Subject} from 'rxjs';
 import {fromFetch} from 'rxjs/fetch';
-import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
+import {catchError, debounceTime, filter, map} from 'rxjs/operators';
 import {DeleteObjectsCommand, GetObjectCommand, ObjectIdentifier, S3Client, S3ClientConfig} from '@aws-sdk/client-s3';
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
 import {convertToReverseProxy, isFileserverUrl} from '~/shared/utils/url';
 import {
   Credentials,
   selectRevokeSucceed,
-  selectS3BucketCredentials,
   selectS3BucketCredentialsBucketCredentials
 } from '../../core/reducers/common-auth-reducer';
 import {getAllCredentials, refreshS3Credential, showLocalFilePopUp} from '../../core/actions/common-auth.actions';
 import {ConfigurationService} from '../../shared/services/configuration.service';
-import {Environment} from '../../../../environments/base';
 import {DEFAULT_REGION} from '../../shared/utils/amazon-s3-uri';
 import {getBucketAndKeyFromSrc, isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
 
@@ -25,28 +23,23 @@ const HTTP_REGEX = /^https?:\/\//;
 
 @Injectable()
 export class BaseAdminService {
-  // bucketCredentials: Observable<any>;
-  public s3Services: {[bucket: string]: S3Client} = {};
-  revokeSucceed: Observable<boolean>;
-  private readonly s3BucketCredentials: Observable<{ bucketCredentials: Credentials[] }>;
-  private localServerWorking = false;
-  private environment: Environment;
+  protected store = inject(Store);
+  protected confService = inject(ConfigurationService);
+
+  public s3Services: Record<string, S3Client> = {};
+  private revokeSucceed = this.store.selectSignal(selectRevokeSucceed);
+  private environment = this.confService.configuration;
+  private credentials = this.getCredentialsObservable()
   private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
-  private credentials: Credentials[];
-  protected store: Store;
-  protected confService: ConfigurationService;
+  private localServerWorking = false;
 
   constructor() {
-    this.store = inject(Store);
-    this.confService = inject(ConfigurationService);
-    this.revokeSucceed = this.store.select(selectRevokeSucceed);
-    this.revokeSucceed.subscribe(this.onRevokeSucceed);
-    this.s3BucketCredentials = this.store.select(selectS3BucketCredentials);
-    this.s3BucketCredentials.pipe(skip(1)).subscribe(() => {
+    effect(() => {
+      if (this.revokeSucceed()) {
+        this.getAllCredentials();
+      }
     });
-    this.store.select(selectS3BucketCredentialsBucketCredentials)
-      .subscribe(cred => this.credentials = cred);
-    this.confService.getEnvironment().subscribe(conf => this.environment = conf);
+
     this.deleteS3FilesSubject = new Subject();
 
     fromEvent(window, 'storage')
@@ -59,22 +52,29 @@ export class BaseAdminService {
       });
   }
 
+  protected getCredentialsObservable() {
+    return this.store.selectSignal(selectS3BucketCredentialsBucketCredentials);
+  }
+
   showLocalFilePopUp(url) {
     this.store.dispatch(showLocalFilePopUp({url}));
   }
 
-  signUrlIfNeeded(url: string, config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number }, previousSignedUrl?: { signed: string; expires: number }):
-    Observable<SignResponse> {
+  signUrlIfNeeded(
+    url: string,
+    config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number },
+    previousSignedUrl?: { signed: string; expires: number }
+  ): Observable<SignResponse> {
     config = {...{skipLocalFile: true, skipFileServer: this.confService.getStaticEnvironment().production, disableCache: null}, ...config};
 
     if (isFileserverUrl(url)) {
-      if (this.environment.communityServer) {
+      if (this.environment().communityServer) {
         url = this.addTenant(url);
       }
       if (config.disableCache) {
         url = this.addS3TimeStamp(url, config.disableCache);
       }
-      if (!config.skipFileServer && this.environment.useFilesProxy) {
+      if (!config.skipFileServer && this.environment().useFilesProxy) {
         return of({type: 'sign', signed: convertToReverseProxy(url), expires: Number.MAX_VALUE});
       }
       return of({type: 'sign', signed: url, expires: Number.MAX_VALUE});
@@ -86,7 +86,7 @@ export class BaseAdminService {
     }
 
     if (this.isAzureUrl(url)) {
-      const azureBucket = this.credentials.find((b) => b.Bucket && b.Bucket.toLowerCase() == 'azure');
+      const azureBucket = this.credentials().find((b) => b.Bucket && b.Bucket.toLowerCase() == 'azure');
       if (azureBucket) {
         return of({type: 'sign', signed: this.signAzureUrl(url, azureBucket), expires: Number.MAX_VALUE});
       }
@@ -98,7 +98,6 @@ export class BaseAdminService {
       }
       const s3 = this.findOrInitBucketS3(bucketKeyEndpoint);
       if (s3) {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const command = new GetObjectCommand({
           Key: bucketKeyEndpoint.Key,
           Bucket: bucketKeyEndpoint.Bucket/*, ResponseContentType: 'image/jpeg'*/
@@ -121,9 +120,9 @@ export class BaseAdminService {
   }
 
   findS3CredentialsInStore(bucketKeyEndpoint: Credentials) {
-    const endpoint = bucketKeyEndpoint.Endpoint?.replace(HTTP_REGEX,'');
-    return this.credentials
-      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && bucket?.Endpoint?.replace(HTTP_REGEX,'') === endpoint);
+    const endpoint = bucketKeyEndpoint.Endpoint?.replace(HTTP_REGEX,'') ?? '';
+    return this.credentials()
+      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && (bucket?.Endpoint?.replace(HTTP_REGEX,'') ?? '') === endpoint);
   }
 
   findOrInitBucketS3(bucketKeyEndpoint: Credentials) {
@@ -171,8 +170,6 @@ export class BaseAdminService {
     this.store.dispatch(getAllCredentials({}));
   }
 
-  private onRevokeSucceed = (bool) => bool ? this.getAllCredentials() : false;
-
   // Uses Allegro Chrome extension injecting patch_local_link function to window - hack to get local files.
   redirectToLocalServer(url: string): string {
     return `http://localhost:${LOCAL_SERVER_PORT}${url.replace('file://', '/')}`;
@@ -206,7 +203,8 @@ export class BaseAdminService {
   }
 
   signAzureUrl(url: string, azureBucket) {
-    const sas = azureBucket ? azureBucket.Secret : '';
+    let sas = azureBucket ? azureBucket.Secret : '';
+    sas = sas.startsWith('?') ? sas : `?${sas}`;
     const sasQueryString = url.includes('?') ? sas.replace('?', '&') : sas;
     return url.replace('azure://', 'https://').concat(sasQueryString);
   }
@@ -225,7 +223,7 @@ export class BaseAdminService {
     const bucketKeyEndpoint = url && getBucketAndKeyFromSrc(url);
     const s3 = this.findOrInitBucketS3(bucketKeyEndpoint) as S3Client;
 
-    /* eslint-disable @typescript-eslint/naming-convention */
+
     const command = new DeleteObjectsCommand({
       Bucket: bucketKeyEndpoint.Bucket,
       Delete: {
@@ -233,7 +231,7 @@ export class BaseAdminService {
         Objects: files.map(file => ({Key: file} as ObjectIdentifier))
       }
     });
-    /* eslint-enable @typescript-eslint/naming-convention */
+
     if (s3) {
       s3.send(command).then(response => {
         if (response.Errors?.length > 0) {

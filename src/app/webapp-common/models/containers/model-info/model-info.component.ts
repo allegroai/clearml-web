@@ -12,7 +12,7 @@ import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {toggleSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {toggleMetricValuesView, toggleSettings} from '@common/experiments/actions/common-experiment-output.actions';
 import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -22,6 +22,7 @@ import {Project} from '~/business-logic/model/projects/project';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {ModelsInfoEffects} from '@common/models/effects/models-info.effects';
 import {headerActions} from '@common/core/actions/router.actions';
+import {selectMetricValuesView} from '@common/experiments/reducers';
 
 
 @Component({
@@ -54,6 +55,8 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   private isModelInEditMode$: Observable<boolean>;
   private selectedProject$: Observable<Project>;
   private modelsFeature: boolean;
+  public routerConfig$: Observable<string[]>;
+  public metricValuesView$: Observable<boolean>;
 
   constructor(
     private router: Router,
@@ -63,12 +66,15 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private modelInfoEffect: ModelsInfoEffects
   ) {
+    this.routerConfig$ =this.store.select(selectRouterConfig)
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
     this.splitSize$ = this.store.select(selectSplitSize);
     this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
     this.isModelInEditMode$ = this.store.select(selectIsModelInEditMode);
     this.selectedProject$ = this.store.select(selectSelectedProject);
+    this.metricValuesView$ = this.store.select(selectMetricValuesView);
+
     this.modelsFeature = this.route.snapshot.data?.setAllProject;
     if (this.modelsFeature) {
       this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}));
@@ -200,6 +206,10 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
         }));
       }
     }));
+  }
+
+  toggleTableView() {
+    this.store.dispatch(toggleMetricValuesView());
   }
 }
 

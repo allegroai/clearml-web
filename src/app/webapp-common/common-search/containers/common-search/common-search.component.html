@@ -1,10 +1,10 @@
-<span class="search-container" [class.open]="isSearching$ | async">
+<span class="search-container" [class.open]="isSearching$ | ngrxPush">
   <sm-search
     #searchComponent
     class="search-header"
     [class.regex-error]="regexError"
-    [value]="(searchQuery$ | async)?.original"
-    [placeholder]="searchPlaceholder$ | async"
+    [value]="(searchQuery$ | ngrxPush)?.original"
+    [placeholder]="searchPlaceholder$ | ngrxPush"
     [hideIcons]="true"
     [minimumChars]="minChars"
     (focusout)="onSearchFocusOut()"
@@ -21,7 +21,7 @@
   </sm-search>
 </span>
 <ng-container *ngIf="searchActive">
-  <i *ngIf="(isSearching$ | async); else searchIcon" class="al-icon al-ico-dialog-x pointer" data-id="closeSearchButton" (click)="clearSearch()" smClickStopPropagation></i>
+  <i *ngIf="(isSearching$ | ngrxPush); else searchIcon" class="al-icon al-ico-dialog-x pointer" data-id="closeSearchButton" (click)="clearSearch()" smClickStopPropagation></i>
   <ng-template #searchIcon>
     <i class="al-icon al-ico-search pointer" (click)="openSearch()" data-id="searchIcon"></i>
   </ng-template>

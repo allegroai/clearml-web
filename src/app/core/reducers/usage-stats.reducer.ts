@@ -1,10 +1,11 @@
-import {Action, createReducer, on, createSelector} from '@ngrx/store';
+import {createReducer, on, createSelector} from '@ngrx/store';
 import {setUsageStats} from '../actions/usage-stats.actions';
 
 
 export const userStatsFeatureKey = 'userStats';
 
 export interface UsageStatState {
+  supported: boolean;
   allowed: boolean;
   currVersion: string;
   allowedVersion: string;
@@ -12,19 +13,20 @@ export interface UsageStatState {
 
 
 export const initialState: UsageStatState = {
+  supported: null,
   allowed: null,
   currVersion: '',
   allowedVersion: ''
 };
 
-const _statsReducer = createReducer(initialState,
+export const usageStatsReducer  = createReducer(
+  initialState,
   on(setUsageStats, (state: UsageStatState, newState) => ({...state, ...newState}))
 );
 
-export const usageStatsReducer = (state = initialState, action: Action) =>  _statsReducer(state, action);
+export const selectSendStats = state => state[userStatsFeatureKey] as UsageStatState;
 
-export const selectSendStats = state => state.userStatsFeatureKey;
-
+export const selectStatsSupported = createSelector(selectSendStats, (state) => state.supported);
 export const selectAllowed = createSelector(selectSendStats, (state) => state?.allowed);
 export const selectCurrentVersion = createSelector(selectSendStats, (state) => state?.currVersion);
 export const selectAllowedVersion = createSelector(selectSendStats, (state) => state?.allowedVersion);

@@ -116,7 +116,7 @@ export interface Task {
     /**
      * Last time any update was done to the task
      */
-    last_change?: string;
+    last_change?: Date;
     /**
      * Last iteration reported for this task
      */

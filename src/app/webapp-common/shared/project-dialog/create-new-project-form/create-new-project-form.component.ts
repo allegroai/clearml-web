@@ -5,7 +5,6 @@ import {
   input,
   Output,
 } from '@angular/core';
-import {URI_REGEX} from '~/app.constants';
 import {Project} from '~/business-logic/model/projects/project';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {rootProjectsPageSize} from '@common/constants';
@@ -24,6 +23,7 @@ import {
   PaginatedEntitySelectorComponent
 } from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {OutputDestPattern} from '@common/shared/project-dialog/project-dialog.component';
 
 
 @Component({
@@ -51,16 +51,14 @@ import {toSignal} from '@angular/core/rxjs-interop';
 export class CreateNewProjectFormComponent {
   private readonly formBuilder = inject(FormBuilder);
 
-  public rootFiltered: boolean;
   public readonly projectsRoot = 'Projects root';
-  public outputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WITH_BUCKET_AND_HOST}$|${URI_REGEX.FILE}$|${URI_REGEX.NON_AWS_S3}$|${URI_REGEX.GS_WITH_BUCKET}$|${URI_REGEX.GS_WITH_BUCKET_AND_HOST}|${URI_REGEX.AZURE_WITH_BUCKET}`;
 
   projectForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     description: [''],
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    default_output_destination: [null],
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
+    default_output_destination: [null, [Validators.pattern(OutputDestPattern)]],
+
     system_tags: [[]],
     parent: [null as string, [Validators.required, Validators.minLength(3)]]
   });
@@ -74,8 +72,9 @@ export class CreateNewProjectFormComponent {
   baseProject = input<Project>();
   private projectValue = toSignal(this.projectForm.controls.parent.valueChanges);
   projects = input<Project[]>();
+  protected rootFiltered = computed(() => !this.projectsRoot.includes(this.projectValue()) && this.projectsRoot === this.baseProject()?.name);
   protected allProjects = computed(() => ([
-    ...(this.rootFiltered || this.baseProject()?.id === null ? [] : [{name: this.projectsRoot, id: '999999999999999'}]),
+    ...(!this.projects() || this.rootFiltered() || this.baseProject()?.id === null ? [] : [{name: this.projectsRoot, id: '999999999999999'}]),
     ...(this.baseProject() && !this.projectForm.controls.parent.value ? [this.baseProject()] : []),
     ...this.projects() ?? []
   ]));
@@ -97,11 +96,6 @@ export class CreateNewProjectFormComponent {
         this.initiated = true;
       }
     });
-
-    effect(() => {
-      this.rootFiltered = !this.projectsRoot.includes(this.projectValue()) && this.projectsRoot === this.baseProject()?.name;
-      this.filterSearchChanged.emit({value: this.projectValue() ?? ''});
-    });
   }
 
   send() {
@@ -111,9 +105,10 @@ export class CreateNewProjectFormComponent {
     });
   }
 
-  loadMore(searchString, loadMore) {
+  loadMore(searchString: string, loadMore: boolean) {
     this.loading = true;
-    this.filterSearchChanged.emit({value: searchString || '', loadMore});
+    const value = (searchString !== this.projectsRoot ? searchString : '') ?? '';
+    this.filterSearchChanged.emit({value, loadMore});
   }
 }
 

@@ -20,7 +20,7 @@
       <div #container class="graph-container" [class.dark-theme]="darkTheme">
         <div #parallelGraph>
         </div>
-        <div #legend class="d-flex legend-container">
+        <div #legend class="legend-container">
           @for (experiment of experiments; track experiment.id) {
             <div class="experiment-name">
               <span class="dot-container">
@@ -32,11 +32,13 @@
                 </span>
               </span>
               <span
-                class="task-name pointer"
+                class="task-name pointer ellipsis"
                 (click)="toggleHideExperiment(experiment.id)"
                 (mouseover)="highlightExperiment(experiment)"
                 (mouseout)="removeHighlightExperiment()"
-                [class.hide]="experiment.hidden">
+                [class.hide]="experiment.hidden"
+                smShowTooltipIfEllipsis
+                [smTooltip]="experiment.name + (experiment.duplicateName ? ('.' + (experiment.id|slice:0:5)) : '')">
                 {{experiment.name + (experiment.duplicateName ? ('.' + (experiment.id|slice:0:5)) : '')}}
               </span>
             </div>

@@ -11,7 +11,7 @@ export const download = (data: string, exportName: string) => {
 };
 
 export const prepareColsForDownload = (cols: ISmCol[], valuesMap?: {[colId: string]: {key: any; value: any}[]}) =>
-  cols.filter(col => col.id !== 'selected' && !col.hidden)
+  cols.filter(col => col.id !== 'selected' && (col.includeInDownload || !col.hidden))
     .map(col => col.getter && isArray(col.getter) ? col.getter.map(getterKey => ({...col, downloadKey: getterKey})) : col).flat()
     .map(thisCol =>
       ({

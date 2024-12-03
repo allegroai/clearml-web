@@ -16,6 +16,7 @@ export const ICONS = {
   MINUS: 'fa-minus',
   CHART: 'al-ico-info-max',
   QUEUED: 'al-ico-manage-queue',
+  RETRY: 'al-ico-retry',
   ENQUEUE: 'al-ico-enqueue',
   DEQUEUE: 'al-ico-dequeue',
   IN_PROGRESS: 'fa-hourglass-half',

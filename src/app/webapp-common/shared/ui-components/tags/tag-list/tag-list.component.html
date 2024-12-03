@@ -3,7 +3,7 @@
   <sm-user-tag class="tag-item"
                *ngFor="let tag of tagsList; trackBy: trackFn"
                [style.--max-hover-width]="maxTagHover + 'px'"
-               [colors]="tag.colorObservable | async"
+               [colors]="tag.colorObservable | ngrxPush"
                [caption]="tag.caption"
                [tooltip]="tooltip"
                [disabledRemove]="disableRemove"
@@ -14,7 +14,7 @@
 <ng-template #noRemove>
   <sm-user-tag class="tag-item" data-id="tagName"
                *ngFor="let tag of tagsList; trackBy: trackFn"
-               [colors]="tag.colorObservable | async"
+               [colors]="tag.colorObservable | ngrxPush"
                [caption]="tag.caption"
                [tooltip]="tooltip"
   ></sm-user-tag>

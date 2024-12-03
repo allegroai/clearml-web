@@ -1,0 +1,44 @@
+@import "variables";
+@import "mixins/link";
+
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 24px 24px;
+
+  .preserve-spaces {
+    white-space: pre-wrap;
+  }
+
+  ::ng-deep .editable-div .form-control {
+    height: 74px;
+  }
+
+  .info-value {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    sm-copy-clipboard {
+      visibility: hidden;
+      margin-left: 6px;
+    }
+    &:hover sm-copy-clipboard {
+      visibility: visible;
+    }
+    .link {
+      color: $blue-100;
+      &:hover {
+        color: white;
+      }
+    }
+  }
+
+  .mid-title {
+    padding: 32px 0 12px;
+  }
+
+  sm-table {
+    display: block;
+    height: 400px;
+  }
+}

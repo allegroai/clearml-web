@@ -9,7 +9,8 @@ import {ISmCol} from '../ui-components/data/table/table.consts';
 export class ColGetterPipe implements PipeTransform {
 
   transform(entity: any, col: ISmCol): string {
-    return get(entity, col.getter, '');
+    const result = get(entity, col.getter, '');
+    return typeof get(entity, col.getter, '') === 'object' ? JSON.stringify(result) : result;
   }
 
 }

@@ -1,4 +1,4 @@
-<ng-container *ngTemplateOutlet="contextMenuTemplate; context: { $implicit: contextExperiment}"></ng-container>
+<ng-container *ngTemplateOutlet="contextMenuTemplate; context: {$implicit: contextExperiment}"></ng-container>
 <div class="table-container" [class.card-view]="minimizedView" #tableContainer>
   <sm-table
     [initialColumns]="initialColumns"
@@ -27,7 +27,7 @@
     (rowClicked)="tableRowClicked($event)"
     (rowDoubleClicked)="experimentSelectionChanged.emit({experiment: $event.data, openInfo: true})"
     (loadMoreClicked)="onLoadMoreClicked()"
-    (rowRightClick)="onContextMenu($event)"
+    (rowRightClick)="openContextMenu($event)"
     (colReordered)="columnsReordered.emit($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
     (columnResized)="columnResized.emit($event)"
@@ -209,7 +209,7 @@
         [tagsTemplate]="tagList"
         [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSystemTags(experiment).length === 0 && experiment?.tags.length === 0"
-        (click)="selected && onContextMenu({e: $event, rowData: experiment, backdrop: true})"
+        (click)="selected && cardClicked($event, experiment)"
       >
         <div sm-name-icon *ngIf="experiment?.system_tags?.includes('shared')"><i
           class="al-icon al-ico-link sm-md ms-2"></i></div>

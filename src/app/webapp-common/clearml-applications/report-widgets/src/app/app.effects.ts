@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {
   getParcoords,
   getPlot,
@@ -14,7 +15,6 @@ import {
 import {EMPTY, mergeMap, of, switchMap} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {catchError, filter} from 'rxjs/operators';
-import {BaseAdminService} from '@common/settings/admin/base-admin.service';
 import {ReportsGetTaskDataResponse} from '~/business-logic/model/reports/reportsGetTaskDataResponse';
 import {getSignedUrl, setSignedUrl} from '@common/core/actions/common-auth.actions';
 import {SignResponse} from '@common/settings/admin/base-admin-utils';
@@ -25,6 +25,7 @@ import {requestFailed} from '@common/core/actions/http.actions';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {ReportsApiMultiplotsResponse} from '@common/constants';
+import {BaseAdminService} from '@common/settings/admin/base-admin.service';
 
 
 @Injectable()

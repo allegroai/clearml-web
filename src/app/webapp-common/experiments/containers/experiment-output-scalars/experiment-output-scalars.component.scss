@@ -45,7 +45,7 @@ $list-width: 360px;
     background-color: #f2f3f6;
     transition: max-height 0.3s;
 
-    &.showSettings {
+    &.with-settings {
       min-height: 64px;
       max-height: 128px;
     }

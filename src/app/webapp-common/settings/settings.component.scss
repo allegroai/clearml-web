@@ -44,13 +44,13 @@
 
     mat-drawer {
       border-right: 1px solid $blue-500;
-      width: 220px;
+      width: 265px;
     }
 
     .mat-mdc-list-item {
       width: auto;
       margin: 0 12px 2px;
-      padding-left: 12px;
+      padding: 0 10px;
       border-radius: 4px;
       --mdc-list-list-item-label-text-color: #{$blue-200};
       --mdc-theme-text-primary-on-background: #{$blue-200};
@@ -109,5 +109,23 @@
   margin: 12px 0 6px 24px;
   &:not(:first-child) {
     margin-top: 24px;
+  }
+}
+
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  &__label {
+    flex-grow: 1;
+  }
+  &__badge {
+    background-color: $purple;
+    color: white;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+      line-height: normal;
   }
 }

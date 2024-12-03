@@ -9,6 +9,7 @@ import {NotifierQueueService} from './services/notifier-queue.service';
 import {NotifierConfigToken, NotifierService} from './services/notifier.service';
 
 
+
 /**
  * Injection Token for notifier options
  */
@@ -49,7 +50,7 @@ export const notifierDefaultConfigFactory = (): NotifierConfig => new NotifierCo
     NotifierContainerComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
   ],
   providers: [
     NotifierAnimationService,

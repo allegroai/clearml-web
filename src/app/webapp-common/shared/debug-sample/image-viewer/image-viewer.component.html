@@ -7,7 +7,7 @@
     </div>
     <div class="third viewer-iteration">
       <ng-container *ngIf="!data.withoutNavigation">
-        <div *ngIf="minMaxIterations$ | async as minMaxIterations" data-id="iterationPanel">
+        <div *ngIf="minMaxIterations$ | ngrxPush as minMaxIterations" data-id="iterationPanel">
           <span *ngIf="minMaxIterations.max_iteration !== minMaxIterations.min_iteration || minMaxIterations.min_iteration > 0">
               Iteration <span class="number" data-id="iterationCount">{{iteration}}</span>
           </span>
@@ -85,10 +85,10 @@
     </div>
     <div *ngIf="!data.withoutNavigation" class="navigation">
       <div class="icon-container controller next"
-           (click)="canGoNext() && next()" [class.disabled]="endOfTime$ | async">
+           (click)="canGoNext() && next()" [class.disabled]="endOfTime$ | ngrxPush">
         <i class="al-icon al-ico-next al-color" data-id="nextButton"></i></div>
       <div class="icon-container controller previous"
-           (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime$ | async">
+           (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime$ | ngrxPush">
         <i class="al-icon al-ico-previous al-color" data-id="previousButton"></i></div>
     </div>
   </div>

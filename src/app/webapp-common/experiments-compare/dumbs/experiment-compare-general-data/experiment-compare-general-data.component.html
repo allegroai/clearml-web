@@ -11,12 +11,14 @@
 </header>
 <sm-tag-list [tags]="tags"></sm-tag-list>
 <div class="general-info" data-id="generalInfo">
-  <i *ngIf="experimentsStatusLabels[experiment.status]" [class]="'me-1 icon sm bw i-'+ experiment.status"></i>
+  @if (experimentsStatusLabels[experiment.status]) {
+    <i [class]="'me-1 icon sm bw i-'+ experiment.status"></i>
+  }
   <span>{{experimentsStatusLabels[experiment.status] ?? experiment.status}}</span>
-  <ng-container *ngIf="experiment.last_iteration !== undefined">
+  @if (experiment.last_iteration !== undefined) {
     <span class="dot"></span>
     <span class="flex-shrink-0">{{experiment.last_iteration | number | NA}} iterations</span>
-  </ng-container>
+  }
   <span class="dot"></span>
   <span class="flex-shrink-1" [smTooltip]="(experiment.last_update | date : timeFormatString) || ''">Last updated {{experiment.last_update | timeAgo | NA}}</span>
 </div>

@@ -1,44 +1,59 @@
 <sm-info-header-status-icon-label
-  [status]="getReadyStatus((selectedTableModel$ | async)?.ready || selectedModel?.ready)"
+  [status]="getReadyStatus((selectedTableModel$ | ngrxPush)?.ready || selectedModel?.ready)"
 >
 </sm-info-header-status-icon-label>
 <div class="model-info-container light-theme">
   <sm-model-info-header
     #modelInfoHeader
-    [model]="((selectedTableModel$ | async) || selectedModel)"
+    [model]="((selectedTableModel$ | ngrxPush) || selectedModel)"
     [editable]="!isExample"
-    [backdropActive]="backdropActive$ | async"
+    [backdropActive]="backdropActive$ | ngrxPush"
     [minimized]="minimized"
     (minimizeClicked)="minimizeView()"
     (maximizedClicked)="maximize()"
-    [isSharedAndNotOwner]="isSharedAndNotOwner$ | async"
+    [isSharedAndNotOwner]="isSharedAndNotOwner$ | ngrxPush"
     (modelNameChanged)="updateModelName($event)"
     (closeInfoClicked)="closePanel()"
   >
   </sm-model-info-header>
   <div class="tab-nav" [class.minimized]="minimized">
-    <span class="leave for grid"></span>
+    @if (((routerConfig$ | async).includes('scalars') && minimized) || !minimized) {
+      <span class="leave for grid"></span>
+    }
     <sm-router-tab-nav-bar
-      [splitSize]="splitSize$ | async"
+      [splitSize]="splitSize$ | ngrxPush"
       [links]="links"
     ></sm-router-tab-nav-bar>
-    <span class="refresh-position">
-    <sm-experiment-settings
-      *ngIf="minimized && (scalars$ | async)"
-      [class.maximized]="!minimized"
-      class="setting-icon"
-      [showSettings]="true"
-      (toggleSettings)="toggleSettingsBar()">
-    </sm-experiment-settings>
-    <sm-refresh-button
-      *ngIf="!minimized"
-      class="light-theme me-1"
-      (setAutoRefresh)="setAutoRefresh($event)"
-    >
-    </sm-refresh-button>
-    </span>
+    @if (((routerConfig$ | async).includes('scalars') && minimized) || !minimized) {
+      <span class="refresh-position">
+       <div class="scalar-buttons">
+         @if ((routerConfig$ | async).includes('scalars')) {
+           <div class="table-graph-toggle" [class.maximized]="!minimized">
+            <i class="al-icon pointer al-color blue-400"
+               [smTooltip]="(metricValuesView$ | async)===false? 'Metric values': 'Graphs'"
+               [class]="(metricValuesView$ | async)===false? 'al-ico-table-view': 'al-ico-charts-view'"
+               (click)="toggleTableView()"></i>
+        </div>
+         }
+         @if ((metricValuesView$ | async) === false && (routerConfig$ | async).includes('scalars') && minimized) {
+           <sm-experiment-settings
+             [class.maximized]="!minimized"
+             [showSettings]="(routerConfig$ | async).includes('scalars') && minimized"
+             (toggleSettings)="toggleSettingsBar()"
+           >
+          </sm-experiment-settings>
+         }
+      </div>
+        @if (!minimized) {
+          <sm-refresh-button
+            class="light-theme"
+            (setAutoRefresh)="setAutoRefresh($event)"
+          >
+        </sm-refresh-button>
+        }
+         </span>
+    }
   </div>
-
 
   <div class="model-info-body">
     <router-outlet></router-outlet>

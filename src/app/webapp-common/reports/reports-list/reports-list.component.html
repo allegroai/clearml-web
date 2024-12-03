@@ -1,8 +1,8 @@
-<div class="sm-card-list-layout" [class.in-empty-state]="!(!newReport.observed || reports === null || reports?.length > 0)">
+<div class="sm-card-list-layout" [class.in-empty-state]="!(!newReport.observed || reports() === null || reports()?.length > 0)">
   <ng-content></ng-content>
-  <ng-container *ngIf="!newReport.observed || reports === null || reports?.length > 0; else: empty">
+  <ng-container *ngIf="!newReport.observed || reports() === null || reports()?.length > 0; else: empty">
     <sm-report-card
-      *ngFor="let report of reports; trackBy: trackByFn"
+      *ngFor="let report of reports(); trackBy: trackByFn"
       class="report"
       [hideMenu]="hideMenu"
       [report]="report"
@@ -19,9 +19,12 @@
     >
     </sm-report-card>
 
-    <div class="load-more" *ngIf="!noMoreReports && reports?.length > 0">
-      <button (click)="loadMore.emit()" class="btn btn-cml-primary load-more-btn" data-id="Load More Button">LOAD MORE
-      </button>
+    <div class="load-more" *ngIf="!noMoreReports && reports()?.length > 0">
+      <sm-dots-load-more
+        [loading]="loading"
+        (loadMore)="loadMoreAction()"
+        class="mx-auto my-2"
+      ></sm-dots-load-more>
     </div>
   </ng-container>
 </div>

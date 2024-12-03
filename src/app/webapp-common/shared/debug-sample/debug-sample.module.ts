@@ -14,6 +14,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {FormsModule} from '@angular/forms';
 import {SafePipe} from '@common/shared/pipes/safe.pipe';
 import {ToPercentagePipe} from '@common/shared/pipes/to-precentage.pipe';
+import {PushPipe} from '@ngrx/component';
+
 
 
 
@@ -32,6 +34,7 @@ import {ToPercentagePipe} from '@common/shared/pipes/to-precentage.pipe';
     FormsModule,
     SafePipe,
     ToPercentagePipe,
+    PushPipe,
   ]
 })
 export class DebugSampleModule { }

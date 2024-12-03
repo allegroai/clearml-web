@@ -58,6 +58,9 @@ import { QueuesUpdateResponse } from '../model/queues/queuesUpdateResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
+import {QueuesClearQueueRequest} from '~/business-logic/model/queues/queuesClearQueueRequest';
+import {ApiOptions} from '~/business-logic/api-services/api';
+import {QueuesClearQueueResponse} from '~/business-logic/model/queues/queuesClearQueueResponse';
 
 
 @Injectable()
@@ -93,7 +96,7 @@ export class ApiQueuesService {
 
 
     /**
-     * 
+     *
      * Add or update queue metadata
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -138,7 +141,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Adds a task entry to the queue.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -171,6 +174,7 @@ export class ApiQueuesService {
             headers = headers.set("Content-Type", httpContentTypeSelected);
         }
 
+
 	return this.apiRequest.post<QueuesAddTaskResponse>(`${this.basePath}/queues.add_task`,
             request,
             {
@@ -182,8 +186,23 @@ export class ApiQueuesService {
         );
     }
 
-    /**
-     * 
+  /**
+   * Remove all tasks from the queue and change their statuses to what they were   prior to enqueuing or \&#39;created\&#39;
+   * @param request request body
+   * @param options flags and headers to use in webapp
+   */
+  public queuesClearQueue(request: QueuesClearQueueRequest, options?: ApiOptions): Observable<any> {
+    return this.apiRequest.post<QueuesClearQueueResponse>(`${this.basePath}/queues.clear_queue`,
+      request,
+      {
+        headers: this.defaultHeaders,
+        withCredentials: this.configuration.withCredentials
+      },
+    );
+  }
+
+  /**
+     *
      * Create a new queue
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -228,7 +247,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Deletes a queue. If the queue is not empty and force is not set to true, queue   will not be deleted.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -273,7 +292,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Delete metadata from queue
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -318,7 +337,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Get all queues
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -363,7 +382,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Get all queues
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -408,7 +427,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Gets queue information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -453,8 +472,8 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -498,7 +517,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Gets the next task from the top of the queue (FIFO). The task entry is removed   from the queue.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -543,7 +562,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Returns metrics of the company queues. The metrics are avaraged in the   specified interval.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -588,8 +607,8 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -633,7 +652,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Moves a task entry one step forward towards the top of the queue.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -678,8 +697,8 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -723,8 +742,8 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -768,7 +787,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Removes a task entry from the queue.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -813,7 +832,7 @@ export class ApiQueuesService {
     }
 
     /**
-     * 
+     *
      * Update queue information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

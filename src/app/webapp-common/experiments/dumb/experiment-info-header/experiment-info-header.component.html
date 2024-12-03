@@ -28,7 +28,7 @@
     >
       <i class="al-icon  pointer" data-id="descriptionIcon"
          #commentElement
-         [ngClass]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
+         [class]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
          [matMenuTriggerFor]="menu"
          [delay]="500"
          [action]="'enter'"
@@ -60,11 +60,11 @@
       *ngIf="showMenu && experiment"
       [experiment]="experiment"
       [selectedExperiment]="experiment"
-      [tagsFilterByProject]="tagsFilterByProject$ | async"
+      [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
       [selectedDisableAvailable]="selectedDisableAvailable"
       [selectedDisableAvailableIsMultiple]="false"
-      [projectTags]="projectTags$ | async"
-      [companyTags]="companyTags$ | async"
+      [projectTags]="projectTags$ | ngrxPush"
+      [companyTags]="companyTags$ | ngrxPush"
       [minimizedView]="minimized"
       [isSharedAndNotOwner]="isSharedAndNotOwner"
       [numSelected]="1"
@@ -97,9 +97,9 @@
     #tagsMenu
     class="light-theme"
     [tags]="experiment?.tags"
-    [tagsFilterByProject]="tagsFilterByProject$ | async"
-    [projectTags]="projectTags$ | async"
-    [companyTags]="companyTags$ | async"
+    [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+    [projectTags]="projectTags$ | ngrxPush"
+    [companyTags]="companyTags$ | ngrxPush"
     (tagSelected)="addTag($event)"
   ></sm-tags-menu>
 </div>

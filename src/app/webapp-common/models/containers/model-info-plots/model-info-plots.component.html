@@ -33,7 +33,7 @@
       [metrics]="graphs"
       [legendStringLength]="minimized ? 14 : 19"
       [minimized]="minimized"
-      [splitSize]="splitSize$ | async"
+      [splitSize]="splitSize$ | ngrxPush"
       [isDarkTheme]="dark"
       [exportForReport]="!modelsFeature"
       (createEmbedCode)="createEmbedCode($event)"

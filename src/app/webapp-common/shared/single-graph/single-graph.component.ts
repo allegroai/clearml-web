@@ -14,12 +14,11 @@ import {MatDialog} from '@angular/material/dialog';
 import {PALLET} from '@common/constants';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {SmoothTypeEnum, getSmoothedLine} from '@common/shared/single-graph/single-graph.utils';
-import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
 import {download} from '@common/shared/utils/download';
 import {TinyColor} from '@ctrl/tinycolor';
-import {select, Selection} from 'd3-selection';
-import {cloneDeep, escape} from 'lodash-es';
+import {select} from 'd3-selection';
+import {cloneDeep} from 'lodash-es';
 import plotly from 'plotly.js';
 import {Subject} from 'rxjs';
 import {debounceTime, filter} from 'rxjs/operators';
@@ -34,8 +33,10 @@ import {
   ExtLegend,
   PlotlyGraphBaseComponent
 } from './plotly-graph-base';
+import {showColorPicker} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
+import {normalizeColorToString} from '@common/shared/services/color-hash/color-hash.utils';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 declare const Plotly;
 const RATIO_OFFSET_FIX = 37;
 
@@ -51,7 +52,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public alreadyDrawn = false;
   public shouldRefresh = false;
   public loading: boolean;
-  public type: Array<plotly.PlotData['type'] | 'table'>;
+  public type: (plotly.PlotData['type'] | 'table')[];
   public ratio: number;
   public title: string;
   private originalChart: ExtFrame;
@@ -115,7 +116,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   private rebootGraph(chart: ExtFrame, clean?: boolean) {
     const hidden = this._chart?.data
       .filter(d => !d.isSmoothed)
-      .map((d, i) => d.visible === 'legendonly' ? i : null)
+      .map((d, i) => d.visible === 'legendonly' && (d.fakePlot === chart.data[i].fakePlot) ? i : null)
       .filter(index => index !== null);
     if (clean && this.alreadyDrawn && this.type[0] === 'scatter' && chart.data[0]?.x?.length === 1) {
       (Plotly.deleteTraces as typeof plotly.deleteTraces)(this.chartElm, Array.from({length: this.chartElm.data.length ?? 0}, (v, i) => i));
@@ -249,9 +250,11 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           }));
         }
 
-        if (!this.alreadyDrawn) {
+        // We don't color pie charts labels (just like in histograms)
+        if (!this.alreadyDrawn && this.chart.type !== 'pie') {
           setTimeout(() => {
-            this.subscribeColorButtons(container);
+            this.repositionModeBar(this.plotlyContainer.nativeElement);
+            this.subscribeColorButtons();
             this.updateLegend();
           });
         }
@@ -272,7 +275,6 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     this.title = this.hideTitle ? '' : this.getTitle(graph);
     let layout = {
       ...this.hideDownloadButtons ? {} : this.addParametersIfDarkTheme({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         paper_bgcolor: PALLET.blue950
       }),
       ...this.addParametersIfDarkTheme({
@@ -282,9 +284,8 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }
       }),
       ...graph.layout,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       ...this.addParametersIfDarkTheme({plot_bgcolor: 'transparent'}),
-      height: this.type[0] === 'table' ? this.height - 20 : this.height,
+      height: this.type[0] === 'table' ? this.height - 30 : this.height,
       width: this.ratio ? (this.height * this.ratio) + RATIO_OFFSET_FIX : undefined,
       modebar: {
         color: '#5a658e',
@@ -404,14 +405,14 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         };
         layout.margin = {
           l: 24,
-          t: 52,
+          t: 62,
           r: 24,
           b: 0
         };
       }
     });
     const barLayoutConfig = {
-      hovermode: this.hoverMode ?? 'closest',
+      hovermode: this.hoverMode ?? 'closest'
     };
 
     const scatterLayoutConfig: Partial<ExtLayout> = {
@@ -470,30 +471,32 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
     const modeBarButtonsToAdd = ['v1hovermode', 'togglespikelines'] as undefined as plotly.ModeBarButton[];
 
-    modeBarButtonsToAdd.push({
-      name: 'Hover mode',
-      title: this.getHoverModeTitle(this.hoverMode),
-      icon: {
-        width: 24,
-        height: 24,
-        // fill: 'rgb(77, 102, 255)',
-        path: this.getHoverModePath(this.hoverMode)
-      },
-      click: (gd: plotly.PlotlyHTMLElement) => {
-        switch (this.hoverMode) {
-          case 'closest':
-            this.hoverMode = 'x';
-            break;
-          case 'x':
-            this.hoverMode = 'x unified';
-            break;
-          default:
-            this.hoverMode = 'closest';
+    if (!['scatter3d', 'surface'].includes(graph.type)) {
+      modeBarButtonsToAdd.push({
+        name: 'Hover mode',
+        title: this.getHoverModeTitle(this.hoverMode),
+        icon: {
+          width: 24,
+          height: 24,
+          // fill: 'rgb(77, 102, 255)',
+          path: this.getHoverModePath(this.hoverMode)
+        },
+        click: (gd: plotly.PlotlyHTMLElement) => {
+          switch (this.hoverMode) {
+            case 'closest':
+              this.hoverMode = 'x';
+              break;
+            case 'x':
+              this.hoverMode = 'x unified';
+              break;
+            default:
+              this.hoverMode = 'closest';
+          }
+          this.hoverModeChanged.emit(this.hoverMode);
+          this.updateHoverMode(gd);
         }
-        this.hoverModeChanged.emit(this.hoverMode);
-        this.updateHoverMode(gd);
-      }
-    });
+      });
+    }
 
     if (['multiScalar', 'scalar'].includes(graph.layout.type)) {
       modeBarButtonsToAdd.push({
@@ -529,9 +532,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           pathElement.style.fill = this.chartElm.layout?.showlegend ? 'rgb(77, 102, 255)' : 'rgb(143, 157, 201)';
           svg.parentElement.attributes['data-title'].value = this.getHideButtonTitle();
           this.chartElm.layout.showlegend = !this.chartElm.layout.showlegend;
-          if (this.chartElm.layout.showlegend) {
+          if (this.chartElm.layout.showlegend && this.chart.type !== 'pie') {
             setTimeout(() => {
-              this.subscribeColorButtons(this.plotlyContainer.nativeElement);
+              this.repositionModeBar(this.plotlyContainer.nativeElement);
+              this.subscribeColorButtons();
               this.updateLegend();
             }, 20);
           }
@@ -594,9 +598,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         title: this.hideMaximize === 'disabled' ? `Can't maximize because an iframe with the same name exists` : 'Maximize Graph',
         attr: this.hideMaximize === 'disabled' ? 'plotly-disabled-maximize' : '',
         icon: this.getMaximizeIcon(),
-        click: () => {
-          this.hideMaximize !== 'disabled' && this.maximizeGraph();
-        }
+        click: () => this.hideMaximize !== 'disabled' && this.maximizeGraph()
       };
       modeBarButtonsToAdd.push(maximizeButton);
     }
@@ -624,7 +626,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   private getTitle(graph: ExtFrame) {
-    if(this.hideTitle && this.graphTitle){
+    if (this.hideTitle && this.graphTitle) {
       return this.graphTitle;
     }
     if (graph.layout.title) {
@@ -678,8 +680,15 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         graph.data[i].name = this.getTitle(graph);
       }
 
-      if (!this.alreadyDrawn && !graph.data[i].name.includes('<span style="display: none;"')) {
-        graph.data[i].name = escape(graph.data[i].name);
+      if (this.isCompare) {
+        this.removeUserColorFromPlot(graph.data[i])
+      }
+      const originalColor = this.isCompare ? undefined : this.getOriginalColor(i);
+      const task = graph.data[i].task ?? graph.task;
+      const colorKey = this.generateColorKey(graph.data[i].name.trim(), task, graph.data[i].colorKey);
+      if (!this.alreadyDrawn) {
+        (graph.data[i] as any).originalColor = originalColor;
+        (graph.data[i] as any).fullName = colorKey.replace(`.${task?.substring(0,6)}-`,'-') ?? graph.data[i].name;
 
         if (this.xAxisType === ScalarKeyEnum.Timestamp) {
           const zeroTime = graph.data[i].x[0] as number;
@@ -689,13 +698,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         if (graph.data[i].type === 'bar' && !graph.data[i].marker) {
           graph.data[i].marker = {} as Partial<plotly.PlotMarker>;
         }
-        const genColorKey = this.generateColorKey(graph, i);
-        this.singleColorKey = genColorKey;
-        const wrappedText = (this.scaleFactor === 100 || this.isSmooth) ? graph.data[i].name : `${graph.data[i].name}      `;
-        const orgColor = this.isCompare ? undefined : this.getOriginalColor(i);
-        graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${genColorKey}" data-origin-color="${orgColor}"></span>`;
+        this.singleColorKey = colorKey;
+        graph.data[i].name = (this.scaleFactor === 100 || this.isSmooth) ? graph.data[i].name : `${graph.data[i].name.trim()}      `;
       }
-      const [colorKey, originalColor] = this.extractColorKey(graph.data[i].name);
+
       if (!Array.isArray(originalColor)) {
         let color;
         if (originalColor && !this.colorHash.hasColor(colorKey)) {
@@ -721,17 +727,25 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     return graph;
   }
 
+  private removeUserColorFromPlot(data) {
+    if (data?.marker) {
+      data.marker.color = undefined;
+    }
+    if (data?.line) {
+      data.line.color = undefined;
+    }
+  }
+
   private getOriginalColor(i: number) {
     return (this.originalChart.data[i]?.marker?.color || this.originalChart.data[i]?.line?.color) as string;
   }
 
-  public generateColorKey(graph: ExtFrame, i: number) {
-    const variant = graph.data[i].colorKey || graph.data[i].name;
+  public generateColorKey(name: string, task: string, colorKey: string) {
+    const variant = colorKey || name;
     if (!this.isCompare) {
       return `${variant}?`;  // "?" to adjust desired colors (legend title is removing this ?)
     } else {
-      const task = graph.data[i].task ?? graph.task;
-      return `${variant}-${task}`;
+      return variant?.endsWith(task) ? variant : `${variant}-${task}`;
     }
   }
 
@@ -768,13 +782,13 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         let changed = false;
         graph?.data.forEach(trace => {
           const name = trace.name;
-          const [colorKey] = this.extractColorKey(name);
+          const colorKey = this.generateColorKey(trace.name, trace.task, trace.colorKey);
           if (!name || !this.colorHash.hasColor(colorKey)) {
             return;
           }
           const oldColor = this._getTraceColor(trace);
           const newColorArr = colorObj[colorKey];
-          const newColor = newColorArr ? `rgb(${newColorArr[0]},${newColorArr[1]},${newColorArr[2]})` : false;
+          const newColor = newColorArr ? `rgb(${newColorArr[0]},${newColorArr[1]},${newColorArr[2]})` : null;
           if (oldColor !== newColor && newColor) {
             changed = true;
             this._reColorTrace(trace, newColorArr);
@@ -788,28 +802,31 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       });
   }
 
-  private subscribeColorButtons(container) {
-    this.repositionModeBar(this.plotlyContainer.nativeElement);
-    const traces = container.querySelectorAll('.traces');
-    for (const trace of traces) {
-      let originalColor = null;
-      const textEl = trace.querySelector('.legendtext') as SVGTextElement;
-      const textElData = textEl.getAttribute('data-unformatted');
-      const [text, orgColor] = textEl ? this.extractColorKey(textElData) : ['', ''];
-      if (orgColor) {
-        const {r, g, b, a} = new TinyColor(orgColor).toRgb();
-        originalColor = orgColor ? [r, g, b, a] : null;
-      }
-      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-      title.textContent = text.replace('?', '');
-      textEl.parentElement.appendChild(title);
+  private subscribeColorButtons = () => {
+    select(this.plotlyContainer.nativeElement)
+      .selectAll('.traces .layers')
+      .raise()
+      .on('click', (event, data) => {
+        const colorKey = data[0].trace._input.colorKey;
+        const name = data[0].trace._input.name;
+        const task = data[0].trace._input.task;
+        const originalColor = data[0].trace._input.originalColor;
+        const colorKey2 = this.generateColorKey(name, task, colorKey);
+        this.store.dispatch(showColorPicker({
+          top: event.y,
+          left: event.x,
+          theme: 'light',
+          defaultColor: normalizeColorToString(this.colorHash.initColor(colorKey2, originalColor)),
+          cacheKey: colorKey2,
+          alpha: null
+        }));
+        event.stopPropagation();
+      });
 
-      const layers = trace.querySelector('.layers');
-      const parentEl = layers.parentElement;
-      parentEl.removeChild(layers); // Needed because z-index in svg is by element order
-      parentEl.appendChild(layers);
-      attachColorChooser(text, layers, this.colorHash, this.store, null, originalColor);
-    }
+    select(this.plotlyContainer.nativeElement)
+      .selectAll('.traces .legendtoggle')
+      .append('title')
+      .text((data, i) => (this.chart.data[i] as any).fullName ?? data[0].trace.name);
   }
 
 
@@ -979,7 +996,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         height: '100%',
         maxHeight: 'auto',
         width: '100%',
-        maxWidth: 'auto'
+        maxWidth: this.maximizeClicked.observed ? '100%' : 'auto'
       }).beforeClosed().subscribe(() => this.maximizeClicked.emit());
     });
   }
@@ -992,7 +1009,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     if (!name) {
       return name;
     }
-    return name + ((iter || (this.graphsNumber > 1 && iter === 0)) ? ` - Iteration ${iter}` : '');
+    return name + ((iter || (this.graphsNumber > 1 && iter === 0)) && !name.includes('(iteration') ? ` - Iteration ${iter}` : '');
   }
 
   public repositionModeBar(singleGraphEl) {

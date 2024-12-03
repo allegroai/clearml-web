@@ -11,6 +11,7 @@ import {TagColorService} from '../../../services/tag-color.service';
 import {Observable} from 'rxjs';
 import {UserTagComponent} from '@common/shared/ui-components/tags/user-tag/user-tag.component';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {PushPipe} from '@ngrx/component';
 
 export interface Tag {
   caption: string;
@@ -29,7 +30,8 @@ export interface Tag {
     UserTagComponent,
     NgIf,
     NgForOf,
-    AsyncPipe
+    AsyncPipe,
+    PushPipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

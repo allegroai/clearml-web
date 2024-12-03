@@ -102,7 +102,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.searchChanged({value: this.defaultProjectId ? this.defaultProjectId : ''});
+    this.searchChanged({value: this.defaultProjectId ?? ''});
     this.subs.add(this.projects$.subscribe(projects => {
       this.loading = false;
       this.noMoreOptions = this.allProjectsBeforeFilter?.length === this.previousLength || this.allProjectsBeforeFilter?.length < rootProjectsPageSize;

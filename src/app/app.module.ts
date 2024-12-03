@@ -27,6 +27,7 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
 import {UpdateNotifierComponent} from '@common/shared/ui-components/overlay/update-notifier/update-notifier.component';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spinner.component';
+import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -62,7 +63,7 @@ import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spi
     ChooseColorModule,
     SpinnerComponent,
   ],
-  providers      : [
+  providers: [
     UserPreferences,
     {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {floatLabel: 'always'}},
     {
@@ -77,7 +78,8 @@ import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spi
     {
       provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
       useValue: {position: 'above'} as MatTooltipDefaultOptions
-    }
+    },
+    provideCharts(withDefaultRegisterables()),
   ],
   bootstrap      : [AppComponent],
   exports        : []

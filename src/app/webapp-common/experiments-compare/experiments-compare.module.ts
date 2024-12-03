@@ -106,6 +106,8 @@ import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-pa
 import {MetricResultToSelectedMetricPipe} from '@common/shared/pipes/metric-result-to-selected-metric.pipe';
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
 import {DrawerComponent} from '@common/shared/ui-components/panel/drawer/drawer.component';
+import {PushPipe} from '@ngrx/component';
+
 
 export const COMPARE_STORE_KEY = 'experimentsCompare';
 export const COMPARE_CONFIG_TOKEN =
@@ -217,6 +219,7 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     MetricResultToSelectedMetricPipe,
     MetricVariantToNamePipe,
     DrawerComponent,
+    PushPipe,
   ],
   providers: [
     {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},

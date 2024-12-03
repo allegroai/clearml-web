@@ -7,11 +7,14 @@ import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCre
 import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
+import {URI_REGEX} from '~/app.constants';
 
 export interface ProjectDialogConfig {
   project: Project;
   mode: string;
 }
+export const OutputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WITH_BUCKET_AND_HOST}$|${URI_REGEX.FILE}$|${URI_REGEX.NON_AWS_S3}$|${URI_REGEX.GS_WITH_BUCKET}$|${URI_REGEX.GS_WITH_BUCKET_AND_HOST}|${URI_REGEX.AZURE_WITH_BUCKET}`;
+
 
 
 @Component({
@@ -33,6 +36,10 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
       header: 'MOVE TO',
       icon: 'al-color blue-300 al-ico-move-to'
     },
+    edit: {
+      header: 'EDIT PROJECT',
+      icon: 'al-color blue-300 al-ico-projects'
+    },
 
   };
 
@@ -41,6 +48,7 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
     private matDialogRef: MatDialogRef<ProjectDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: ProjectDialogConfig
   ) {
+
     this.baseProject = data.project;
     this.mode = data.mode;
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
@@ -58,6 +66,10 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
     const project = this.convertFormToProject(projectForm);
     this.store.dispatch(createNewProjectActions.createNewProject({req: project, dialogId: this.matDialogRef.id}));
   }
+  public updateProject(projectForm) {
+    const project = {project: this.baseProject.id, ...this.convertFormToProject(projectForm)};
+    this.store.dispatch(createNewProjectActions.updateProject({req: project, dialogId: this.matDialogRef.id}));
+  }
 
   moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {
     this.store.dispatch(createNewProjectActions.moveProject({
@@ -72,9 +84,9 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
   private convertFormToProject(projectForm: any): ProjectsCreateRequest {
     return {
       name: `${projectForm.parent === 'Projects root' ? '' : projectForm.parent + '/'}${projectForm.name}`,
-      description: projectForm.description,
+      ...(projectForm.description && {description: projectForm.description}),
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      system_tags: projectForm.system_tags,
+      ...(projectForm.system_tags && {system_tags: projectForm.system_tags}),
       // eslint-disable-next-line @typescript-eslint/naming-convention
       default_output_destination: projectForm.default_output_destination
     };

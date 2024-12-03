@@ -87,8 +87,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   @Input() tableCols: ISmCol[];
   private _experiments: IExperimentInfo[] = [];
   private _selectedExperiment: IExperimentInfo;
-  public roundedMetricValues: { [colId: string]: { [expId: string]: boolean } } = {};
-  private _tableFilters: { [p: string]: FilterMetadata };
+  public roundedMetricValues: Record<string, Record<string, boolean>> = {};
+  private _tableFilters: Record<string, FilterMetadata>;
 
   @Input() set experiments(experiments) {
     this._experiments = experiments;
@@ -109,8 +109,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   }
 
   public contextExperiment: IExperimentInfo | ISelectedExperiment;
-  public filtersMatch: { [colId: string]: string } = {};
-  public filtersSubValues: { [colId: string]: any } = {};
+  public filtersMatch: Record<string, string> = {};
+  public filtersSubValues: Record<string, any> = {};
   private titleCasePipe = new TitleCasePipe();
 
   @Input() selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
@@ -214,7 +214,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     return this.systemTags.filter(tag => tag !== 'archived');
   }
 
-  @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
+  @Input() set tableFilters(filters: Record<string, FilterMetadata>) {
     this._tableFilters = filters;
     this.filtersValues = {};
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.STATUS]?.value ?? [];
@@ -239,15 +239,15 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   }
 
   @Output() experimentSelectionChanged = new EventEmitter<{ experiment: ITableExperiment; openInfo?: boolean }>();
-  @Output() experimentsSelectionChanged = new EventEmitter<Array<ITableExperiment>>();
+  @Output() experimentsSelectionChanged = new EventEmitter<ITableExperiment[]>();
   @Output() loadMoreExperiments = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() typesMenuOpened = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
-  @Output() openContextMenu = new EventEmitter<{ x: number; y: number; single?: boolean; backdrop?: boolean }>();
+  @Output() contextMenu = new EventEmitter<{ x: number; y: number; single?: boolean; backdrop?: boolean }>();
   @Output() removeTag = new EventEmitter<{ experiment: ITableExperiment; tag: string }>();
-  @Output() clearAllFilters = new EventEmitter<{ [s: string]: FilterMetadata }>();
+  @Output() clearAllFilters = new EventEmitter<Record<string, FilterMetadata>>();
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -307,11 +307,12 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     }
   }
 
-  tableRowClicked(event: { e: MouseEvent; data: ITableExperiment }) {
-    if (this._selectedExperiments.some(exp => exp.id === event.data.id)) {
-      this.onContextMenu({e: event.e, rowData: event.data, backdrop: true});
-    } else if (!this.selectionReachedLimit) {
-      this.experimentsSelectionChanged.emit([event.data]);
+  tableRowClicked({e, data}: { e: MouseEvent; data: ITableExperiment }) {
+    if (this.selectionMode === 'single') {
+      this.experimentSelectionChanged.emit({experiment: data});
+    }
+    if (this._selectedExperiments.some(exp => exp.id === data.id)) {
+      this.openContextMenu({e, rowData: data, backdrop: true});
     }
   }
 
@@ -319,8 +320,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     this.experimentsSelectionChanged.emit(selection);
   }
 
-
-  onContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {
+  openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {
     if (!data?.single) {
       this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
       if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
@@ -332,7 +332,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     }
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.openContextMenu.emit({x: event.clientX, y: event.clientY, single: data?.single, backdrop: data?.backdrop});
+    this.contextMenu.emit({x: event.clientX, y: event.clientY, single: data?.single, backdrop: data?.backdrop});
   }
 
 
@@ -365,9 +365,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     }
   }
 
-
   selectAll(filtered?: boolean) {
     this.store.dispatch(selectAllExperiments({filtered}));
   }
-
 }

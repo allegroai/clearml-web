@@ -1,17 +1,17 @@
 <div class="w-100 model-header">
   <sm-model-header
     [minimizedView]="minimizedView"
-    [isArchived]="isArchived$ | async"
+    [isArchived]="isArchived$ | ngrxPush"
     [disableCreateNewButton]="isExampleProject"
-    [tableCols]="filteredTableCols$ | async"
-    [sharedView]="isSharedAndNotOwner$|async"
-    [tableFilters]="tableFilters$ | async"
-    [metadataKeys]="metadataKeys$ | async"
-    [metricVariants]="metricVariants$ | async"
-    [tableMode]="firstModel ? (tableMode$ | async) : 'table'"
-    [hideNavigation]="modelsPage$| async"
-    [rippleEffect]="tableModeAwareness$ | async"
-    [noData]="!((models$ | async)?.length > 0)"
+    [tableCols]="filteredTableCols$ | ngrxPush"
+    [sharedView]="isSharedAndNotOwner$|ngrxPush"
+    [tableFilters]="tableFilters$ | ngrxPush"
+    [metadataKeys]="metadataKeys$ | ngrxPush"
+    [metricVariants]="metricVariants$ | ngrxPush"
+    [tableMode]="firstModel ? (tableMode$ | ngrxPush) : 'table'"
+    [hideNavigation]="modelsPage$| ngrxPush"
+    [rippleEffect]="tableModeAwareness$ | ngrxPush"
+    [noData]="!((models$ | ngrxPush)?.length > 0)"
     (isArchivedChanged)="archivedChanged($event)"
     (setAutoRefresh)="setAutoRefresh($event)"
     (selectedTableColsChanged)="selectedTableColsChanged($event)"
@@ -27,7 +27,7 @@
   ></sm-model-header>
 </div>
 <div class="models-body"
-     [class.footer-visible]="(selectedModels$ | async)?.length > 1|| (showAllSelectedIsActive$ |async)">
+     [class.footer-visible]="(selectedModels$ | ngrxPush)?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -37,40 +37,40 @@
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
             (transitionEnd)="modelsTable.table.resize(); modelsTable.afterTableInit()"
-            [class.opened]="minimizedView && (selectSplitSize$ | async) <= 1"
-            [class.closed]="minimizedView && (selectSplitSize$ | async) >= 99"
+            [class.opened]="minimizedView && (selectSplitSize$ | ngrxPush) <= 1"
+            [class.closed]="minimizedView && (selectSplitSize$ | ngrxPush) >= 99"
   >
-    <as-split-area 
-      [size]="100 - splitInitialSize" 
+    <as-split-area
+      [size]="100 - splitInitialSize"
       [minSize]="1"
       [maxSize]="99"
-      [visible]="(isSharedAndNotOwner$ | async) !== true"
+      [visible]="(isSharedAndNotOwner$ | ngrxPush) !== true"
     >
       <sm-models-table
         #modelsTable
         class="w-100 align-self-stretch"
         selectionMode="single"
-        [models]="models$ | async"
-        [projects]="(projectsOptions$ | async)"
-        [tableCols]="tableCols$ | async"
+        [models]="models$ | ngrxPush"
+        [projects]="(projectsOptions$ | ngrxPush)"
+        [tableCols]="tableCols$ | ngrxPush"
         [minimizedView]="minimizedView"
-        [noMoreModels]="noMoreModels$ | async"
-        [users]="users$ |async"
-        [frameworks]="frameworks$ |async"
-        [tags]="tags$ | async"
-        [metadataValuesOptions]="metadataColsOptions$ | async"
-        [systemTags]="systemTags$ | async"
-        [tableSortFields]="(tableSortFields$ | async)"
-        [tableSortOrder]="(tableSortOrder$ | async)"
-        [tableFilters]="(tableFilters$ | async)"
-        [colsOrder]="(tableColsOrder$ | async)"
-        [selectedModels]="selectedModels$ | async"
-        [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | async"
-        [selectedModel]="selectedModel$ | async"
-        [split]="selectSplitSize$ | async"
+        [noMoreModels]="noMoreModels$ | ngrxPush"
+        [users]="users$ |ngrxPush"
+        [frameworks]="frameworks$ |ngrxPush"
+        [tags]="tags$ | ngrxPush"
+        [metadataValuesOptions]="metadataColsOptions$ | ngrxPush"
+        [systemTags]="systemTags$ | ngrxPush"
+        [tableSortFields]="(tableSortFields$ | ngrxPush)"
+        [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
+        [colsOrder]="(tableColsOrder$ | ngrxPush)"
+        [selectedModels]="selectedModels$ | ngrxPush"
+        [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | ngrxPush"
+        [selectedModel]="selectedModel$ | ngrxPush"
+        [split]="selectSplitSize$ | ngrxPush"
         [enableMultiSelect]="true"
         [entityType]="entityTypeEnum.model"
-        [cardsCollapsed]="cardsCollapsed$ | async"
+        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
         (columnsReordered)="columnsReordered($event)"
         (modelSelectionChanged)="modelSelectionChanged($event)"
         (modelsSelectionChanged)="modelsSelectionChanged($event)"
@@ -82,6 +82,7 @@
         (loadMoreModels)="getNextModels()"
         (clearAllFilters)="clearTableFiltersHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
+        (closePanel)="closePanel()"
       >
       </sm-models-table>
     </as-split-area>
@@ -91,7 +92,7 @@
   </as-split>
 </div>
 <sm-entity-footer
-  [footerState]="footerState$ | async"
+  [footerState]="footerState$ | ngrxPush"
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'models')"

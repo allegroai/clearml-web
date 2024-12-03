@@ -9,6 +9,9 @@ import {merge} from 'lodash-es';
 import {PipelinesRouterModule} from '@common/pipelines/pipelines.route';
 import {PipelineCardComponent} from '@common/pipelines/pipeline-card/pipeline-card.component';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {PushPipe} from '@ngrx/component';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+
 
 
 export const pipelinesSyncedKeys = [
@@ -50,6 +53,8 @@ const getPipelineConfig = () => ({
     StoreModule.forFeature('projects', projectsReducer, PIPELINES_CONFIG_TOKEN),
     PipelineCardComponent,
     ButtonToggleComponent,
+    PushPipe,
+    DotsLoadMoreComponent,
   ],
   exports: [PipelinesPageComponent],
   providers: [

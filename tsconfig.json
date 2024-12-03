@@ -33,7 +33,7 @@
       "~/*": [
         "app/*"
       ]
-    },
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

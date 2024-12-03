@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, viewChild} from '@angular/core';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -17,9 +17,6 @@ import {HasReadOnlyFooterItem} from '@common/shared/entity-page/footer-items/has
 import {
   PipelineControllerMenuComponent
 } from '@common/pipelines-controller/pipeline-controller-menu/pipeline-controller-menu.component';
-import {
-  PipelineControllerInfoComponent
-} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {AbortFooterItem} from '@common/shared/entity-page/footer-items/abort-footer-item';
 import {removeTag} from '@common/experiments/actions/common-experiments-menu.actions';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
@@ -27,6 +24,7 @@ import {DeleteFooterItem} from '@common/shared/entity-page/footer-items/delete-f
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
+import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 
 @Component({
   selector: 'sm-controllers',
@@ -35,8 +33,7 @@ import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.
 })
 export class ControllersComponent extends ExperimentsComponent implements OnInit {
 
-  @ViewChild('contextMenu') override contextMenu: PipelineControllerMenuComponent;
-  @ViewChild(PipelineControllerInfoComponent) diagram: PipelineControllerInfoComponent;
+  override contextMenu = viewChild.required<ExperimentMenuComponent>(PipelineControllerMenuComponent);
 
   constructor() {
     super();
@@ -46,7 +43,7 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
 
   override createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<Array<{id :string}>>;
+    selected$: Observable<{id :string}[]>;
     showAllSelectedIsActive$: Observable<boolean>;
     tags$: Observable<string[]>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
@@ -74,10 +71,10 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
     window.setTimeout(() => {
       switch (item.id) {
         case MenuItems.delete:
-          this.contextMenu.deleteExperimentPopup(entityType || EntityTypeEnum.controller, true);
+          this.contextMenu().deleteExperimentPopup(entityType || EntityTypeEnum.controller, true);
           break;
         case MenuItems.abort:
-          this.contextMenu.abortControllerPopup();
+          (this.contextMenu() as PipelineControllerMenuComponent).abortControllerPopup();
           break;
         default:
           super.onFooterHandler({emitValue, item});
@@ -90,7 +87,7 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
   }
 
   newRun() {
-    this.contextMenu.runPipelineController(true);
+    (this.contextMenu() as PipelineControllerMenuComponent).runPipelineController(true);
   }
 
   removeTag({experiment, tag}: { experiment: ISelectedExperiment; tag: string }) {
@@ -105,7 +102,7 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
   }
 
   override downloadTableAsCSV() {
-    this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Pipelines`);
+    this.table().table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Pipelines`);
   }
   override setupBreadcrumbsOptions() {
     this.sub.add(this.selectedProject$.pipe(

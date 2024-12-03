@@ -23,6 +23,7 @@ import {getAllProjectsPageProjects, resetProjects} from '@common/projects/common
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-nested-simple-datasets-page',
@@ -34,7 +35,8 @@ import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-l
     NgIf,
     CircleCounterComponent,
     ClickStopPropagationDirective,
-    TagListComponent
+    TagListComponent,
+    PushPipe
   ],
   standalone: true
 })

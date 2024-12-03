@@ -28,7 +28,7 @@ export class ProjectDialogEffects {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(newProjectActions.createNewProject),
+    ofType(newProjectActions.createNewProject, newProjectActions.updateProject),
     map(action => activeLoader(action.type))
   ));
 
@@ -49,6 +49,24 @@ export class ProjectDialogEffects {
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
             getAllSystemProjects(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been created successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`),
+          ]
+        ),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), newProjectActions.setCreationStatus({status: CREATION_STATUS.FAILED})])
+      )
+    )
+  ));
+
+  updateProject = createEffect(() => this.actions.pipe(
+    ofType(newProjectActions.updateProject),
+    concatLatestFrom(() => this.store.select(selectActiveWorkspace)),
+    switchMap(([action]) => this.projectsApiService.projectsUpdate({...action.req})
+      .pipe(
+        tap(() => this.dialog.getDialogById(action.dialogId).close(true)),
+        mergeMap(() => [
+            deactivateLoader(action.type),
+            newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
+            getAllSystemProjects(),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been updated successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`),
           ]
         ),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), newProjectActions.setCreationStatus({status: CREATION_STATUS.FAILED})])

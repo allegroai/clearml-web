@@ -220,4 +220,8 @@ export class CreateExperimentDialogComponent {
         .forEach((control) => control.enable());
     }
   }
+
+  loadMoreQueues() {
+    this.store.dispatch(getQueuesForEnqueue());
+  }
 }

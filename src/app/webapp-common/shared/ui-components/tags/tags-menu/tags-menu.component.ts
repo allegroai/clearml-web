@@ -26,6 +26,7 @@ import {A11yModule} from '@angular/cdk/a11y';
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-tags-menu',
@@ -44,7 +45,8 @@ import {
     TooltipDirective,
     ClickStopPropagationDirective,
     A11yModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    PushPipe
   ]
 })
 export class TagsMenuComponent {

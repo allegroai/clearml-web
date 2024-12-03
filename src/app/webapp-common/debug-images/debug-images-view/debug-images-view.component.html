@@ -5,6 +5,7 @@
     togglePosition="before"
     [expanded]="$first"
     (afterExpand)="resize()"
+    [class.short-list]="iteration.events.length <= ref.nativeElement.clientWidth / 200"
   >
     @if (!isDatasetVersionPreview) {
       <mat-expansion-panel-header class="debug-header" [collapsedHeight]="null" data-id="debugHeader">

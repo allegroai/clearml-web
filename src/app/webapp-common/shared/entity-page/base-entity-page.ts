@@ -145,7 +145,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
         filter(([, edit, showAllSelectedIsActive]) => !edit && !showAllSelectedIsActive),
         map(([auto]) => auto)
       )
-      .subscribe(auto => this.refreshList(auto === null))
+      .subscribe(auto => this.refreshList(auto !== false))
     );
     this.setupBreadcrumbsOptions();
   }
@@ -317,7 +317,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     if (colId === 'project.name') {
       if ((this.projectId || this.selectedProjectId) === '*') {
-        !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
+        if (!value.loadMore) {
+          this.store.dispatch(resetTablesFilterProjectsOptions());
+        }
         this.store.dispatch(getTablesFilterProjectsOptions({
           searchString: value.value || '',
           loadMore: value.loadMore

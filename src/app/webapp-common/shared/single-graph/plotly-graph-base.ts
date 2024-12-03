@@ -49,6 +49,7 @@ export interface ExtData extends plotly.PlotData {
   colorKey?: string;
   isSmoothed: boolean;
   originalMetric?: string;
+  fakePlot?: boolean;
 }
 
 @Component({
@@ -106,7 +107,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     const taskId = chart.task;
     const namesHash = {};
     for (let i = 0; i < data.length; i++) {
-      if (!data[i].name || data[i].name === chart.variant || data[i].name.endsWith('</span>')) {
+      if (!data[i].name || data[i].name === chart.variant || data[i].name.endsWith('</span>') || data[i].name.endsWith(`.${(data[i].task || taskId).substring(0, 6)}`)) {
         continue;
       }
       const name = data[i].name;
@@ -135,14 +136,6 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     }
 
     return data;
-  }
-
-  public extractColorKey(html: string): string[] {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    const el = div.querySelector('.color-key');
-    const orgColor = el?.getAttribute('data-origin-color');
-    return el ? [el.getAttribute('data-color-key'), orgColor === 'undefined' ? null : orgColor] : ['', ''];
   }
 
   ngOnDestroy(): void {

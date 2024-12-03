@@ -30,7 +30,6 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {ClipboardModule} from 'ngx-clipboard';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 import {cloneItemIntoDummy} from '@common/shared/utils/shared-utils';
 import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
@@ -55,6 +54,8 @@ export interface IBreadcrumbsLink {
   example?: boolean;
   id?: string;
   tags?: string[];
+  badge?: string;
+  badgeTooltip?: string;
   onlyWithProject?: boolean;
 }
 
@@ -94,9 +95,8 @@ export class BreadcrumbsComponent {
   public route = inject(ActivatedRoute);
   private configService = inject(ConfigurationService);
   private cd = inject(ChangeDetectorRef);
-  private breadcrumbsService = inject(BreadcrumbsService); // don't delete
   public currentUrl: string;
-  public showShareButton: boolean = false;
+  public showShareButton = false;
   public subProjectsMenuIsOpen: boolean;
 
   @Input() activeWorkspace: GetCurrentUserResponseUserObjectCompany;

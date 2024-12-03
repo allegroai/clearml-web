@@ -5,7 +5,7 @@
      queryParamsHandling="merge"
      routerLinkActive="active"
      #rla="routerLinkActive"
-     [active]="rla.isActive || link.activeBy && (routerConfig$| async)?.includes(link.activeBy)"
+     [active]="rla.isActive || link.activeBy && (routerConfig$| ngrxPush)?.includes(link.activeBy)"
      [attr.data-id]="link.name"
   >{{link.name | uppercase}}</a>
 </nav>

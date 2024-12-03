@@ -33,27 +33,28 @@
   </mat-form-field>
 
   <sm-paginated-entity-selector
-    name="projectName"
     formControlName="parent"
     [data]="allProjects()"
     label="Create in"
     placeHolder="Search for project path"
     [isRequired]="true"
-    [createNewSuffix]="projectsNames() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
+    [createNewSuffix]="projects() !== null && projectForm.controls.parent.value && !(projectForm.controls.parent.value | stringIncludedInArray: projectsNames())"
     (getEntities)="loadMore($event, false)"
     (loadMore)="loadMore($event, true)"
   >
   </sm-paginated-entity-selector>
-  @if (projectForm.controls.parent.touched && projectForm.controls.parent.invalid && projectForm.controls.parent.errors; as errors) {
-    <mat-error>
-      @if (errors?.required) {
-        Please add name.
-      }
-      @if (errors?.minlength) {
-        Project name should contain more than 3 characters.
-      }
-    </mat-error>
-  }
+  <div class="errors">
+    @if ((!projectForm.controls.parent.untouched) && projectForm.controls.parent.invalid && projectForm.controls.parent.errors; as errors) {
+      <mat-error>
+        @if (errors?.required) {
+          Please add name.
+        }
+        @if (errors?.minlength) {
+          Project name should contain more than 3 characters.
+        }
+      </mat-error>
+    }
+  </div>
 
   <mat-form-field appearance="outline">
     <mat-label>Description</mat-label>
@@ -70,10 +71,9 @@
            matInput
            name="default_output_destination"
            formControlName="default_output_destination"
-           [pattern]="outputDestPattern"
            placeholder="e.g. s3://bucket. gs://bucket"
     >
-    @if (projectForm.controls.parent.invalid && projectForm.controls.parent.errors; as errors) {
+    @if (projectForm.controls.default_output_destination.invalid && projectForm.controls.default_output_destination.errors; as errors) {
       <mat-error>
         @if (errors?.required) {
           Please add default destination.

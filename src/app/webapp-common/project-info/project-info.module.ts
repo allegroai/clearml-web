@@ -16,6 +16,8 @@ import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {PushPipe} from '@ngrx/component';
+
 
 @NgModule({
   declarations: [ProjectInfoComponent, ProjectStatsComponent, MetricForStatsDialogComponent],
@@ -31,7 +33,8 @@ import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select
     TooltipDirective,
     DialogTemplateComponent,
     ShowTooltipIfEllipsisDirective,
-    SelectMetricForCustomColComponent
+    SelectMetricForCustomColComponent,
+    PushPipe,
   ]
 })
 export class ProjectInfoModule {

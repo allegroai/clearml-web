@@ -11,6 +11,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {PushPipe} from '@ngrx/component';
+
 
 
 
@@ -27,7 +29,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     MatProgressSpinnerModule,
     TagListComponent,
     ChooseColorModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    PushPipe,
   ]
 })
 export class SingleGraphModule { }

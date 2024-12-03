@@ -20,6 +20,7 @@ import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {FormsModule} from '@angular/forms';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -35,7 +36,8 @@ import {selectProjectType} from '@common/core/reducers/view.reducer';
     CheckboxThreeStateListComponent,
     FilterPipe,
     FormsModule,
-    NgIf
+    NgIf,
+    PushPipe
   ]
 })
 export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {

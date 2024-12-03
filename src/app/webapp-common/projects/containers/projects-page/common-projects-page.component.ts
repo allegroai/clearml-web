@@ -103,6 +103,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   protected router = inject(Router);
   protected route = inject(ActivatedRoute);
   protected dialog = inject(MatDialog);
+  public loading: boolean;
 
   constructor() {
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -119,6 +120,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       debounceTime(50),
       concatLatestFrom(() => [this.selectedProjectId$, this.searchQuery$, this.store.select(selectRouterConfig)]),
       map(([[projectsList, selectedProject = {} as Project], selectedProjectId, searchQuery, config]) => {
+        this.loading = false;
         this.searching = searchQuery?.query.length > 0;
         this.allExamples = projectsList?.length > 0 && projectsList?.every(project => isExample(project));
         if (!projectsList) {
@@ -317,6 +319,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   loadMore() {
+    this.loading = true;
     this.store.dispatch(getAllProjectsPageProjects());
   }
 

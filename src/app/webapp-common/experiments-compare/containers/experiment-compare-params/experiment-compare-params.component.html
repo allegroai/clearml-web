@@ -1,10 +1,10 @@
 <sm-compare-card-list
   [experiments]="experiments"
-  [tasksLimitExceeded] = "experiments?.length && (taskIds$ | async)?.length > experiments?.length"
+  [tasksLimitExceeded] = "experiments?.length && (taskIds$ | ngrxPush)?.length > experiments?.length"
   [baseExperiment]="baseExperiment"
-  [ngClass]="calculatingTree ? 'pending' : ''"
+  [class]="calculatingTree ? 'pending' : ''"
   (experimentListChanged)="syncUrl($event)"
->
+  >
   <div *compareCardHeader="let experiment; let i = index">
     <sm-experiment-compare-general-data
       [experiment]="experiment"
@@ -13,39 +13,40 @@
     </sm-experiment-compare-general-data>
   </div>
   <div class="tree-card-body" *compareCardBody="let experiment; let i = index">
-    <div class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
-      <!--      TODO: move is-not-origin class outside nodes tree-->
-      <ng-template let-dataSource="dataSource"
-                   let-treeControl="treeControl"
-                   [ngTemplateOutletContext]="{dataSource: experimentsDataControl[experiment.id][0],
-                                               treeControl: experimentsDataControl[experiment.id][1]}"
-                   [ngTemplateOutlet]="selfie" #selfie>
-        <cdk-virtual-scroll-viewport
-          #virtualScrollRef
-          class="virtual-scroll-container"
-          [class.is-not-origin]="i > 0"
-          [class.with-ellipsis]="showEllipsis"
-          itemSize="28" minBufferPx="280" maxBufferPx="560"
-        >
-          <ng-container *cdkVirtualFor="let node of dataSource; let i = index">
-            <div class="node" [class.parent]="node.hasChildren">
-              <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level"
-                   (mouseenter)="rowHovered(node.data?.path)">
-                <div class="content"
-                     (click)="toggleNode(node)"
-                     [ngClass]="node?.data?.classStyle"
-                     [class.selected-diff]="checkIfSelectedPath(node.data)"
-                     [class.hovered]="checkIfHoveredPath(node.data)"
-                     [class.identical-row]="!allPaths[node.data.path]">
-                  <i class="fas" [style.margin-left.px]="2 + node.level * 20"
-                     [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                  <span class="title-key"
-                        [class.ellipsis]="showEllipsis">{{(renameMap[node.data.key] || node.data.key)}}</span>
-                </div>
-              </div>
-              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data)"
-                   (mouseenter)="rowHovered(node.data?.path)">
-                <div [style.padding-left.px]="2 + node.level * 20" [ngClass]="{
+    @if (experimentsDataControl[experiment.id]) {
+      <div class="section h-100">
+        <!--      TODO: move is-not-origin class outside nodes tree-->
+          @let dataSource = experimentsDataControl[experiment.id][0];
+          @let treeControl = experimentsDataControl[experiment.id][1];
+          <cdk-virtual-scroll-viewport
+            #virtualScrollRef
+            class="virtual-scroll-container"
+            [class.is-not-origin]="i > 0"
+            [class.with-ellipsis]="showEllipsis"
+            itemSize="28" minBufferPx="280" maxBufferPx="560"
+            >
+            <ng-container *cdkVirtualFor="let node of dataSource; let i = index">
+              <div class="node" [class.parent]="node.hasChildren">
+                @if (node.hasChildren) {
+                  <div class="section" [class]="'depth-' + node.level"
+                    (mouseenter)="rowHovered(node.data?.path)">
+                    <div class="content"
+                      (click)="toggleNode(node)"
+                      [class]="node?.data?.classStyle"
+                      [class.selected-diff]="checkIfSelectedPath(node.data)"
+                      [class.hovered]="checkIfHoveredPath(node.data)"
+                      [class.identical-row]="!allPaths[node.data.path]">
+                      <i class="fas" [style.margin-left.px]="2 + node.level * 20"
+                      [class]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                      <span class="title-key"
+                      [class.ellipsis]="showEllipsis">{{(renameMap[node.data.key] || node.data.key)}}</span>
+                    </div>
+                  </div>
+                }
+                @if (!node.hasChildren) {
+                  <div class="section" (click)="keyClicked(node.data)"
+                    (mouseenter)="rowHovered(node.data?.path)">
+                <div [style.padding-left.px]="2 + node.level * 20" [class]="{
                   'node-item-container': true,
                   'identical-row': checkIfIdenticalRow(node.data),
                   'selected-diff': checkIfSelectedPath(node.data),
@@ -56,45 +57,50 @@
                   'equal-row': node.data.isValueEqualToOrigin,
                   'hide-identical-mode': hideIdenticalFields
                 }">
-                  <div *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)"
-                       #row class="node-row">
-                    <pre class="node-key" 
-                         [class.no-ellipsis]="node.data.key.length < 15"
-                         [class.ellipsis]="showEllipsis"
-                    >{{node.data.key}}<i class="al-icon sm al-ico-line-expand extend-toggle"
-                                         [class.fa-rotate-180]="!showEllipsis"
-                                         (click)="toggleEllipsis(); $event.stopPropagation()"></i>
-                    </pre>
-                    <pre class="node-val"
-                         [style.width.px]="showEllipsis ? nativeWidth - 180 - node.level * 20 : null"
-                         [class.no-ellipsis]="node.data.value.length < 15"
-                         [class.ellipsis]="showEllipsis" data-id="diffDataRow">{{node.data.value}}<i
-                      class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis"
-                      (click)="toggleEllipsis(); $event.stopPropagation()"></i>
-                    </pre>
-                    <i *ngIf="node.data.tooltip" class="al-icon sm al-ico-description node-icon"
-                       customClass="hyper-parameters-tooltip" [smTooltip]="node.data.tooltip"></i>
-                  </div>
+                      @if ((node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)) {
+                        <div
+                          #row class="node-row">
+                          <pre class="node-key"
+                            [class.no-ellipsis]="node.data.key.length < 15"
+                            [class.ellipsis]="showEllipsis"
+                            >{{node.data.key}}<i class="al-icon sm al-ico-line-expand extend-toggle"
+                            [class.fa-rotate-180]="!showEllipsis"
+                          (click)="toggleEllipsis(); $event.stopPropagation()"></i>
+                        </pre>
+                        <pre class="node-val"
+                          [style.width.px]="showEllipsis ? nativeWidth - 180 - node.level * 20 : null"
+                          [class.no-ellipsis]="node.data.value?.length < 15"
+                          [class.ellipsis]="showEllipsis" data-id="diffDataRow">{{node.data.value}}<i
+                          class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis"
+                        (click)="toggleEllipsis(); $event.stopPropagation()"></i>
+                      </pre>
+                      @if (node.data.tooltip) {
+                        <i class="al-icon sm al-ico-description node-icon"
+                        customClass="hyper-parameters-tooltip" [smTooltip]="node.data.tooltip"></i>
+                      }
+                    </div>
+                  }
                 </div>
               </div>
-            </div>
-          </ng-container>
-        </cdk-virtual-scroll-viewport>
-      </ng-template>
-    </div>
+            }
+          </div>
+        </ng-container>
+      </cdk-virtual-scroll-viewport>
   </div>
+}
+</div>
 </sm-compare-card-list>
 
 
 <sm-portal outletId="searchDiff">
   <sm-search class="light-theme"
-             [value]="searchText"
-             [minimumChars]="1"
-             [debounceTime]="300"
-             [enableNavigation]="true"
-             [searchCounterIndex]="foundIndex"
-             [searchResultsCount]="foundPaths.length"
-             (valueChanged)="find($event)"
+    [value]="searchText"
+    [minimumChars]="1"
+    [debounceTime]="300"
+    [enableNavigation]="true"
+    [searchCounterIndex]="foundIndex"
+    [searchResultsCount]="foundPaths.length"
+    (valueChanged)="find($event)"
   ></sm-search>
 </sm-portal>
 

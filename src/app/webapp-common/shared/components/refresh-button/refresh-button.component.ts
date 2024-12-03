@@ -1,11 +1,12 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output, inject, signal, effect} from '@angular/core';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {Store} from '@ngrx/store';
 import {selectAutoRefresh} from '@common/core/reducers/view.reducer';
-import {Observable} from 'rxjs';
-import {AsyncPipe, NgIf} from '@angular/common';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { AsyncPipe } from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'sm-refresh-button',
@@ -14,20 +15,28 @@ import {FormsModule} from '@angular/forms';
   standalone: true,
   imports: [
     AsyncPipe,
-    MatCheckboxModule,
     FormsModule,
-    NgIf
+    HesitateDirective,
+    ClickStopPropagationDirective,
+    MatSlideToggle
   ]
 })
 export class RefreshButtonComponent {
-  @Input() allowAutoRefresh: boolean = true;
-  @Input() disabled: boolean = true;
-  @Output() setAutoRefresh = new EventEmitter<boolean>();
+  protected refreshService = inject(RefreshService);
+  private store = inject(Store);
 
-  autoRefreshState$: Observable<boolean>;
+  allowAutoRefresh = input<boolean>(true);
+  disabled = input<boolean>(true);
+  setAutoRefresh = output<boolean>();
 
-  constructor(public refresh: RefreshService, private store: Store) {
-    this.autoRefreshState$ = store.select(selectAutoRefresh);
+  protected autoRefreshState = this.store.selectSignal(selectAutoRefresh);
+  protected showMenu = signal(false);
+  protected rotate = signal(false);
+
+  refresh() {
+    this.refreshService.trigger();
+    this.rotate.set(true);
+    window.setTimeout(() => {this.rotate.set(false)}, 1000);
   }
 }
 

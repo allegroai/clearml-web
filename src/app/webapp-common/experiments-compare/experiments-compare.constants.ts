@@ -110,3 +110,5 @@ export const MODELS_COMPARE_ROUTES = [
   {header: 'scalars', subHeader: ''},
   {header: 'plots', subHeader: '', featureLink: 'metrics-plots'},
 ] as HeaderNavbarTabConfig[];
+
+export const HIDDEN_PLOTS_BY_DEFAULT = ['Pipeline - Execution Flow', 'Pipeline Details - Execution Details'];

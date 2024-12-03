@@ -5,7 +5,6 @@
   max-width: 640px;
 
   p {
-    text-align: center;
     font-size: 14px;
     color: $blue-450;
     overflow-wrap: break-word;
@@ -26,13 +25,9 @@
   }
 
   .enqueue-warning {
-    opacity: 0;
-    height: 0;
-    &.show {
-      height: auto;
-      transition: opacity 1s;
-      opacity: 1;
-    }
+    height: auto;
+    transition: opacity 1s;
+    opacity: 1;
   }
 }
 

@@ -1,22 +1,19 @@
 import {
   ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges, OnDestroy, OnInit,
-  Output,
-  ViewChild
+  Component, computed, effect,
+  EventEmitter, inject, input,
+  Output, signal,
 } from '@angular/core';
-import {NgModel} from '@angular/forms';
-import {Observable, Subscription} from 'rxjs';
+import {FormBuilder, Validators} from '@angular/forms';
 import {Project} from '~/business-logic/model/projects/project';
 import {trackByValue} from '@common/shared/utils/forms-track-by';
-import {MatOptionSelectionChange} from '@angular/material/core';
 import {rootProjectsPageSize} from '@common/constants';
-import {
-  IOption
-} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
+export interface NewReportData {
+  name: string;
+  description: string;
+  project: Project;
+}
 
 @Component({
   selector: 'sm-create-new-report-form',
@@ -24,112 +21,81 @@ import {
   styleUrls: ['./create-new-report-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateNewReportFormComponent implements OnChanges, OnInit, OnDestroy {
-  public filteredProjects$: Observable<{ label: string; value: string }[]>;
-  private _projects: Project[];
-  public projectsOptions: { label: string; value: string }[];
-  public trackByValue = trackByValue;
-  public panelHeight: number;
-  private subs = new Subscription();
-  private rootFiltered: boolean;
-  public readonly projectsRoot = {label: 'Projects root', value: null};
-  @ViewChild('projectInput') projectInput: NgModel;
+export class CreateNewReportFormComponent {
+  private builder = inject(FormBuilder);
 
-  public reportsNames: Array<string>;
-  public projectsNames: Array<string>;
-  public report: { name: string; description: string; project: { label: string; value: string } } = {
-    name: null,
+  public trackByValue = trackByValue;
+  private createNew: string;
+  public readonly projectsRoot = {name: 'Projects root', id: null};
+
+  // public reportsNames: string[];
+  protected reportForm = this.builder.group({
+    name: [null as string, [Validators.required, Validators.minLength(3)]],
     description: '',
-    project: null
-  };
-  filterText: string = '';
+    project: [null as string, [Validators.required, Validators.minLength(3)]]
+  });
+
+  filterText = '';
   isAutoCompleteOpen: boolean;
 
-  @Input() readOnlyProjectsNames: string[];
-  @Input() defaultProjectId: string;
-  public loading: boolean;
-  public noMoreOptions: boolean;
-  private previousLength: number | undefined;
-
-  @Input() set projects(projects: Project[]) {
-    this.loading = false;
-    this.noMoreOptions = projects?.length === this.previousLength || projects?.length < rootProjectsPageSize;
-    this.previousLength = projects?.length;
-    this._projects = projects;
-    this.projectsOptions = [
-      ...((this.rootFiltered || projects === null) ? [] : [this.projectsRoot]),
-      ...(projects ? projects.map(project => ({label: project.name, value: project.id})) : [])
-    ];
-    this.projectsNames = this.projectsOptions.map(project => project.label);
-  }
-
-  get projects() {
-    return this._projects;
-  }
+  readOnlyProjectsNames = input<string[]>();
+  defaultProjectId = input<string>();
+  projects = input<Project[]>(null);
 
   @Output() filterSearchChanged = new EventEmitter<{value: string; loadMore?: boolean}>();
-  @Output() reportCreated = new EventEmitter();
+  @Output() reportCreated = new EventEmitter<NewReportData>();
 
-  ngOnInit(): void {
-    this.searchChanged(['*', null].includes(this.defaultProjectId) ? '' : this.defaultProjectId);
-    setTimeout(() => {
-      this.subs.add(this.projectInput.valueChanges.subscribe(searchString => {
-          if (searchString !== this.report.project) {
-            this.searchChanged(searchString?.label || searchString || '');
-          }
-        })
-      );
+  protected loading = signal(true);
+  private initialized = false;
+  protected noMoreOptions = computed(() => this.projects()?.length < rootProjectsPageSize);
+  protected projectsOptions = computed(() => [
+    ...((this.reportForm.controls.project.value && !this.projectsRoot.name.toLowerCase().includes(this.reportForm.controls.project.value.toLowerCase()) || this.projects() === null) ? [] : [this.projectsRoot]),
+    ...(this.projects() ?? [])
+  ]);
+  protected projectsNames = computed(() => [this.projectsRoot.name, ...this.projectsOptions().map(project => project.name)]);
+
+
+  constructor() {
+    effect(() => {
+      if (this.projects() !== null) {
+        this.loading.set(false);
+      }
+    }, {allowSignalWrites: true});
+
+    effect(() => {
+      if (this.projects()?.length > 0 && !this.initialized) {
+        this.initialized = true;
+        this.reportForm.controls.project.setValue(this.projectsOptions().find(p => p.id === this.defaultProjectId())?.name || this.projectsRoot.name);
+        this.reportForm.controls.project.updateValueAndValidity();
+      }
+    });
+
+    effect(() => {
+      this.searchChanged(['*', null].includes(this.defaultProjectId()) ? '' : this.defaultProjectId());
     });
   }
 
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
-  }
-
-  ngOnChanges(): void {
-    if (this.projects?.length > 0 && this.report.project === null) {
-      this.report.project = this.projectsOptions.find(p => p.value === this.defaultProjectId) || {label: this.projectsRoot.label, value: null};
-      this.projectInput.control.updateValueAndValidity();
-    }
-  }
-
-  createNewSelected($event: MatOptionSelectionChange) {
-    this.report.project = {label: $event.source.value, value: null};
-  }
-
-  projectSelected($event: MatOptionSelectionChange) {
-    this.report.project = {label: $event.source.value.label, value: $event.source.value.value};
-  }
-  setIsAutoCompleteOpen(focus: boolean) {
-    this.isAutoCompleteOpen = focus;
-  }
-
-  displayFn(project: IOption | string) {
-    return typeof project === 'string' ? project : project?.label;
-  }
-
-  clear() {
-    this.projectInput.control.setValue('');
+  createNewSelected($event: string) {
+    this.createNew = $event;
   }
 
   send() {
-    this.reportCreated.emit(this.report);
+    const project = this.reportForm.controls.project.value;
+    this.reportCreated.emit({
+      ...this.reportForm.value,
+      project: project === this.createNew ? {name: project} : this.projectsOptions().find(p => p.name === project)
+    } as NewReportData);
   }
 
   searchChanged(searchString: string) {
-    this.projectsOptions = null;
-    this.projectsNames = null;
-    this.rootFiltered = searchString && !this.projectsRoot.label.toLowerCase().includes(searchString.toLowerCase());
-    searchString !== null && this.filterSearchChanged.emit({value: searchString, loadMore: false});
+    if (searchString !== null) {
+      this.filterSearchChanged.emit({value: searchString, loadMore: false});
+    }
   }
 
-  loadMore(searchString) {
-    this.loading = true;
-    this.filterSearchChanged.emit({value: searchString || '', loadMore: true});
-  }
-
-  isFocused(locationRef: HTMLInputElement) {
-    return document.activeElement === locationRef;
+  loadMore(term: string, loadMore: boolean) {
+    this.loading.set(true);
+    this.filterSearchChanged.emit({value: term || '', loadMore});
   }
 }
 

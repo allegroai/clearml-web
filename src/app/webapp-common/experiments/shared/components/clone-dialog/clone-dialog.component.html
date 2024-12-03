@@ -30,14 +30,14 @@
                minlength="3"
                (keydown.enter)="projectInput.control.markAsTouched()"
                smUniqueNameValidator
-               [existingNames]="readOnlyProjects$ | async">
+               [existingNames]="readOnlyProjects$ | ngrxPush">
         <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!$any(formData.project)?.value) && formData.project && !($any(formData.project) | stringIncludedInArray: projectsNames)"
               class="creat-new-suffix">(Create New)</span>
         <i matSuffix class="al-icon sm-md search-icon" [class]="formData.project ? 'al-ico-dialog-x pointer' : 'al-ico-search'"
            (click)="formData.project && projectInput.reset(); projectInputRef.focus()"
            smClickStopPropagation></i>
         <mat-error *ngIf="cloneForm.controls.projectName?.errors?.required">Please provide a Project</mat-error>
-        <mat-error *ngIf="cloneForm.controls.projectName?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
+        <mat-error *ngIf="cloneForm.controls.projectName?.errors?.minlength">Name should be at least 3 characters long</mat-error>
         <mat-error *ngIf="cloneForm.controls.projectName?.errors?.uniqueName">Please provide a different name as this project name is
           taken as an Example project
         </mat-error>
@@ -77,7 +77,7 @@
       <mat-checkbox
         *ngIf="type === 'experiment'"
         name="forceParent"
-        [checked]="forceParent$ | async"
+        [checked]="forceParent$ | ngrxPush"
         (change)="formData.forceParent = $event.checked"
       >Set<b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined"> {{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }} </b><span style="white-space: nowrap">as parent</span> </mat-checkbox>
       <mat-form-field class="w-100" appearance="outline">

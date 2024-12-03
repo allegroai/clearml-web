@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {
@@ -12,7 +13,7 @@ import {
 import {CARDS_IN_ROW} from './common-dashboard.const';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap, debounceTime} from 'rxjs/operators';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
@@ -29,7 +30,7 @@ export class CommonDashboardEffects {
   ) {}
   /* eslint-disable @typescript-eslint/naming-convention */
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(getRecentProjects, getRecentExperiments),
+    ofType(getRecentExperiments),
     map(action => activeLoader(action.type))
   ));
 

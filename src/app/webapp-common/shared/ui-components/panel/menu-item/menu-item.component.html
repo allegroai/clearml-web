@@ -13,7 +13,7 @@
   <div class="item-label" [class.placeForIcon]="enableIcon">
     <div class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="enableTooltip? (itemTooltip || itemLabel): ''" data-id="sortByOption">{{itemLabel}}</div>
     @if (sortOrder) {
-      <i class="ms-2 al-icon sm-md" [ngClass]="sortOrder === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' " data-id="orderTypeIcon"></i>
+      <i class="ms-2 al-icon sm-md" [class]="sortOrder === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' " data-id="orderTypeIcon"></i>
     }
   </div>
   @if (removable) {

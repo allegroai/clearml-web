@@ -6,8 +6,10 @@ import {Subscription} from 'rxjs';
 import {getCssTheme} from '../../../utils/shared-utils';
 import {invertRgb} from '../../../services/color-hash/color-hash.utils';
 import { TinyColor, mostReadable } from '@ctrl/tinycolor';
-import {NgIf} from '@angular/common';
+
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
   selector: 'sm-chips',
@@ -16,9 +18,10 @@ import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgIf,
-    ChooseColorModule
-  ]
+    ChooseColorModule,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective
+]
 })
 export class ChipsComponent implements OnInit, OnDestroy {
 

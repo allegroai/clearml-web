@@ -1,107 +1,107 @@
+<ng-content></ng-content>
 <sm-editable-section #experimentDescriptionSection
                      class="grow"
                      [editable]="!isExample"
                      [disableEditable]="isExample"
                      (saveClicked)="commentValueChanged(experimentCommentText); experimentDescriptionSection.editModeChanged(false);"
                      (cancelClicked)="onCancelComment() "
+                     (activateEditClicked)="onDescriptionEditMode()"
 >
   <sm-section-header label="DESCRIPTION:"></sm-section-header>
-  <textarea rows="4"
+  <textarea #description
+            rows="4"
             class="mb-2"
             data-id="descriptionTextField"
             [(ngModel)]="experimentCommentText" [readOnly]="!experimentDescriptionSection.inEditMode"></textarea>
 </sm-editable-section>
 
-<div class="general-info">
+
+<sm-editable-section [hideEditButton]="true" [disableEditable]="true" class="section">
+  <sm-section-header label="EXPERIMENT DETAILS"></sm-section-header>
   <sm-labeled-row label="ARCHIVED:">
-    <div style="width: 93px">{{experiment?.system_tags?.includes('archived') ? 'Yes' : 'No'}}</div>
+    <div style="width: 93px">{{ experiment?.system_tags?.includes('archived') ? 'Yes' : 'No' }}</div>
   </sm-labeled-row>
 
-
   <sm-labeled-row label="CHANGED AT:">
-    {{(experiment?.status_changed | date : timeFormatString) | NA}}
+    {{ (experiment?.status_changed | date : timeFormatString) | NA }}
   </sm-labeled-row>
 
   <sm-labeled-row label="LAST ITERATION:">
-    {{(experiment?.last_iteration) | NA}}
+    {{ (experiment?.last_iteration) | NA }}
   </sm-labeled-row>
-
 
   <sm-labeled-row label="STATUS MESSAGE:">
-    {{experiment?.status_message | NA}}
+    {{ experiment?.status_message | NA }}
   </sm-labeled-row>
-
 
   <sm-labeled-row label="STATUS REASON:">
-    {{experiment?.status_reason | NA}}
+    {{ experiment?.status_reason | NA }}
   </sm-labeled-row>
-
 
   <sm-labeled-row label="CREATED AT:">
-    {{(experiment?.created | date : timeFormatString) | NA}}
+    {{ (experiment?.created | date : timeFormatString) | NA }}
   </sm-labeled-row>
-
 
   <sm-labeled-row label="STARTED AT:">
-    {{(experiment?.started | date : timeFormatString) | NA}}
+    {{ (experiment?.started | date : timeFormatString) | NA }}
   </sm-labeled-row>
-
 
   <sm-labeled-row label="LAST UPDATED AT:">
-    {{(experiment?.last_update | date:'MMM d yyyy H:mm') | NA}}
+    {{ (experiment?.last_update | date:'MMM d yyyy H:mm') | NA }}
   </sm-labeled-row>
 
-
   <sm-labeled-row label="COMPLETED AT:">
-    {{(experiment?.completed | date : timeFormatString) | NA}}
+    {{ (experiment?.completed | date : timeFormatString) | NA }}
   </sm-labeled-row>
 
   <sm-labeled-row label="RUN TIME:">
-    {{(experiment?.active_duration | duration) | NA}}
+    {{ (experiment?.active_duration | duration) | NA }}
   </sm-labeled-row>
 
   <sm-labeled-row label="QUEUE:">
-    <a [routerLink]="'/workers-and-queues/queues'" [queryParams]="{id: experiment?.execution?.queue?.id}">
-      {{experiment?.execution?.queue?.name | NA}}
+    <a [routerLink]="'/workers-and-queues/queues'" [queryParams]="{id: experiment?.execution?.queue?.id}" [class.na]="!experiment?.execution?.queue?.name">
+      {{ experiment?.execution?.queue?.name | NA }}
     </a>
   </sm-labeled-row>
 
   <sm-labeled-row label="WORKER:">
-    <a [routerLink]="'/workers-and-queues/workers'" [queryParams]="{id: experiment?.last_worker}">
-      {{experiment?.last_worker | NA}}
+    <a [routerLink]="'/workers-and-queues/workers'" [queryParams]="{id: experiment?.last_worker}" [class.na]="!experiment?.last_worker">
+      {{ experiment?.last_worker | NA }}
     </a>
   </sm-labeled-row>
 
   <sm-labeled-row label="CREATED BY:">
-    {{experiment?.user?.name | NA}}
+    {{ experiment?.user?.name | NA }}
   </sm-labeled-row>
 
 
   <sm-labeled-row label="PARENT TASK:">
     <div *ngIf="experiment?.parent; else nA">
       <a [href]="'projects/*/experiments/'+ experiment?.parent?.id"
-         target="_blank">{{experiment?.parent?.name}}</a>
+         target="_blank">{{ experiment?.parent?.name }}</a>
       <sm-copy-clipboard [clipboardText]="experiment?.parent?.id"
                          [hideBackground]="true"
                          [label]="''"
                          [inline]="true"
                          [tooltipText]="'Copy parent task ID to clipboard'" class="copy-btn"></sm-copy-clipboard>
     </div>
-    <ng-template #nA>{{null| NA}}</ng-template>
+    <ng-template #nA>{{ null| NA }}</ng-template>
   </sm-labeled-row>
 
   <sm-labeled-row label="PROJECT:">
-    {{experiment?.project?.name | NA}}
+    {{ experiment?.project?.name | NA }}
   </sm-labeled-row>
 
   <sm-labeled-row label="ID:">
-    {{experiment?.id | NA}}
+    {{ experiment?.id | NA }}
   </sm-labeled-row>
 
   <ng-container *ngFor="let runtimeItem of $any(experiment?.runtime) | keyvalue | filterInternal ">
     <sm-labeled-row [label]="runtimeItem.key">
-      {{runtimeItem.value}}
+      {{ runtimeItem.value }}
     </sm-labeled-row>
   </ng-container>
 
-</div>
+</sm-editable-section>
+
+

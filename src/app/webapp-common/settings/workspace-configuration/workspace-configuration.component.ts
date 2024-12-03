@@ -1,4 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
+import {Store} from '@ngrx/store';
 
 @Component({
   selector: 'sm-workspace-configuration',
@@ -6,4 +8,8 @@ import {Component} from '@angular/core';
   styleUrls: ['./workspace-configuration.component.scss']
 })
 export class WorkspaceConfigurationComponent {
+
+  private store = inject(Store);
+  protected currentUser = this.store.selectSignal(selectCurrentUser);
+
 }

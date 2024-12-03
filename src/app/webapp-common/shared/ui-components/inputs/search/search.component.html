@@ -1,44 +1,50 @@
 <span class="search-input-container"
-      [class.expand]="expandOnHover"
+  [class.expand]="expandOnHover()"
+  [class.active]="active"
+  [class.with-counter]="enableNavigation()"
+  [class.with-results]="searchResultsCount() > 0 && !empty"
+  [class.focused]="focused"
+  (dblclick)="$event.stopPropagation()"
+  (mouseover)="updateActive(true)"
+  (mouseleave)="updateActive(false)">
+  <span class="search-input" [class.expand]="expandOnHover()">
+    <input
       [class.active]="active"
-      [class.with-counter]="enableNavigation"
-      [class.with-results]="searchResultsCount > 0 && !empty"
-      [class.focused]="focused"
-      (dblclick)="$event.stopPropagation()"
-      (mouseover)="updateActive(true)"
-      (mouseleave)="updateActive(false)">
-  <span class="search-input" [class.expand]="expandOnHover">
-  <input
-    [class.active]="active"
-    data-id="searchInputField"
-    #searchBar
-    [placeholder]="placeholder"
-    (focusin)="focusInput(true)"
-    (focusout)="focusInput(false)"
-    (input)="onValueChange()"
-    (keydown)="onKeyDown($event)"
-  >
-  <i *ngIf="!hideIcons && searchBar.value.length === 0; else hideIcons ? noIcon : showX"
-     class="icon-button al-icon al-ico-search" data-id="searchIcon"></i>
+      data-id="searchInputField"
+      #searchBar
+      [placeholder]="placeholder()"
+      (focusin)="focusInput(true)"
+      (focusout)="focusInput(false)"
+      (input)="onValueChange()"
+      (keydown)="onKeyDown($event)"
+      >
+    @if (!hideIcons() && searchBar.value.length === 0) {
+      <i
+      class="icon-button al-icon al-ico-search" data-id="searchIcon"></i>
+    } @else {
+      <ng-template [ngTemplateOutlet]="hideIcons() ? noIcon : showX"></ng-template>
+    }
     <ng-template #showX>
-    <i class="icon-button al-icon al-ico-dialog-x pointer" (click)="clear()" data-id="searchCrossButton"></i>
-  </ng-template>
-    <ng-container *ngIf="enableNavigation">
-      <div *ngIf="!searchResultsCount" class="separator"></div>
-      <ng-container *ngIf="searchResultsCount > 0 && !empty">
+      <i class="icon-button al-icon al-ico-dialog-x pointer" (click)="clear()" data-id="searchCrossButton"></i>
+    </ng-template>
+    @if (enableNavigation()) {
+      @if (!searchResultsCount()) {
         <div class="separator"></div>
-        <div class="match">{{searchCounterIndex + 1}} of {{searchResultsCount}}</div>
+      }
+      @if (searchResultsCount() > 0 && !empty) {
         <div class="separator"></div>
-      </ng-container>
+        <div class="match">{{searchCounterIndex() + 1}} of {{searchResultsCount()}}</div>
+        <div class="separator"></div>
+      }
       <i class="icon-button al-icon al-ico-ico-chevron-up" data-id="previousSearchResultButton"
-         [class.disabled]="empty || searchCounterIndex < 1"
-         (click)="findNext(true)"></i>
+        [class.disabled]="empty || searchCounterIndex() < 1"
+      (click)="findNext(true)"></i>
       <i class="icon-button al-icon al-ico-ico-chevron-down" data-id="nextSearchResultButton"
-         [class.disabled]="empty || searchCounterIndex + 1 === searchResultsCount || !searchResultsCount"
-         (click)="findNext()"></i>
-    </ng-container>
-  <ng-template #noIcon>
-    <ng-content></ng-content>
-  </ng-template>
+        [class.disabled]="empty || searchCounterIndex() + 1 === searchResultsCount() || !searchResultsCount()"
+      (click)="findNext()"></i>
+    }
+    <ng-template #noIcon>
+      <ng-content></ng-content>
+    </ng-template>
   </span>
 </span>

@@ -3,6 +3,7 @@ import {reducer as queuesReducer, State as QueuesState} from './queues.reducer';
 import {workersReducer, WorkersState} from './workers.reducer';
 import {statsReducer, StatsState} from './stats.reducer';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
+import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
 
 interface State {
   workers: WorkersState,
@@ -28,7 +29,7 @@ export const selectQueuesStatsTimeFrame  = createSelector(selectQueuesState, sta
 export const selectQueuesTableSortFields = createSelector(selectQueuesState, state => state.tableSortFields);
 
 export const selectWorkersState = createSelector(workersAndQueues, state => state.workers);
-export const selectWorkers = createSelector(selectWorkersState, state => state.data);
+export const selectWorkers = createSelector(selectWorkersState, state => state.data as WorkerExt[]);
 export const selectStats   = createSelector(selectWorkersState, state => state.stats);
 export const selectSelectedWorker  = createSelector(selectWorkersState, state => state.selectedWorker);
 export const selectWorkersTableSortFields = createSelector(selectWorkersState, state => state.tableSortFields);

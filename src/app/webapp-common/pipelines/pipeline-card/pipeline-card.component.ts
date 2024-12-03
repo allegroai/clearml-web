@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {TIME_FORMAT_STRING} from '@common/constants';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
@@ -38,7 +39,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     TagListComponent,
     NgIf,
     ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    SaferPipe
   ]
 })
 export class PipelineCardComponent extends ProjectCardComponent {

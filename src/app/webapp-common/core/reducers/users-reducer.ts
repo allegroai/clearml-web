@@ -35,14 +35,14 @@ export const initUsers: UsersState = {
   showOnlyUserWork: {},
   serverVersions: null,
   gettingStarted: null,
-  settings: null,
+  settings: null
 };
 
 export const users = state => state.users as UsersState;
 export const selectSettings = createSelector(users, (state) => state?.settings);
 export const selectMaxDownloadItems = createSelector(selectSettings, (state): number => state?.max_download_items ?? 1000);
 export const selectCurrentUser = createSelector(users, state => state.currentUser);
-export const selectIsAdmin = createSelector(users, state => state.currentUser.role === RoleEnum.Admin);
+export const selectIsAdmin = createSelector(users, state => state.currentUser?.role === RoleEnum.Admin);
 export const selectActiveWorkspace = createSelector(users, state => state.activeWorkspace);
 export const selectActiveWorkspaceTier = createSelector(selectActiveWorkspace, workspace => workspace?.tier);
 export const selectUserWorkspaces = createSelector(users, state => state.userWorkspaces);
@@ -57,7 +57,19 @@ export const selectWorkspaceOwner = createSelector(selectActiveWorkspace, select
   }
   return null;
 });
-export const selectShowOnlyUserWork = createSelector(users, selectProjectType, (state, projectType) => projectType? state.showOnlyUserWork[projectType]: false);
+export const selectIsAdminInActiveWorkspace = createSelector(selectCurrentUser, selectIsAdmin, selectActiveWorkspace, selectUserWorkspaces,
+  (user, isAdmin, active, workspaces) => {
+    if (active) {
+      if (workspaces?.length > 1) {
+        const activeWs = workspaces?.find(ws => ws.id === active.id);
+        return activeWs?.owners?.some(owner => owner.id === user.id);
+      } else {
+        return isAdmin;
+      }
+    }
+    return false;
+  });
+export const selectShowOnlyUserWork = createSelector(users, selectProjectType, (state, projectType) => projectType ? state.showOnlyUserWork[projectType] : false);
 
 export const usersReducerFunctions = [
   on(fetchCurrentUser, state => ({...state})),

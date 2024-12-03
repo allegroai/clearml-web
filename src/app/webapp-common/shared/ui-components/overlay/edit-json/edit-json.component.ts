@@ -85,9 +85,9 @@ export class EditJsonComponent implements AfterViewInit{
       this.textData = undefined;
     } else if (this.typeJson && typeof data.textData !== 'string') {
       if (data.reorder) {
-        this.textData = jsonPipe.transform(orderJson(data.textData));
+        this.textData = this.jsonPipe.transform(orderJson(data.textData));
       } else {
-        this.textData = jsonPipe.transform(data.textData);
+        this.textData = this.jsonPipe.transform(data.textData);
       }
     } else {
       this.textData = data.textData as string;

@@ -7,7 +7,7 @@
                 [smTooltip]="isExpand? 'Minimize view' : 'Expand view'"
                 matTooltipPosition="below"
                 (click)="expandClicked()">
-          <i class="al-icon sm-md" [ngClass]="isExpand ? 'al-ico-hor-minimize' : 'al-ico-hor-expand'"></i>
+          <i class="al-icon sm-md" [class]="isExpand ? 'al-ico-hor-minimize' : 'al-ico-hor-expand'"></i>
         </button>
         <button *ngIf="!readOnly && !editMode" class="btn btn-cml-primary md-button" (click)="editClicked()">EDIT
         </button>
@@ -59,7 +59,7 @@
           type="button"
           class="btn btn-default btn-img-menu"
           smTooltip="Image resources"
-        ><i class="al-icon al-ico-image sm-md"></i><i class="al-icon al-ico-dropdown-arrow"></i></button>
+        ><i class="ms-2 al-icon al-ico-image sm-md"></i><i class="al-icon al-ico-dropdown-arrow"></i></button>
       </div>
     </md-editor>
   </div>

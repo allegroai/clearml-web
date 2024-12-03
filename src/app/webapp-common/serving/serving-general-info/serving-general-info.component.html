@@ -1,0 +1,77 @@
+@for (kpi of kpis(); track kpi) {
+  <div>
+    <sm-labeled-row label="{{kpi.label}}">
+      @if (!kpi.href) {
+        <div class="info-value">
+          <span [class.preserve-spaces]="kpi.downloadable">{{ kpi.value }}</span>
+        </div>
+      }
+      @if (kpi.href && kpi.value) {
+        <div class="info-value">
+          <a [href]="kpi.href" class="link">
+            {{ kpi.value }}
+          </a>
+          <sm-copy-clipboard [clipboardText]="kpi.href" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
+        </div>
+      }
+      @if (kpi.href && (!kpi.value)) {
+        <div class="info-value">N/A</div>
+      }
+    </sm-labeled-row>
+  </div>
+}
+
+<div class="mid-title">MODEL INSTANCES LIST</div>
+<sm-table
+  [columns]="columns"
+  [tableData]="lines()"
+  [resizableColumns]="false"
+  [scrollable]="true"
+  [simple]="true"
+  [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: lines(), itemSize: 32}"
+  [virtualScroll]="true"
+  [rowHeight]="48"
+  [selectionMode]="null"
+  [columnResizeMode]="'fit'"
+
+>
+  <ng-template let-col let-row="rowData" let-i="rowIndex" pTemplate="body">
+    @switch (col.id) {
+      @case ('id') {
+        @if (instancesLinks()?.[i]) {
+          <a [href]="instancesLinks()?.[i]?.link" class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="instancesLinks()?.[i]?.name">
+            {{ instancesLinks()?.[i]?.name }}
+          </a>
+        } @else {
+        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.id">
+          {{ row?.id }}
+        </span>
+      }
+      }
+      @case ('uptime_sec') {
+        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.uptime_sec">
+            {{ row?.uptime_sec | duration }}
+          </span>
+      }
+      @case ('requests') {
+        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.requests">
+            {{ row?.requests | number }}
+          </span>
+      }
+      @case ('requests_min') {
+        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.requests_min">
+            {{ row?.requests_min | number }}
+          </span>
+      }
+      @case ('latency_ms') {
+        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.latency_ms">
+            {{ row?.latency_ms }}ms
+          </span>
+      }
+      @default {
+        <span class="ellipsis" [matTooltipShowDelay]="500" [smTooltip]="row?.[col.id]" smShowTooltipIfEllipsis>{{ row?.[col.id] }}</span>
+      }
+    }
+
+  </ng-template>
+</sm-table>

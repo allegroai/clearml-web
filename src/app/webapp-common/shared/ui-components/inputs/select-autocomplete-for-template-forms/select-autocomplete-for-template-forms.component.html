@@ -18,7 +18,7 @@
         (onSelectionChange)= "customOptionSelected($event)"
         >"{{filterText}}" <span class="new">(Add item)</span></mat-option>
       }
-      @for (option of filteredItems(); track option) {
+      @for (option of filteredItems(); track option.label + $index) {
         <mat-option [value]="option">{{option.label}}</mat-option>
       }
     </mat-autocomplete>

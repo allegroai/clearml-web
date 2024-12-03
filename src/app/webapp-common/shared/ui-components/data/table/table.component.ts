@@ -13,6 +13,7 @@ import {
   OnInit,
   Output,
   QueryList,
+  signal,
   TemplateRef,
   TrackByFunction,
   ViewChild,
@@ -37,7 +38,7 @@ import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {sortCol} from '@common/shared/utils/sortCol';
-import {mkConfig, download, generateCsv} from 'export-to-csv';
+import {mkConfig, download, generateCsv, asString} from 'export-to-csv';
 import {prepareColsForDownload} from '@common/shared/utils/download';
 import {NgTemplateOutlet} from '@angular/common';
 import {ResizableColumnDirective} from '@common/shared/ui-components/data/table/resizable-column.directive';
@@ -85,7 +86,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   private loadMoreDebouncer: Subject<null>;
   public menuItems = [] as MenuItem[];
   minView: boolean;
-  private _filters: { [s: string]: FilterMetadata };
+  private _filters: Record<string, FilterMetadata>;
   private readonly isChrome = navigator.userAgent.indexOf('Chrome') > -1;
   public lastRowExpanded: boolean;
   public noDataTop: number;
@@ -97,10 +98,11 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   loadButton: ElementRef<HTMLDivElement>;
   @ViewChildren('loadButton') loadButtons: QueryList<ElementRef<HTMLDivElement>>;
   @ViewChild('cm', {static: true}) menu: ContextMenu;
+  @ViewChild('noData', {static: true}) noData: TemplateRef<any>;
   @ContentChildren(PrimeTemplate) templates: QueryList<PrimeTemplate>;
   private _tableData: D[];
   private _columnsOrder: string[];
-  public loading: boolean;
+  public loading = signal(true);
   private scaleFactor: number;
   private waiting: boolean;
   public scrollContainer: HTMLDivElement;
@@ -113,9 +115,12 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   @Input() expandRowOnClick = true;
   @Input() initialColumns;
   private waitForClick: number;
+  private allColumns: ISmCol[];
 
   @Input() set tableData(tableData: D[]) {
-    this.loading = false;
+    if (tableData) {
+      this.loading.set(false);
+    }
     this.rowsNumber = tableData ? tableData.length : 0;
     this._tableData = tableData;
   }
@@ -138,6 +143,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   @Input() set columns(columns: ISmCol[]) {
     if (columns?.length > 0) {
       this._columns = columns.filter(col => !col.hidden);
+      this.allColumns = columns;
       this.orderColumns();
       this.resize();
     }
@@ -166,7 +172,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   @Input() rowHover: boolean;
   @Input() noHeader = false;
   @Input() simple = false;
-  @Input() expandedRowKeys: { [s: string]: boolean } = {};
+  @Input() expandedRowKeys: Record<string, boolean> = {};
   @Input() rowExpandMode: 'multiple' | 'single' = 'multiple';
   @Input() cardsCollapsed = false;
 
@@ -179,7 +185,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     this.calcResize();
   }
 
-  @Input() set filters(filters: { [s: string]: FilterMetadata }) {
+  @Input() set filters(filters: Record<string, FilterMetadata>) {
     this._filters = filters;
     if (!this.minView) {
       this.table.filters = filters;
@@ -190,7 +196,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     }
   }
 
-  @Input() noDataMessage = 'No data to show';
+  @Input() noDataTemplate: TemplateRef<null>;
   @Input() checkedItems = [];
   @Input() virtualScroll: boolean;
   @Input() virtualScrollOptions: ScrollerOptions = {};
@@ -481,7 +487,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
   }
 
   loadMore() {
-    this.loading = true;
+    this.loading.set(true);
     if (this.autoLoadMore) {
       this.loadMoreClicked.emit();
     } else {
@@ -559,7 +565,7 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     });
   }
 
-  get sortableCols(): Array<ISmCol> {
+  get sortableCols(): ISmCol[] {
     return (this.initialColumns || this.columns).filter(col => col.sortable);
   }
 
@@ -589,6 +595,22 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
     this.lastRowExpanded = expanded && expandedIndex === this.rowsNumber - 1;
   }
 
+  getTableCopy() {
+    const colsOrder = this.columnsOrder ?? this.columns.map(col => col.id);
+    const sortedAllColumns = colsOrder.map(sortCol => this.allColumns.find(col => col.id === sortCol))
+    const downloadCols = prepareColsForDownload(sortedAllColumns);
+    const rows = this.tableData.map(row =>
+      downloadCols.reduce((acc, dCol) => {
+        const val = get(row, dCol.field, '');
+        acc[dCol.name] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
+          , '') : val;
+        return acc;
+      }, {})
+    );
+    const csvConfig = mkConfig({useKeysAsHeaders: true});
+    return asString(generateCsv(csvConfig)(rows));
+  }
+
 
   downloadTableAsCSV(tableName?: string) {
     const options = mkConfig({
@@ -596,7 +618,10 @@ export class TableComponent<D extends { id: string }> implements AfterContentIni
       showColumnHeaders: true,
     });
 
-    const downloadCols = prepareColsForDownload(this.columns);
+    const colsOrder = this.columnsOrder ?? this.columns.map(col => col.id);
+    const sortedAllColumns = colsOrder.map(sortCol => this.allColumns.find(col => col.id === sortCol)).filter(col => !!col);
+    const rest = this.allColumns.filter(col => !colsOrder.includes(col.id));
+    const downloadCols = prepareColsForDownload([...sortedAllColumns, ...rest]);
     options.columnHeaders = downloadCols.map(dCol => dCol.name);
     const rows = this.tableData.map(row =>
       downloadCols.reduce((acc, dCol) => {

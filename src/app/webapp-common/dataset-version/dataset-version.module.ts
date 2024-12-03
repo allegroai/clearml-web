@@ -43,6 +43,9 @@ import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-
 import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
 import {TableModule} from 'primeng/table';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {PushPipe} from '@ngrx/component';
+import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+
 
 
 
@@ -94,7 +97,9 @@ export const routes: Routes = [
     ButtonToggleComponent,
     OverlayComponent,
     TableModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    PushPipe,
+    ExperimentHeaderComponent
   ],
   exports: [
     SimpleDatasetVersionPreviewComponent,

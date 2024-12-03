@@ -76,7 +76,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   readonly modelsReadyOptions = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly timeFormatString = TIME_FORMAT_STRING;
 
-  public override filtersOptions: { [colId: string]: IOption[] } = {
+  public override filtersOptions: Record<string, IOption[]> = {
     [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: [],
     [MODELS_TABLE_COL_FIELDS.READY]: this.modelsReadyOptions,
     [MODELS_TABLE_COL_FIELDS.USER]: [],
@@ -94,11 +94,11 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   private _selectedModels: TableModel[];
   private _models: SelectedModel[];
   public getSysTags = getSysTags;
-  public filtersMatch: { [colId: string]: string } = {};
-  public filtersSubValues: { [colId: string]: string[] } = {};
+  public filtersMatch: Record<string, string> = {};
+  public filtersSubValues: Record<string, string[]> = {};
   public singleRowContext: boolean;
-  private _tableFilters: { [p: string]: FilterMetadata };
-  public roundedMetricValues: { [colId: string]: { [expId: string]: boolean } } = {};
+  private _tableFilters: Record<string, FilterMetadata>;
+  public roundedMetricValues: Record<string, Record<string, boolean>> = {};
 
 
   @Input() set models(models: SelectedModel[]) {
@@ -177,7 +177,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     return this._selectedModel;
   }
 
-  @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
+  @Input() set tableFilters(filters: Record<string, FilterMetadata>) {
     this._tableFilters = filters;
     this.filtersValues = {};
     this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = filters?.[MODELS_TABLE_COL_FIELDS.FRAMEWORK]?.value ?? [];
@@ -236,6 +236,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   }
 
   @Input() systemTags = [] as string[];
+  @Input() columnResizeMode = 'expand' as 'fit' | 'expand';
 
   get validSystemTags() {
     return this.systemTags.filter(tag => tag !== 'archived');
@@ -247,7 +248,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
-  @Output() clearAllFilters = new EventEmitter<{ [s: string]: FilterMetadata }>();
+  @Output() clearAllFilters = new EventEmitter<Record<string, FilterMetadata>>();
 
   @ViewChild(TableComponent, {static: true}) override table: TableComponent<SelectedModel>;
   @ViewChild('contextMenuExtended') contextMenuExtended: ModelMenuExtendedComponent;
@@ -335,8 +336,6 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   tableRowClicked(event: { e: Event; data: SelectedModel }) {
     if (this._selectedModels.some(exp => exp.id === event.data.id)) {
       this.openContextMenu({e: event.e, rowData: event.data, backdrop: true});
-    } else {
-      this.modelsSelectionChanged.emit([event.data]);
     }
   }
 

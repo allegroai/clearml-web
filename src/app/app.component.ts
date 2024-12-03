@@ -1,16 +1,13 @@
-import {ApiUsersService} from './business-logic/api-services/users.service';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, Injector} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, inject} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {selectBreadcrumbs, selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
 import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
-import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
 import {getAllSystemProjects, setSelectedProjectId, updateProject} from '@common/core/actions/projects.actions';
 import {selectRouterProjectId, selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {MatDialog} from '@angular/material/dialog';
 import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
 import {distinctUntilChanged, filter, tap} from 'rxjs/operators';
@@ -21,8 +18,6 @@ import {selectAvailableUpdates} from './core/reducers/view.reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
 import {aceReady, firstLogin, plotlyReady, setScaleFactor, visibilityChanged} from '@common/core/actions/layout.actions';
 import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
-import {UsageStatsService} from './core/services/usage-stats.service';
-import {dismissSurvey} from './core/actions/layout.actions';
 import {getScaleFactor} from '@common/shared/utils/shared-utils';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
@@ -31,6 +26,7 @@ import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 import {Environment} from '../environments/base';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {User} from '~/business-logic/model/users/user';
+import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
 
 @Component({
   selector: 'sm-root',
@@ -39,24 +35,30 @@ import {User} from '~/business-logic/model/users/user';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public loggedOut$: Observable<boolean>;
+  private router = inject(Router);
+  private titleService = inject(Title);
+  private store = inject(Store);
+  public serverUpdatesService = inject(ServerUpdatesService);
+  private uiUpdatesService = inject(UiUpdatesService);
+  private tipsService = inject(TipsService);
+  private renderer = inject(Renderer2);
+  private configService = inject(ConfigurationService);
+  private breadcrumbsService = inject(BreadcrumbsService); // don't delete
+  protected loggedOut$: Observable<boolean>;
   private urlSubscription: Subscription;
-  public selectedProject$: Observable<Project>;
-  public projectId: string;
-  public isWorkersContext: boolean;
-  public updatesAvailable$: Observable<string>;
+  protected selectedProject$: Observable<Project>;
+  protected projectId: string;
+  protected isWorkersContext: boolean;
+  protected updatesAvailable$: Observable<string>;
   private breadcrumbsSubscription: Subscription;
   private selectedCurrentUserSubscription: Subscription;
-  public showNotification: boolean = true;
-  public demo = ConfigurationService.globalEnvironment.demo;
-  public isLoginContext: boolean;
-  public currentUser: User;
-  private gtmService;
-  public isSharedAndNotOwner$: Observable<boolean>;
+  protected showNotification = true;
+  protected isLoginContext: boolean;
+  protected currentUser: User;
+  protected isSharedAndNotOwner$: Observable<boolean>;
   private activeWorkspace: string;
-  public hideUpdate: boolean;
-  public showSurvey: boolean;
-  private plotlyURL: string;
+  protected hideUpdate: boolean;
+  protected showSurvey: boolean;
   private environment: Environment;
   private title = 'ClearML';
 
@@ -70,22 +72,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private titleService: Title,
-    private store: Store,
-    private projectsApi: ApiProjectsService,
-    private userService: ApiUsersService,
-    public serverUpdatesService: ServerUpdatesService,
-    private uiUpdatesService: UiUpdatesService,
-    private tipsService: TipsService,
-    private matDialog: MatDialog,
-    private userStats: UsageStatsService,
-    private renderer: Renderer2,
-    private injector: Injector,
-    private configService: ConfigurationService
   ) {
-    this.loggedOut$ = store.select(selectLoggedOut);
+    this.loggedOut$ = this.store.select(selectLoggedOut);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.updatesAvailable$ = this.store.select(selectAvailableUpdates);
@@ -109,20 +97,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.configService.globalEnvironmentObservable.subscribe(env => {
       this.hideUpdate = env.hideUpdateNotice;
       this.showSurvey = env.showSurvey;
-      this.plotlyURL = env.plotlyURL;
       this.environment = env;
     });
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(
-        (item: NavigationEnd) => {
-          const gtmTag = {
-            event: 'page',
-            pageName: item.url
-          };
-          this.gtmService?.pushTag(gtmTag);
-          this.store.dispatch(routerActions.navigationEnd());
-        });
+      .subscribe(() => this.store.dispatch(routerActions.navigationEnd()));
 
     this.selectedCurrentUserSubscription = this.store.select(selectCurrentUser).pipe(
       tap(user => this.currentUser = user as unknown as User),
@@ -160,7 +139,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.breadcrumbsSubscription = this.store.select(selectBreadcrumbs).subscribe(breadcrumbs => {
       const crumbs = breadcrumbs.flat().filter((breadcrumb => !!breadcrumb?.name)).map(breadcrumb => breadcrumb.name);
-      crumbs.length> 0 && this.titleService.setTitle(`${this.title ? this.title + '-' : ''} ${crumbs.join(' / ')}`);
+      if (crumbs.length> 0) {
+        this.titleService.setTitle(`${this.title ? this.title + '-' : ''} ${crumbs.join(' / ')}`);
+      }
     });
 
     if (window.localStorage.getItem('disableHidpi') !== 'true') {
@@ -191,28 +172,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.selectedCurrentUserSubscription.unsubscribe();
   }
 
-  changeRoute(feature) {
-    return this.router.navigateByUrl('projects/' + this.projectId + '/' + feature);
-  }
-
-  backToProjects() {
-    return this.router.navigateByUrl('projects');
-  }
-
   versionDismissed(version: string) {
     this.serverUpdatesService.setDismissedVersion(version);
   }
 
   notifierActive(show: boolean) {
     this.showNotification = show;
-  }
-
-  dismissSurvey() {
-    this.store.dispatch(dismissSurvey());
-
-  }
-
-  get guestUser(): boolean {
-    return !this.currentUser || this.currentUser?.role === 'guest';
   }
 }

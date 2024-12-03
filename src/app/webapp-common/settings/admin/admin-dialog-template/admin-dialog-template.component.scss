@@ -34,6 +34,8 @@ $credentialBaseHeight: 252px;
     .code-container{
       height: $credentialBaseHeight;
       transition: height 1s ease;
+      margin-bottom: 16px;
+
       &.jupyter{
         height: $credentialBaseHeight - 50;
       }

@@ -20,6 +20,10 @@ $generic-font-size: 11px;
     text-align: center;
     color: $blue-800;
     text-transform: uppercase;
+
+    &.no-uppercase {
+      text-transform: unset;
+    }
   }
 
   .sub-header {

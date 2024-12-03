@@ -1,3 +1,6 @@
-<div *ngIf="showSettings" smTooltip="Settings" (click)="toggleSettings.emit()">
-  <i class="al-icon al-ico-settings pointer" data-id="scalar settings"></i>
-</div>
+@if (showSettings) {
+  <div smTooltip="Settings" (click)="toggleSettings.emit()" class="settings">
+    <i class="al-icon al-ico-settings pointer" data-id="scalar settings"></i>
+  </div>
+}
+

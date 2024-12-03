@@ -4,7 +4,7 @@ import {ConfirmDialogConfig} from './confirm-dialog.model';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
-import {SafePipe} from '@common/shared/pipes/safe.pipe';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {NgIf, NgTemplateOutlet} from '@angular/common';
 
 @Component({
@@ -16,18 +16,19 @@ import {NgIf, NgTemplateOutlet} from '@angular/common';
     DialogTemplateComponent,
     MatCheckboxModule,
     FormsModule,
-    SafePipe,
     NgIf,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    SaferPipe
   ]
 })
 export class ConfirmDialogComponent {
 
-  @Input() displayX: boolean = true;
+  @Input() displayX = true;
   showNeverShowAgain: boolean;
   title: string;
   body?: string;
   template?: TemplateRef<any>;
+  templateContext: any;
   yes = 'OK';
   no = 'Cancel';
   iconClass = '';
@@ -47,6 +48,7 @@ export class ConfirmDialogComponent {
     this.reference = data.reference || '';
     this.body = data.body || '';
     this.template = data.template;
+    this.templateContext = data.templateContext;
     this.yes = data.yes || '';
     this.no = typeof data.no === 'string' && data?.no ? data.no : '';
     this.iconClass = data.iconClass || '';

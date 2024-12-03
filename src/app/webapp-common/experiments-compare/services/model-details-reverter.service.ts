@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+
 import {Inject, Injectable, LOCALE_ID} from '@angular/core';
 import {TAGS} from '../../tasks/tasks.constants';
 import {IModelInfo} from '../../experiments/shared/common-experiment-model.model';
@@ -22,7 +22,7 @@ export class ModelDetailsReverterService {
     this.locale = locale;
   }
 
-  revertModels(modelIds: Array<string>, models: Array<IModelInfo>, tasks: Array<ITask>): ModelDetail[] {
+  revertModels(modelIds: string[], models: IModelInfo[], tasks: ITask[]): ModelDetail[] {
     // map the experiment ids to keep the user order.
     return modelIds.map(id => {
       const model = models.find(ex => ex.id === id);
@@ -42,7 +42,7 @@ export class ModelDetailsReverterService {
     });
   }
 
-  revertModelsDesign(modelIds: Array<string>, models: Array<IModelInfo>, safeMode: boolean): ModelDetail[] {
+  revertModelsDesign(modelIds: string[], models: IModelInfo[], safeMode: boolean): ModelDetail[] {
     // map the experiment ids to keep the user order.
     return modelIds.map(id => {
       const model = models.find(ex => ex.id === id);
@@ -89,9 +89,9 @@ export class ModelDetailsReverterService {
     return model.metadata;
   }
 
-  private revertLineage(model: IModelInfo, tasks: Array<ITask>) {
+  private revertLineage(model: IModelInfo, tasks: ITask[]) {
     return {
-      'created by': `${model.task.name} (${model.task.id})`,
+      ...(model.task && {'created by': `${model.task.name} (${model.task.id})`}),
       'Used by': tasks.reduce((acc, curr) => {
         acc[`hash_${curr.name}${curr.id}`] = `${curr.name} : ${curr.id}`;
         return acc;

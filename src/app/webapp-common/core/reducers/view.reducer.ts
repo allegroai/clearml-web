@@ -26,6 +26,7 @@ export interface ViewState {
   firstLogin: boolean;
   firstLoginAt: number;
   neverShowPopupAgain: string[];
+  neverShowChangesAgain: string;
   plotlyReady: boolean;
   aceReady: boolean;
   aceCaretPosition: { [key: string]: Ace.Point };
@@ -54,6 +55,7 @@ export const initViewState: ViewState = {
   firstLogin: false,
   firstLoginAt: +(window?.localStorage?.getItem('firstLogin') || 0),
   neverShowPopupAgain: [],
+  neverShowChangesAgain: null,
   plotlyReady: false,
   aceReady: false,
   aceCaretPosition: {},
@@ -92,6 +94,7 @@ export const selectPlotlyReady = createSelector(views, state => state.plotlyRead
 export const selectAceReady = createSelector(views, state => state.aceReady);
 export const selectAceCaretPosition = createSelector(views, state => state.aceCaretPosition);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
+export const selectNeverShowAppChanges = createSelector(views, (state): string => state.neverShowChangesAgain);
 export const selectRedactedArguments = createSelector(views, (state): { key: string }[] => state.redactedArguments);
 export const selectHideRedactedArguments = createSelector(views, (state): {
   key: string
@@ -159,6 +162,10 @@ export const viewReducers = [
   on(layoutActions.neverShowPopupAgain, (state, action) => ({
     ...state,
     neverShowPopupAgain: action.reset ? state.neverShowPopupAgain.filter(popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))
+  })),
+  on(layoutActions.neverShowChangesAgain, (state, action) => ({
+    ...state,
+    neverShowChangesAgain:  action.version
   })),
   on(setBreadcrumbs, (state, action): ViewState => ({
     ...state, breadcrumbs: action.breadcrumbs, ...(action.workspaceNeutral !== undefined && {workspaceNeutral: action.workspaceNeutral})

@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, input, output, signal} from '@angular/core';
 import {compareByFieldFunc} from '@common/tasks/tasks.utils';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {MatExpansionModule} from '@angular/material/expansion';
-import {KeyValuePipe, NgForOf, NgIf} from '@angular/common';
+import {KeyValuePipe} from '@angular/common';
 import {AdvancedFilterPipe} from '@common/shared/pipes/advanced-filter.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
@@ -12,6 +12,8 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {FilterOutPipe} from '@common/shared/pipes/filterOut.pipe';
+import {decodeURIComponentSafe} from '@common/shared/utils/tableParamEncode';
 
 export type HyperParams<T> = ReadonlyMap<string, T[]>;
 
@@ -24,107 +26,112 @@ export type HyperParams<T> = ReadonlyMap<string, T[]>;
   imports: [
     SearchComponent,
     MatExpansionModule,
-    NgForOf,
     KeyValuePipe,
     AdvancedFilterPipe,
     TooltipDirective,
     FilterPipe,
     MatCheckboxModule,
     MatRadioModule,
-    NgIf,
     ClickStopPropagationDirective,
     ShowTooltipIfEllipsisDirective,
+    FilterOutPipe
   ]
 })
 export class GroupedCheckedFilterListComponent {
 
   renameMap = {_legacy: 'General'};
+  private debounceTimer: number;
 
-  public expanded = {};
-  public searchText: string;
-  public itemsObjectList: HyperParams<{ checked: boolean; value: string }>;
-  public selectionLimitReached: boolean;
+  public expanded = signal<{ string: boolean }>({} as { string: boolean });
+  public searchText = signal('');
+  public itemsObjectListFiltered = signal<HyperParams<{ checked: boolean; value: string }>>(null);
 
-  @Input() limitSelection = 9999;
-  @Input() titleText: string;
-  @Input() placeholderText: string;
-  @Input() single = false;
+  limitSelection = input(9999);
+  titleText = input<string>();
+  placeholderText = input<string>();
+  single = input(false);
+  selectedItemsList = input<string[]>(null);
+  itemsList = input<Record<string, HyperParams<{ checked: boolean; value: string }>>>(null);
+  selectedItemsListMapper = input((data) => decodeURIComponentSafe(data.id));
+  selectedItemsListPrefix = input('hyperparams.');
+  filterItemsLabel = input<string>();
+  selectFilteredItems = input<boolean>();
 
-  @Input() selectedItemsListMapper = (data) => decodeURIComponent(data.id);
-  @Input() selectedItemsListPrefix = 'hyperparams.';
-  private _itemsList;
-  private _selectedItemsList: string[];
+  selectedItems = output<{
+    param: string;
+    value: unknown;
+  }>();
+  clearSelection = output();
+  hideFilteredItems = output();
 
-  @Input() set selectedItemsList(selectedItemsList: any[]) {
-    this._selectedItemsList = selectedItemsList;
-    if (selectedItemsList && this.itemsList) {
-      this.itemsObjectList = this.getItemsObjectList(this.itemsList);
+  itemsObjectList = computed(() => {
+    if (this.itemsList() && this.selectedItemsList()) {
+      return this.getItemsObjectList(this.itemsList());
     }
-    this.selectionLimitReached = selectedItemsList && (Object.values(selectedItemsList) as any).flat().length >= this.limitSelection;
-  }
+    return {} as HyperParams<{ checked: boolean; value: string }>;
+  });
 
-  get selectedItemsList() {
-    return this._selectedItemsList;
-  }
+  selectionLimitReached = computed(() =>
+    this.selectedItemsList() && (Object.values(this.selectedItemsList())).flat().length >= this.limitSelection());
 
-  @Input() filterItemsLabel: string;
-  @Input() selectFilteredItems: boolean;
-
-  @Input() set itemsList(itemsList: { [section: string]: any }) {
-    this._itemsList = itemsList;
-    if (this.selectedItemsList && itemsList) {
-      this.itemsObjectList = this.getItemsObjectList(itemsList);
+  itemsObjectListFilteredEffect = effect(() => {
+    if (this.itemsObjectList()) {
+      this.searchQ(this.searchText(), 0);
     }
-  }
+  }, {allowSignalWrites: true});
 
-  get itemsList() {
-    return this._itemsList;
-  }
-
-  private getItemsObjectList = (itemsList: { [section: string]: any }) =>
+  private getItemsObjectList = (itemsList: Record<string, HyperParams<{ checked: boolean; value: string }>>) =>
     Object.entries(itemsList).reduce((acc, [section, params]) => {
-      acc[section] = Object.entries(params).map(([paramKey,]) => {
-        const search = `${this.selectedItemsListPrefix}${section}.${paramKey}`;
+      acc[section] = Object.entries(params).map(([paramKey]) => {
+        const search = `${this.selectedItemsListPrefix()}${section}.${paramKey}`;
         return {
           value: paramKey,
-          checked: this.selectedItemsList.map(this.selectedItemsListMapper).includes(search)
+          checked: this.selectedItemsList().map(this.selectedItemsListMapper()).includes(search)
         };
       });
       return acc;
 
     }, {}) as HyperParams<{ checked: boolean; value: string }>;
 
-  @Output() selectedItems = new EventEmitter<{ param: string; value: any }>();
-  @Output() clearSelection = new EventEmitter();
-  @Output() hideFilteredItems = new EventEmitter();
-
-  constructor(private changeDetectorRef: ChangeDetectorRef) {
-  }
-
   public toggleParamToDisplay(category: string, param: string, value: boolean) {
-    this.selectedItems.emit({value,
+    this.selectedItems.emit({
+      value,
       param: `${category.replaceAll('.', '%2E')}.${param?.replaceAll('.', '%2E')}`
     });
   }
 
-  public searchQ(value) {
-    this.searchText = value;
-    this.changeDetectorRef.detectChanges();
-
+  public searchQ(searchQuery: string, debounceTime = 275) {
+    window.clearTimeout(this.debounceTimer);
+    this.debounceTimer = window.setTimeout(() => {
+      this.itemsObjectListFiltered.set(Object.entries(this.itemsObjectList()).reduce((acc, [key, val]) => {
+        const query = searchQuery.toLowerCase();
+        const groupFound = key.toLowerCase().includes(query);
+        const listFiltered = val.filter(item => item.value.toLowerCase().includes(query));
+        if (groupFound && listFiltered.length === 0) {
+          acc[key] = val;
+        } else if (listFiltered.length > 0) {
+          acc[key] = listFiltered;
+        }
+        return acc;
+      }, {} as HyperParams<{ checked: boolean; value: string }>));
+      if (searchQuery) {
+        this.expanded.set(Object.keys(this.itemsObjectListFiltered()).reduce((acc, group) => {
+          acc[group] = true;
+          return acc;
+        }, {} as { string: boolean }));
+      }
+      this.searchText.set(searchQuery);
+    }, debounceTime);
   }
 
   onClearSelection() {
     this.clearSelection.emit();
   }
 
-  trackByKeyFn = (index, item) => item.key;
-
-  trackByValFn = (index, item) => item.value;
-
   compareByKey = compareByFieldFunc('key');
 
   toggleExpand(name) {
-    this.expanded[name] = !this.expanded[name];
+    this.expanded.update(exp => ({...exp, name: !this.expanded()[name]}));
   }
 
   protected readonly Object = Object;

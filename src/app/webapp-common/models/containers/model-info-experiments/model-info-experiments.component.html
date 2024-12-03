@@ -1,8 +1,8 @@
 <div class="lineage-container">
 <div class="d-flex align-items-center pb-3">
   <h4 class="m-0">CREATED BY</h4> <a class="ms-3"
-                                     target="_blank" [routerLink]="selectedModelCreatingTaskLink$ | async">{{(selectedModel$ | async)?.task?.name}}</a>
-  <sm-id-badge class="ms-3" *ngIf="(selectedModel$ | async)?.task?.id" [id]="(selectedModel$ | async)?.task?.id"
+                                     target="_blank" [routerLink]="selectedModelCreatingTaskLink$ | ngrxPush">{{(selectedModel$ | ngrxPush)?.task?.name}}</a>
+  <sm-id-badge class="ms-3" *ngIf="(selectedModel$ | ngrxPush)?.task?.id" [id]="(selectedModel$ | ngrxPush)?.task?.id"
                 (copied)="copyToClipboard()"></sm-id-badge>
 </div>
 <hr>

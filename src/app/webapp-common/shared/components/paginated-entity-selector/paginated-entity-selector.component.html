@@ -9,21 +9,21 @@
          [disabled]="disabled"
          (input)="getEntitiesFn(control.value)"
          (keydown.enter)="control.markAsTouched()"
-         (focusout)="onTouched()"
+         (focusout)="onTouched && onTouched()"
   >
   @if (createNewSuffix()) {
     <span matSuffix class="creat-new-suffix">(Create New)</span>
   }
   <i matSuffix class="al-icon sm-md search-icon"
      [class]="control.value ? 'al-ico-dialog-x pointer' : 'al-ico-search'"
-     (click)="control.value && control.setValue(null); inputRef.focus()"
+     (click)="control.value && control.setValue(null); getEntities.emit(null); inputRef.focus()"
      smClickStopPropagation
   ></i>
   <mat-autocomplete #auto="matAutocomplete"
                     class="light-theme"
                     classList="light-theme"
                     [displayWith]="displayFn"
-                    (opened)="(!data().length || control.value) && getEntitiesFn('')"
+                    (opened)="(!data().length || control.value) && getEntitiesFn(control.value)"
                     autoActiveFirstOption>
     @if (createNewSuffix()) {
       <mat-option class="item" [value]="control.value" (onSelectionChange)="createNewSelected.emit($event.source.value)">

@@ -50,7 +50,7 @@ export const initAuth: AuthState = {
   s3BucketCredentials: {
     bucketCredentials: []
   },
-  signedUrls: {}
+  signedUrls: {},
 };
 
 export const selectAuth = state => state.auth as AuthState;

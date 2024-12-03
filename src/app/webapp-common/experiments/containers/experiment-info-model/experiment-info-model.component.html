@@ -1,10 +1,10 @@
 <ng-template
   let-saving="saving" let-editable="editable"
   let-experimentName="experimentName" let-modelLabels="modelLabels"
-  [ngTemplateOutletContext]="{ saving: saving$ | async,
-                               editable: editable$ | async,
-                               experimentName: selectedExperiment$ | async,
-                               modelLabels: modelLabels$ | async}"
+  [ngTemplateOutletContext]="{ saving: saving$ | ngrxPush,
+                               editable: editable$ | ngrxPush,
+                               experimentName: selectedExperiment$ | ngrxPush,
+                               modelLabels: modelLabels$ | ngrxPush}"
   [ngTemplateOutlet]="template" #template>
 <sm-editable-section #modelSection
                      *ngIf="(model?.id || editable)"

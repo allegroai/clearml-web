@@ -1,80 +1,87 @@
-<mat-drawer-container autosize class="light-theme">
-  <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
-    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()" data-id="closeToggleGraph"></i>
-    <div class="list-container">
+@if (metricValuesView$ | async) {
+  <sm-experiment-metric-data-table [selectedMetricsScalar]="tableSelectedMetrics$ | async" [lastMetrics]="lastMetricsValues$ | async" (selectedMetricsChanged)="selectedMetricsChanged($event)"></sm-experiment-metric-data-table>
+} @else {
+  <mat-drawer-container autosize class="light-theme">
+    <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
+      <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()" data-id="closeToggleGraph"></i>
+      <div class="list-container">
+        <sm-graph-settings-bar
+          class="drawer-settings-bar"
+          *ngIf="!minimized"
+          [verticalLayout]="true"
+          [smoothWeight]="smoothWeight$ | ngrxPush"
+          [smoothType]="smoothType$ | ngrxPush"
+          [xAxisType]="xAxisType$ | ngrxPush"
+          [groupBy]="groupBy"
+          [groupByOptions]="groupByOptions"
+          (changeWeight)="changeSmoothness($event)"
+          (toggleSettings)="toggleSettingsBar()"
+          (changeXAxisType)="changeXAxisType($event)"
+          (changeGroupBy)="changeGroupBy($event)"
+          (changeSmoothType)="changeSmoothType($event)"
+        ></sm-graph-settings-bar>
+
+        <sm-selectable-grouped-filter-list
+          [list]="scalarList"
+          [checkedList]="selectedMetrics"
+          [searchTerm]="searchTerm$ | ngrxPush"
+          (itemSelect)="metricSelected($event)"
+          (hiddenChanged)="hiddenListChanged($event)"
+          (searchTermChanged)="searchTermChanged($event)"
+        ></sm-selectable-grouped-filter-list>
+      </div>
+    </mat-drawer>
+    <mat-drawer-content class="overflow-hidden">
       <sm-graph-settings-bar
-        class="drawer-settings-bar"
-        *ngIf="!minimized"
-        [verticalLayout]="true"
-        [smoothWeight]="smoothWeight$ | async"
-        [smoothType]="smoothType$ | async"
-        [xAxisType]="xAxisType$ | async"
+        class="ribbon-setting-bar"
+        [class.with-settings]="!!(showSettingsBar$ | async) && minimized"
+        [smoothWeight]="smoothWeight$ | ngrxPush"
+        [smoothType]="smoothType$ | ngrxPush"
+        [xAxisType]="xAxisType$ | ngrxPush"
         [groupBy]="groupBy"
         [groupByOptions]="groupByOptions"
+        [splitSize]="splitSize$ | ngrxPush"
         (changeWeight)="changeSmoothness($event)"
         (toggleSettings)="toggleSettingsBar()"
         (changeXAxisType)="changeXAxisType($event)"
         (changeGroupBy)="changeGroupBy($event)"
         (changeSmoothType)="changeSmoothType($event)"
       ></sm-graph-settings-bar>
-      <sm-selectable-grouped-filter-list
-        [list]="scalarList"
-        [checkedList]="selectedMetrics"
-        [searchTerm]="searchTerm$ | async"
-        (itemSelect)="metricSelected($event)"
-        (hiddenChanged)="hiddenListChanged($event)"
-        (searchTermChanged)="searchTermChanged($event)"
-      ></sm-selectable-grouped-filter-list>
-    </div>
-  </mat-drawer>
-  <mat-drawer-content class="overflow-hidden">
-    <sm-graph-settings-bar
-      class="ribbon-setting-bar"
-      [class.showSettings]="showSettingsBar && minimized"
-      [smoothWeight]="smoothWeight$ | async"
-      [smoothType]="smoothType$ | async"
-      [xAxisType]="xAxisType$ | async"
-      [groupBy]="groupBy"
-      [groupByOptions]="groupByOptions"
-      [splitSize]="splitSize$ | async"
-      (changeWeight)="changeSmoothness($event)"
-      (toggleSettings)="toggleSettingsBar()"
-      (changeXAxisType)="changeXAxisType($event)"
-      (changeGroupBy)="changeGroupBy($event)"
-      (changeSmoothType)="changeSmoothType($event)"
-    ></sm-graph-settings-bar>
-    <div class="graphs-container" [class.maximized]="!minimized">
-      <div class="hover-button" *ngIf="minimized">
-        <button
-          class="btn btn-secondary"
-          (click)="drawer.open()"
-          smTooltip="Toggle Graphs"
-        >
-          <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
-        </button>
+      <div class="graphs-container" [class.maximized]="!minimized">
+        @if ((metricValuesView$ | async) === false && minimized) {
+          <div class="hover-button">
+            <button
+              class="btn btn-secondary"
+              (click)="drawer.open()"
+              smTooltip="Toggle Graphs"
+            >
+              <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
+            </button>
+          </div>
+        }
+
+        <sm-experiment-graphs
+          [class.with-settings]="!!(showSettingsBar$ | async) && minimized"
+          #experimentGraphs
+          [isGroupGraphs]="false"
+          [metrics]="graphs"
+          [singleValueData]="singleValueData$ | ngrxPush"
+          [experimentName]="experimentName"
+          [hiddenList]="selectedMetrics"
+          [smoothWeight]="smoothWeightDelayed$ | ngrxPush"
+          [smoothType]="smoothType$ | ngrxPush"
+          [legendStringLength]="minimized ? 14 : 19"
+          [minimized]="minimized"
+          [xAxisType]="xAxisType$ | ngrxPush"
+          [groupBy]="groupBy"
+          [splitSize]="splitSize$ | ngrxPush"
+          [breakPoint]="900"
+          [exportForReport]="exportForReport"
+          [hoverMode]="'x'"
+          (createEmbedCode)="createEmbedCode($event)"
+          (resetGraphs)="resetMetrics()"
+        ></sm-experiment-graphs>
       </div>
-      <sm-experiment-graphs
-        [class.with-settings]="showSettingsBar && minimized"
-        #experimentGraphs
-        [isGroupGraphs]="false"
-        [metrics]="graphs"
-        [singleValueData]="singleValueData$ | async"
-        [experimentName]="experimentName"
-        [hiddenList]="selectedMetrics"
-        [smoothWeight]="smoothWeightDelayed$ | async"
-        [smoothType]="smoothType$ | async"
-        [legendStringLength]="minimized ? 14 : 19"
-        [minimized]="minimized"
-        [xAxisType]="xAxisType$ | async"
-        [groupBy]="groupBy"
-        [splitSize]="splitSize$ | async"
-        [breakPoint]="900"
-        [exportForReport]="exportForReport"
-        [hoverMode]="'x'"
-        (createEmbedCode)="createEmbedCode($event)"
-        (resetGraphs)="resetMetrics()"
-      >
-      </sm-experiment-graphs>
-    </div>
-  </mat-drawer-content>
-</mat-drawer-container>
+    </mat-drawer-content>
+  </mat-drawer-container>
+}

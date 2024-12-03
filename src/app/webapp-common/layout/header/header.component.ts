@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectActiveWorkspace, selectCurrentUser} from '../../core/reducers/users-reducer';
+import {selectActiveWorkspace, selectCurrentUser, selectIsAdmin} from '../../core/reducers/users-reducer';
 import {logout} from '../../core/actions/users.actions';
 import {addMessage, openAppsAwarenessDialog} from '../../core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {ChangesService} from '@common/shared/services/changes.service';
 
 @Component({
   selector: 'sm-header',
@@ -27,6 +28,7 @@ export class HeaderComponent {
   private store = inject(Store);
   private dialog = inject(MatDialog);
   public tipsService = inject(TipsService);
+  public changesService = inject(ChangesService);
   private loginService = inject(LoginService);
   private router = inject(Router);
   private activeRoute = inject(ActivatedRoute);
@@ -39,6 +41,7 @@ export class HeaderComponent {
   protected environment = toSignal(this.configService.getEnvironment());
   protected url = this.store.selectSignal(selectRouterUrl);
   protected user = this.store.selectSignal(selectCurrentUser);
+  protected isAdmin = this.store.selectSignal(selectIsAdmin);
   protected userNotificationPath = this.store.selectSignal(selectUserSettingsNotificationPath);
   protected invitesPending = this.store.selectSignal(selectInvitesPending);
   protected userFocus = signal<boolean>(false);
@@ -54,6 +57,7 @@ export class HeaderComponent {
 
   constructor(
   ) {
+    this.getRouteData();
     this.router.events
     .pipe(
       takeUntilDestroyed(),
@@ -75,10 +79,6 @@ export class HeaderComponent {
 
   copyToClipboardSuccess() {
     this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
-  }
-
-  openTip() {
-    this.tipsService.showTipsModal(null, true);
   }
 
   openWelcome(event: MouseEvent) {

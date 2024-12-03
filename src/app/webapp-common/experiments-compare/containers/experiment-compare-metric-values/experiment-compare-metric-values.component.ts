@@ -49,7 +49,7 @@ const VALUE_MODES: ValueModes = {
   values: {
     key: 'value',
     name: 'Last Value'
-  },
+  }
 };
 
 
@@ -97,12 +97,12 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   private scrollContainer: HTMLDivElement;
   public scrolled: boolean;
   public filterValue: string;
-  public settings: ExperimentCompareSettings = {} as ExperimentCompareSettings;
+  public settings: ExperimentCompareSettings = null;
   private initialSettings = {
     selectedMetricsScalar: []
-  } as ExperimentCompareSettings
-  private originalSettings: string[];
-  private selectedMetrics$: Observable<ExperimentCompareSettings>;
+  } as ExperimentCompareSettings;
+  private originalSelection: string[];
+  private selectedExperimentsSettings$: Observable<ExperimentCompareSettings>;
 
   @HostListener('window:beforeunload', ['$event']) unloadHandler() {
     this.saveSettingsState();
@@ -118,25 +118,29 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.comparedTasks$ = this.store.select(selectCompareMetricsValuesExperiments);
     this.selectShowRowExtremes$ = this.store.select(selectShowRowExtremes);
     this.selectExportTable$ = this.store.select(selectExportTable).pipe(filter(e => !!e));
-    this.selectedMetrics$ = this.store.select(selectSelectedExperimentSettings).pipe(distinctUntilChanged(isEqual));
+    this.selectedExperimentsSettings$ = this.store.select(selectSelectedExperimentSettings).pipe(distinctUntilChanged(isEqual));
   }
 
   ngOnInit() {
     this.entityType = this.route.snapshot.parent.parent.data.entityType;
-    this.subs.add(this.store.select(selectRouterConfig).pipe(
-      map(params => params?.at(-1).replace('-', '_')),
-      distinctUntilChanged()
-    ).subscribe((valuesMode) => {
-      this.valuesMode = VALUE_MODES[valuesMode] || VALUE_MODES['values'];
-      this.changeDetection.detectChanges();
-    }));
 
-    this.subs.add(this.store.select(selectRouterParams).pipe(
-      distinctUntilKeyChanged('ids'),
-      map(params => params?.ids?.split(',')),
-      tap(taskIds => this.taskIds = taskIds),
-      filter(taskIds => !!taskIds && taskIds?.join(',') !== this.getExperimentIdsParams(this.experiments))
-    )
+    this.subs.add(this.store.select(selectRouterConfig)
+      .pipe(
+        map(params => params?.at(-1).replace('-', '_')),
+        distinctUntilChanged()
+      )
+      .subscribe((valuesMode) => {
+        this.valuesMode = VALUE_MODES[valuesMode] || VALUE_MODES['values'];
+        this.changeDetection.markForCheck();
+      }));
+
+    this.subs.add(this.store.select(selectRouterParams)
+      .pipe(
+        distinctUntilKeyChanged('ids'),
+        map(params => params?.ids?.split(',')),
+        tap(taskIds => this.taskIds = taskIds),
+        filter(taskIds => !!taskIds && taskIds?.join(',') !== this.getExperimentIdsParams(this.experiments))
+      )
       .subscribe((experimentIds: string[]) => {
         this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
         this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({
@@ -173,30 +177,34 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds, entity: this.entityType, autoRefresh})
       )));
 
-    this.selectedMetrics$.pipe(combineLatestWith(this.variantFilter.valueChanges.pipe(startWith('')))).subscribe(([, variantFilter]) => {
-      this.filterValue = variantFilter;
-      this.filter(this.filterValue);
-    });
+    this.subs.add(this.selectedExperimentsSettings$
+      .pipe(combineLatestWith(this.variantFilter.valueChanges.pipe(startWith(''))))
+      .subscribe(([, variantFilter]) => {
+        this.filterValue = variantFilter;
+        this.filter(this.filterValue);
+      })
+    );
 
-    this.subs.add(this.colorHash.getColorsObservable().pipe(
-    ).subscribe(() => {
-      this.experimentsColor = this.experiments?.reduce((acc, exp) => {
-        acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.orgName ?? exp.name}-${exp.id}`));
-        return acc;
-      }, {} as { [name: string]: string });
-      this.changeDetection.detectChanges();
-    }));
+    this.subs.add(this.colorHash.getColorsObservable()
+      .subscribe(() => {
+        this.experimentsColor = this.experiments?.reduce((acc, exp) => {
+          acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.orgName ?? exp.name}-${exp.id}`));
+          return acc;
+        }, {} as { [name: string]: string });
+        this.changeDetection.detectChanges();
+      }));
 
-    this.subs.add(this.selectExportTable$.subscribe(() => {
-      this.dataTableFiltered.length && this.exportToCSV();
-      this.store.dispatch(setExportTable({export: false}));
-    }));
+    this.subs.add(this.selectExportTable$
+      .subscribe(() => {
+        this.dataTableFiltered.length && this.exportToCSV();
+        this.store.dispatch(setExportTable({export: false}));
+      }));
 
-    this.subs.add(this.selectedMetrics$.pipe(take(1)).subscribe(settings => {
-      const selectedScalars = settings?.selectedMetricsScalar;
-      this.originalSettings = selectedScalars;
-      this.settings = settings ? {...this.initialSettings, selectedMetricsScalar: selectedScalars} : {...this.initialSettings} as ExperimentCompareSettings;
-    }));
+    this.selectedExperimentsSettings$
+      .pipe(take(1))
+      .subscribe(settings => {
+        this.originalSelection = settings.selectedMetricsScalar;
+      });
   }
 
   private startTableScrollListener() {
@@ -248,11 +256,29 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
               min: acc.min ? Math.min(acc.min, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.min) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key],
               max: acc.max ? Math.max(acc.max, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.max) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key]
             };
-          }, {values: {}} as { metric, variant, firstMetricRow: boolean, min:  number, max: number, values: { [expId: string]: Task['last_metrics'] } })
+          }, {values: {}} as { metric, variant, firstMetricRow: boolean, min: number, max: number, values: { [expId: string]: Task['last_metrics'] } })
         };
       })).flat(1);
+
+      if (!this.settings) {
+        this.settings = this.originalSelection ?
+          {...this.initialSettings, selectedMetricsScalar: this.originalSelection} :
+          {...this.initialSettings};
+      }
       if (!this.settings.selectedMetricsScalar || this.settings.selectedMetricsScalar?.length === 0) {
         this.settings.selectedMetricsScalar = this.getFirstMetrics(10);
+      } else {
+        const newVariantsToSelect = [];
+        Object.entries(this.metricVariantList).forEach(([metric, variant]) => {
+          if (this.settings.selectedMetricsScalar.includes(metric) && this.settings.selectedMetricsScalar.filter(a => a.startsWith(metric)).length === 1) {
+            Object.keys(variant).map(variantName => metric + variantName).forEach(variantPath => {
+              if (!this.settings.selectedMetricsScalar.includes(variantPath)) {
+                newVariantsToSelect.push(variantPath);
+              }
+            });
+          }
+        });
+        this.settings = {...this.settings, selectedMetricsScalar: [...this.settings.selectedMetricsScalar, ...newVariantsToSelect]};
       }
       this.filter(this.filterValue);
     }
@@ -262,7 +288,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     if (!this.dataTable) {
       return;
     }
-    this.dataTableFiltered = this.dataTable.filter(row => this.settings.selectedMetricsScalar?.includes(`${row.metric}${row.variant}`)).filter(row => row.metric.includes(value) || row.variant.includes(value));
+    this.dataTableFiltered = this.dataTable.filter(row => this.settings.selectedMetricsScalar?.includes(row.metric + row.variant)).filter(row => row.metric.includes(value) || row.variant.includes(value));
     this.showFilterTooltip = true;
     let previousMetric: string;
     this.dataTableFiltered.forEach(row => {
@@ -300,11 +326,11 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       return {
         Metric: row.metric,
         Variant: row.variant,
-        ...headers.reduce( (acc, header, i) => {
-          acc[header] = values[i]
+        ...headers.reduce((acc, header, i) => {
+          acc[header] = values[i];
           return acc;
         }, {})
-      }
+      };
     }));
     download(options)(csv);
   }
@@ -315,20 +341,20 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
   showAll() {
     const firstSelectedMetrics = this.getFirstMetrics(10);
-    this.settings = {...this.settings, selectedMetricsScalar: this.originalSettings.length > 0 ? this.originalSettings : firstSelectedMetrics};
+    this.settings = {...this.settings, selectedMetricsScalar: this.originalSelection.length > 0 ? this.originalSelection : firstSelectedMetrics};
     this.filter(this.filterValue);
   }
 
   private getFirstMetrics(number: number) {
-    const sortedMetrics = Object.entries(this.metricVariantList).sort((a, b) => a[0] > b[0]? -1 : 1);
+    const sortedMetrics = Object.entries(this.metricVariantList).sort((a, b) => a[0] > b[0] ? -1 : 1);
     return sortedMetrics.map(([metric, variants]) => {
       const sortedVariants = Object.keys(variants).sort();
-      return sortedVariants.map(variant => metric + variant)
+      return sortedVariants.map(variant => metric + variant);
     }).flat().slice(0, number);
   }
 
   private saveSettingsState() {
-    if (!isEqual(this.settings.selectedMetricsScalar, this.originalSettings)) {
+    if (!isEqual(this.settings.selectedMetricsScalar, this.originalSelection)) {
       this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedMetricsScalar: this.settings.selectedMetricsScalar}}));
     }
   }

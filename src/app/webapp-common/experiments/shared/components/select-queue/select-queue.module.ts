@@ -19,6 +19,7 @@ import {
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {PushPipe} from '@ngrx/component';
 
 @NgModule({
   imports: [
@@ -36,6 +37,7 @@ import {
     TooltipDirective,
     RequiredAutocompleteSelectionValidatorDirective,
     ShowTooltipIfEllipsisDirective,
+        PushPipe,
   ],
   providers      : [],
   declarations   : [SelectQueueComponent],

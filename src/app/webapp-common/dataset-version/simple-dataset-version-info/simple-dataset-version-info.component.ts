@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject } from '@angular/core';
 import {PipelineControllerInfoComponent, PipelineItem, StatusOption} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
 import {experimentDetailsUpdated, getSelectedPipelineStep, setSelectedPipelineStep} from '@common/experiments/actions/common-experiments-info.actions';
@@ -20,11 +20,11 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
   providers: [DagManagerUnsortedService]
 })
 export class SimpleDatasetVersionInfoComponent extends PipelineControllerInfoComponent {
+      private dialog = inject(MatDialog);
+      private commonExperimentsInfoEffects = inject(CommonExperimentsInfoEffects);
 
   constructor(
-    private dialog: MatDialog,
-    private commonExperimentsInfoEffects: CommonExperimentsInfoEffects
-  ) {
+) {
     super();
     this.detailsPanelMode = StatusOption.content;
     this.defaultDetailsMode = StatusOption.content;

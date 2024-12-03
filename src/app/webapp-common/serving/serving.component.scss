@@ -1,0 +1,20 @@
+@import "variables";
+@import "../layout/layout.scss";
+
+:host {
+
+  .models-body {
+    width: 100%;
+    height: calc(100% - #{$project-header-height});
+    transition: height 0.3s;
+  }
+
+  .model-table-container {
+    transition: all 0.3s;
+
+  }
+
+  ::ng-deep .card-view table {
+    width: unset !important;
+  }
+}

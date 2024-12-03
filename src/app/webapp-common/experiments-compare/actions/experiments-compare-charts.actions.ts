@@ -11,7 +11,6 @@ import {MetricVariants} from '~/business-logic/model/events/metricVariants';
 
 export const EXPERIMENTS_COMPARE_METRICS_CHARTS_ = 'EXPERIMENTS_COMPARE_METRICS_CHARTS_';
 
-export const SET_EXPERIMENT_PLOTS               = EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'SET_EXPERIMENT_PLOTS';
 
 export const getMultiScalarCharts = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_SCALAR_CHARTS',
@@ -25,7 +24,7 @@ export const getMultiSingleScalars = createAction(
 
 export const getMultiPlotCharts = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_PLOT_CHARTS',
-  props<{ taskIds: Array<string>; entity: EntityTypeEnum; metrics: MetricVariants[]; autoRefresh?: boolean }>()
+  props<{ taskIds: string[]; entity: EntityTypeEnum; metrics: MetricVariants[]; autoRefresh?: boolean }>()
 );
 
 export const setExperimentMultiScalarSingleValue = createAction(

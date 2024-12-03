@@ -9,7 +9,8 @@ $output-tabs-height: 64px;
 
   .experiment-output-container {
     height: 100%;
-    &.minimized{
+
+    &.minimized {
       height: calc(100% - 32px);
     }
   }
@@ -37,17 +38,35 @@ $output-tabs-height: 64px;
   .refresh-position {
     display: flex;
     align-items: center;
-    margin-right: 30px;
+    margin-right: 24px;
     margin-left: auto;
+
+    .scalar-buttons {
+      gap: 12px;
+      display: flex;
+      align-items: center;
+    }
   }
 
   .refreshIcon {
     margin-right: 10px;
   }
 
+  .table-graph-toggle {
+    height: 28px;
+
+    &.maximized {
+      height: 32px;
+      align-items: center;
+      display: flex;
+      margin-right: 14px;
+    }
+  }
+
   .output-body {
     position: relative;
     height: calc(100% - #{$output-tabs-height + $experiment-info-header-height + 32px});
+
     &.minimized {
       height: calc(100% - #{$experiment-info-header-height + $experiment-info-tabs-height + 3px});
     }

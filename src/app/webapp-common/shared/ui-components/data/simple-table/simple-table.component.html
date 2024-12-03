@@ -1,23 +1,30 @@
-<div class="headers" *ngIf="!hideHeaders">
-  <div *ngFor="let col of cols; trackBy: trackById" [class]="col.class">{{col.header}}</div>
-</div>
-<div cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!enableDragAndDrop">
-  <div
-    *ngFor="let row of rowsData; let i = index; trackBy: trackByFn"
-    cdkDrag
-    cdkDragPreviewContainer="parent"
-    class="table-row"
-    [class.toggleable]="isRowToggleable(i)"
-    [class.open]="open[i]"
-    [class.draggable]="enableDragAndDrop"
-    (click)="toggleRow(i)"
-  >
+@if (!hideHeaders()) {
+  <div class="headers">
+    @for (col of cols(); track col.header + $index) {
+      <div [class]="col.class">{{col.header}}</div>
+    }
+  </div>
+}
+<div cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!enableDragAndDrop()">
+  @for (row of rowsData(); track trackByFn(i, row); let i = $index) {
+    <div
+      cdkDrag
+      cdkDragPreviewContainer="parent"
+      class="table-row"
+      [class.toggleable]="isRowToggleable(i)"
+      [class.open]="open[i]"
+      [class.draggable]="enableDragAndDrop()"
+      (click)="toggleRow(i)"
+      >
       <ng-template
         [ngTemplateOutlet]="templateRef"
-        [ngTemplateOutletContext]="{$implicit: cols[i], row: row, rowIndex: i}">
+        [ngTemplateOutletContext]="{$implicit: cols()[i], row: row, rowIndex: i}">
       </ng-template>
-  </div>
-  <div *ngIf="rowsData?.length === 0" class="empty-state">
-    {{ noDataMessage || 'No data to show'}}
-  </div>
+    </div>
+  }
+  @if (!rowsData()?.length) {
+    <div class="empty-state">
+      {{ noDataMessage() || 'No data to show'}}
+    </div>
+  }
 </div>

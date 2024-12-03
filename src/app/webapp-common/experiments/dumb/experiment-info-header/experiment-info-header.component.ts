@@ -21,6 +21,7 @@ import {
   selectionDisabledPublishExperiments,
   selectionDisabledQueue,
   selectionDisabledReset,
+  selectionDisabledRetry,
   selectionDisabledViewWorker
 } from '@common/shared/entity-page/items.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
@@ -92,6 +93,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
       [MenuItems.delete]: selectionDisabledDelete([experiment]),
       [MenuItems.moveTo]: selectionDisabledMoveTo([experiment]),
       [MenuItems.enqueue]: selectionDisabledEnqueue([experiment]),
+      [MenuItems.retry]: selectionDisabledRetry([experiment]),
       [MenuItems.dequeue]: selectionDisabledDequeue([experiment]),
       [MenuItems.queue]: selectionDisabledQueue([experiment]),
       [MenuItems.viewWorker]: selectionDisabledViewWorker([experiment]),

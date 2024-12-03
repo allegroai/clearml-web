@@ -7,6 +7,7 @@ import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/me
 import {AsyncPipe} from '@angular/common';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-show-only-user-work',
@@ -16,7 +17,8 @@ import {selectProjectType} from '@common/core/reducers/view.reducer';
   imports: [
     MenuComponent,
     MenuItemComponent,
-    AsyncPipe
+    AsyncPipe,
+    PushPipe
   ]
 })
 export class ShowOnlyUserWorkComponent {

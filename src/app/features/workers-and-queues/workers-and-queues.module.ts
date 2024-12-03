@@ -52,6 +52,7 @@ import {MatInputModule} from '@angular/material/input';
 import {OrchestrationComponent} from "~/features/workers-and-queues/orchestration.component";
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
+import {PushPipe} from '@ngrx/component';
 
 @NgModule({
   imports: [
@@ -86,7 +87,8 @@ import {RefreshButtonComponent} from '@common/shared/components/refresh-button/r
     TableModule,
     MatInputModule,
     ShowTooltipIfEllipsisDirective,
-    RefreshButtonComponent
+    RefreshButtonComponent,
+    PushPipe
   ],
   declarations: [
     OrchestrationComponent,

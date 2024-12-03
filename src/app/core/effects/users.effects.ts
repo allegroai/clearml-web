@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, ofType, createEffect} from '@ngrx/effects';
-import {filter, take, mergeMap, switchMap, catchError} from 'rxjs/operators';
+import {mergeMap, switchMap, catchError, map} from 'rxjs/operators';
 import {ApiServerService} from '~/business-logic/api-services/server.service';
 import {ServerReportStatsOptionResponse} from '~/business-logic/model/server/serverReportStatsOptionResponse';
 import {setUsageStats, updateUsageStats} from '../actions/usage-stats.actions';
@@ -16,20 +16,18 @@ export class UserEffects {
 
   constructor(private actions: Actions, private userService: ApiUsersService, private serverService: ApiServerService) {}
 
-  setUser$ = createEffect(() => this.actions.pipe(
-    ofType(fetchCurrentUser),
-    filter(user => !!user),
-    take(1),
-    mergeMap(() => this.serverService.serverReportStatsOption({})
-      .pipe(
-        switchMap((options: ServerReportStatsOptionResponse) => [setUsageStats({
-          allowed: options.enabled,
-          currVersion: options.current_version,
-          allowedVersion: options.enabled_version
-        })])
-      )
-    )
-  ));
+  setUser$ = createEffect(() => {
+    return this.actions.pipe(
+      ofType(fetchCurrentUser),
+      mergeMap(() => this.serverService.serverReportStatsOption({})),
+      switchMap((options: ServerReportStatsOptionResponse) => [setUsageStats({
+        supported: options.supported,
+        allowed: options.enabled,
+        currVersion: options.current_version,
+        allowedVersion: options.enabled_version
+      })])
+    );
+  });
 
   setStatsPref$ = createEffect(
     () => this.actions.pipe(
@@ -38,6 +36,7 @@ export class UserEffects {
         (action) => this.serverService.serverReportStatsOption({enabled: action.allowed})
           .pipe(
             switchMap((options: ServerReportStatsOptionResponse) => [setUsageStats({
+              supported: options.supported,
               allowed: options.enabled,
               currVersion: options.current_version,
               allowedVersion: options.enabled_version
@@ -52,10 +51,10 @@ export class UserEffects {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     mergeMap(() => this.userService.usersGetCurrentUser({get_supported_features: true})
       .pipe(
-        switchMap((res: UsersGetCurrentUserResponse) => [setCurrentUser({
+        map((res: UsersGetCurrentUserResponse) => setCurrentUser({
           user: res.user,
           gettingStarted: res.getting_started as unknown as GettingStarted, settings: res.settings
-        })]),
+        })),
         catchError(error => [requestFailed(error)])
       )
     )

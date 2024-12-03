@@ -20,7 +20,7 @@
         autocomplete="off"
       >
       <div matSuffix class="d-flex-center mx-2">
-        <i *ngIf="companyTags !== null && (disableFilterByProject$ | async)=== false"
+        <i *ngIf="companyTags !== null && (disableFilterByProject$ | ngrxPush)=== false"
            class="icon sm-md me-3 mb-2 pointer"
            [class]="tagsFilterByProject ? 'i-project-tags-filter-active' : 'i-project-tags-filter'"
            smTooltip="Toggle all/project-only tags"

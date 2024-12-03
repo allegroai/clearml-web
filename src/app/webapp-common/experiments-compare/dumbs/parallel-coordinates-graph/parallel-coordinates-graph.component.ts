@@ -23,6 +23,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare let Plotly;
@@ -59,7 +60,8 @@ interface ParaPlotData {
     SlicePipe,
     TooltipDirective,
     ChooseColorModule,
-    MetricVariantToNamePipe
+    MetricVariantToNamePipe,
+    ShowTooltipIfEllipsisDirective
 ],
   standalone: true
 })
@@ -215,8 +217,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         type: 'parcoords',
         labelangle: 30,
         dimensions: this.parameters.map((parameter) => {
+          const splitted = parameter.split('.');
+          const newParameter = [splitted.shift(), splitted.join('.'), 'value'];
           parameter = `${parameter}.value`;
-          const allValuesIncludingNull = this.experiments.map(experiment => get(experiment.hyperparams, parameter));
+          const allValuesIncludingNull = this.experiments.map(experiment =>  get(experiment.hyperparams, newParameter));
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
           const textVal = {} as { [key: string]: number };
           let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
@@ -233,7 +237,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
             }
           }
           return {
-            label: parameter,
+            label: parameter.replace(/\.value$/, ''),
             ticktext,
             tickvals,
             values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(experiment.hyperparams, parameter)) ? 'N/A' : get(experiment.hyperparams, parameter)])),
@@ -313,9 +317,9 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     return valuesMax === valuesMin ? (valuesMin - 1) : valuesMin - ((valuesMax - valuesMin) / values.length);
   }
 
-  getLayout(setDimentiosn = true) {
+  getLayout(setDimentiosn = true, margins?) {
     return {
-      margin: {l: 120, r: 120},
+      margin: margins ? margins : {l: 120, r: 120},
       ...(setDimentiosn && {
         height: 500,
         width: this.parallelGraph.nativeElement.offsetWidth
@@ -409,6 +413,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   }
 
   downloadImage() {
+    this.container.nativeElement.classList.add('downloading');
     from(domtoimage.toBlob(this.container.nativeElement))
       .pipe(take(1))
       .subscribe((blob: Blob) => {
@@ -418,6 +423,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         a.target = '_blank';
         a.download = `Hyperparameters ${this.metrics[0].metric} ${this.metrics[0].variant}.png`;
         a.click();
+        this.container.nativeElement.classList.remove('downloading');
       });
   }
 
@@ -438,7 +444,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         chart: cloneDeep({
           data: this.data as unknown as ExtData[],
           layout: {
-            ...this.getLayout(false),
+            ...this.getLayout(false, {l: 120, r: 120, t: 150, b: 40}),
             title: ''
           },
           config: {

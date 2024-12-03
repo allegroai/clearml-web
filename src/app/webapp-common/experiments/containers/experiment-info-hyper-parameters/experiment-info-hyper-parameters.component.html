@@ -1,4 +1,4 @@
-<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <as-split
   class="light-theme"
   [unit]="'pixel'"
@@ -7,10 +7,10 @@
   <as-split-area [size]="minimized ? 250 : 360" [minSize]="150">
     <sm-experiment-hyper-params-navbar
       [class.minimized]="minimized"
-      [hyperParams]="(hyperParamsInfo$| async)"
-      [configuration]="configuration$ | async"
-      [routerConfig]="(routerConfig$ | async)?.[minimized ? 5 : 6]"
-      [routerParams]="routerParams$ | async"
+      [hyperParams]="(hyperParamsInfo$| ngrxPush)"
+      [configuration]="configuration$ | ngrxPush"
+      [routerConfig]="(routerConfig$ | ngrxPush)?.[minimized ? 5 : 6]"
+      [routerParams]="routerParams$ | ngrxPush"
       [disableAdd]="!(selectedExperiment?.status === 'created')"
     ></sm-experiment-hyper-params-navbar>
   </as-split-area>

@@ -74,15 +74,3 @@ export class ChooseColorDirective {
 
 }
 
-export const attachColorChooser = (text: string, buttonElement: Element, colorHash: ColorHashService, store: Store, withAlpha?: boolean, orgColor?: number[]) => {
-  const directive = new ChooseColorDirective(new ElementRef(buttonElement), store);
-  directive.colorButtonRef = new ElementRef(buttonElement);
-  directive.stringToColor  = text;
-  directive.colorPickerWithAlpha = withAlpha;
-  const listener = (e: MouseEvent) => {
-    directive.smChooseColor = colorHash.initColor(text, orgColor);
-    directive.openColorPicker(e);
-  };
-  buttonElement.removeEventListener('click', listener);
-  buttonElement.addEventListener('click', listener);
-};

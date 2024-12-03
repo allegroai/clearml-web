@@ -1,5 +1,5 @@
 <div class="s3-sub-header">
-  <div [innerHTML]="header"></div>
+  <div [innerHTML]="header | purify"></div>
 </div>
 <div class="container">
   <form #S3NGForm="ngForm" (submit)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()">

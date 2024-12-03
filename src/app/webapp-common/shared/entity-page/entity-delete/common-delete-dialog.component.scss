@@ -115,4 +115,9 @@
     display: flex;
     justify-content: center;
   }
+
+  .entity-name {
+    max-width: 200px;
+    font-weight: bold;
+  }
 }

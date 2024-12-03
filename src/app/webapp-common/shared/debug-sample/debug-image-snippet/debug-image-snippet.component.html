@@ -1,4 +1,4 @@
-<ng-container *ngIf="(source$ | async) as source">
+<ng-container *ngIf="(source$ | ngrxPush) as source">
   <div *ngIf="!isFailed" class="item-snippet" [class.loading]="isLoading"  [class]="theme" [class.no-hover-effect]="noHoverEffects">
     <ng-container [ngSwitch]="type">
 
@@ -102,7 +102,7 @@
   </div>
 </ng-container>
 
-<ng-container *ngIf="(source$ | async) as source">
+<ng-container *ngIf="(source$ | ngrxPush) as source">
   <div *ngIf="isFailed" class="item-snippet">
     <sm-snippet-error
       [theme]="theme"

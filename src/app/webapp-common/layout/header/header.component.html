@@ -1,4 +1,4 @@
-<div class="header-container" [class.login]="isLogin">
+<div class="header-container" [class.login]="isLogin()">
   <div class="d-flex">
     <sm-breadcrumbs
       class="spacer"
@@ -79,8 +79,13 @@
           <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
         </a>
         @if (tipsService.hasTips()) {
-          <button mat-menu-item (click)="openTip()" data-id="Pro Tips Option">
+          <button mat-menu-item (click)="tipsService.showTipsModal(null, true)" data-id="Pro Tips Option">
             <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
+          </button>
+        }
+        @if (isAdmin() && !environment().communityServer && changesService.hasChanges()) {
+          <button mat-menu-item (click)="changesService.showChangesModal()" data-id="Pro Tips Option">
+            <i class="al-icon sm-md al-ico-bullhorn"></i>Version Notifications
           </button>
         }
         <ng-container *smCheckPermission="'applications'">

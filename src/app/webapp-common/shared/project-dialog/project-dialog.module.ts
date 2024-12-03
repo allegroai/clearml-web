@@ -33,6 +33,8 @@ import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {CreateNewProjectFormComponent} from '@common/shared/project-dialog/create-new-project-form/create-new-project-form.component';
+import {PushPipe} from '@ngrx/component';
+import {EditProjectFormComponent} from '@common/shared/project-dialog/edit-project-form/edit-project-form.component';
 
 @NgModule({
   imports: [
@@ -59,7 +61,9 @@ import {CreateNewProjectFormComponent} from '@common/shared/project-dialog/creat
     ClickStopPropagationDirective,
     ShowTooltipIfEllipsisDirective,
     CreateNewProjectFormComponent,
-    ProjectMoveToFormComponent
+    ProjectMoveToFormComponent,
+    PushPipe,
+    EditProjectFormComponent
   ],
   declarations: [ProjectDialogComponent]
 })

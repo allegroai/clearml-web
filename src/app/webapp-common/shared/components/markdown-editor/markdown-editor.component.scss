@@ -196,6 +196,10 @@
       }
 
       .btn-group {
+        display: inline-flex;
+        vertical-align: middle;
+        gap: 3px;
+
         button {
           display: flex;
           align-items: center;
@@ -203,7 +207,6 @@
           font-size: 16px;
           width: 24px;
           height: 24px;
-          margin: 0 3px;
           border-radius: 2px !important;
           color: $blue-300;
           background-color: $blue-600;

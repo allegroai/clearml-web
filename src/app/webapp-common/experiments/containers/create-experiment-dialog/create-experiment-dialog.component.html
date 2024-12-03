@@ -13,7 +13,7 @@
           @if (codeFormGroup.controls.name.invalid) {
             <mat-error>
             @if (codeFormGroup.controls.name.errors?.minlength) {
-              Name should be more than 2 characters long
+              Name should be at least 3 characters long
             }
             @else if (codeFormGroup.controls.name.errors?.required) {
               Name is required
@@ -119,10 +119,14 @@
               </div>
             }
           </section>
-          <button class="btn btn-icon d-flex justify-content-between align-items-center mt-4" (click)="$event.preventDefault(); addArg()">
-            <i class="al-icon al-ico-plus"></i>
-            <span style="transform: translateY(1px);">Add argument</span>
-          </button>
+          <div>
+            <span class="add-argument" (click)="$event.preventDefault(); addArg()" type="button">
+              <i class="al-icon sm al-ico-plus"></i>
+              <a href="#">
+                Add argument
+              </a>
+            </span>
+          </div>
         </form>
         <div class="buttons">
           <button class="btn btn-outline-neon" matStepperPrevious>BACK</button>
@@ -205,6 +209,7 @@ six"></textarea>
             label="Queue"
             [data]="queues() | filter: queueVal(): 'name'"
             [isRequired]="true"
+            (loadMore)="loadMoreQueues()"
           ></sm-paginated-entity-selector>
         </section>
         <h5>Output</h5>

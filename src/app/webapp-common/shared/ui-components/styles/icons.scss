@@ -31,7 +31,7 @@
   }
 
   &.blue-500 {
-    color: $blue-500;
+    color: $blue-500 !important;
   }
 
   &.blue-600 {
@@ -129,6 +129,11 @@
     width: 64px;
     height: 64px;
     font-size: 64px;
+  }
+  &.xxxl {
+    width: 88px;
+    height: 88px;
+    font-size: 88px;
   }
 }
 
@@ -563,6 +568,30 @@
 
 .i-google {
   @include icon('#{$assets-icons-path}/ico-google.svg');
+}
+
+.i-aws {
+  @include icon('#{$assets-icons-path}/ico-aws.svg');
+}
+
+.i-azure {
+  @include icon('#{$assets-icons-path}/ico-azure.svg');
+}
+
+.i-google-cloud {
+  @include icon('#{$assets-icons-path}/ico-google-cloud-storage.svg');
+}
+
+.i-aws-cloud {
+  @include icon('#{$assets-icons-path}/ico-aws-S3-storage.svg');
+}
+
+.i-azure-cloud {
+  @include icon('#{$assets-icons-path}/ico-azure-blob-storage.svg');
+}
+
+.i-minio {
+  @include icon('#{$assets-icons-path}/logo_minio.svg');
 }
 
 .i-github {

@@ -1,33 +1,29 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
-  Component,
+  Component, computed, effect,
   ElementRef,
   EventEmitter,
-  forwardRef,
-  Input,
-  OnDestroy,
-  Output,
-  ViewChild
+  forwardRef, input,
+  Output, signal, viewChild,
 } from '@angular/core';
-import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/templateFormSectionBase';
-import {FormControl, FormsModule, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
+import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {filter, map, startWith} from 'rxjs/operators';
-import {Observable, fromEvent, Subscription} from 'rxjs';
-import {MatOptionModule, MatOptionSelectionChange} from '@angular/material/core';
+import {fromEvent, switchMap} from 'rxjs';
+import {filter} from 'rxjs/operators';
 import {
-  MatAutocompleteModule,
+  MatAutocomplete,
   MatAutocompleteSelectedEvent,
-  MatAutocompleteTrigger
+  MatAutocompleteTrigger, MatOption
 } from '@angular/material/autocomplete';
-import {MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import {MatChipGrid, MatChipInput, MatChipInputEvent} from '@angular/material/chips';
+import {MatFormField, MatSuffix} from '@angular/material/form-field';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ChipsComponent} from '@common/shared/ui-components/buttons/chips/chips.component';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
-import {isArray} from 'lodash-es';
+import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {MatOptionSelectionChange} from '@angular/material/core';
+import {computedPrevious} from 'ngxtension/computed-previous';
+import {isEqual} from 'lodash-es';
 
 
 export interface IOption {
@@ -47,155 +43,205 @@ export interface IOption {
       multi: true
     }],
   standalone: true,
-  imports: [FormsModule, NgIf, NgFor, AsyncPipe, MatChipsModule, MatOptionModule, MatFormFieldModule, MatAutocompleteModule, ClickStopPropagationDirective, ChipsComponent, LabeledFormFieldDirective, ReactiveFormsModule]
+  imports: [ClickStopPropagationDirective, ChipsComponent, LabeledFormFieldDirective, ReactiveFormsModule, MatChipGrid,
+    MatChipInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatFormField, MatSuffix]
 })
 
-export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBaseDirective implements OnDestroy, AfterViewInit {
-  private _items: { label: string; value: string }[];
-  private _focusIt: boolean;
-  public loading = true;
+export class SelectAutocompleteWithChipsComponent implements ControlValueAccessor {
+
+  onChange: (any) => void;
+  onTouched: () => void;
+
   separatorKeysCodes: number[] = [ENTER, COMMA];
-  filterText = '';
-  isNewName = false;
   public chipCtrl = new FormControl<string | null>(null);
-  public filteredItems$: Observable<{ label: string; value: string }[]>;
-  private keyDownSub: Subscription;
+  protected selected = signal<IOption[]>(null);
+  private prevSelected = computedPrevious(this.selected);
 
-  protected readonly trackByValue = (index: number, option: IOption) => option?.value ?? option;
 
-  @Input() errorMsg: string;
-  @Input() multiple = true;
-  @Input() appearance: 'outline' | 'fill';
-  @Input() name: string;
-  @Input() showSearchIcon = false;
-  @Input() formFieldClass: string;
-  @Output() customOptionAdded = new EventEmitter<MatOptionSelectionChange>();
-  @Input() override disabled = false;
-  @Input() clearable = true;
-  @Input() placeholder = '';
-  @Input() optionAddable = false;
-  @Input() autofocus = false;
+  multiple = input(true);
+  appearance = input<'outline' | 'fill'>('outline');
+  name = input<string>();
+  formFieldClass = input<string>();
+  disabled = input(false);
+  clearable = input(true);
+  placeholder = input('');
+  allowAddingOptions = input(false);
+  autofocus = input(false);
+  items = input<IOption[]>([]);
+  focusIt = input<boolean>();
 
-  @Input() set items(items: { label: string; value: string }[]) {
-    this.loading = false;
-    this._items = Array.isArray(items) ? items : [items];
-    this.chipCtrl.setValue(null);
-    this.disabled ? this.chipCtrl.disable() : this.chipCtrl.enable();
-  }
+  protected autocompleteInput = viewChild<ElementRef<HTMLInputElement>>('autocompleteInput');
+  autocomplete = viewChild(MatAutocompleteTrigger);
 
-  get items() {
-    return this._items || [];
-  }
-
-  @Input() set focusIt(isFocus) {
-    if (isFocus && this.autofocus) {
-      this._focusIt = isFocus;
-      setTimeout(() => this.autocompleteInput.nativeElement.focus(), 50);
+  protected valueChanged = toSignal(this.chipCtrl.valueChanges);
+  protected safeItems = computed(() => this.items() ? Array.isArray(this.items()) ? this.items() : [this.items()] as unknown as IOption[] : []);
+  protected loading = computed(() => !this.items());
+  protected isNewName$ = computed(() => {
+    if (this.valueChanged() && typeof this.valueChanged() !== 'object') {
+      const value = this.valueChanged();
+      const itemsLabels = this.safeItems()?.map(item => item.label) as string[] ?? [];
+      const selectedLabels = this.selected()?.map(item => item.label) as string[] ?? [];
+      return !itemsLabels.includes(value) && !selectedLabels.includes(value);
     } else {
-      this._focusIt = false;
+      return false
     }
-  }
+  });
 
-  get focusIt() {
-    return this._focusIt;
-  }
-
-  @ViewChild('autocompleteInput') autocompleteInput: ElementRef<HTMLInputElement>;
-  @ViewChild(MatAutocompleteTrigger) autocomplete: MatAutocompleteTrigger;
-
-  override set value(val) {
-    super.value = !val || isArray(val) ? val : [val];
-  }
-
-  ngOnDestroy() {
-    this.keyDownSub?.unsubscribe();
-  }
-
-  private _filter(value: string) {
-    this.filterText = value;
-    const currentVal = !this.val || Array.isArray(this.val) ? this.val : [this.val];
-    const currLabels = currentVal?.map(item => item?.label || item) as string[] || [];
-    const itemsLabels = this.items.map(item => item.label) as string[];
-    this.isNewName = !itemsLabels.includes(value);
-    const filterValue = value?.toLowerCase();
-    return  this.items.filter(item =>
-      item.label?.toLowerCase().includes(filterValue) && !currLabels.includes(item.label)
-    );
-  }
-
-  displayFn(item: {label: string} | string): string {
-    return typeof item === 'string' ? item : item?.label;
-  }
-
-  remove(item: IOption) {
-    this.value = this.val.filter(it => it.value !== item.value);
-    this.chipCtrl.setValue(null);
-    this.autocompleteInput.nativeElement.value = '';
-  }
-
-  clear() {
-    this.value = null;
-    this.chipCtrl.setValue(null);
-    this.autocompleteInput.nativeElement.value = '';
-  }
-
-  add(event: MatChipInputEvent) {
-    const value = (event.value || '').trim();
-    if (!this.optionAddable || this.multiple && this.val.find(option => option.value === value)) {
-      return
+  protected filteredItems = computed(() => {
+    const value = this.valueChanged();
+    const currLabels = this.selected()?.map(item => item.label) as string[] || [];
+    if (this.valueChanged() && typeof this.valueChanged() !== 'object') {
+      const filterValue = value?.toLowerCase();
+      return this.safeItems().filter(item =>
+        item.label?.toLowerCase().includes(filterValue) && !currLabels.includes(item.label)
+      );
+    } else {
+      return this.safeItems().filter(item => !currLabels.includes(item.label));
     }
+  });
+  private init = false;
 
-    if (value) {
-      this.value = this.multiple ? this.val.concat([value]) : [value];
-      this.chipCtrl.setValue(null);
-    }
-    event.chipInput!.clear();
-  }
+  constructor() {
+    effect(() => {
+      const selection = this.selected();
+      if (this.init && !isEqual(this.selected(), this.prevSelected())) {
+        if(this.onChange) {
+          this.onChange(selection);
+        }
+        if (this.onTouched) {
+          this.onTouched();
+        }
+      }
+    });
 
-  selected(event: MatAutocompleteSelectedEvent) {
-    const value = event.option.value;
-    this.value = this.multiple ? this.val.concat([value]) : [value];
-    this.chipCtrl.setValue(null);
-    this.autocompleteInput.nativeElement.value = '';
-  }
+    effect(() => {
+      if (this.items()) {
+        this.chipCtrl.setValue(null);
+      }
+    });
 
-  removeLastChip() {
-    if (Array.isArray(this.val) && this.val.length > 0) {
-      this.writeValue(this.val.slice(0, -1));
-    } else if (this.val?.value) {
-      this.writeValue(null);
-      this.filterText = '';
-    }
-  }
+    effect(() => {
+      if (this.disabled()) {
+        this.chipCtrl.disable();
+      } else {
+        this.chipCtrl.enable();
+      }
+    });
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.keyDownSub = fromEvent(this.autocompleteInput.nativeElement, 'keydown').subscribe((keyDown: KeyboardEvent) => {
+    effect(() => {
+      if (this.focusIt() && this.autofocus() && this.autocompleteInput()) {
+        setTimeout(() => this.autocompleteInput().nativeElement.focus(), 50);
+      }
+    });
+
+    toObservable(this.autocompleteInput)
+      .pipe(
+        takeUntilDestroyed(),
+        filter(comp => !!comp?.nativeElement),
+        switchMap(comp => fromEvent(comp.nativeElement, 'keydown'))
+      )
+      .subscribe((keyDown: KeyboardEvent) => {
         if (keyDown.key === 'Backspace' && (keyDown.target as HTMLInputElement).value === '') {
           this.removeLastChip();
         }
 
-        if (this.autocomplete.panelOpen) {
+        if (this.autocomplete().panelOpen) {
           keyDown.stopPropagation();
         }
       });
-
-      this.filteredItems$ = this.chipCtrl.valueChanges
-        .pipe(
-          startWith(''),
-          filter(value => typeof value !== 'object' || value === null),
-          map(value => value ?? ''),
-          map(value => this._filter(value)),
-        );
-    }, 0);
   }
 
-  trackByFn(index, item) {
-    return item?.label ?? item;
+  @Output() customOptionAdded = new EventEmitter<IOption>();
+
+  displayFn(item: { label: string } | string): string {
+    return typeof item === 'string' ? item : item?.label;
   }
 
-  openDropdown () {
-    this.autocomplete.panelOpen ? this.autocomplete.closePanel() : this.autocomplete.openPanel();
+  remove(item: IOption) {
+    this.selected.update(selected => selected.filter(chip => chip.value !== item.value));
+    this.chipCtrl.setValue(null);
+    this.autocompleteInput().nativeElement.value = '';
   }
 
+  clear() {
+    this.chipCtrl.setValue(null);
+    this.selected.set(null);
+    this.autocompleteInput().nativeElement.value = '';
+  }
+
+
+  add(event: MatChipInputEvent) {
+    const value = (event.value || '').trim();
+    const selectedOption = this.selected()?.find(option => option.value === value);
+    if (!this.allowAddingOptions() || this.multiple() && selectedOption) {
+      return;
+    }
+    if (value) {
+      let option = this.safeItems().find(option => option.value === value);
+      if (!option) {
+        option = {value, label: value};
+        this.customOptionAdded.emit(option);
+      }
+      this.selected.update(selected => this.multiple() ? (selected ?? []).concat(option) : [option]);
+      this.chipCtrl.setValue(null);
+    }
+    if (event.chipInput) {
+      event.chipInput!.clear();
+    }
+    this.autocompleteInput().nativeElement.value = '';
+  }
+
+  optionSelected(event: MatAutocompleteSelectedEvent) {
+    const value = event.option.value;
+    // this.value = this.multiple ? this.val.concat([value]) : [value];
+    const option = this.safeItems().find(option => option.value === value);
+    if (option) {
+      this.selected.update(selected => this.multiple() ? (selected ?? []).concat(option) : [option]);
+    }
+    this.chipCtrl.setValue(null);
+    this.autocompleteInput().nativeElement.value = '';
+  }
+
+  removeLastChip() {
+    this.selected.update(selected => selected.slice(0, selected.length - 1));
+  }
+
+  openDropdown() {
+    if (this.autocomplete().panelOpen) {
+      this.autocomplete().closePanel();
+    } else {
+      this.autocomplete().openPanel();
+    }
+  }
+
+  writeValue(val: IOption[] | IOption) {
+    if (val) {
+      this.selected.set(Array.isArray(val) ? val : [val]);
+    }
+    window.setTimeout(() => this.init = true);
+  }
+
+  registerOnChange(fn: () => void) {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void) {
+    this.onTouched = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean) {
+    if (isDisabled) {
+      this.chipCtrl.disable();
+    } else {
+      this.chipCtrl.enable();
+    }
+  }
+
+  addOption($event: MatOptionSelectionChange<string>) {
+    this.add({
+      input: undefined,
+      value: $event.source.value,
+      chipInput: undefined
+    });
+  }
 }

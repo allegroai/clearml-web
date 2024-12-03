@@ -1,0 +1,51 @@
+<mat-drawer-container autosize class="dark-theme">
+  <mat-drawer #drawer [mode]="'over'">
+    <i class="close al-icon al-ico-dialog-x sm-md" (click)="drawer.close()" data-id="closeToggleGraph"></i>
+    <div class="list-container">
+      <sm-selectable-filter-list
+        checkAllIcon="al-ico-show"
+        placeholder="Find plots"
+        [list]="chartsList"
+        [checkedList]="selectedCharts()"
+        [searchTerm]="searchTerm()"
+        theme="dark"
+        (itemSelect)="metricSelected($event)"
+        (hiddenChanged)="selectedMetricListChanged($event)"
+        (searchTermChanged)="searchTermChanged($event)"
+      >
+      </sm-selectable-filter-list>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="overflow-hidden">
+    <div class="header">
+      <button
+        class="btn btn-secondary"
+        (click)="drawer.open()"
+        smTooltip="Toggle Graphs">
+        <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
+      </button>
+      <mat-form-field appearance="outline" class="dark-outline thin time-selector no-bottom">
+        <mat-select [ngModel]="currentTimeFrame()" (ngModelChange)="timeFrameChange($event)" name="time-frame" panelClass="dark-outline">
+          @for (timeFrame of timeFrameOptions; track timeFrame.label) {
+            <mat-option [value]="timeFrame.value">
+              {{ timeFrame.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div #charts class="charts-container">
+    @for (params of chartParamOptions; track params.label) {
+      @if (!hiddenCharts().includes(params.label)) {
+        @defer (on viewport) {
+          <sm-serving-stats class="overflow-hidden" [class]="params.label" [metricType]="params" [currentTimeFrame]="currentTimeFrame()"></sm-serving-stats>
+        } @placeholder {
+          <div style="height: 364px; width: 100%" class="chart-placeholder" [class]="params.label" ></div>
+        }
+      }
+    }
+    </div>
+
+
+  </mat-drawer-content>
+</mat-drawer-container>

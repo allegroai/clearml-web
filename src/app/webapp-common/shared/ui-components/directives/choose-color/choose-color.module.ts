@@ -7,6 +7,7 @@ import {StoreModule} from '@ngrx/store';
 import {colorPreferenceReducer} from './choose-color.reducer';
 
 
+
 export const colorSyncedKeys    = [
   'colorPreferences',
 ];
@@ -25,7 +26,7 @@ const _declarations = [
     CommonModule,
     ColorPickerModule,
     StoreModule.forFeature('colorsPreference', colorPreferenceReducer),
-  ],
+      ],
   exports        : _declarations
 })
 export class ChooseColorModule {

@@ -6,39 +6,78 @@ import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ActivatedRoute} from '@angular/router';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {
+  TasksGetOperationsLogResponseOperations
+} from '~/business-logic/model/tasks/tasksGetOperationsLogResponseOperations';
+
+export enum StepStatusEnum {
+  queued = 'queued',
+  pending = 'pending',
+  skipped = 'skipped',
+  cached = 'cached',
+  executed = 'executed',
+  running = 'running',
+  failed = 'failed',
+  aborted = 'aborted',
+  completed = 'completed'
+}
+
+export interface TreeStep {
+  base_task_id: string,
+  queue: string,
+  parents: string[],
+  executed: string;
+  status: StepStatusEnum;
+  job_type: TaskTypeEnum;
+  job_started: number;
+  job_ended: number;
+  job_code_section: string;
+  job_id: string;
+}
 
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
 
 export const getExperimentInfo = createAction(
   EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_INFO',
-  props<{id: string}>()
+  props<{ id: string; autoRefresh?: boolean }>()
 );
+export const getExperimentOperationLog = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_OPERATION_LOG',
+  props<{ id: string; autoRefresh?: boolean }>()
+);
+
 
 export const resetExperimentInfo = createAction(EXPERIMENTS_INFO_PREFIX + 'RESET_EXPERIMENT_INFO');
 
 export const autoRefreshExperimentInfo = createAction(
   EXPERIMENTS_INFO_PREFIX + 'AUTO_REFRESH_EXPERIMENT_INFO',
-  props<{id: string}>()
+  props<{ id: string }>()
 );
 
 export const setExperiment = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT',
-  props<{experiment: IExperimentInfo}>()
+  props<{ experiment: IExperimentInfo }>()
 );
 
 export const experimentUpdatedSuccessfully = createAction(
   EXPERIMENTS_INFO_PREFIX + 'EXPERIMENT_UPDATED_SUCCESSFULLY',
-  props<{id: string}>()
+  props<{ id: string }>()
 );
 
 export const setExperimentInfoData = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_INFO_DATA',
-  props<{experiment: IExperimentInfo}>()
+  props<{ experiment: IExperimentInfo }>()
+);
+
+export const setExperimentOperationLog = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_OPERATION_LOG',
+  props<{ operationLog: TasksGetOperationsLogResponseOperations[] }>()
 );
 
 export const getExperiment = createAction(
   EXPERIMENTS_INFO_PREFIX + '[set experiment]',
-  props<{ experimentId: string; autoRefresh?: boolean}>()
+  props<{ experimentId: string; autoRefresh?: boolean }>()
 );
 
 export const getExperimentUncommittedChanges = createAction(
@@ -51,21 +90,21 @@ export const setExperimentUncommittedChanges = createAction(
   props<{ diff: string }>()
 );
 
-export const getExperimentArtifacts= createAction(
+export const getExperimentArtifacts = createAction(
   EXPERIMENTS_INFO_PREFIX + '[get artifacts]',
   props<{ experimentId: string; autoRefresh?: boolean }>()
 );
 
-export const downloadArtifacts= createAction(
+export const downloadArtifacts = createAction(
   EXPERIMENTS_INFO_PREFIX + '[download artifacts]',
-  props<{url: string; inMemory?: boolean}>()
+  props<{ url: string; inMemory?: boolean }>()
 );
-export const downloadSuccess= createAction( EXPERIMENTS_INFO_PREFIX + '[download artifacts success]');
-export const downloadFailed= createAction( EXPERIMENTS_INFO_PREFIX + '[download artifacts failed]');
+export const downloadSuccess = createAction(EXPERIMENTS_INFO_PREFIX + '[download artifacts success]');
+export const downloadFailed = createAction(EXPERIMENTS_INFO_PREFIX + '[download artifacts failed]');
 
 export const setExperimentArtifacts = createAction(
   EXPERIMENTS_INFO_PREFIX + '[set artifacts]',
-  props<{model: IExperimentModelInfo; experimentId: string}>()
+  props<{ model: IExperimentModelInfo; experimentId: string }>()
 );
 
 export const updateExperimentInfoData = createAction(
@@ -73,7 +112,11 @@ export const updateExperimentInfoData = createAction(
   props<{ id?: ITableExperiment['id']; changes: Partial<IExperimentInfo> }>()
 );
 export const saveExperimentInputModel = createAction(
-  EXPERIMENTS_INFO_PREFIX + '[save input model]', props<{ modelId: string; modelName: string; route: ActivatedRoute}>());
+  EXPERIMENTS_INFO_PREFIX + '[save input model]', props<{
+    modelId: string;
+    modelName: string;
+    route: ActivatedRoute
+  }>());
 
 export const saveHyperParamsSection = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SAVE_HYPERPARAMS', props<{ hyperparams: ParamsItem[] }>());
@@ -92,7 +135,7 @@ export const setExperimentSaving = createAction(
 
 export const getExperimentConfigurationObj = createAction(
   EXPERIMENTS_INFO_PREFIX + 'GET_CONFIGURATION_OBJ',
-  );
+);
 export const getPipelineConfigurationObj = createAction(
   EXPERIMENTS_INFO_PREFIX + 'GET_PIPELINE_CONFIGURATION_OBJ',
 );
@@ -134,7 +177,7 @@ export const experimentDetailsUpdated = createAction(
 
 export const setExperimentErrors = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_ERRORS',
-  props<{ [key: string]: ExperimentInfoState['errors'] }>()
+  props<Record<string, ExperimentInfoState['errors']>>()
 );
 
 export const activateEdit = createAction(
@@ -146,10 +189,10 @@ export const deactivateEdit = createAction(EXPERIMENTS_INFO_PREFIX + 'DEACTIVATE
 
 export const setExperimentFormErrors = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_FORM_ERRORS',
-  props<{errors: {[key: string]: any}}>()
+  props<{ errors: Record<string, any > }>()
 );
 
 export const navigateToDataset = createAction(
   EXPERIMENTS_INFO_PREFIX + 'Navigate to open dataset',
-  props<{datasetId: string}>()
+  props<{ datasetId: string }>()
 );

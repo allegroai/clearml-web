@@ -1,7 +1,7 @@
 import {MEDIA_VIDEO_EXTENSIONS, MediaContentTypeEnum} from '~/app.constants';
 import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
-import {capitalize, get, last, snakeCase} from 'lodash-es';
+import {capitalize, escape, get, last, snakeCase} from 'lodash-es';
 import {User} from '~/business-logic/model/users/user';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 import {camelCase} from 'lodash-es';
@@ -66,7 +66,7 @@ export const isHtmlOrText = (url: string) => {
     const parsed = new URL(url);
     const ext = last(parsed.pathname.split('.'));
     return ['txt', 'text', 'html', 'htm'].includes(ext);
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -79,10 +79,10 @@ export const createModelLink = (uri, modelId, modelSignedUri) => {
 };
 
 export const allItemsAreSelected = (itemsInView: { id: string }[], selectedItems: { id: string }[]) => {
-  if (itemsInView?.length === 0 || selectedItems.length === 0) {
+  if (itemsInView?.length === 0 || selectedItems?.length === 0) {
     return false;
   } else {
-    const selectedItemsIds = selectedItems.map(item => item.id);
+    const selectedItemsIds = selectedItems?.map(item => item.id);
     return (itemsInView?.every(item => selectedItemsIds.includes(item.id)));
   }
 };
@@ -174,9 +174,9 @@ export function crc32(str, ...rest /* , polynomial = 0x04C11DB7, initialValue = 
 
 export const htmlTextShort = (name: string, limit = 80) => {
   if (name?.length > limit) {
-    return `<span title="${name}">${name.slice(0, limit - 3)}...</span>`;
+    return `<span title="${name}">${escape(name.slice(0, limit - 3))}...</span>`;
   }
-  return name;
+  return escape(name);
 };
 
 export const findRegexRecursively = (object, field: string, regex: RegExp) => {
@@ -224,7 +224,7 @@ export const getScaleFactor = (isMobile = false) => {
       screenHeight = window.screen.height < window.screen.width ? window.screen.height : window.screen.width;
       dimensionRatio = Math.max(60, Math.min(100, Math.round((100 * (screenHeight / 1080) / 10)) * 10));
     }
-  } catch (err) {
+  } catch {
     dimensionRatio = 100;
   }
   dimensionRatio = 10000 / dimensionRatio;

@@ -14,6 +14,6 @@ export class SelectOptionValueToLabelPipe implements PipeTransform {
       return value;
     }
     const option = options.find(option => option.value === value);
-    return option ? option.label : value;
+    return option?.label ?? value;
   }
 }

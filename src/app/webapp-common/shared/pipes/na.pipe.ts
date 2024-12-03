@@ -3,7 +3,7 @@ import {NA} from '../../../app.constants';
 
 @Pipe({
   name: 'NA',
-  standalone: true
+  standalone: true,
 })
 export class NAPipe implements PipeTransform {
 

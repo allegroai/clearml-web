@@ -2,7 +2,7 @@ import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import * as actions from '../actions/common-experiments-view.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {createCompareMetricColumn, TableFilter} from '../../shared/utils/tableParamEncode';
+import {createCompareMetricColumn, decodeURIComponentSafe, TableFilter} from '../../shared/utils/tableParamEncode';
 import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
@@ -14,24 +14,25 @@ import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 import {cloneExperimentClicked} from '@common/experiments/actions/common-experiments-menu.actions';
+import {HIDDEN_PLOTS_BY_DEFAULT} from '@common/experiments-compare/experiments-compare.constants';
 
 
 export interface ExperimentsViewState {
   tableCols: ISmCol[];
-  colsOrder: { [Project: string]: string[] };
+  colsOrder: Record<string, string[]>;
   tableFilters: any;
-  tempFilters: { [columnId: string]: FilterMetadata };
-  projectColumnFilters: { [projectId: string]: { [columnId: string]: FilterMetadata } };
-  projectColumnsSortOrder: { [projectId: string]: SortMeta[] };
-  projectColumnsWidth: { [projectId: string]: { [colId: string]: number } };
+  tempFilters: Record<string, FilterMetadata>;
+  projectColumnFilters: Record<string, Record<string, FilterMetadata>>;
+  projectColumnsSortOrder: Record<string, SortMeta[]>;
+  projectColumnsWidth: Record<string, Record<string, number>>;
   metricsCols: ISmCol[];
-  hiddenTableCols: { [colName: string]: boolean };
-  hiddenProjectTableCols: { [projectId: string]: { [colName: string]: boolean | undefined } };
-  experiments: Array<ITableExperiment>;
+  hiddenTableCols: Record<string, boolean>;
+  hiddenProjectTableCols: Record<string, Record<string, boolean | undefined>>;
+  experiments: ITableExperiment[];
   refreshList: boolean;
   noMoreExperiment: boolean;
   selectedExperiment: IExperimentInfo;
-  selectedExperiments: Array<ISelectedExperiment>;
+  selectedExperiments: ISelectedExperiment[];
   selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   selectedExperimentSource: string;
   experimentToken: string;
@@ -39,11 +40,11 @@ export interface ExperimentsViewState {
   hyperParamsFiltersPage: number;
   globalFilter: SearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
-  metricVariants: Array<MetricVariantResult>;
-  metricVariantsPlots: Array<MetricVariantResult>;
-  compareSelectedMetrics: { [projectid: string]: { metrics: Array<Partial<ISmCol>>; lastModified: number } };
-  compareSelectedMetricsPlots: { [projectid: string]: { metrics: Array<Partial<ISmCol>>; lastModified: number } };
-  hyperParams: Array<any>;
+  metricVariants: MetricVariantResult[];
+  metricVariantsPlots: MetricVariantResult[];
+  compareSelectedMetrics: Record<string, { metrics: Partial<ISmCol>[]; lastModified: number }>;
+  compareSelectedMetricsPlots: Record<string, { metrics: Partial<ISmCol>[]; lastModified: number }>;
+  hyperParams: {name: string; section: string}[];
   hyperParamsOptions: Record<ISmCol['id'], string[]>;
   metricsLoading: boolean;
   projectTags: string[];
@@ -60,7 +61,7 @@ export interface ExperimentsViewState {
 export const experimentsViewInitialState: ExperimentsViewState = {
   tableCols: [],
   colsOrder: {},
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   hiddenTableCols: {comment: true, active_duration: true, id: true},
   hiddenProjectTableCols: {},
   experiments: null,
@@ -112,12 +113,12 @@ const setExperimentsAndUpdateSelectedExperiments = (state: ExperimentsViewState,
 export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     experimentsViewInitialState,
     on(actions.setTableCols, (state, action): ExperimentsViewState => ({...state, tableCols: action.cols})),
-    on(actions.resetExperiments, (state): ExperimentsViewState => ({
+    on(actions.resetExperiments, (state, action): ExperimentsViewState => ({
       ...state,
       experiments: experimentsViewInitialState.experiments,
       selectedExperiment: experimentsViewInitialState.selectedExperiment,
       metricVariants: experimentsViewInitialState.metricVariants,
-      metricVariantsPlots: experimentsViewInitialState.metricVariantsPlots,
+      ...(!action.skipResetMetric && {metricVariantsPlots: experimentsViewInitialState.metricVariantsPlots}),
       showAllSelectedIsActive: experimentsViewInitialState.showAllSelectedIsActive,
       // tableMode: experimentsViewInitialState.tableMode
     })),
@@ -249,7 +250,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
           ...action.filters.reduce((obj, filter: TableFilter) => {
             obj[filter.col] = {value: filter.value, matchMode: filter.filterMatchMode};
             return obj;
-          }, {} as { [columnId: string]: { value: string; matchMode: string } })
+          }, {} as Record<string, { value: string; matchMode: string }>)
         }
       }
     })),
@@ -258,7 +259,17 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
         ...state,
         metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]
       })),
-    on(actions.addColumn, (state, action): ExperimentsViewState => ({...state, metricsCols: [...state.metricsCols, action.col]})),
+    on(actions.addColumn, (state, action): ExperimentsViewState => {
+      const hiddenColumns = {...state.hiddenProjectTableCols[action.col.projectId]};
+      delete hiddenColumns[action.col.id];
+      return {
+        ...state,
+        metricsCols: [...state.metricsCols, action.col],
+        hiddenProjectTableCols: {
+          ...state.hiddenProjectTableCols,
+          [action.col.projectId]: hiddenColumns
+        }
+      }}),
     on(actions.addSelectedMetric, (state, action): ExperimentsViewState => {
       const selectedMetricsKey = state.tableCompareView === 'scalars' ? 'compareSelectedMetrics' : 'compareSelectedMetricsPlots';
       return {
@@ -273,19 +284,20 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
       }
     }),
     on(actions.removeCol, (state, action): ExperimentsViewState => {
+      const columnId = decodeURIComponentSafe(action.id);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const {[action.id]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
+      const {[columnId]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
       return {
         ...state,
-        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.id && tableCol.projectId === action.projectId))],
+        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === columnId && tableCol.projectId === action.projectId))],
         projectColumnsSortOrder: {
           ...state.projectColumnsSortOrder,
-          [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field !== action.id) || null
+          [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field !== columnId) || null
         },
         projectColumnsWidth: {...state.projectColumnsWidth, [action.projectId]: remainingColsWidth},
         colsOrder: {
           ...state.colsOrder,
-          [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null
+          [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== columnId) : null
         }
       };
     }),
@@ -328,7 +340,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
             ...state[selectedMetricsKey],
             [action.projectId]: {
               lastModified: state[selectedMetricsKey][action.projectId]?.lastModified ?? (new Date()).getTime(),
-              metrics: action.metrics.slice(0, 5).map(metric => createCompareMetricColumn(metric))
+              metrics: action.metrics.slice(0, 8).map(metric => createCompareMetricColumn(metric, HIDDEN_PLOTS_BY_DEFAULT))
             }
           }
         }),

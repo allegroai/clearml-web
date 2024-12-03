@@ -5,7 +5,7 @@
     [style.--cardWidth]="cardWidth + 'px'"
     [style.--gridGap]="gridGap + 'px'"
     [style.--padding]="snippetsMode ? padding + 'px' : null"
-    *cdkVirtualFor="let row of itemRows$ | async; let rowIndex = index"
+    *cdkVirtualFor="let row of itemRows$ | ngrxPush; let rowIndex = index"
     >
     @for (item of row; track trackFn(item) + cardHeight) {
       <ng-container *ngTemplateOutlet="cardTemplate; context: {$implicit: item, index: $index + rowIndex * cardsInRow}"></ng-container>
@@ -14,7 +14,7 @@
       <div></div>
     }
   </div>
-  @if (showLoadMoreButton && (itemRows$ | async)?.length) {
+  @if (showLoadMoreButton && (itemRows$ | ngrxPush)?.length) {
     <div class="load-more"  (smScrollEnd)="autoLoadMore && !loading && autoLoad()">
       <button (click)="loadMoreClicked.emit()" class="btn btn-cml-primary load-more-btn">
         @if (loading) {

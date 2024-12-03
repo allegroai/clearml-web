@@ -2,9 +2,9 @@
                     (xClicked)="closeDialog(undefined)" [closeOnX]="false"
                     [iconClass]="iconClass" [iconData]="iconData">
   <div *ngIf="reference" class="reference">{{reference}}</div>
-  <div *ngIf="body; else templateBody" class="body" [class.text-center]="this.centerText" [innerHTML]="body | safe: 'html'"></div>
+  <div *ngIf="body; else templateBody" class="body" [class.text-center]="centerText" [innerHTML]="body | purify"></div>
   <ng-template #templateBody>
-    <ng-container *ngTemplateOutlet="this.template"></ng-container>
+    <ng-container *ngTemplateOutlet="template; context: templateContext"></ng-container>
   </ng-template>
   <ng-content></ng-content>
 

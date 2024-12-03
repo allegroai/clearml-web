@@ -17,7 +17,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl, setS3Credentials} from '@common/core/actions/common-auth.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {_mergeVariants, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareGraph, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
+import {_mergeVariants, allowedMergedTypes, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareGraph, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
@@ -26,7 +26,6 @@ import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
 import {setCurrentDebugImage} from '@common/shared/debug-sample/debug-sample.actions';
 import {isFileserverUrl} from '~/shared/utils/url';
-import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {
   ExtraTask,
   ParallelCoordinatesGraphComponent
@@ -60,7 +59,7 @@ export interface SelectedMetricVariant extends MetricVariantResult {
     SingleGraphModule,
     DebugSampleModule,
     ParallelCoordinatesGraphComponent,
-    SingleValueSummaryTableComponent
+    SingleValueSummaryTableComponent,
   ]
 })
 export class AppComponent implements OnInit {
@@ -73,7 +72,7 @@ export class AppComponent implements OnInit {
   public frame: DebugSample;
   public plotLoaded: boolean;
   private environment: Environment;
-  public activated: boolean = false;
+  public activated = false;
   private searchParams: URLSearchParams;
   private otherSearchParams: URLSearchParams;
   public type: WidgetTypes;
@@ -82,7 +81,7 @@ export class AppComponent implements OnInit {
   protected signIsNeeded$ = this.store.selectSignal(appFeature.selectSignIsNeeded);
   protected noPermissions$ = this.store.selectSignal(appFeature.selectNoPermissions);
   public isDarkTheme: boolean;
-  public externalTool: boolean = false;
+  public externalTool = false;
   public parcoordsData: { experiments: ExtraTask[]; params: string[]; metrics: SelectedMetricVariant[] };
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
   public singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
@@ -176,12 +175,12 @@ export class AppComponent implements OnInit {
           if (plotParsed.data[0] && !plotParsed.data[0].name) {
             plotParsed.data[0].name = plot.variant;
           }
-          if (groupedPlots[metric] && ['scatter', 'bar'].includes(plotParsed?.data?.[0]?.type) && previousPlotIsMergable) {
+          if (groupedPlots[metric] && allowedMergedTypes.includes(plotParsed?.data?.[0]?.type) && previousPlotIsMergable) {
             groupedPlots[metric].plotParsed = {...groupedPlots[metric].plotParsed, data: _mergeVariants(groupedPlots[metric].plotParsed.data, plotParsed.data)};
           } else {
             groupedPlots[metric] = {...plot, plotParsed};
           }
-          previousPlotIsMergable = index > -1 || (index === -1 && ['scatter', 'bar'].includes(plotParsed.data[0]?.type));
+          previousPlotIsMergable = index > -1 || (index === -1 && allowedMergedTypes.includes(plotParsed.data[0]?.type));
         });
       });
       return groupedPlots;
@@ -295,8 +294,9 @@ export class AppComponent implements OnInit {
         if (isFileserverUrl(sample.url) && this.searchParams.get('company')) {
           url.searchParams.append('tenant', this.searchParams.get('company'));
         }
-        this.store.dispatch(getSignedUrl({url: url.toString()}));
-        this.store.select(selectSignedUrl(url.toString()))
+        const urlDecoded = decodeURI(url.toString()); // decodeURI and not decodeURIComponent
+        this.store.dispatch(getSignedUrl({url: urlDecoded}));
+        this.store.select(selectSignedUrl(urlDecoded))
           .pipe(
             filter(signed => !!signed?.signed),
             map(({signed: signedUrl}) => signedUrl),

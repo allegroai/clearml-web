@@ -2,10 +2,7 @@ import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angu
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
-import {
-  selectIsExperimentEditable,
-  selectShowExtraDataSpinner
-} from '~/features/experiments/reducers';
+import {selectIsExperimentEditable, selectShowExtraDataSpinner} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
 import {
   selectExperimentExecutionInfoData,
@@ -30,6 +27,9 @@ import {
 import {
   CommonExperimentConverterService
 } from '@common/experiments/shared/services/common-experiment-converter.service';
+import {
+  ClearInstalledPackagesDialogComponent
+} from '@common/experiments/dumb/clear-installed-packges-dialog/clear-installed-packages-dialog.component';
 
 @Component({
   selector: 'sm-experiment-info-execution',
@@ -46,11 +46,11 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   private formDataSubscription: Subscription;
   public minimized = this.route.snapshot.routeConfig?.data?.minimized ?? false;
   public executionInfo$ = this.store.select(selectExperimentExecutionInfoData);
-  public showExtraDataSpinner$ = this.store.select(selectShowExtraDataSpinner);
-  public editable$ = this.store.select(selectIsExperimentEditable);
-  public isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
-  public saving$ = this.store.select(selectIsExperimentSaving);
-  public backdropActive$ = this.store.select(selectBackdropActive);
+  public showExtraDataSpinner = this.store.selectSignal(selectShowExtraDataSpinner);
+  public editable = this.store.selectSignal(selectIsExperimentEditable);
+  public isInDev = this.store.selectSignal(selectIsSelectedExperimentInDev);
+  public saving = this.store.selectSignal(selectIsExperimentSaving);
+  public backdropActive = this.store.selectSignal(selectBackdropActive);
   public redactedArguments$ = this.store.select(selectHideRedactedArguments);
   public formData: IExecutionForm;
   links = ['details', 'uncommitted changes', 'installed packages', 'container'];
@@ -74,10 +74,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   @ViewChild('containerImage') containerImage: ElementRef;
   @ViewChild('containerArguments') containerArguments: ElementRef;
-
-  constructor() {
-
-  }
+  resetRequirementToolTip: string;
 
   ngOnInit() {
     this.store.dispatch(commonInfoActions.setExperimentFormErrors({errors: null}));
@@ -88,13 +85,14 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         this.requirementsOptions = Object.keys(this.requirementLabels)
           .filter(key => Object.hasOwn(formData?.requirements ?? {}, key))
           .map(key => ({
-          value: key,
-          label: this.requirementLabels[key]
-        } as IOption));
+            value: key,
+            label: this.requirementLabels[key]
+          } as IOption));
         if (!Object.hasOwn(formData?.requirements ?? {}, this.selectedRequirement)) {
           this.selectedRequirement = 'pip';
         }
         this.editableRequirements = this.selectedRequirement === 'pip';
+        this.resetRequirementToolTip = `Set packages to originally recorded values (${formData.requirements?.orgPip ? 'original-pip' : ''}${formData.requirements?.orgPip && formData.requirements?.orgConda ? ' / ' : ''}${formData.requirements?.orgConda ? 'original-conda' : ''})`;
       }
     });
   }
@@ -104,15 +102,14 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   }
 
   saveSourceData() {
-    const source = this.sourceCode.sourceCodeForm.form.value as IExecutionForm['source'];
+    const source = this.sourceCode.sourceCodeForm.value as IExecutionForm['source'];
     this.store.dispatch(commonInfoActions.saveExperimentSection({
       script: {
-        /* eslint-disable @typescript-eslint/naming-convention */
         repository: source.repository,
         entry_point: source.entry_point,
         working_dir: source.working_dir,
         binary: source.binary?.trim(),
-        /* eslint-enable @typescript-eslint/naming-convention */
+
         ...this.convertScriptType(source)
       }
     }));
@@ -126,7 +123,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
     const outputDestination = this.outputDestination.nativeElement.value;
 
     // why BE can't get output.destination as task.edit?
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     this.store.dispatch(commonInfoActions.saveExperimentSection({output_dest: outputDestination} as any));
   }
 
@@ -163,8 +160,8 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         filter(res => res)
       )
       .subscribe(() => {
-          this.activateEditChanged('diff');
-          this.store.dispatch(commonInfoActions.saveExperimentSection({script: {diff: ''}}));
+        this.activateEditChanged('diff');
+        this.store.dispatch(commonInfoActions.saveExperimentSection({script: {diff: ''}}));
       });
   }
 
@@ -178,11 +175,11 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       .subscribe(setupShellScript => {
         if (this.formData.container.setup_shell_script !== setupShellScript) {
           smEditableSection.saveSection();
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           this.store.dispatch(commonInfoActions.saveExperimentSection({
             container: {
               ...this.formData.container,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               setup_shell_script: setupShellScript
             }
           }));
@@ -235,22 +232,62 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   }
 
   clearInstalledPackages() {
-    this.clearConfirmDialog('installed packages').pipe(take(1)).subscribe((confirmed) => {
+    this.dialog.open(ClearInstalledPackagesDialogComponent,
+      {data: {showReset: (this.editableRequirements && (this.formData.requirements?.orgPip || this.formData.requirements?.orgConda))}})
+      .afterClosed().pipe(take(1)).subscribe((confirmed) => {
       if (confirmed) {
         this.activateEditChanged('requirements');
-        this.store.dispatch(commonInfoActions.saveExperimentSection({script: {requirements: {}}}));
+        if (confirmed.selectedOption === 'reset') {
+          this.store.dispatch(commonInfoActions.saveExperimentSection({
+            script: {
+              requirements: {
+                ...this.formData.requirements,
+                ...((this.formData.requirements?.pip && this.formData.requirements.orgPip) && {pip: this.formData.requirements.orgPip}),
+                ...((this.formData.requirements?.conda && this.formData.requirements.orgConda) && {pip: this.formData.requirements.orgConda}),
+              }
+            }
+          }));
+        } else {
+          this.store.dispatch(commonInfoActions.saveExperimentSection({script: {requirements: confirmed?.selectedOption === 'dontInstall' ? {[this.selectedRequirement]: ''} : {}}}));
+        }
       }
     });
+  }
+
+  resetInstalledPackages() {
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: `Reset installed packages`,
+        body: `Are you sure you want to reset Installed Packages?<br>This will set the packages to originally recorded values.`,
+        yes: 'Reset',
+        no: 'Keep',
+        iconClass: 'al-icon al-ico-reset al-color blue-300',
+      }
+    }).afterClosed().pipe(take(1)).subscribe((confirmed) => {
+      if (confirmed) {
+        this.activateEditChanged('requirements');
+        this.store.dispatch(commonInfoActions.saveExperimentSection({
+          script: {
+            requirements: {
+              ...this.formData.requirements,
+              ...((this.formData.requirements?.pip && this.formData.requirements.orgPip) && {pip: this.formData.requirements.orgPip}),
+              ...((this.formData.requirements?.conda && this.formData.requirements.orgConda) && {pip: this.formData.requirements.orgConda}),
+            }
+          }
+        }));
+      }
+    });
+
   }
 
   clearSetupShellScript() {
     this.clearConfirmDialog('setup shell script').pipe(take(1)).subscribe((confirmed) => {
       if (confirmed) {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         this.store.dispatch(commonInfoActions.saveExperimentSection({
           container: {
             ...this.formData.container,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             setup_shell_script: ''
           }
         }));
@@ -271,7 +308,12 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   }
 
-  private openEditJsonDialog(data: { textData: string; readOnly?: boolean; title?: string; format?: string }, editableSectionComponent?: EditableSectionComponent): MatDialogRef<EditJsonComponent> {
+  private openEditJsonDialog(data: {
+    textData: string;
+    readOnly?: boolean;
+    title?: string;
+    format?: string
+  }, editableSectionComponent?: EditableSectionComponent): MatDialogRef<EditJsonComponent> {
     const editJsonComponent = this.dialog.open(EditJsonComponent, {
       data
     });

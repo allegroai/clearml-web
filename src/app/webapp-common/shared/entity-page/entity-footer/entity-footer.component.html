@@ -9,7 +9,7 @@
       <ng-container *ngIf="!footerItem.isTag; else tags">
         <span
           *ngIf="!footerItemState?.preventCurrentItem"
-          [ngClass]="footerItemState?.wrapperClass"
+          [class]="footerItemState?.wrapperClass"
 
           [smTooltip]="footerItem.disable || footerItemState.disable
                                   ? footerItem.disableDescription || footerItemState.disableDescription
@@ -17,7 +17,7 @@
         >
           <button
             class="compare-button-container"
-            [ngClass]="footerItem.class || footerItemState?.class"
+            [class]="footerItem.class || footerItemState?.class"
             (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
             [class.disabled]="footerItemState?.disable ? footerItemState?.disable : null"
           >

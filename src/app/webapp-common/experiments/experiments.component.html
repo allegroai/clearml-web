@@ -1,19 +1,19 @@
-<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
-  [tableCols]="(tableMode$ | async) === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | async) : (compareSelectedMetricsScalars$ | async)) : (filteredTableCols$| async)"
-  [isArchived]="isArchived$ | async"
+  [tableCols]="(tableMode$ | ngrxPush) === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
+  [isArchived]="isArchived$ | ngrxPush"
   [metricVariants]="metricsVariants$()"
-  [hyperParams]="(tableMode$ | async) === 'compare' ? null : hyperParams$ | async"
+  [hyperParams]="(tableMode$ | ngrxPush) === 'compare' ? null : hyperParams$ | ngrxPush"
   [minimizedView]="minimizedView"
-  [isMetricsLoading]="metricLoading$ | async"
-  [tableFilters]="tableFilters$ | async"
-  [showNavbarLinks]="(isPipeline$ | async) === false"
-  [tableMode]="tableMode$ | async"
-  [showCompareScalarSettings]="showCompareScalarSettings$ | async"
+  [isMetricsLoading]="metricLoading$ | ngrxPush"
+  [tableFilters]="tableFilters$ | ngrxPush"
+  [showNavbarLinks]="(isPipeline$ | ngrxPush) === false"
+  [tableMode]="tableMode$ | ngrxPush"
+  [showCompareScalarSettings]="showCompareScalarSettings$ | ngrxPush"
   [compareView]="tableCompareView$()"
-  [rippleEffect]="tableModeAwareness$ | async"
+  [rippleEffect]="tableModeAwareness$ | ngrxPush"
   [addButtonTemplate]="addButton"
-  [noData]="!((experiments$ | async)?.length > 0)"
+  [noData]="!((experiments$ | ngrxPush)?.length > 0)"
   [entityType]="entityType"
   (isArchivedChanged)="archivedChanged($event)"
   (selectedTableColsChanged)="getTableModeFromURL() === 'compare' ?  toggleSelectedMetricHidden($event) : selectedTableColsChanged($event)"
@@ -34,7 +34,7 @@
   @if (projectId$() !== '*') {
     <button
       class="btn btn-cml-primary d-flex justify-content-between align-items-center me-3"
-      [disabled]="isArchived$ | async"
+      [disabled]="isArchived$ | ngrxPush"
       data-id="New Experiment"
       (click)="newExperiment()"
       [smTooltip]="isSmallScreen ? 'NEW EXPERIMENT' : ''"
@@ -45,7 +45,7 @@
   }
 </ng-template>
 <div class="experiment-body"
-     [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
+     [class.footer-visible]="((selectedExperiments$ | ngrxPush) && (selectedExperiments$ | ngrxPush)?.length > 1) || (showAllSelectedIsActive$ |ngrxPush)">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -55,8 +55,8 @@
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
             (transitionEnd)="experimentsTable.table?.resize(100); experimentsTable.afterTableInit()"
-            [class.opened]="minimizedView && (selectSplitSize$ | async) <= 1"
-            [class.closed]="minimizedView && (selectSplitSize$ | async) >= 99"
+            [class.opened]="minimizedView && (selectSplitSize$ | ngrxPush) <= 1"
+            [class.closed]="minimizedView && (selectSplitSize$ | ngrxPush) >= 99"
   >
     <as-split-area
       [size]="100 - (splitInitialSize)"
@@ -68,32 +68,32 @@
         #experimentsTable
         class="align-self-stretch"
         selectionMode="single"
-        [projects]="(projectsOptions$ | async)"
+        [projects]="(projectsOptions$ | ngrxPush)"
         [initialColumns]="tableCols"
-        [colsOrder]="(tableColsOrder$ | async)"
-        [tableCols]="tableCols$| async"
-        [experiments]="experiments$ | async"
-        [users]="users$ | async"
-        [hyperParamsOptions]="hyperParamsOptions$ | async"
-        [activeParentsFilter]="activeParentsFilter$ | async"
-        [parents]="parents$ | async"
-        [experimentTypes]="types$ | async"
-        [tags]="tags$ | async"
-        [systemTags]="systemTags$ | async"
-        [tableSortFields]="(tableSortFields$ | async)"
-        [tableSortOrder]="(tableSortOrder$ | async)"
-        [tableFilters]="(tableFilters$ | async)"
-        [selectedExperiments]="selectedExperiments$ | async"
-        [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | async"
-        [selectedExperiment]="selectedTableExperiment$ |async"
+        [colsOrder]="(tableColsOrder$ | ngrxPush)"
+        [tableCols]="tableCols$| ngrxPush"
+        [experiments]="experiments$ | ngrxPush"
+        [users]="users$ | ngrxPush"
+        [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
+        [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
+        [parents]="parents$ | ngrxPush"
+        [experimentTypes]="types$ | ngrxPush"
+        [tags]="tags$ | ngrxPush"
+        [systemTags]="systemTags$ | ngrxPush"
+        [tableSortFields]="(tableSortFields$ | ngrxPush)"
+        [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
+        [selectedExperiments]="selectedExperiments$ | ngrxPush"
+        [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
+        [selectedExperiment]="selectedTableExperiment$ |ngrxPush"
         [minimizedView]="minimizedView"
-        [noMoreExperiments]="noMoreExperiments$ | async"
-        [split]="selectSplitSize$ | async"
+        [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
+        [split]="selectSplitSize$ | ngrxPush"
         [contextMenuTemplate]="contextMenuExtendedTemplate"
         [contextMenuActive]="contextMenuActive"
         [entityType]="entityType"
-        [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | async"
-        [cardsCollapsed]="cardsCollapsed$ | async"
+        [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | ngrxPush"
+        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
         [cardHeight]="116"
         (experimentSelectionChanged)="getTableModeFromURL() !== 'compare' && experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
@@ -105,16 +105,17 @@
         (loadMoreExperiments)="getNextExperiments()"
         (columnsReordered)="columnsReordered($event)"
         (columnResized)="columnResized($event)"
-        (openContextMenu)="onContextMenuOpen($event)"
+        (contextMenu)="onContextMenuOpen($event)"
         (clearAllFilters)="clearTableFiltersHandler($event)"
         (cardsCollapsedChanged)="cardsCollapsedToggle()"
+        (closePanel)="closePanel()"
       >
       </sm-experiments-table>
     </as-split-area>
     <as-split-area
       style="display: flex; flex-direction: column;"
       [size]="splitInitialSize"
-      [class.light-theme]="(isPipeline$ | async) === false"
+      [class.light-theme]="(isPipeline$ | ngrxPush) === false"
       [class.info-disabled]="infoDisabled"
       [visible]="minimizedView" [order]="2"
     >
@@ -124,7 +125,7 @@
 </div>
 
 <sm-entity-footer
-  [footerState]="footerState$ | async"
+  [footerState]="footerState$ | ngrxPush"
   [footerItems]="footerItems"
   (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'experiments')"
@@ -132,16 +133,15 @@
 
 <ng-template #contextMenuExtendedTemplate let-contextExperiment>
   <sm-experiment-menu-extended
-    #contextMenuExtended
     [experiment]="contextExperiment"
-    [selectedExperiment]="selectedExperiment$ | async"
-    [selectedExperiments]="singleRowContext ? (selectedExperiment$ | async) ? [(selectedExperiment$ | async)] : undefined : selectedExperiments"
+    [selectedExperiment]="selectedExperiment$ | ngrxPush"
+    [selectedExperiments]="singleRowContext ? (selectedExperiment$ | ngrxPush) ? [(selectedExperiment$ | ngrxPush)] : undefined : selectedExperiments"
     [selectedDisableAvailableIsMultiple]="!singleRowContext"
-    [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable((selectedExperiment$ | async) || contextExperiment ) : (selectedExperimentsDisableAvailable$ | async)"
+    [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable((selectedExperiment$ | ngrxPush) || contextExperiment ) : (selectedExperimentsDisableAvailable$ | ngrxPush)"
     [numSelected]="singleRowContext ? 1 : selectedExperiments.length"
-    [tagsFilterByProject]="tagsFilterByProject$ | async"
-    [projectTags]="tags$ | async"
-    [companyTags]="companyTags$ | async"
+    [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+    [projectTags]="tags$ | ngrxPush"
+    [companyTags]="companyTags$ | ngrxPush"
     [activateFromMenuButton]="false"
     [useCurrentEntity]="singleRowContext"
     [minimizedView]="true"

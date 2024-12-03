@@ -1,11 +1,11 @@
 <div class="sm-card-list-layout projects"
-     [class.in-empty-state]="!(((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching)">
+     [class.in-empty-state]="!(((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush))) || searching)">
   <sm-projects-header
     (orderByChanged)="orderByChanged($event)"
-    [sortByField]="projectsOrderBy$ | async"
-    [sortOrder]="projectsSortOrder$ | async"
+    [sortByField]="projectsOrderBy$ | ngrxPush"
+    [sortOrder]="projectsSortOrder$ | ngrxPush"
     [enableTagsFilter]="true"
-    [tags]="projectsTags$ | async"
+    [tags]="projectsTags$ | ngrxPush"
   >
     <sm-button-toggle
       left-items
@@ -26,13 +26,13 @@
     </div>
   </sm-projects-header>
   <ng-container
-    *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching; else emptyState">
+    *ngIf="((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush))) || searching; else emptyState">
     <sm-pipeline-card
-      *ngFor="let project of projectsList$ | async; trackBy: trackById ;let last=last"
+      *ngFor="let project of projectsList$ | ngrxPush; trackBy: trackById ;let last=last"
       [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
       [hideProjectPathIcon]="!!projectId"
       [project]="project"
-      [allTags]="projectsTags$ | async"
+      [allTags]="projectsTags$ | ngrxPush"
       (projectCardClicked)="projectCardClicked($event)"
       (projectNameChanged)="projectNameChanged({id: project.id, name: $event})"
       (addTag)="addTag(project, $event)"
@@ -41,8 +41,12 @@
     ></sm-pipeline-card>
   </ng-container>
 
-  <div class="load-more" *ngIf="(noMoreProjects$ | async) === false && (projectsList$ | async)?.length > 0">
-    <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn" data-id="Load More Button">LOAD MORE</button>
+  <div class="load-more" *ngIf="(noMoreProjects$ | ngrxPush) === false && (projectsList$ | ngrxPush)?.length > 0">
+    <sm-dots-load-more
+      [loading]="loading"
+      (loadMore)="loadMore()"
+      class="mx-auto my-2"
+    ></sm-dots-load-more>
   </div>
 </div>
 <ng-template #emptyState>

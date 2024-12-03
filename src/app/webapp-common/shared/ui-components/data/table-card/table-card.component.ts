@@ -26,6 +26,7 @@ export class TableCardComponent {
 
   @Input() selected;
   @Input() checked: boolean;
+  @Input() noSelection = false;
   @Input() tagsTemplate: TemplateRef<any>;
   @Input() compactColDataTemplate: TemplateRef<any>;
 

@@ -1,26 +1,31 @@
-<div
-  *ngIf="label"
-  class="chips"
-  [style.max-width]="maxWidth"
-  (click)="$event.stopPropagation()"
-  (mousedown)="$event.stopPropagation()"
->
-  <span class="label"
-        data-id="label"
-        [style.color]="color"
-        [style.background]="backgroundColor">
-    <span *ngIf="!colorIsForced" class="dot-container">
-      <span #dot class="dot pallete-cursor"
+@if (label) {
+  <div
+    class="chips"
+    [style.max-width]="maxWidth"
+    (click)="$event.stopPropagation()"
+    (mousedown)="$event.stopPropagation()"
+    >
+    <span class="label"
+      data-id="label"
+      [style.color]="color"
+      [style.background]="backgroundColor">
+      @if (!colorIsForced) {
+        <span class="dot-container">
+          <span #dot class="dot pallete-cursor"
             data-id="colorDotButton"
             [style.background-color]="color"
             [colorButtonRef]="dot"
             [smChooseColor]="color"
             [stringToColor]="label">
-      </span>
+          </span>
+        </span>
+      }
+      <span [smTooltip]="label" smShowTooltipIfEllipsis class="label-text ellipsis" data-id="labelName">{{label}}</span>
+      @if (allowRemove) {
+        <span class="pointer" (mousedown)="$event.stopPropagation(); $event.preventDefault()" (click)="remove.emit($event); $event.stopPropagation()">
+          <i class="al-icon al-ico-dialog-x xs pointer" data-id="annotation cross button" ></i>
+        </span>
+      }
     </span>
-    <span smTooltip="label.length > 12 ? label : ''" class="label-text ellipsis" data-id="labelName">{{label}}</span>
-    <span class="pointer" *ngIf="allowRemove" (mousedown)="$event.stopPropagation(); $event.preventDefault()" (click)="remove.emit($event); $event.stopPropagation()">
-      <i class="al-icon al-ico-dialog-x xs pointer" data-id="annotation cross button" ></i>
-    </span>
-  </span>
-</div>
+  </div>
+}

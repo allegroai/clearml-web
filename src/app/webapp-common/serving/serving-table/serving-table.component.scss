@@ -1,0 +1,30 @@
+@import "variables";
+@import "../../../layout/layout.scss";
+
+:host {
+  sm-table {
+    display: block;
+    height: 100%;
+  }
+
+  .table-container {
+    height: 100%;
+    width: 100%;
+  }
+
+  sm-table-card-filter-template {
+    margin-left: 1em;
+  }
+}
+
+.model-name {
+  color: $blue-250;
+  font-weight: normal;
+}
+
+.center-message {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}

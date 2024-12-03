@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, input, output, viewChild } from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ClipboardModule} from 'ngx-clipboard';
@@ -16,12 +16,13 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   ]
 })
 export class IdBadgeComponent {
-  @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
-  @Input() id: string;
-  @Input() short = false;
-  @Output() copied = new EventEmitter();
+  trigger = viewChild.required(MatMenuTrigger);
+  id = input<string>();
+  short = input(false);
+  caption = input('Copy full ID')
+  copied = output();
 
   openMenu() {
-    this.trigger.openMenu();
+    this.trigger().openMenu();
   }
 }

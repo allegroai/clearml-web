@@ -12,13 +12,15 @@ import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projects
 })
 export class UniqueProjectValidator implements AsyncValidator {
   @Input() parent: string;
+  @Input() allowedPath: string;
 
   constructor(private projectsApi: ApiProjectsService) {
   }
 
-  validate(control: AbstractControl): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> {
-    if (!(control.value?.length > 2)) {
-      return null;
+  validate(control: AbstractControl): Promise<ValidationErrors> | Observable<ValidationErrors> {
+    const projectPath = this.parent ? `${this.parent}/${control.value}` : control.value;
+    if (!(control.value?.length > 2) || projectPath === this.allowedPath) {
+      return of(null);
     }
 
     return of(control.value).pipe(

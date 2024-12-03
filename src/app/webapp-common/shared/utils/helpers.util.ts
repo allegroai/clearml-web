@@ -2,7 +2,7 @@ import {isNil, isUndefined} from 'lodash-es';
 import {excludedKey} from '@common/shared/utils/tableParamEncode';
 
 export function hasValue(value): boolean {
-  return !isUndefined(value) && !isNil(value);
+  return !isUndefined(value) && !isNil(value) && value.length !== 0;
 }
 
 export function getValueOrDefault<T, F>(value: T, fallbackValue?: F): T | F {

@@ -17,6 +17,7 @@ import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
+import {PushPipe} from '@ngrx/component';
 
 
 @Component({
@@ -31,8 +32,9 @@ import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll
     CdkVirtualScrollViewport,
     NgTemplateOutlet,
     ScrollEndDirective,
-    AsyncPipe
-]
+    AsyncPipe,
+    PushPipe
+  ]
 })
 export class VirtualGridComponent implements OnChanges{
   private items$ = new BehaviorSubject<any[]>(null);

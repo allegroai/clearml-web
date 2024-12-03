@@ -1,9 +1,9 @@
 <ng-template
   let-saving="saving" let-editable="editable"
   let-configurationObjectName="configurationObjectName"
-  [ngTemplateOutletContext]="{ saving: saving$ | async,
-                               editable: editable$ | async,
-                               configurationObjectName: selectedConfigObj$ | async}"
+  [ngTemplateOutletContext]="{ saving: saving$ | ngrxPush,
+                               editable: editable$ | ngrxPush,
+                               configurationObjectName: selectedConfigObj$ | ngrxPush}"
   [ngTemplateOutlet]="template" #template>
   <sm-editable-section [editable]="false">
     <sm-section-header [label]="configurationObjectName | replaceViaMapPipe:sectionReplaceMap | uppercase"></sm-section-header>

@@ -345,17 +345,21 @@ export function compareArrayOfStrings<T extends Array<string[]>>(values: T): T {
 }
 
 export function convertConfigurationFromExperiments<T extends Array<IExperimentDetail>>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
-  const data = experiments.map(experiment => originalExperiments[experiment.id]?.configuration?.General?.value.split('\n') || []) || [];
-  if (data.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
-    return experiments;
-  }
-  const values = compareArrayOfStrings(data);
-  experiments.forEach((experiment, index) => {
-    if (' General' in experiment.configuration) {
-      experiment.configuration[' General'] = values[index] as any;
-    } else {
-      experiment.configuration['General'] = values[index] as any;
+  const allKeys = new Set(experiments.map(experiment => Object.keys(experiment.configuration)).flat(1));
+  allKeys.forEach(key => {
+    const keyData = experiments.map(experiment => originalExperiments[experiment.id]?.configuration?.[key.trim()]?.value.split('\n') || []) || [];
+    if (keyData.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
+      return;
     }
+    const keyValues = compareArrayOfStrings(keyData);
+    experiments.forEach((experiment, index) => {
+      if (` ${key}` in experiment.configuration) {
+        experiment.configuration[` ${key}`] = keyValues[index] as any;
+      } else {
+        experiment.configuration[key] = keyValues[index] as any;
+      }
+
+    });
   });
   return experiments;
 }

@@ -1,14 +1,18 @@
-<div [id]="step.stepId" class="step-container pointer"
-     [class.selected]="selected" data-id="stepContainer">
-  <div class="step-part step-title" [class]="step.data.status">
-    <sm-experiment-type-icon-label [type]="step.data?.job_type" [showLabel]="false"></sm-experiment-type-icon-label>
-    <div class="title" smShowTooltipIfEllipsis [smTooltip]="step.name" >{{step.name}}</div>
+<div [id]="stepWithStatus().stepId" class="step-container pointer"
+  [class.selected]="selected()" data-id="stepContainer">
+  <div class="step-part step-title" [class]="stepWithStatus().data.status">
+    <sm-experiment-type-icon-label [type]="stepWithStatus().data?.job_type" [showLabel]="false"></sm-experiment-type-icon-label>
+    <div class="title" smShowTooltipIfEllipsis [smTooltip]="stepWithStatus().name" >{{stepWithStatus().name}}</div>
     <i tabindex="1" class="al-icon sm-md al-ico-console" (click)="openConsole.emit()" (keyup)="openConsole.emit()" data-id="stepResultButton"></i>
   </div>
-  <div class="step-part step-footer" [class]="step.data.status" data-id="stepFooter">
-    <i *ngIf="step.data.status !== 'pending'" class="al-icon sm-md" [class]="'al-ico-status-' + step.data.status" data-id="stepStatusIcon"></i>
-    <div *ngIf="step?.data?.job_started">
-      {{runTime | duration}}
-    </div>
+  <div class="step-part step-footer" [class]="stepWithStatus().data.status" data-id="stepFooter">
+    @if (stepWithStatus().data.status !== 'pending') {
+      <i class="al-icon sm-md" [class]="'al-ico-status-' + stepWithStatus().data.status" data-id="stepStatusIcon"></i>
+    }
+    @if (stepWithStatus().data?.job_started) {
+      <div>
+        {{runTime() | duration}}
+      </div>
+    }
   </div>
 </div>

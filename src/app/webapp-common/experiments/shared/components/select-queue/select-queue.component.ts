@@ -45,6 +45,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: {
       taskIds?: string[];
       reference?: string;
+      retryMode?: boolean;
     }
   ) {
     this.store.dispatch(getQueuesForEnqueue());

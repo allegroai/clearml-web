@@ -22,6 +22,7 @@ import {OverflowsDirective} from '@common/shared/ui-components/directives/overfl
 import {TableModule} from 'primeng/table';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
+
 @NgModule({
   declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent],
   exports: [DashboardProjectsComponent, DashboardExperimentsComponent],
@@ -41,7 +42,7 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     TableComponent,
     OverflowsDirective,
     TableModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
   ]
 })
 export class CommonDashboardModule {

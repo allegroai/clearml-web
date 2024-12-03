@@ -1,6 +1,5 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
-import {Store} from '@ngrx/store';
+import {ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
@@ -10,17 +9,16 @@ import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AbortControllerDialogComponent {
+      public dialogRef = inject<MatDialogRef<AbortControllerDialogComponent>>(MatDialogRef<AbortControllerDialogComponent>);
   public experiments: ISelectedExperiment[];
   shouldBeAbortedTasks: ISelectedExperiment[] = null;
 
-  constructor(
-    private store: Store,
-    public dialogRef: MatDialogRef<AbortControllerDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: {
+  constructor() {
+    const data = inject<{
       tasks: ISelectedExperiment[];
       shouldBeAbortedTasks: ISelectedExperiment[];
-    }
-  ) {
+    }>(MAT_DIALOG_DATA);
+
     this.experiments = data.tasks;
     this.shouldBeAbortedTasks = data.shouldBeAbortedTasks;
 

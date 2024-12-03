@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, EventEmitter, input, Output} from '@angular/core';
 
 import {GroupedList} from '@common/tasks/tasks.model';
 import {JsonPipe, KeyValuePipe, NgForOf} from '@angular/common';
@@ -15,20 +15,14 @@ import {StringStartsWithInArrayPipe} from '@common/shared/pipes/string-starts-wi
 interface GroupItem {
   data: GroupItem;
   name: string;
-  visible: boolean;
   hasChildren: boolean;
   children: string[];
   parent: string;
   lastChild: boolean;
 }
 
-export interface GroupedVisibleList {
-  [metric: string]: GroupItem;
-}
-
 interface ExampleFlatNode {
   expandable: boolean;
-  visible: boolean;
   name: string;
   parent: string;
   level: number;
@@ -57,31 +51,12 @@ interface ExampleFlatNode {
   ]
 })
 export class GroupedSelectableListComponent {
-  private _list: GroupedList;
-  public showList: GroupedVisibleList;
 
   checkIcon: string[] = ['al-ico-show', 'al-ico-hide'];
-  @Input() searchTerm: string;
+  searchTerm = input<string>();
+  list = input<GroupedList>();
+  checkedList = input<string[]>();
 
-  @Input() set list(list) {
-    this._list = list;
-    if (this.checkedList) {
-      this.dataSource.data = this.buildingNestedList();
-    } else {
-      setTimeout(() => this.dataSource.data = this.buildingNestedList())
-    }
-    if (this.searchTerm) {
-      this.treeControl.expandAll();
-    } else {
-      this.treeControl.collapseAll();
-    }
-  }
-
-  get list() {
-    return this._list;
-  }
-
-  @Input() checkedList: Array<string>
   @Output() itemSelect = new EventEmitter<string>();
   @Output() itemCheck = new EventEmitter<{ pathString: string; parent: string }>();
   @Output() groupChecked = new EventEmitter<{ key: string; hide: boolean }>();
@@ -113,14 +88,29 @@ export class GroupedSelectableListComponent {
 
   hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
 
+  constructor() {
+    effect(() => {
+      if (this.list()) {
+        this.dataSource.data = this.buildingNestedList();
+      }
+    });
+
+    effect(() => {
+      if (this.searchTerm()) {
+        this.treeControl.expandAll();
+      } else {
+        this.treeControl.collapseAll();
+      }
+    });
+  }
+
   private buildingNestedList() {
-    return Object.entries(this.list).map(([parent, children]) => ({
+    return Object.entries(this.list()).map(([parent, children]) => ({
       data: Object.keys(children).reduce((acc, child, i) => {
         acc[child] = {
           name: child,
           parent,
           data: children[child],
-          visible: this.checkedList.includes(parent + child),
           hasChildren: false,
           lastChild: Object.keys(children).length - 1 === i,
           children: []
@@ -129,7 +119,6 @@ export class GroupedSelectableListComponent {
       }, {} as GroupItem),
       name: parent,
       parent: '',
-      visible: this.checkedList.some(item => item.startsWith(parent)),
       hasChildren: Object.keys(children).length > 0,
       children: [parent, ...Object.keys(children).map(child => parent + child)]
     }) as GroupItem);
@@ -137,7 +126,7 @@ export class GroupedSelectableListComponent {
 
   isHideAllMode(parent: ExampleFlatNode) {
     const children = this.treeControl.dataNodes.filter(a => a.parent === parent.name);
-    return parent.expandable ? children.some(child => this.checkedList.includes(parent.name + child.name)) : this.checkedList.includes(parent.name);
+    return parent.expandable ? children.some(child => this.checkedList().includes(parent.name + child.name)) : this.checkedList().includes(parent.name);
   }
 
   groupCheck(node: ExampleFlatNode) {

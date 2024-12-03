@@ -6,9 +6,10 @@
 
 :host {
   .actions {
-    padding: 6px 0;
+    display: block;
+    padding: 12px 0 0;
     font-size: 12px;
-    color: $blue-480;
+    height: 36px;
   }
   .metrics-container {
     display: flex;
@@ -37,7 +38,7 @@
   }
 
   sm-search {
-    margin: 0 12px;
+    margin: 0 24px;
   }
 
   .variant-label {
@@ -74,21 +75,35 @@
     color: $blue-400;
 
     mat-expansion-panel-header {
-      padding: 7px 24px 7px 4px;
-      border-radius: 0;
-      border-bottom: 1px solid $blue-100;
+      padding: 7px 4px 7px 0;
 
-      &.mat-expanded {
-        background-color: $blue-50;
-        border-radius: 0;
-        border-bottom: none;
-        font-weight: bold;
+      mat-panel-title {
+        max-width: calc(100% - 12px);
       }
 
       .panel-title {
         padding-right: 12px;
-        font-size: 13px;
+        font-size: 14px;
         color: $blue-400;
+      }
+
+      .has-selected {
+        margin-left: auto;
+        background-color: $purple;
+        width: 6px;
+        height: 6px;
+        flex: 0 0 6px;
+        border-radius: 6px;
+        align-self: center;
+      }
+
+      &.mat-expanded {
+        border-radius: 0;
+        border-bottom: none;
+        font-weight: 500;
+        .panel-title {
+          color: $purple;
+        }
       }
     }
   }
@@ -101,7 +116,7 @@
     height: calc(100% - 34px);
     width: 100%;
     overflow-y: scroll;
-    padding-left: 12px;
+    padding: 0 24px;
   }
 
   .metric-expansion-content {
@@ -130,6 +145,11 @@
 
   .spinner {
     margin: auto;
+  }
+
+  .empty-container {
+    display: flex;
+    height: calc(100% - 36px);
   }
 
   .empty-state {

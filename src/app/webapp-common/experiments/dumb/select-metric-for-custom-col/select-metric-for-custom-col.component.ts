@@ -13,6 +13,7 @@ import {CheckboxControlComponent} from '@common/shared/ui-components/forms/check
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {HasSelectedPipe} from '@common/experiments/dumb/select-metric-for-custom-col/has-selected.pipe';
 
 export interface SelectionEvent {
   variant: MetricVariantResult;
@@ -40,48 +41,57 @@ export interface SelectionEvent {
     ShowTooltipIfEllipsisDirective,
     MatRadioButton,
     MatRadioGroup,
-    FormsModule
+    FormsModule,
+    HasSelectedPipe
   ],
   standalone: true
 })
 export class SelectMetricForCustomColComponent {
-  public metricTree: {[metricName: string]: MetricVariantResult[]};
+  public metricTree: Record<string, MetricVariantResult[]>;
   public filteredMetricTree: [string, MetricVariantResult[]][];
   public expandedMetrics = {};
-  public metricsCols: {[metVar: string]: string[]};
+  public metricsCols: Record<string, string[]>;
   public searchText: string;
   public entriesLimit = 300;
   public moreResults: number;
   private debounceTimer: number;
+  public selectedMetric: {[metric: string]: boolean};
 
-  @Input() set metricVariants(metricVar: Array<MetricVariantResult>) {
+  @Input() set metricVariants(metricVar: MetricVariantResult[]) {
     if (metricVar === null) {
       return;
     }
     this.metricTree = metricVar?.reduce((result, metric) => {
-      result[metric.metric] ? result[metric.metric].push(metric) : result[metric.metric] = [metric];
+      if (result[metric.metric]) {
+        result[metric.metric].push(metric);
+      } else {
+        result[metric.metric] = [metric];
+      }
       return result;
-    }, {} as {[metricName: string]: MetricVariantResult[]});
+    }, {} as Record<string, MetricVariantResult[]>);
     this.filteredMetricTree = Object.entries(this.metricTree || {}).slice(0, this.entriesLimit);
     this.moreResults = Object.keys(this.metricTree || {}).length - this.filteredMetricTree.length;
   }
 
   @Input() set tableCols(tableCols) {
     this.metricsCols = {};
+    this.selectedMetric = {};
     tableCols?.filter(tableCol => tableCol.metric_hash)?.forEach(tableCol => {
       this.expandedMetrics[tableCol.metric_hash] = this.expandedMetrics[tableCol.metric_hash] ?? true;
+      this.selectedMetric[tableCol.metric_hash] = true;
       this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] ?
-        this.metricsCols[tableCol.metric_hash + tableCol.variant_hash].push(tableCol.valueType) :
-        this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] = [tableCol.valueType];
+        this.metricsCols[tableCol.metric_hash + tableCol.variant_hash].push(tableCol.valueType ?? tableCol.metricName) :
+        this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] = [tableCol.valueType ?? tableCol.metricName];
     });
   }
+
   @Input() multiSelect = true;
   @Input() skipValueType = false;
   @Input() enableClearSelection: boolean;
   // @Output() getMetricsToDisplay  = new EventEmitter();
   @Output() selectedMetricToShow = new EventEmitter<SelectionEvent>();
   @Output() clearSelection = new EventEmitter();
-  @Output() goBack               = new EventEmitter();
+  @Output() goBack = new EventEmitter();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
@@ -102,7 +112,8 @@ export class SelectMetricForCustomColComponent {
   public toggleMetricToDisplay(variant: ISmCol, value: boolean, valueType: MetricValueType) {
     this.selectedMetricToShow.emit({variant, addCol: !value, valueType});
   }
-  public resetSearch(){
+
+  public resetSearch() {
     this.searchQ('');
   }
 
@@ -111,8 +122,9 @@ export class SelectMetricForCustomColComponent {
     this.debounceTimer = window.setTimeout(() => {
       this.searchText = value;
       if (value?.length > 0) {
+        const query = value.toLowerCase();
         this.filteredMetricTree = Object.entries(this.metricTree).filter(([, results]) =>
-          results.some(variant => variant.variant.includes(value))
+          results.some(variant => variant.variant.toLowerCase().includes(query) || variant.metric.toLowerCase().includes(query))
         );
         this.moreResults = this.filteredMetricTree.length - this.entriesLimit;
         this.filteredMetricTree = this.filteredMetricTree.slice(0, this.entriesLimit);

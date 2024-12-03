@@ -33,6 +33,7 @@ export class SelectableFilterListComponent {
   @Input() placeholder: string = 'Search';
   @Input() titleLabel: string;
   @Input() checkAllIcon: string;
+  @Input() theme: 'light' | 'dark' = 'light';
   @Output() itemSelect             = new EventEmitter<string>();
   @Output() hiddenChanged          = new EventEmitter<Array<SelectableListItem['value']>>();
   @Output() searchTermChanged      = new EventEmitter<string>();

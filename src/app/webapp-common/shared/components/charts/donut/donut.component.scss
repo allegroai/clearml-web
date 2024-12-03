@@ -81,5 +81,13 @@
     font-size: 32px;
     font-weight: 500;
     opacity: 0;
+    pointer-events: none;
+
+    .caption {
+      font-size: 16px;
+      background-color: $blue-950;
+      border-radius: 6px;
+      padding: 0 8px;
+    }
   }
 }

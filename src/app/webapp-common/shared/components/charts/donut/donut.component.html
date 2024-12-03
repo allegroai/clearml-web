@@ -1,8 +1,8 @@
 <div class="content">
   <div class="donut-container">
     <canvas
-      [style.height]="resizing() ? 0 : null"
-      [style.width]="resizing() ? 0 : null"
+      [style.height.px]="resizing() ? 0 : null"
+      [style.width.px]="resizing() ? 0 : null"
       baseChart
       class="donut-container"
       [data]="donutData()"
@@ -10,10 +10,15 @@
       [options]="$any(donutOptions)"
       (chartHover)="chartHovered($event)"
     ></canvas>
-    <div class="percent" [style.opacity]="percent() !== null ? 1 : null">{{percent()}}%</div>
+    <div class="percent" [style.opacity]="!resizing() && highlightedData() !== null ? 1 : null">
+      @if (highlightedData(); as highlighted) {
+        <div class="caption">{{highlighted.caption}} ({{highlighted.value}})</div>
+        <div>{{highlighted.percent}}%</div>
+      }
+    </div>
   </div>
   <div class="donut-legend" data-id="annotationPieChart">
-    @for (slice of donutData().datasets[0].data; track slice; let index = $index) {
+    @for (slice of donutData().datasets[0].data; track index; let index = $index) {
       <div
         class="slice"
         [class.highlight]="index === highlight()"

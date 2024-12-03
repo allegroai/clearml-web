@@ -5,6 +5,7 @@ import {IApiRequest, SmHttpResponse} from '../model/api-request';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {HttpHeaders} from '@angular/common/http';
 import {map} from 'rxjs/operators';
+import {ApiOptions} from '~/business-logic/api-services/api';
 
 @Injectable()
 export class SmApiRequestsService {
@@ -35,7 +36,7 @@ export class SmApiRequestsService {
     reportProgress?: boolean;
     responseType?: 'json';
     withCredentials?: boolean;
-  }): Observable<T> {
+  }, extOptions?: ApiOptions): Observable<T> {
     options.withCredentials = true;
     return this.http.post<SmHttpResponse>(url, body, options).pipe(map(res => res.data));
   }

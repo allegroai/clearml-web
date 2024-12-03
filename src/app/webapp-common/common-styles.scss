@@ -25,24 +25,24 @@
 // your theme to them. This will ensure the correct values for your app are included.
 //@include mat.all-component-bases(/* TODO(v17): pass $your-theme here */);
 
-$custom-typography: mat.define-typography-config(
+$custom-typography: mat.m2-define-typography-config(
   $font-family: $font-family-base
 );
 
 @include mat.typography-hierarchy($custom-typography);
 @include mat.all-component-typographies($custom-typography);
 
-$allegro-palette-primary: mat.define-palette($mat-allegro);
-$allegro-palette-accent: mat.define-palette($mat-allegro, A400, A100, A400);
+$allegro-palette-primary: mat.m2-define-palette($mat-allegro);
+$allegro-palette-accent: mat.m2-define-palette($mat-allegro, A400, A100, A400);
 
-$sm-palette-primary: mat.define-palette($sm-purple);
-$sm-palette-accent: mat.define-palette($sm-purple, A100, A200, A400);
-$sm-palette-warn: mat.define-palette(mat.$purple-palette);
+$sm-palette-primary: mat.m2-define-palette($sm-purple);
+$sm-palette-accent: mat.m2-define-palette($sm-purple, A100, A200, A400);
+$sm-palette-warn: mat.m2-define-palette(mat.$m2-purple-palette);
 
-$sm-neon-palette-primary: mat.define-palette($sm-neon);
-$sm-neon-palette-accent: mat.define-palette($sm-neon, A200, A100, A400);
+$sm-neon-palette-primary: mat.m2-define-palette($sm-neon);
+$sm-neon-palette-accent: mat.m2-define-palette($sm-neon, A200, A100, A400);
 
-$dark-theme: mat.define-dark-theme((
+$dark-theme: mat.m2-define-dark-theme((
   color: (
     primary: $allegro-palette-primary,
     accent: $allegro-palette-accent
@@ -51,7 +51,7 @@ $dark-theme: mat.define-dark-theme((
   density: -2
 ));
 
-$light-theme: mat.define-light-theme((
+$light-theme: mat.m2-define-light-theme((
   color: (
     primary: $allegro-palette-primary,
     accent: $allegro-palette-accent
@@ -59,7 +59,7 @@ $light-theme: mat.define-light-theme((
   typography: $custom-typography,
 ));
 
-$sm-theme: mat.define-light-theme((
+$sm-theme: mat.m2-define-light-theme((
   color: (
     primary: $sm-palette-primary,
     accent: $sm-palette-accent,
@@ -68,7 +68,7 @@ $sm-theme: mat.define-light-theme((
   typography: $custom-typography
 ));
 
-$sm-neon-theme: mat.define-dark-theme((
+$sm-neon-theme: mat.m2-define-dark-theme((
   color: (
     primary: $sm-neon-palette-primary,
     accent: $sm-neon-palette-accent,
@@ -108,6 +108,7 @@ $sm-neon-theme: mat.define-dark-theme((
   @include mat.checkbox-theme($dark-theme);
   @include mat.list-theme($dark-theme);
   @include mat.stepper-theme($dark-theme);
+  @include mat.tabs-theme($sm-neon-theme);
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
@@ -149,6 +150,7 @@ $sm-neon-theme: mat.define-dark-theme((
   @include mat.checkbox-color($sm-theme);
   @include mat.list-color($light-theme);
   @include mat.stepper-color($sm-theme);
+  @include mat.tabs-color($sm-theme);
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
@@ -163,10 +165,10 @@ $sm-neon-theme: mat.define-dark-theme((
     --mdc-linear-progress-track-height: 12px;
   }
 
-  .mat-mdc-radio-button, .mat-mdc-radio-button.mat-accent {
-    --mdc-radio-disabled-selected-icon-color: #{$blue-300};
-    --mdc-radio-disabled-unselected-icon-color: #{$blue-300};
-  }
+  //.mat-mdc-radio-button, .mat-mdc-radio-button.mat-accent {
+  //  --mdc-radio-disabled-selected-icon-color: #{$blue-300};
+  //  --mdc-radio-disabled-unselected-icon-color: #{$blue-300};
+  //}
 
   .mat-drawer {
     border-right: solid 1px $blue-100;
@@ -401,9 +403,9 @@ mat-expansion-panel {
     width: 16px;
     height: 16px;
 
-    .mdc-radio__inner-circle {
-      border-width: 8px;
-    }
+    //.mdc-radio__inner-circle {
+    //  border-width: 8px;
+    //}
   }
 
   .mat-ripple.mat-radio-ripple {
@@ -509,6 +511,11 @@ button {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  &.inline {
+    display: inline-block;
+    vertical-align: middle;
+  }
 }
 
 body .ui-state-highlight .card {
@@ -1042,8 +1049,7 @@ button.btn.button-outline-dark {
 }
 
 .cdk-drag-preview.form-group-drag {
-  padding: 8px 16px 32px 16px;
-  border-radius: 4px;
+  overflow: hidden;
   border: solid 1px $cloudy-blue;
   background-color: white;
 }

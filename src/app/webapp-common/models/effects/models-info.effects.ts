@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
 import {
   catchError,
@@ -94,7 +95,7 @@ export class ModelsInfoEffects {
         if (this.previousSelectedId && currentSelected?.id != this.previousSelectedId) {
           this.previousSelectedLastUpdate = null;
         }
-        this.previousSelectedId = currentSelected?.id;
+        this.previousSelectedId = currentSelected?.id ?? action.id;
         if (!currentSelected || !visible) {
           return of([action, null, tableSelected, selected]);
         }

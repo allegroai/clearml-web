@@ -28,7 +28,7 @@ import {
 import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {createMetricColumn, MetricColumn} from '@common/shared/utils/tableParamEncode';
-import {concatLatestFrom} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {presetColors} from '@common/shared/ui-components/inputs/color-picker/color-picker-wrapper.component';
 import {selectMetricVariants} from '@common/experiments/reducers';
 

@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {ProfileNameComponent} from '@common/settings/admin/profile-name/profile-name.component';
-import {WebappConfigurationComponent} from '@common/settings/webapp-configuration/webapp-configuration.component';
+import {WebappConfigurationComponent} from '~/features/settings/containers/webapp-configuration/webapp-configuration.component';
 import {WorkspaceConfigurationComponent} from '@common/settings/workspace-configuration/workspace-configuration.component';
 import {SettingsComponent} from './settings.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';

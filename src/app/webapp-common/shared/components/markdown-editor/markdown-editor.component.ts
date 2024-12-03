@@ -20,7 +20,7 @@ import {
   MarkdownCheatSheetDialogComponent
 } from '@common/shared/components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
 import {getBaseName} from '@common/shared/utils/shared-utils';
-import * as marked from 'marked';
+import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -56,7 +56,7 @@ export class MarkdownEditorComponent {
   protected cdr = inject( ChangeDetectorRef);
   protected dialog = inject( MatDialog);
   private originalInfo: string;
-  private ready: boolean = false;
+  private ready = false;
   private preview: Element;
   private editor: Element;
   public isDirty: boolean;
@@ -77,7 +77,7 @@ export class MarkdownEditorComponent {
     hideIcons: ['TogglePreview', 'FullScreen']
   } as MdEditorOption;
   public ace: Ace.Editor;
-  public isExpand: boolean = false;
+  public isExpand = false;
   public duplicateNames: boolean;
   public postRender = (dirty: string): string => {
     if (this.blockUserScripts) {
@@ -135,7 +135,7 @@ export class MarkdownEditorComponent {
   }
 
   constructor() {
-    window['marked'] = marked.marked;
+    window['marked'] = marked;
     this.editMode = false;
 
     const widgetOrigin = this.reportService.getUrl().toString()
@@ -247,7 +247,7 @@ export class MarkdownEditorComponent {
   }
 
   insertImage(resource: string) {
-    this.ace.insert(`![${getBaseName(resource)}](${resource})\n`);
+    this.ace.insert(`![${decodeURIComponent(getBaseName(resource))}](${resource})\n`);
   }
 }
 

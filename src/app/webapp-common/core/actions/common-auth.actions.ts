@@ -1,6 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 import {CredentialKeyExt, Credentials} from '../reducers/common-auth-reducer';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {SettingsUser} from '~/features/settings/settings.util';
 
 export const AUTH_PREFIX = 'AUTH_';
 
@@ -16,7 +17,12 @@ export const updateS3Credential = createAction(
 );
 export const createCredential = createAction(
   AUTH_PREFIX + 'CREATE_CREDENTIAL (API)',
-  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string; userId?: string}>()
+  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string; user?: SettingsUser}>()
+);
+
+export const createCredentialPopup = createAction(
+  AUTH_PREFIX + 'CREATE_CREDENTIAL POPUP',
+  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string; user?: SettingsUser}>()
 );
 
 export const updateCredentialLabel = createAction(

@@ -249,7 +249,15 @@ After the issue is resolved and Trains Server is up and running, reload this pag
         if (this.locationStrategy.getBaseHref() && this.locationStrategy.getBaseHref() !== '/') {
           pathname = pathname.replace(this.locationStrategy.getBaseHref(), '');
         }
-        const redirectUrl: string = pathname + window.location.search;
+
+        let redirectUrl = '';
+        let extraParam = '';
+        if (pathname.match(/^\/_\w+$/gm)) {
+          extraParam = pathname;
+        } else {
+          redirectUrl = pathname + window.location.search;
+        }
+
         if (
           !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl) &&
           (this.guestUser?.enabled || ConfigurationService.globalEnvironment.autoLogin)
@@ -278,8 +286,8 @@ After the issue is resolved and Trains Server is up and running, reload this pag
           } else {
             resolve(null);
           }
-        } else if (!['/login/signup', '/login'].some(url => redirectUrl.startsWith(url))) {
-          const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login';
+        } else if (!extraParam && !['/login/signup', '/login'].some(url => redirectUrl.startsWith(url))) {
+          const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login' + '/' + extraParam;
           window.history.replaceState(window.history.state, '', targetUrl);
         }
       }

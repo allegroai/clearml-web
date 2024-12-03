@@ -5,7 +5,6 @@ import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {
   selectExperimentsList,
-  selectExperimentsTableCols,
   selectGlobalFilter,
   selectNoMoreExperiments,
   selectTableFilters,
@@ -73,7 +72,6 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   public tableCols = INITIAL_MODEL_EXPERIMENTS_TABLE_COLS;
   public entityTypes = EntityTypeEnum;
   private paramsSubscription: Subscription;
-  private columns$: Observable<ISmCol[] | undefined>;
   public experiments$: Observable<IExperimentInfo[]>;
   public tableFilters$: Observable<{ [columnId: string]: FilterMetadata }>;
   public tags$: Observable<string[]>;
@@ -97,7 +95,6 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
     this.resizedCols$.next(this._resizedCols);
     this.experiments$ = this.store.select(selectExperimentsList);
     this.searchTerm$ = this.store.select(selectGlobalFilter);
-    this.columns$ = this.store.select(selectExperimentsTableCols);
     this.selectSplitSize$ = this.store.select(selectSplitSize);
 
     this.tableFilters$ = this.store.select(selectTableFilters)
@@ -134,14 +131,14 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.paramsSubscription.unsubscribe();
-    this.store.dispatch(resetExperiments());
+    this.store.dispatch(resetExperiments({}));
     this.store.dispatch(resetGlobalFilter());
   }
 
 
-  experimentsSelectionChanged(tasks) {
-    const projectId = tasks?.[0]?.project?.id ? tasks?.[0]?.project?.id : '*';
-    window.open('projects/' + projectId + '/experiments/' + tasks?.[0]?.id);
+  experimentSelectionChanged({experiment}) {
+    const projectId = experiment?.project?.id ? experiment?.project?.id : '*';
+    window.open('projects/' + projectId + '/experiments/' + experiment?.id);
   }
 
   getNextExperiments() {

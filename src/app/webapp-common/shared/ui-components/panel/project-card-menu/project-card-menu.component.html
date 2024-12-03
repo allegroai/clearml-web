@@ -1,9 +1,9 @@
 <sm-menu buttonClass="al-ico-bars-menu al-icon" [showCart]="false" panelClasses="light-theme">
-  <sm-menu-item itemLabel="Rename"
-                data-id="Rename"
+  <sm-menu-item itemLabel="Edit"
+                data-id="Edit"
                 iconClass="al-icon al-color blue-800 al-ico-edit"
                 [disabled]="!project.company?.id"
-                (itemClicked)="projectNameInlineActivated.emit()"></sm-menu-item>
+                (itemClicked)="projectEditClicked.emit(project)"></sm-menu-item>
   <sm-menu-item itemLabel="New Project"
                 data-id="New Project"
                 iconClass="al-icon al-color blue-800 al-ico-add"

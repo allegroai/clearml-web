@@ -1,6 +1,6 @@
 <div class="header">
   <div class="name ellipsis" [smTooltip]="report?.name" smShowTooltipIfEllipsis>{{report?.name}}</div>
-  <div *ngIf="(editMode$ | async) !== true" class="actions">
+  <div *ngIf="(editMode$ | ngrxPush) !== true" class="actions">
     <sm-tag-list
       [tags]="report?.tags"
       (add)="openTagMenu($event, tagsMenuTrigger, tagsMenu)"
@@ -46,7 +46,7 @@
     <sm-tags-menu
       #tagsMenu
       [tags]="report?.tags"
-      [projectTags]="reportTags$ | async"
+      [projectTags]="reportTags$ | ngrxPush"
       [companyTags]="null"
       [tagsFilterByProject]="true"
       (tagSelected)="addTag($event)"
@@ -64,7 +64,7 @@
   <mat-drawer-container class="h-100">
     <mat-drawer
       #drawer
-      [mode]="(smallScreen$ | async) ? 'over' : 'side'"
+      [mode]="(smallScreen$ | ngrxPush) ? 'over' : 'side'"
       [opened]="!editor.editMode && showDescription"
       (closed)="showDescription = false"
     >
@@ -96,7 +96,7 @@
         [readOnly]="!draft || example"
         [resources]="resources"
         [handleUpload]="handleUpload"
-        [blockUserScripts]="blockUserScripts$ | async"
+        [blockUserScripts]="blockUserScripts$ | ngrxPush"
         (saveInfo)="save($event)"
         (editModeChanged)="editModeChanged();"
         (dirtyChanged)="dirtyChanged($event);"

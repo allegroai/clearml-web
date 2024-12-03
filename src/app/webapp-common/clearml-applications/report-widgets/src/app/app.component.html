@@ -22,7 +22,7 @@
             [identifier]="'report-widget'"
             [width]="400"
             [xAxisType]="xaxis"
-            [isCompare]="true"
+            [isCompare]="$any(plotData)?.plotParsed?.data?.[0]?.type !== 'parcoords'"
             [noMargins]="true"
             [hideMaximize]="hideMaximize"
             (maximizeClicked)="maximize()">

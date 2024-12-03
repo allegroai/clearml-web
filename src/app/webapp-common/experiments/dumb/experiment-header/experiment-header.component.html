@@ -1,12 +1,12 @@
 <div class="d-flex justify-content-between header-container align-items-center"
   [class.archive-mode]="isArchived()">
   <div class="d-flex-center">
-    <ng-container *ngTemplateOutlet="addButtonTemplate(); context: {smallScreen: (isSmallScreen$ | async).matches}">
+    <ng-container *ngTemplateOutlet="addButtonTemplate(); context: {smallScreen: (isSmallScreen$ | ngrxPush).matches}">
     </ng-container>
     <sm-toggle-archive
       [class.hide-item]="sharedView()"
       [showArchived]="isArchived()"
-      [minimize]="(isSmallScreen$ | async).matches"
+      [minimize]="(isSmallScreen$ | ngrxPush).matches"
       (toggleArchived)="isArchivedChanged.emit($event)"
     ></sm-toggle-archive>
     <sm-button-toggle
@@ -32,7 +32,7 @@
         [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
         <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
         <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
-        [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
+        [itemLabel]="'Download first '+ (maxDownloadItems$ | ngrxPush) +' items'"></sm-menu-item>
       </sm-menu>
     }
 

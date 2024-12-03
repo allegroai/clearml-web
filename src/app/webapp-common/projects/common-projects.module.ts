@@ -12,6 +12,9 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
 import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
 import {StoreModule} from '@ngrx/store';
 import {projectsReducer} from '~/features/projects/projects.reducer';
+import {PushPipe} from '@ngrx/component';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+
 
 @NgModule({
   imports: [
@@ -24,6 +27,8 @@ import {projectsReducer} from '~/features/projects/projects.reducer';
     EffectsModule.forFeature([ProjectsEffects, CommonProjectsEffects]),
     LabeledFormFieldDirective,
     ProjectCardComponent,
+    PushPipe,
+    DotsLoadMoreComponent,
   ],
   declarations: [CommonProjectsPageComponent, ProjectsListComponent],
   exports: [CommonProjectsPageComponent, ProjectsListComponent]

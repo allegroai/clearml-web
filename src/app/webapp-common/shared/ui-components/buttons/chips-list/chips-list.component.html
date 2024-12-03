@@ -1,6 +1,10 @@
-<sm-chips *ngFor="let label of items; trackBy: trackByIndex" [isDarkBackground]="true" [label]="label" maxWidth="100%"></sm-chips>
-<div *ngIf="hiddenLabels.length > 0"
-     class="hidden-labels"
-     [smTooltip]="hiddenLabels.join(', ')">
-  +{{hiddenLabels.length}}
-</div>
+@for (label of items; track $index) {
+  <sm-chips [isDarkBackground]="true" [label]="label" maxWidth="100%"></sm-chips>
+}
+@if (hiddenLabels.length > 0) {
+  <div
+    class="hidden-labels"
+    [smTooltip]="hiddenLabels.join(', ')">
+    +{{hiddenLabels.length}}
+  </div>
+}
