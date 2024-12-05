@@ -1,56 +1,72 @@
 <sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="NEW RUN"
-                    [pageHeader]="title"
-                    iconClass="al-color blue-300 al-ico-pipelines">
+  [pageHeader]="title"
+  iconClass="al-color blue-300 al-ico-pipelines">
   <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme form-container">
     <input #fakeInput name="Don't remove - it take the autofocus dropdown" style="opacity: 0; height: 0; width: 0">
-    <div class="section-title" *ngIf="params?.length > 0">Parameters</div>
-    <div *ngFor="let param of params" class="param-line">
-      <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="param.name">{{param.name}}</div>
-      <ng-container [ngSwitch]="param.type">
-        <mat-form-field appearance="outline" class="no-bottom" *ngSwitchCase="'float'">
-          <input #floatInput="ngModel"  type="text" matInput [(ngModel)]="param.value" [name]="param.name" pattern="[+-]?([0-9]*[.])?[0-9]+" >
-          <mat-error
-            *ngIf="floatInput?.errors && floatInput?.errors['pattern']">
-            Please provide an float
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="no-bottom" *ngSwitchCase="'int'">
-          <input  type="text" step="1" matInput [(ngModel)]="param.value" #intInput="ngModel" [name]="param.name" pattern="^[-\d]\d*$">
-          <mat-error
-            *ngIf="intInput?.errors && intInput?.errors['pattern']">
-            Please provide an integer
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="no-bottom" *ngSwitchDefault>
-          <input matInput [(ngModel)]="param.value" [name]="param.name">
-        </mat-form-field>
-      </ng-container>
-    </div>
+    @if (params?.length > 0) {
+      <div class="section-title">Parameters</div>
+    }
+    @for (param of params; track param.name) {
+      <div class="param-line">
+        <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="param.name">{{param.name}}</div>
+        @switch (param.type) {
+          @case ('float') {
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input #floatInput="ngModel"  type="text" matInput [(ngModel)]="param.value" [name]="param.name" pattern="[+-]?([0-9]*[.])?[0-9]+" >
+              @if (floatInput?.errors && floatInput?.errors['pattern']) {
+                <mat-error
+                  >
+                  Please provide an float
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          @case ('int') {
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input  type="text" step="1" matInput [(ngModel)]="param.value" #intInput="ngModel" [name]="param.name" pattern="^[-\d]\d*$">
+              @if (intInput?.errors && intInput?.errors['pattern']) {
+                <mat-error
+                  >
+                  Please provide an integer
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          @default {
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input matInput [(ngModel)]="param.value" [name]="param.name">
+            </mat-form-field>
+          }
+        }
+      </div>
+    }
     <div class="section-title d-flex align-items-center">Configuration</div>
     <div class="param-line">
       <div class="param-key" [class.error]="queueInputModel?.errors?.required">Pipeline controller queue*</div>
       <mat-form-field
         appearance="outline" class="no-bottom queue-select"
         (mousedown)="selectedQueue && !isFocused(queueInput) && (selectedQueue = null)"
-      >
+        >
         <input type="text"
-               #queueInput
-               #queueInputModel="ngModel"
-               matInput
-               name="queue"
-               [(ngModel)]="selectedQueue"
-               [matAutocomplete]="auto"
-               required
-               data-id="queueFiled">
+          #queueInput
+          #queueInputModel="ngModel"
+          matInput
+          name="queue"
+          [(ngModel)]="selectedQueue"
+          [matAutocomplete]="auto"
+          required
+          data-id="queueFiled">
         <i matSuffix
-           class="al-icon sm-md search-icon me-2"
-           [class]="queueInputModel.value ? 'al-ico-dialog-x pointer':'al-ico-search'"
-           (click)="queueInputModel.value && (selectedQueue = null)"
+          class="al-icon sm-md search-icon me-2"
+          [class]="queueInputModel.value ? 'al-ico-dialog-x pointer':'al-ico-search'"
+          (click)="queueInputModel.value && (selectedQueue = null)"
         ></i>
         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn" class="light-theme">
-          <mat-option *ngFor="let queue of queues | filter:queueInput.value:'name'" [value]="queue">
-            <div [smSearchText]="selectedQueue?.name">{{queue.name }}</div>
-          </mat-option>
+          @for (queue of queues | filter:queueInput.value:'name'; track queue) {
+            <mat-option [value]="queue">
+              <div [smSearchText]="selectedQueue?.name">{{queue.name }}</div>
+            </mat-option>
+          }
         </mat-autocomplete>
       </mat-form-field>
     </div>

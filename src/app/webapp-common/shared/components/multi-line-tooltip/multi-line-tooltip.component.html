@@ -25,11 +25,7 @@
     (smHesitate)="tooltipMenu.closed.emit()"
     #hesitateMenu="hesitate"
   >
-    @if (infoData) {
-      <div [innerHTML]="infoData"></div>
-    } @else {
-      <ng-content></ng-content>
-    }
+    <ng-content></ng-content>
   </div>
 
 </mat-menu>

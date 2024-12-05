@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import * as actions from '../../webapp-common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectSelectedProjectId, selectShowHidden} from '@common/core/reducers/projects.reducer';
@@ -10,7 +11,7 @@ import {requestFailed} from '@common/core/actions/http.actions';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {selectCurrentUser, selectShowOnlyUserWork,} from '@common/core/reducers/users-reducer';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {selectRouterConfig} from "@common/core/reducers/router-reducer";
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 
 
 @Injectable()

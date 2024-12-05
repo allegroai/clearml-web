@@ -193,7 +193,9 @@ export const setHyperParamsFiltersPage = createAction(
   EXPERIMENTS_PREFIX + ' [set hyper params filters page]',
   props<{ page: number }>()
 );
-export const resetExperiments = createAction(EXPERIMENTS_PREFIX + ' [reset experiments]');
+export const resetExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [reset experiments]',
+  props<{skipResetMetric?: boolean}>());
 export const getCustomMetrics = createAction(
   EXPERIMENTS_PREFIX + ' [get custom metrics]',
   props<{hideLoader?: boolean}>()

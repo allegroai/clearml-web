@@ -12,6 +12,7 @@ import {uniqBy} from 'lodash-es';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
+import {ConfigurationService} from '@common/shared/services/configuration.service'
 
 
 export interface ScatterPlotPoint {
@@ -263,6 +264,6 @@ export const selectShowHidden = createSelector(projects, selectSelectedProject,
   (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));
 
 export const selectHideExamples = createSelector(projects, state => state?.hideExamples);
-export const selectBlockUserScript = createSelector(projects, state => state?.blockUserScript);
+export const selectBlockUserScript = createSelector(projects, state => ConfigurationService.globalEnvironment?.blockUserScript || state?.blockUserScript);
 export const selectDefaultNestedModeForFeature = createSelector(projects, state => state?.defaultNestedModeForFeature);
 export const selectProjectsOptionsScrollId = createSelector(projects, state => state?.projectsOptionsScrollId);

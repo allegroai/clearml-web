@@ -8,6 +8,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {AdminService} from '~/shared/services/admin.service';
 import {FormsModule, NgForm} from '@angular/forms';
 import {Credentials} from '@common/core/reducers/common-auth-reducer';
@@ -25,7 +26,8 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
     FormsModule,
     MatInputModule,
     TooltipDirective,
-    LabeledFormFieldDirective
+    LabeledFormFieldDirective,
+    SaferPipe
   ]
 })
 export class S3AccessDialogComponent implements OnChanges {

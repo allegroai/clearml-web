@@ -1,50 +1,57 @@
-<form #autoSelectForm='ngForm'>
-  <mat-form-field [appearance]="appearance" [class]="formFieldClass" smNochedFormField>
-      <mat-chip-grid #chipList aria-label="Fruit selection" [disabled]="disabled" [class.single]="!multiple">
+<form>
+  <mat-form-field [appearance]="appearance()" [class]="formFieldClass()" smNochedFormField>
+    <mat-chip-grid #chipList aria-label="Fruit selection" [disabled]="disabled()" [class.single]="!multiple()">
+      @for (item of selected(); track item.value) {
         <sm-chips
-        *ngFor="let item of val; trackBy: trackByValue"
-        [label]="item?.label ?? $any(item)"
-        [allowRemove]="clearable && !disabled"
-        (remove)="remove(item)"
+          [label]="item.label"
+          [allowRemove]="clearable() && !disabled()"
+          (remove)="remove(item)"
         ></sm-chips>
-        <input
-          #autocompleteInput
-          [placeholder]="!val && placeholder"
-          data-id="labelInputField"
-          [name]="name"
-          [formControl]="chipCtrl"
-          [matChipInputFor]="chipList"
-          [matAutocomplete]="auto"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          (matChipInputTokenEnd)="add($event)"
-          class="chips-input"
-        >
-      </mat-chip-grid>
-      <i *ngIf="!disabled"
-         matSuffix
-         class="al-icon me-2"
-         data-id="filterBylabelDropdownIcon"
-        [class]="!!val && !(multiple && clearable) ? 'al-ico-dialog-x sm-md pointer' : 'al-ico-dropdown-arrow sm-md'"
-        (click)="$event.stopPropagation(); !!val && !(multiple && clearable) ? clear() : openDropdown()"
-        smClickStopPropagation></i>
+      }
+      <input
+        #autocompleteInput
+        [formControl]="chipCtrl"
+        [placeholder]="placeholder()"
+        data-id="labelInputField"
+        [name]="name()"
+        [matChipInputFor]="chipList"
+        [matAutocomplete]="auto"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        (matChipInputTokenEnd)="add($event)"
+        class="chips-input"
+      >
+    </mat-chip-grid>
+    @if (!disabled()) {
+      <i
+        matSuffix
+        class="al-icon me-2"
+        data-id="filterBylabelDropdownIcon"
+        [class]="selected()?.length > 0 && !multiple() && !clearable() ? 'al-ico-dialog-x sm-md pointer' : 'al-ico-dropdown-arrow sm-md'"
+        (click)="$event.stopPropagation(); !!selected() && !(multiple() && clearable()) ? clear() : openDropdown()"
+      smClickStopPropagation></i>
+    }
     <mat-autocomplete
       #auto="matAutocomplete"
       [displayWith]="displayFn"
-      [class]="formFieldClass"
-      [classList]="formFieldClass"
-      (optionSelected)="selected($event)"
-    >
-      <mat-option
-        *ngIf="filterText && isNewName && optionAddable"
-        class="item"
-        [value]="{label:filterText, value:filterText}"
-        (onSelectionChange)="customOptionAdded.emit($event)"
+      [class]="formFieldClass()"
+      [classList]="formFieldClass()"
+      (optionSelected)="optionSelected($event)"
       >
-        "{{filterText}}"<span class="new">(Add item)</span>
-      </mat-option>
-      <mat-option *ngFor="let option of (filteredItems$ | async); trackBy: trackByFn" [value]="option">
-        {{option.label}}
-      </mat-option>
+      @if (chipCtrl.value && isNewName$() && allowAddingOptions()) {
+        <mat-option
+          class="item"
+          [value]="chipCtrl.value"
+          (onSelectionChange)="addOption($event)"
+
+          >
+          "{{chipCtrl.value}}"<span class="new">(Add item)</span>
+        </mat-option>
+      }
+      @for (option of filteredItems(); track option.label) {
+        <mat-option [value]="option.value">
+          {{option.label}}
+        </mat-option>
+      }
     </mat-autocomplete>
   </mat-form-field>
 </form>

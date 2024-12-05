@@ -2,14 +2,14 @@
   <div class="table-diff-row header">
     <div (click)="sortByClicked('key')" class="pointer">{{keyTitle}}
       <i class="fas"
-         [ngClass]="{
+         [class]="{
        'fa-sort-down': sortConfig.keyOrValue === 'key' && sortConfig.order==='asc',
        'fa-sort-up': sortConfig.keyOrValue === 'key' && sortConfig.order==='desc',
        'fa-sort show-only-on-hover': sortConfig.keyOrValue === 'value'}"></i>
     </div>
     <div (click)="sortByClicked('value')" class="pointer">{{valueTitle}}
       <i class="fas"
-         [ngClass]="{
+         [class]="{
        'fa-sort-down': sortConfig.keyOrValue === 'value' && sortConfig.order==='asc',
        'fa-sort-up': sortConfig.keyOrValue === 'value' && sortConfig.order==='desc',
        'fa-sort show-only-on-hover': sortConfig.keyOrValue === 'key'}"></i>

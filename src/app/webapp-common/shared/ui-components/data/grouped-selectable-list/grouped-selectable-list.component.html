@@ -4,12 +4,13 @@
     <span [class]="node.parent ? 'child-node' : 'parent-node'"
           [class.last-child]="node.lastChild">
       <span class="ellipsis flex-grow-1"
-            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList) : !(node.name | stringStartsWithInArray: checkedList)"
+            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList()) : !checkedList().includes(node.name)"
             [smTooltip]="node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis
             (click)="itemSelect.emit(node.parent + node.name)">{{ node.name }}</span>
       <i (click)="node.parent ? itemCheck.emit( {pathString: node.parent + node.name, parent: node.parent}) :
          groupCheck(node); $event.stopPropagation()"
-         [class]="((node.parent ? (node.parent + node.name | stringIncludedInArray: checkedList) : node.name | stringStartsWithInArray: checkedList) ? checkIcon[0] : checkIcon[1]) + ' al-icon sm'">
+         class=" al-icon sm"
+         [class]="(node.parent ? (node.parent + node.name | stringIncludedInArray: checkedList()) : checkedList().includes(node.name)) ? checkIcon[0] : checkIcon[1]">
       </i>
     </span>
   </mat-tree-node>
@@ -17,12 +18,13 @@
   <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding class="parent">
     <span matTreeNodeToggle class="parent-node"
           [class.expanded]="treeControl.isExpanded(node)"
-          [class.unchecked]="!(node.children | arrayIncludedInArray:checkedList)">
+          [class.unchecked]="!(node.children | arrayIncludedInArray:checkedList())">
       <i class="al-icon al-ico-caret-right toggle-icon"></i>
       <span class="ellipsis flex-grow-1" [smTooltip]="node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>{{ node.name }}</span>
     </span>
     <i (click)="groupCheck(node); $event.stopPropagation()"
-       [class]="((node.children | arrayIncludedInArray:checkedList)? checkIcon[0] : checkIcon[1]) + ' al-icon sm'">
+       class=" al-icon sm"
+       [class]="(node.children | arrayIncludedInArray:checkedList())? checkIcon[0] : checkIcon[1]">
     </i>
   </mat-tree-node>
 </mat-tree>

@@ -53,7 +53,7 @@ export class TableFilterSortTemplateComponent {
 
   public formControl = new UntypedFormControl();
   isSorted: boolean;
-  searching: boolean = true;
+  searching = true;
   private _value: string[];
   public loading: boolean;
 
@@ -66,7 +66,7 @@ export class TableFilterSortTemplateComponent {
 
   @Input() fixedOptionsSubheader;
 
-  @Input() set value(filters: Array<string>) {
+  @Input() set value(filters: string[]) {
     this.loading = false;
     if (Array.isArray(filters)) {
       this.formControl.setValue(filters);
@@ -94,8 +94,8 @@ export class TableFilterSortTemplateComponent {
     this.options()?.length < this.column().paginatedFilterPageSize || this.options()?.length === this.previousLength && this.searchValue() === this.previousSearchValue :
   this.paginatedOptions()?.length === this.options()?.length);
 
-  @Input() subOptions: Array<{ label: string; value: string }>;
-  @Input() tooltip: boolean = false;
+  @Input() subOptions: { label: string; value: string }[];
+  @Input() tooltip = false;
   @Output() filterChanged = new EventEmitter();
   @Output() subFilterChanged = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
@@ -163,7 +163,7 @@ export class TableFilterSortTemplateComponent {
 
   loadMore() {
     this.loading = true;
-    this.pageNumber.set(this.pageNumber() + 1);
+    this.pageNumber.update(num => num + 1);
     if (!this.column().asyncFilter) {
       window.setTimeout(() => this.loading = false, 300);
     }

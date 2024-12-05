@@ -40,8 +40,14 @@ i.icon {
     }
   }
 
+  &.dark {
+    .item:hover {
+      background-color: $blue-600;
+    }
+  }
 }
 
 .unchecked {
   opacity: 0.4;
 }
+

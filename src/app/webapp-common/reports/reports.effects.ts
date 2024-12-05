@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
@@ -64,6 +65,8 @@ import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {setMainPageTagsFilter} from '@common/core/actions/projects.actions';
 import {cleanTag} from '@common/shared/utils/helpers.util';
 import {excludedKey, getTagsFilters} from '@common/shared/utils/tableParamEncode';
+import {of} from 'rxjs';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 
 @Injectable()
 export class ReportsEffects {
@@ -74,6 +77,7 @@ export class ReportsEffects {
     private route: ActivatedRoute,
     private router: Router,
     private reportsApiService: ApiReportsService,
+    private projectsApi: ApiProjectsService,
     private http: HttpClient,
     private matDialog: MatDialog
   ) {
@@ -87,16 +91,20 @@ export class ReportsEffects {
 
   createReport$ = createEffect(() => this.actions.pipe(
     ofType(createReport),
-    switchMap((action) => this.reportsApiService.reportsCreate(action.reportsCreateRequest)
-      .pipe(mergeMap((res: ReportsCreateResponse) => {
-        this.router.navigate(['reports', res.project_id, res.id]);
-        return [deactivateLoader(createReport.type)];
-      }),
-      catchError(err => [
-        requestFailed(err),
-        setServerError(err, null, 'failed to create a new report'),
-        deactivateLoader(createReport.type),
-      ])))
+    switchMap((action) => action.reportsCreateRequest.project !== undefined ? of(action) :
+      this.projectsApi.projectsCreate({name: action.reportsCreateRequest.projectName}).pipe(
+        map((res) => ({...action, reportsCreateRequest:{...action.reportsCreateRequest, project: res.id}}))
+      )),
+    switchMap((action) => this.reportsApiService.reportsCreate(action.reportsCreateRequest)),
+    mergeMap((res: ReportsCreateResponse) => {
+      this.router.navigate(['reports', res.project_id, res.id]);
+      return [deactivateLoader(createReport.type)];
+    }),
+    catchError(err => [
+      requestFailed(err),
+      setServerError(err, null, 'failed to create a new report'),
+      deactivateLoader(createReport.type),
+    ])
   ));
 
   getReports = createEffect(() => this.actions.pipe(
@@ -116,7 +124,7 @@ export class ReportsEffects {
     ]),
     switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId]) =>
       this.reportsApiService.reportsGetAllEx({
-        /* eslint-disable @typescript-eslint/naming-convention */
+
         only_fields: ['name', 'comment', 'company', 'tags', 'report', 'project.name', 'user.name', 'status', 'last_update', 'system_tags'] as (keyof Report)[],
         size: PAGE_SIZE,
         project: projectId === '*' ? null : projectId,
@@ -136,7 +144,7 @@ export class ReportsEffects {
             fields: ['id', 'name', 'tags', 'project', 'comment', 'report']
           }
         })
-        /* eslint-enable @typescript-eslint/naming-convention */
+
       })
         .pipe(
           mergeMap((res: ReportsGetAllExResponse) => [
@@ -189,7 +197,7 @@ export class ReportsEffects {
       map(() => action))),
     switchMap(action => this.reportsApiService.reportsGetAllEx({
       id: [action.id],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       only_fields: ['name', 'status', 'company.id', 'user.id', 'comment', 'report', 'tags', 'system_tags', 'report_assets', 'project.name']
     })),
     tap(res => {
@@ -238,10 +246,10 @@ export class ReportsEffects {
           type: 'report'
         }
       }).afterClosed()
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         .pipe(
           filter(project => !!project),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           map(project => ({task: action.report.id, project: project.id, project_name: project.name}))
         )
     ),
@@ -318,10 +326,10 @@ export class ReportsEffects {
             ...(!action.skipUndo ?
               [addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report archived successfully', [null, ...undoActions
               ].filter(a => a))] : []),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             setReportChanges({
               id: action.report.id,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               changes: {system_tags: (action.report.system_tags || []).concat('archived')}
             })
           ];
@@ -355,7 +363,7 @@ export class ReportsEffects {
               [(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report restored successfully', [null, ...undoActions].filter(a => a)))] : []),
             setReportChanges({
               id: action.report.id,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               changes: {system_tags: (action.report.system_tags || []).filter(tag => tag !== 'archived')}
             })
           ];
@@ -412,7 +420,7 @@ export class ReportsEffects {
         mergeMap(([, report]) => [updateReport({
           id: report.id,
           changes: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+
             report_assets: report.report_assets?.filter(r => r !== action.resource),
           }
         })])

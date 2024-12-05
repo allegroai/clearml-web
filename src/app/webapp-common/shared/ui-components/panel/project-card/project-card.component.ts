@@ -7,7 +7,6 @@ import {trackById} from '@common/shared/utils/forms-track-by';
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {BreadcrumbsEllipsisPipe} from '@common/shared/pipes/breadcrumbs-ellipsis.pipe';
 import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
 import {
@@ -17,6 +16,7 @@ import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.m
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {NgIf} from '@angular/common';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
 
 
 @Component({
@@ -28,7 +28,6 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     CdkVirtualScrollViewport,
     CardComponent,
     TooltipDirective,
-    SaferPipe,
     BreadcrumbsEllipsisPipe,
     InlineEditComponent,
     ShowTooltipIfEllipsisDirective,
@@ -37,7 +36,8 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     CdkFixedSizeVirtualScroll,
     NgIf,
     CdkVirtualForOf,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    MultiLineTooltipComponent
   ],
   standalone: true
 })
@@ -69,6 +69,7 @@ export class ProjectCardComponent {
   @Output() deleteProjectClicked = new EventEmitter<Project>();
   @Output() moveToClicked = new EventEmitter<Project>();
   @Output() newProjectClicked = new EventEmitter<Project>();
+  @Output() projectEditClicked = new EventEmitter<Project>();
   @ViewChild('projectName', {static: true}) projectName;
 
 

@@ -26,6 +26,8 @@ export const selectRouterParams = createSelector(selectRouter, router => router 
 export const selectRouterQueryParams = createSelector(selectRouter, router => router && router.queryParams);
 export const selectRouterConfig = createSelector(selectRouter, router => router && router.config);
 export const selectRouterData = createSelector(selectRouter, router => router && router.data);
+export const selectFirstRouterConfig = createSelector(selectRouterConfig, config => config?.[0]);
+
 
 export const routerReducer = createReducer(initRouter,
   on(setRouterSegments, (state, action): RouterState => ({

@@ -13,21 +13,21 @@
     placeholder="Filter By Regex"
     class="form-control"
     style="width: 250px;"
-    [value]="filter$ |async"
+    [value]="filter$ |ngrxPush"
     (keyup)="filterLog($event)"
   />
 </div>
 <div *ngIf="hasLog === false" class="no-output">
-  <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-log-dark' : 'i-no-log'"></i>
+  <i class="icon no-output-icon" [class]="isDarkTheme ? 'i-no-log-dark' : 'i-no-log'"></i>
   <h4>NO LOG DATA</h4>
 </div>
 
 <sm-experiment-log-info *ngIf="hasLog"
   [class.no-header]="!showHeader"
   [isDarkTheme]="isDarkTheme"
-  [logs]="log$ | async"
-  [beginningOfLog]="logBeginning$ | async"
-  [filterString]="filter$ | async"
-  [fetching]="fetching$ | async"
+  [logs]="log$ | ngrxPush"
+  [beginningOfLog]="logBeginning$ | ngrxPush"
+  [filterString]="filter$ | ngrxPush"
+  [fetching]="fetching$ | ngrxPush"
   (fetchMore)="getLogs($event)"
 ></sm-experiment-log-info>

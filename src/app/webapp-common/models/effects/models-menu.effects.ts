@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Action, Store} from '@ngrx/store';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {catchError, map, mergeMap, switchMap, tap} from 'rxjs/operators';

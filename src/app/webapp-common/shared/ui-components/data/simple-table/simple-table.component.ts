@@ -1,7 +1,7 @@
-import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
+import {Component, ContentChild, TemplateRef, input, output} from '@angular/core';
 import {CdkDrag, CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
-import {FormsTrackBy, trackById} from '../../../utils/forms-track-by';
-import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {FormsTrackBy} from '../../../utils/forms-track-by';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'sm-simple-table-2',
@@ -9,36 +9,37 @@ import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
   styleUrls: ['./simple-table.component.scss'],
   standalone: true,
   imports: [
-    NgIf,
-    NgForOf,
     CdkDropList,
     NgTemplateOutlet,
     CdkDrag
-  ]
+]
 })
 export class SimpleTableComponent extends FormsTrackBy {
 
   public open = [];
-  public trackById = trackById;
 
   get formData() {
-    return this.rowsData;
+    return this.rowsData();
   }
-  @Input() rowsConfig: Array<{ collapsible: boolean }> = [];
-  @Input() rowsData: Array<any>;
-  @Input() cols: { class: string; header: string; subHeader?: string }[];
-  @Input() hideHeaders = false;
-  @Input() enableDragAndDrop = false;
-  @Input() noDataMessage: string;
-  @Output() entryDropped = new EventEmitter<CdkDragDrop<any>>();
+  rowsConfig = input<{collapsible: boolean;}[]>([]);
+  rowsData = input<any[]>();
+  cols = input<{
+        class: string;
+        header: string;
+        subHeader?: string;
+    }[]>();
+  hideHeaders = input(false);
+  enableDragAndDrop = input(false);
+  noDataMessage = input<string>();
+  entryDropped = output<CdkDragDrop<any>>();
 
   @ContentChild(TemplateRef) templateRef: TemplateRef<any>;
 
-  isRowToggleable(rowIndex) {
-    return this.rowsConfig[rowIndex] && this.rowsConfig[rowIndex].collapsible;
+  isRowToggleable(rowIndex: number) {
+    return this.rowsConfig()[rowIndex] && this.rowsConfig()[rowIndex].collapsible;
   }
 
-  toggleRow(rowIndex) {
+  toggleRow(rowIndex: number) {
     if (this.isRowToggleable(rowIndex)) {
       this.open[rowIndex] = !this.open[rowIndex];
     }

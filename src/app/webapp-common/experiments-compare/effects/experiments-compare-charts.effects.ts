@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import * as chartActions from '../actions/experiments-compare-charts.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';

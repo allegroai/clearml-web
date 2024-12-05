@@ -1,17 +1,19 @@
 <div class="d-flex h-100">
-  <div *ngIf="!minimized" class="list-container">
-    <sm-selectable-filter-list
-      checkAllIcon="al-ico-show"
-      placeholder="Find plots"
-      [list]="graphList"
-      [checkedList]="settings.selectedMetricsPlot"
-      [searchTerm]="searchTerm$ | async"
-      (itemSelect)="metricSelected($event)"
-      (hiddenChanged)="selectedListChanged($event)"
-      (searchTermChanged)="searchTermChanged($event)"
-    >
-    </sm-selectable-filter-list>
-  </div>
+  @if (!minimized) {
+    <div class="list-container">
+      <sm-selectable-filter-list
+        checkAllIcon="al-ico-show"
+        placeholder="Find plots"
+        [list]="graphList"
+        [checkedList]="settings.selectedMetricsPlot"
+        [searchTerm]="searchTerm$ | ngrxPush"
+        (itemSelect)="metricSelected($event)"
+        (hiddenChanged)="selectedListChanged($event)"
+        (searchTermChanged)="searchTermChanged($event)"
+        >
+      </sm-selectable-filter-list>
+    </div>
+  }
   <div class="graphs-container h-100 w-100">
     <sm-experiment-graphs
       [metrics]="graphs"
@@ -19,11 +21,11 @@
       [isGroupGraphs]="true"
       [hiddenList]="settings.selectedMetricsPlot"
       [exportForReport]="!modelsFeature"
-      [splitSize]="splitSize$ | async"
+      [splitSize]="splitSize$ | ngrxPush"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
       [hoverMode]="'x unified'"
-    >
+      >
     </sm-experiment-graphs>
   </div>
 </div>

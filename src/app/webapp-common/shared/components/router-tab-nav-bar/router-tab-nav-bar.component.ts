@@ -6,6 +6,7 @@ import {Store} from '@ngrx/store';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {debounceTime} from 'rxjs/operators';
+import {PushPipe} from '@ngrx/component';
 
 export interface Link {
   name: string;
@@ -24,6 +25,7 @@ export interface Link {
     UpperCasePipe,
     RouterLinkActive,
     NgForOf,
+    PushPipe,
   ],
   standalone: true
 })

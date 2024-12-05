@@ -1,5 +1,5 @@
 import {Component, ChangeDetectionStrategy, signal, effect, input, computed, viewChild} from '@angular/core';
-import {ChartData, ChartEvent, ChartOptions, ChartType} from 'chart.js';
+import {ActiveDataPoint, ChartData, ChartEvent, ChartOptions, ChartType} from 'chart.js';
 import {BaseChartDirective} from 'ng2-charts';
 
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
@@ -36,8 +36,9 @@ export class DonutComponent {
     maintainAspectRatio: false,
     borderWidth: 0,
     plugins: {
-      legend: {display: false}
-    }
+      legend: {display: false},
+      tooltip: {enabled: false}
+    },
   } as ChartOptions<'doughnut'>;
 
   data = input.required<DonutChartData[]>();
@@ -48,22 +49,28 @@ export class DonutComponent {
       datasets: [{
         data: this.data().map(slice => slice.quantity),
         backgroundColor: this.colors(),
+        hoverOffset: 10,
       }]
     })
   );
   protected total = computed(() =>
     this.data().reduce((acc, slice) => acc + slice.quantity, 0)
   );
-  protected percent = computed(() => {
+  protected highlightedData = computed(() => {
     if (this.highlight() !== null) {
-      return  Math.round(this.donutData().datasets[0].data[this.highlight()] / this.total() * 100);
+      const value = this.donutData().datasets[0].data[this.highlight()];
+      return  {
+        caption: this.donutData().labels[this.highlight()],
+        value,
+        percent: Math.round(value / this.total() * 100),
+      };
     } else {
       return null;
     }
   });
 
   constructor() {
-    let setTimer: number = 0;
+    let setTimer = 0;
     effect(() => {
       this.windowResize();
       this.resize();
@@ -87,9 +94,15 @@ export class DonutComponent {
 
   hoverLegend(slice: number) {
     this.highlight.set(slice);
+
+    const element: ActiveDataPoint  = {datasetIndex: 0, index: slice};
+    this.chart()?.chart.setActiveElements([element]);
+    this.chart()?.chart.update('none');
   }
 
   leaveLegend() {
     this.highlight.set(null);
+    this.chart()?.chart.setActiveElements([]);
+    this.chart()?.chart.update('none');
   }
 }

@@ -28,12 +28,12 @@ import {ModelHeaderComponent} from '~/webapp-common/models/dumbs/model-header/mo
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
 import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
 import {merge, pick} from 'lodash-es';
-import { ModelInfoExperimentsComponent } from './containers/model-info-experiments/model-info-experiments.component';
+import {ModelInfoExperimentsComponent} from './containers/model-info-experiments/model-info-experiments.component';
 import {
   ModelExperimentsTableComponent
 } from '@common/models/containers/model-experiments-table/model-experiments-table.component';
-import { ModelInfoPlotsComponent } from './containers/model-info-plots/model-info-plots.component';
-import { ModelInfoScalarsComponent } from './containers/model-info-scalars/model-info-scalars.component';
+import {ModelInfoPlotsComponent} from './containers/model-info-plots/model-info-plots.component';
+import {ModelInfoScalarsComponent} from './containers/model-info-scalars/model-info-scalars.component';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {UserPreferences} from '@common/user-preferences';
@@ -88,9 +88,17 @@ import {CountLinesPipe} from '@common/shared/pipes/count-lines.pipe';
 import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
-import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  SelectMetricForCustomColComponent
+} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {
+  ExperimentCustomColsMenuComponent
+} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
+import {PushPipe} from '@ngrx/component';
+
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
@@ -192,25 +200,24 @@ const getInitState = (userPreferences: UserPreferences) => ({
     CdkVirtualForOf,
     CdkFixedSizeVirtualScroll,
     SelectMetricForCustomColComponent,
-    ExperimentCustomColsMenuComponent
+    ExperimentCustomColsMenuComponent,
+    ModelInfoMetadataComponent,
+    PushPipe,
   ],
-    providers: [
-        SmFormBuilderService, DatePipe,
-        {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
-    ],
-    exports: [
-        ModelsComponent
-    ],
-    declarations: [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
-        ModelViewNetworkComponent, ModelInfoNetworkComponent,
-        ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
-        ModelGeneralInfoComponent, ModelHeaderComponent,
-        ModelInfoMetadataComponent,
-        ModelInfoExperimentsComponent,
-        ModelExperimentsTableComponent,
-        ModelInfoPlotsComponent,
-        ModelInfoScalarsComponent
-    ]
+  providers: [
+    SmFormBuilderService, DatePipe,
+    {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
+  ],
+
+  declarations: [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
+    ModelViewNetworkComponent, ModelInfoNetworkComponent,
+    ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
+    ModelGeneralInfoComponent, ModelHeaderComponent,
+    ModelInfoExperimentsComponent,
+    ModelExperimentsTableComponent,
+    ModelInfoPlotsComponent,
+    ModelInfoScalarsComponent
+  ]
 })
 export class ModelsModule {
 }

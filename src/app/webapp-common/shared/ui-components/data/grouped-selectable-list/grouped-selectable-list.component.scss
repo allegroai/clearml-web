@@ -2,7 +2,7 @@
 
 :host {
   display: block;
-  padding: 0 10px 0 24px;
+  padding: 0 24px;
   margin: 0;
   overflow: scroll;
 }
@@ -67,7 +67,7 @@ mat-tree-node:hover .al-ico-hide {
   font-size: 12px;
   border-radius: 4px;
   line-height: 32px;
-  padding: 0 4px;
+  padding: 0 4px 0 12px;
 
   &:hover {
     background-color: $blue-50;

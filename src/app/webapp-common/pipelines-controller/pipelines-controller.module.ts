@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {importProvidersFrom, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ControllersComponent} from './controllers.component';
 import {AngularSplitModule} from 'angular-split';
@@ -47,12 +47,51 @@ import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
+import {PushPipe} from '@ngrx/component';
+import {compareNavigationGuard} from '@common/experiments/compare-navigation.guard';
+import {compareViewStateGuard} from '@common/experiments/compare-view-state.guard';
+import {ExperimentCompareScalarChartsComponent} from '@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
+import {COMPARE_CONFIG_TOKEN, COMPARE_STORE_KEY, getCompareConfig} from '@common/experiments-compare/experiments-compare.module';
+import {UserPreferences} from '@common/user-preferences';
+import {StoreModule} from '@ngrx/store';
+import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
+import {ExperimentComparePlotsComponent} from '@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component';
+import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: ControllersComponent,
     children: [
+  {
+    path: 'compare',
+    canActivate: [compareNavigationGuard],
+    children: []
+  },
+  {
+    path: 'compare/scalars',
+    canActivate: [compareViewStateGuard],
+    component: ExperimentCompareScalarChartsComponent,
+    data: {minimized: true},
+    providers: [
+      {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+      importProvidersFrom(
+        StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+      ),
+    ],
+  },
+  {
+    path: 'compare/plots',
+    canActivate: [compareViewStateGuard],
+    component: ExperimentComparePlotsComponent,
+    data: {minimized: true},
+    providers: [
+      {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+      importProvidersFrom(
+        StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+      ),
+    ],
+  },
       {
         path: ':controllerId', component: PipelineControllerInfoComponent,
       },
@@ -112,6 +151,8 @@ export const routes: Routes = [
     MatMenuModule,
     ShowTooltipIfEllipsisDirective,
     SelectQueueModule,
+    PushPipe,
+    ExperimentHeaderComponent
   ],
   providers: [
     ControllersComponent,

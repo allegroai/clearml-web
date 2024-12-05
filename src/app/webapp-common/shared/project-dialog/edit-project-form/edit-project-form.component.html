@@ -1,0 +1,64 @@
+<form [formGroup]="projectForm" class="d-flex flex-column">
+  <mat-form-field appearance="outline" class="mat-light">
+    <mat-label>Project name</mat-label>
+    <input name="projectName"
+           formControlName="name"
+           matInput
+           autocomplete="off"
+           smUniqueProjectValidator
+           [parent]="parentProjectPath()"
+           [allowedPath]="project().name"
+           pattern="^[^\/]*$"
+    >
+    @if (projectForm.controls.name.invalid && projectForm.controls.name.errors; as errors) {
+      <mat-error>
+        @if (errors?.required) {
+          Please add name.
+        }
+        @if (errors?.uniqueProject) {
+          Project name in this path already exists.
+        }
+        @if (errors?.minlength) {
+          Project name should contain more than 3 characters.
+        }
+        @if (errors?.emptyName && !errors?.minlength) {
+          Project name can't contain only spaces.
+        }
+        @if (errors?.pattern &&  !errors?.minlength) {
+          Project name can't contain slash (/)
+        }
+      </mat-error>
+    }
+  </mat-form-field>
+<mat-form-field appearance="outline" class="mat-light">
+  <mat-label>Project path</mat-label>
+  <input matInput
+         name="parent"
+         formControlName="parent"
+         [disabled]="true"
+  >
+</mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Default output destination</mat-label>
+    <input class="project-output-dest"
+           matInput
+           name="default_output_destination"
+           formControlName="default_output_destination"
+           [disabled]="true"
+    >
+    @if (projectForm.controls.default_output_destination.invalid && projectForm.controls.default_output_destination.errors; as errors) {
+      <mat-error>
+        @if (errors?.pattern) {
+          Illegal output destination (e.g. s3://bucket. gs://bucket)
+        }
+      </mat-error>
+    }
+  </mat-form-field>
+    <div class="actions">
+      <button (click)="cancelClicked.emit()" class="btn btn-outline-neon" data-id="Cancel">CANCEL</button>
+      <button [disabled]="projectForm.invalid" (click)="send()" data-id="Save" class="btn btn-neon">
+        SAVE
+      </button>
+    </div>
+</form>

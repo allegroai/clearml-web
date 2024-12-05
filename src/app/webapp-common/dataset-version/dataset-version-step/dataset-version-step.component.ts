@@ -1,7 +1,7 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input, input, output } from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
-import {StepStatusEnum} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
+import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
 
 export interface TreeVersion {
   name: string;
@@ -28,8 +28,6 @@ export class DatasetVersionStepComponent {
   protected _step: VersionItem;
   protected readonly fileSizeConfigStorage = fileSizeConfigStorage;
 
-  constructor(private cdr: ChangeDetectorRef) { }
-
   @Input() set step(step: VersionItem) {
     this._step = {...step, data: {...step.data, status: step.data?.status || StepStatusEnum.pending}};
   }
@@ -37,7 +35,6 @@ export class DatasetVersionStepComponent {
   get step() {
     return this._step;
   }
-  @Input() selected: boolean;
-  @Output() openConsole = new EventEmitter();
-
+  selected = input<boolean>();
+  openConsole = output();
 }

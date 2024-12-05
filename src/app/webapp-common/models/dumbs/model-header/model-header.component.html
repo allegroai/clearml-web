@@ -5,7 +5,7 @@
       <sm-toggle-archive
         [class.hide-item]="sharedView()"
         [showArchived]="isArchived()"
-        [minimize]="(isSmallScreen$ | async).matches"
+        [minimize]="(isSmallScreen$ | ngrxPush).matches"
         (toggleArchived)="onIsArchivedChanged($event)"></sm-toggle-archive>
     }
     <sm-button-toggle
@@ -26,7 +26,7 @@
     <sm-menu class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
              [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSVButton">
       <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
-      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()" [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
+      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()" [itemLabel]="'Download first '+ (maxDownloadItems$ | ngrxPush) +' items'"></sm-menu-item>
     </sm-menu>
     @if (!minimizedView() || sharedView()) {
       <sm-custom-cols-menu

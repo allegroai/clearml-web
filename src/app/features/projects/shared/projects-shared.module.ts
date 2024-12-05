@@ -33,6 +33,7 @@ import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-
 import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 
 const _declarations = [
   ProjectCardMenuExtendedComponent,
@@ -70,7 +71,8 @@ const _declarations = [
     TooltipDirective,
     ButtonToggleComponent,
     NavbarItemComponent,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    DotsLoadMoreComponent
   ],
   declarations: [..._declarations, PipelinesEmptyStateComponent],
   exports: [..._declarations, PipelinesEmptyStateComponent]

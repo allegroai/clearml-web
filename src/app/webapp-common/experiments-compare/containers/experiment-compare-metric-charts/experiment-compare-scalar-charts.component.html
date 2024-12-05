@@ -1,43 +1,45 @@
 <mat-drawer-container autosize class="light-theme">
   <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
     <div class="list-container">
-      <sm-graph-settings-bar
-        class="drawer-settings-bar"
-        *ngIf="!minimized"
-        [verticalLayout]="true"
-        [smoothWeight]="settings.smoothWeight"
-        [smoothType]="settings.smoothType"
-        [xAxisType]="settings.xAxisType"
-        [groupBy]="settings.groupBy"
-        [groupByOptions]="groupByOptions"
-        (changeWeight)="changeSmoothness($event)"
-        (toggleSettings)="toggleSettingsBar()"
-        (changeXAxisType)="changeXAxisType($event)"
-        (changeGroupBy)="changeGroupBy($event)"
-        (changeSmoothType)="changeSmoothType($event)"
-      ></sm-graph-settings-bar>
-      <sm-selectable-grouped-filter-list
-        *ngIf="!minimized"
-        [list]="graphList"
-        [checkedList]="settings.selectedMetricsScalar"
-        [searchTerm]="searchTerm$ | async"
-        (itemSelect)="metricSelected($event)"
-        (hiddenChanged)="selectedListChanged($event)"
-        (searchTermChanged)="searchTermChanged($event)"
-      >
-      </sm-selectable-grouped-filter-list>
+      @if (!minimized) {
+        <sm-graph-settings-bar
+          class="drawer-settings-bar"
+          [verticalLayout]="true"
+          [smoothWeight]="settings.smoothWeight"
+          [smoothType]="settings.smoothType"
+          [xAxisType]="settings.xAxisType"
+          [groupBy]="settings.groupBy"
+          [groupByOptions]="groupByOptions"
+          (changeWeight)="changeSmoothness($event)"
+          (toggleSettings)="toggleSettingsBar()"
+          (changeXAxisType)="changeXAxisType($event)"
+          (changeGroupBy)="changeGroupBy($event)"
+          (changeSmoothType)="changeSmoothType($event)"
+        ></sm-graph-settings-bar>
+      }
+      @if (!minimized) {
+        <sm-selectable-grouped-filter-list
+          [list]="graphList"
+          [checkedList]="settings.selectedMetricsScalar"
+          [searchTerm]="searchTerm$ | ngrxPush"
+          (itemSelect)="metricSelected($event)"
+          (hiddenChanged)="selectedListChanged($event)"
+          (searchTermChanged)="searchTermChanged($event)"
+          >
+        </sm-selectable-grouped-filter-list>
+      }
     </div>
   </mat-drawer>
   <mat-drawer-content class="overflow-hidden">
     <sm-graph-settings-bar
       class="ribbon-setting-bar"
-      [class.showSettings]="showSettingsBar && minimized"
+      [class.showSettings]="(showSettingsBar$ | ngrxPush) && minimized"
       [smoothWeight]="settings.smoothWeight"
       [smoothType]="settings.smoothType"
       [xAxisType]="settings.xAxisType"
       [groupBy]="settings.groupBy"
       [groupByOptions]="groupByOptions"
-      [splitSize]="splitSize$ | async"
+      [splitSize]="splitSize$ | ngrxPush"
       (changeWeight)="changeSmoothness($event)"
       (toggleSettings)="toggleSettingsBar()"
       (changeXAxisType)="changeXAxisType($event)"
@@ -45,7 +47,7 @@
       (changeSmoothType)="changeSmoothType($event)"
     ></sm-graph-settings-bar>
     <sm-experiment-graphs
-      [class.with-settings]="showSettingsBar && minimized"
+      [class.with-settings]="(showSettingsBar$ | ngrxPush) && minimized"
       [metrics]="graphs"
       [hiddenList]="settings.selectedMetricsScalar"
       [isGroupGraphs]="false"
@@ -55,15 +57,14 @@
       [xAxisType]="settings.xAxisType"
       [groupBy]="settings.groupBy"
       [multipleSingleValueData]="singleValues"
-      [hoverMode]="hoverMode$ | async"
+      [hoverMode]="hoverMode$ | ngrxPush"
       [exportForReport]="!modelsFeature"
       [minimized]="minimized"
       [breakPoint]="900"
-      [splitSize]="splitSize$ | async"
+      [splitSize]="splitSize$ | ngrxPush"
       (resetGraphs)="resetMetrics()"
       (hoverModeChanged)="hoverModeChanged($event)"
       (createEmbedCode)="createEmbedCode($event)"
-    >
-    </sm-experiment-graphs>
+    ></sm-experiment-graphs>
   </mat-drawer-content>
 </mat-drawer-container>

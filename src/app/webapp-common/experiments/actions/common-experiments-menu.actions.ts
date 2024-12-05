@@ -72,6 +72,11 @@ export const navigateToQueue = createAction(
   props<{ experimentId: string }>()
 );
 
+export const navigateToWorker = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'navigate to worker',
+  props<{ experimentId: string }>()
+);
+
 export const enqueueClicked = createAction(
   EXPERIMENTS_INFO_PREFIX + 'enqueue experiments',
   props<{ selectedEntities: ISelectedExperiment[]; queue: Queue; verifyWatchers: boolean }>()

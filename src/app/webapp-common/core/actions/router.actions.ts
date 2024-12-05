@@ -47,7 +47,7 @@ export const setTypeBreadcrumbs = createAction(
 );
 
 export const setWorkspaceNeutral = createAction(
-  BREADCRUMBS_PREFIX + 'SET_TYPE_BREADCRUMBS',
+  BREADCRUMBS_PREFIX + 'set workspace neutral',
   props<{ neutral: boolean }>()
 );
 

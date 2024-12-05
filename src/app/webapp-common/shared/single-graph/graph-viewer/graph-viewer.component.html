@@ -1,7 +1,7 @@
 <div class="modal-container" [class.dark-theme]="darkTheme" #modalContainer>
   <div class="graph-viewer-header">
     <div class="chart-title ellipsis"
-      [class.w-100]="!(minMaxIterations$ | async)?.minIteration"
+      [class.w-100]="!(minMaxIterations$ | ngrxPush)?.minIteration"
       [smTooltip]="title" smShowTooltipIfEllipsis>
       @if (singleGraph && data.moveLegendToTitle && chart) {
         <span #dot
@@ -18,7 +18,7 @@
     <input #fakeInput name="Don't remove - it take the autofocus from slider" style="opacity: 0; height: 0; width: 0">
     @if (!darkTheme) {
       <div class="viewer-iteration">
-        @if (minMaxIterations$ | async; as minMaxIterations) {
+        @if (minMaxIterations$ | ngrxPush; as minMaxIterations) {
           <div>
             @if (minMaxIterations.maxIteration !== minMaxIterations.minIteration || minMaxIterations.minIteration > 0) {
               <span>
@@ -45,8 +45,8 @@
       </div>
     }
     <div class="header-actions">
-      <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center me-3"></div>
-      @if ((isFetchingData$ | async) === false && isFullDetailsMode) {
+      <div [class.load-spinner]="(isFetchingData$ | ngrxPush) || !plotLoaded" class="d-flex align-items-center me-3"></div>
+      @if ((isFetchingData$ | ngrxPush) === false && isFullDetailsMode) {
         <div class="pointer d-flex align-items-center me-3" smTooltip="Refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
       }
       <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
@@ -62,9 +62,9 @@
           <span class="label-text axis-text-margin-left">Horizontal Axis</span>
           <mat-form-field appearance="outline" class="axis-type-field no-bottom" [class.black]="darkTheme">
             <mat-select
-              [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)"
+              [value]="xAxisType$ | ngrxPush" (selectionChange)="xAxisTypeChanged($event)"
               [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'"
-              [disabled]="isFetchingData$ | async"
+              [disabled]="isFetchingData$ | ngrxPush"
               >
               @for (type of xAxisTypeOption; track type.value) {
                 <mat-option [value]="type.value">{{type.name}}</mat-option>

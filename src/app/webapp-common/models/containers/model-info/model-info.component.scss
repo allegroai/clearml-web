@@ -29,10 +29,8 @@
 
   .tab-nav {
     display: grid;
-    grid-template-columns: 200px 1fr 200px;
-    align-items: center;
+    grid-template-columns: 110px 1fr 110px;
     border-bottom: 1px solid #efefef;
-    margin-right: 30px;
 
     &.minimized {
       display: flex;
@@ -62,7 +60,14 @@
   .refresh-position {
     display: flex;
     align-items: center;
+    margin-right: 24px;
     margin-left: auto;
+
+    .scalar-buttons {
+      gap: 12px;
+      display: flex;
+      align-items: center;
+    }
   }
 
   .refreshIcon {
@@ -72,6 +77,17 @@
   sm-experiment-settings.maximized {
     display: block;
     padding-top: 6px;
+  }
+
+  .table-graph-toggle {
+    height: 28px;
+
+    &.maximized {
+      height: 32px;
+      align-items: center;
+      display: flex;
+      margin-right: 14px;
+    }
   }
 }
 

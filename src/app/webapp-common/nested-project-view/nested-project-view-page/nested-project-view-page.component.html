@@ -1,5 +1,5 @@
 <div class="sm-card-list-layout projects"
-     [class.in-empty-state]="!(projectsList?.length !== 0 || searching)">
+     [class.in-empty-state]="!(projectsList()?.length !== 0 || searching)">
   <sm-projects-header
     (orderByChanged)="orderByChanged.emit($event)"
     [sortByField]="projectsOrderBy"
@@ -22,10 +22,10 @@
       <ng-content select="[extendedButtons]"></ng-content>
     </div>
   </sm-projects-header>
-  <ng-container *ngIf="projectsList?.length !== 0 || searching; else emptyState">
-    <ng-container *ngFor="let project of projectsList; trackBy: trackById ; let last=last; let index=index">
+  <ng-container *ngIf="projectsList()?.length !== 0 || searching; else emptyState">
+    <ng-container *ngFor="let project of projectsList(); trackBy: trackById ; let last=last; let index=index">
       <sm-nested-card
-        *ngIf="index + totalVirtualCards < projectsList.length || noMoreProjects || searching"
+        *ngIf="index + totalVirtualCards < projectsList().length || noMoreProjects || searching"
         [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
         [entityType]="entityType"
         [project]="project"
@@ -36,13 +36,16 @@
         <div card-footer class="footer-tags" *ngIf="cardContentFooterTemplateRef">
           <ng-container *ngTemplateOutlet="cardContentFooterTemplateRef; context: {$implicit: project}"></ng-container>
         </div>
-
       </sm-nested-card>
     </ng-container>
   </ng-container>
 
-  <div class="load-more" *ngIf="noMoreProjects === false && projectsList?.length > 0">
-    <button (click)="loadMore.emit()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
+  <div class="load-more" *ngIf="noMoreProjects === false && projectsList()?.length > 0">
+    <sm-dots-load-more
+      [loading]="loading"
+      (loadMore)="loadMoreAction()"
+      class="mx-auto my-2"
+    ></sm-dots-load-more>
   </div>
 </div>
 <ng-template #emptyState>

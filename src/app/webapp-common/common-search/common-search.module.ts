@@ -6,6 +6,8 @@ import {searchReducer} from './common-search.reducer';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {PushPipe} from '@ngrx/component';
+
 
 @NgModule({
   imports: [
@@ -14,6 +16,7 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
     ClickStopPropagationDirective,
     SearchComponent,
     TooltipDirective,
+    PushPipe,
   ],
   declarations: [CommonSearchComponent],
   exports     : [CommonSearchComponent]

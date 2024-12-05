@@ -1,13 +1,11 @@
 <div class="title">
   WEB APP CLOUD ACCESS <i
   class="al-icon al-ico-info-circle sm info ms-3"
-  smTooltip="Local, browser cached, access tokens that facilitate retrieving your cloud stored resources"
-
-></i>
+  smTooltip="Local, browser cached, access tokens that facilitate retrieving your cloud stored resources"></i>
 </div>
-<div class="section">
-  <sm-s3-access
-    [s3bucketCredentials]="s3BucketCredentials$ | async"
-    (s3bucketCredentialsChanged)="onS3BucketCredentialsChanged($event)">
-  </sm-s3-access>
-</div>
+<sm-s3-access
+  class="dark-theme"
+  [ngModel]="s3BucketCredentials()"
+  [externalCredentials]="externalCredentials()"
+  (ngModelChange)="onS3BucketCredentialsChanged($event)">
+</sm-s3-access>

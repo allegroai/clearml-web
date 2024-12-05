@@ -13,6 +13,8 @@ import {
 } from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatInputModule} from '@angular/material/input';
+import {PushPipe} from '@ngrx/component';
+
 
 @NgModule({
   imports: [
@@ -25,6 +27,7 @@ import {MatInputModule} from '@angular/material/input';
     UniqueNameValidatorDirective,
     DialogTemplateComponent,
     MatInputModule,
+    PushPipe,
   ],
   declarations   : [QueueCreateDialogComponent, CreateNewQueueFormComponent]
 })

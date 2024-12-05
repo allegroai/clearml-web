@@ -2,8 +2,10 @@ import {createAction, props} from '@ngrx/store';
 import {ExperimentSettings} from '../reducers/experiment-output.reducer';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
-import {EventsGetTaskSingleValueMetricsResponseTasks} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
-import {ChartHoverModeEnum} from '../shared/common-experiments.const';
+import {
+  EventsGetTaskSingleValueMetricsResponseTasks
+} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
+import {Task} from '~/business-logic/model/tasks/task';
 
 export type GroupByCharts = 'metric' | 'none';
 
@@ -82,6 +84,11 @@ export const setExperimentScalarSingleValue = createAction(
   props<EventsGetTaskSingleValueMetricsResponseTasks >()
 );
 
+export const setExperimentMetricsVariantValues = createAction(
+  EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_METRICS_VARIANT_VALUES',
+  props<{lastMetrics: Task['last_metrics']} >()
+);
+
 export const setExperimentSettings = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'UPDATE_EXPERIMENT_SETTINGS',
   props<{ id: string; changes: Partial<ExperimentSettings> }>()
@@ -102,5 +109,6 @@ export const setLogFilter = createAction(
 export const resetLogFilter = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_LOG_FILTER');
 export const downloadFullLog = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'DOWNLOAD_FULL_LOG', props<{ experimentId: string }>());
 export const toggleSettings = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_SETTINGS');
+export const toggleMetricValuesView = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_METRIC_VALUES_VIEW');
 export const setGraphsPerRow = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_GRAPHS_PER_ROW', props<{ graphsPerRow: number }>());
 

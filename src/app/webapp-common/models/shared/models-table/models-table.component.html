@@ -7,9 +7,9 @@
   [selectedDisableAvailableIsMultiple]="!singleRowContext"
   [selectedDisableAvailable]="singleRowContext ? getSingleSelectedModelsDisableAvailable(selectedModel? selectedModel: contextModel) : selectedModelsDisableAvailable"
   [numSelected]="singleRowContext ? 1 : selectedModels.length"
-  [tagsFilterByProject]="tagsFilterByProject$ | async"
-  [projectTags]="projectTags$ | async"
-  [companyTags]="companyTags$ | async"
+  [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+  [projectTags]="projectTags$ | ngrxPush"
+  [companyTags]="companyTags$ | ngrxPush"
   [activateFromMenuButton]="false"
   [useCurrentEntity]="singleRowContext"
   [backdrop]="menuBackdrop"
@@ -31,6 +31,7 @@
     [scrollable]="true"
     [columnsOrder]="colsOrder"
     [lazyLoading]="true"
+    [columnResizeMode]="columnResizeMode"
     [selection]="selectedModel"
     [checkedItems]="selectedModels"
     [activeContextRow]="contextModel"
@@ -181,7 +182,7 @@
         [tagsTemplate]="tagList"
         [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSysTags(model).length === 0 && model?.tags.length === 0"
-        (click)="selected && openContextMenu({e: $event, rowData: model, backdrop: true})"
+        (click)="selected && cardClicked($event, model)"
       >
         <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i>
         </div>

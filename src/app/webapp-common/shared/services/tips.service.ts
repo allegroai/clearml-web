@@ -18,16 +18,14 @@ import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
 import {DeviceDetectorService} from 'ngx-device-detector';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 
-interface Tips {
-  [url: string]: Tip[];
-}
+type Tips = Record<string, Tip[]>;
 
 export interface Tip {
   title: string;
   image: string;
   content: string;
-  context: string;
-  feature: FeaturesEnum;
+  context?: string;
+  feature?: FeaturesEnum;
 }
 
 const tipsCooldownTime = 1000 * 60 * 60 * 24 * 3;
@@ -45,7 +43,7 @@ export class TipsService {
   private tipsConfig = signal<Tips>({global: []});
   private nextTimeToShowTips: Date;
   private neverShowAgain: boolean;
-  private firstTime: boolean = true;
+  private firstTime = true;
   private mobile = this.deviceService.isMobile();
   public hasTips = computed(() => Object.keys(this.tipsConfig()).length > 0);
 
@@ -120,13 +118,14 @@ export class TipsService {
 
   public showTipsModal(allTips?: Tip[], hideDontShow?: boolean) {
     const visitedIndex = parseInt(window.localStorage.getItem('tipVisitedIndex'), 10) || 0;
-    allTips = allTips ? allTips : (Object.values(this.tipsConfig()) as any).flat();
+    allTips = allTips ? allTips : (Object.values(this.tipsConfig())).flat();
     this.matDialog.open<TipOfTheDayModalComponent, TipsModalData, boolean>(TipOfTheDayModalComponent, {
       data: {
         tips: allTips,
         visitedIndex,
-        hideDontShow: this.neverShowAgain || hideDontShow
-      }
+        hideDontShow: this.neverShowAgain || hideDontShow,
+      },
+      maxWidth: '712px'
     }).afterClosed()
       .subscribe((neveShowAgain) => {
         if (neveShowAgain) {

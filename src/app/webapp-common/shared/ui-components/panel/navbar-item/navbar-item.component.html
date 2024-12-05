@@ -1,5 +1,9 @@
 <div [class]="'navbar-item ' + direction" [class.active]="active" [class.with-subheader]="subHeader">
-  <div class="d-flex align-items-center header">{{header?.toUpperCase()}}@if(multi){<i class="ms-2 al-icon al-ico-dropdown-arrow"></i>}</div>
+  <div class="d-flex align-items-center header">{{header?.toUpperCase()}}
+    @if (badge) {
+      <span class="badge" [smTooltip]="badgeTooltip" [matTooltipShowDelay]="300">{{badge}}</span>
+    }
+  </div>
   @if (subHeader) {
     <div class="sub-header">{{subHeader}}</div>
   }

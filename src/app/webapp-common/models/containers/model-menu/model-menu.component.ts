@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output, inject, computed} from '@angular/core';
 import {
   archiveSelectedModels,
   changeProjectRequested,
@@ -42,45 +42,29 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
   styleUrls: ['./model-menu.component.scss']
 })
 export class ModelMenuComponent extends BaseContextMenuComponent {
-
+  protected dialog = inject(MatDialog);
+  protected adminService = inject(AdminService);
   readonly icons = ICONS;
   public modelSignedUri: string;
-  public _model: SelectedModel;
-  public isExample: boolean;
-  public isLocalFile: boolean;
-  public isArchive: boolean;
 
-  @Input() set model(model: SelectedModel) {
-    this._model = model;
-    this.isExample = isReadOnly(model);
-    this.isLocalFile = this.adminService.isLocalFile(model?.uri);
-    this.isArchive = model?.system_tags?.includes('archived');
-  }
+  model = input.required<SelectedModel>();
+  selectedModel = input<SelectedModel>();
+  selectedModels = input<SelectedModel[]>();
+  numSelected = input(0);
+  projectTags = input<string[]>();
+  companyTags = input<string[]>();
+  tagsFilterByProject = input<boolean>();
+  activateFromMenuButton = input(true);
+  useCurrentEntity = input(false);
+  tagSelected = output<string>();
 
-  get model() {
-    return this._model;
-  }
-
-  @Input() selectedModel: SelectedModel;
-  @Input() selectedModels: SelectedModel[];
-  @Input() numSelected = 0;
-  @Input() projectTags: string[];
-  @Input() companyTags: string[];
-  @Input() tagsFilterByProject: boolean;
-  @Input() activateFromMenuButton = true;
-  @Input() useCurrentEntity = false;
-  @Output() tagSelected = new EventEmitter<string>();
-
-  constructor(
-    protected dialog: MatDialog,
-    protected adminService: AdminService,
-  ) {
-    super();
-  }
+  protected isExample = computed(() => isReadOnly(this.model()));
+  protected isLocalFile = computed(() => this.adminService.isLocalFile(this.model()?.uri));
+  protected isArchive = computed(() => this.model()?.system_tags?.includes('archived'));
 
   archiveClicked() {
     // info header case
-    const selectedModels = this.selectedModels ? selectionDisabledArchive(this.selectedModels).selectedFiltered : [this.model];
+    const selectedModels = this.selectedModels() ? selectionDisabledArchive(this.selectedModels()!).selectedFiltered : [this.model()];
     if (selectedModels[0].system_tags?.includes('archived')) {
       this.store.dispatch(restoreSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     } else {
@@ -89,7 +73,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   }
 
   public publishPopup() {
-    const selectedModels = this.selectedModels ? selectionDisabledPublishModels(this.selectedModels).selectedFiltered : [this.model];
+    const selectedModels = this.selectedModels() ? selectionDisabledPublishModels(this.selectedModels()!).selectedFiltered : [this.model()];
 
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -114,7 +98,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   }
 
   public moveToProjectPopup() {
-    const selectedModels = this.selectedModels ? selectionDisabledMoveTo(this.selectedModels).selectedFiltered : [this.model];
+    const selectedModels = this.selectedModels() ? selectionDisabledMoveTo(this.selectedModels()!).selectedFiltered : [this.model()];
     const currentProjects = Array.from(new Set(selectedModels.map(exp => exp.project?.id).filter(p => p)));
     const dialog = this.dialog.open(ChangeProjectDialogComponent, {
       data: {
@@ -135,7 +119,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   }
 
   public downloadModelFileClicked = () => {
-    const url = this.model.uri;
+    const url = this.model().uri;
     this.store.dispatch(getSignedUrl({url}));
     this.store.select(selectSignedUrl(url))
       .pipe(
@@ -160,10 +144,10 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   deleteModelPopup() {
     const confirmDialogRef =     this.dialog.open<CommonDeleteDialogComponent, DeleteData, boolean>(CommonDeleteDialogComponent, {
       data: {
-        entity: this._model,
-        numSelected: this.numSelected,
+        entity: this.model(),
+        numSelected: this.numSelected(),
         entityType: EntityTypeEnum.model,
-        useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity
+        useCurrentEntity: this.activateFromMenuButton() || this.useCurrentEntity()
       },
       width: '600px',
       disableClose: true
@@ -171,7 +155,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.store.dispatch(setSelectedModels({models: []}));
-        this.store.dispatch(modelSelectionChanged({model: null, project: this.projectId() || this.model?.project?.id || '*'}));
+        this.store.dispatch(modelSelectionChanged({model: null, project: this.projectId() || this.model()?.project?.id || '*'}));
         this.store.dispatch(fetchModelsRequested());
         this.store.dispatch(cancelModelEdit());
       }
@@ -181,7 +165,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   toggleDetails() {
     this.store.dispatch(setTableMode({mode:'info'}));
     this.store.dispatch(modelSelectionChanged({
-      model: this._model,
+      model: this.model(),
       project: this.projectId()
     }));
   }

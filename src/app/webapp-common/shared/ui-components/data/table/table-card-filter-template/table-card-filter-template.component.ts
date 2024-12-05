@@ -48,13 +48,13 @@ export class TableCardFilterTemplateComponent {
   protected loading = signal<boolean>(false);
 
 
-  value = input<{[colId: string]: string[]}>({});
+  value = input<Record<string, string[]>>({});
   fixedOptionsSubheader = input<string>();
   subValue = input<string[]>( []);
   subOptions = input<IOption[]>([]);
   columns = input.required<ISmCol[]>();
-  options = input.required<{[col: string]: IOption[]}>();
-  filterMatch = input<{ [colId: string]: string }>();
+  options = input.required<Record<string, IOption[]>>();
+  filterMatch = input<Record<string, string>>();
   protected isFiltering = computed(() =>
     (this.value() && Object.values(this.value()).some(options => options?.length > 0)) ||
     this.subValue()?.length > 0
@@ -124,7 +124,7 @@ export class TableCardFilterTemplateComponent {
   }
 
   loadMore() {
-    window.setTimeout(() => this.pageNumber.set(this.pageNumber() + 1), 300);
+    window.setTimeout(() => this.pageNumber.update(num => num + 1), 300);
     this.loading.set(true);
   }
 }

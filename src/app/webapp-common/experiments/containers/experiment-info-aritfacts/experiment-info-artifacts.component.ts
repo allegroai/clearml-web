@@ -28,7 +28,7 @@ import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 @Component({
   selector: 'sm-experiment-info-artifacts-model',
   templateUrl: './experiment-info-artifacts.component.html',
-  styleUrls: ['./experiment-info-aritfacts.component.scss']
+  styleUrls: ['./experiment-info-artifacts.component.scss']
 })
 export class ExperimentInfoArtifactsComponent implements OnDestroy {
   public backdropActive$: Observable<boolean>;
@@ -51,7 +51,7 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.experimentInfo$ = this.store.select(selectExperimentInfoData);
     this.routerConfig$ = this.store.select(selectRouterConfig);
-    this.selectedId$ = this.store.select(selectArtifactId)
+    this.selectedId$ = this.store.select(selectArtifactId);
     this.experimentKey$ = this.store.select(selectSelectedExperimentFromRouter);
 
     this.sub.add(this.store.select(selectRouterConfig)
@@ -95,9 +95,10 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
         .subscribe(([selectedId, modelInfo]) => {
           const onOutputModel = this.route.snapshot.firstChild?.data?.outputModel;
           const onInputModel = this.route.snapshot.firstChild?.data?.outputModel === false;
+          const taskName = this.route.snapshot.queryParams.taskName;
           if (selectedId) {
             const selectedArtifact = modelInfo.artifacts?.find(artifact => artifact.key === selectedId);
-            const selectedInputModel = modelInfo.input?.find(model => model.id === selectedId);
+            const selectedInputModel = modelInfo.input?.find(model => model.id === selectedId && model.taskName === taskName);
             const selectedOutputModel = modelInfo.output?.find(model => model.id === selectedId);
             const onArtifact = !onInputModel && !onOutputModel;
             if ((onOutputModel && !selectedOutputModel) || (onInputModel && !selectedInputModel) || (onArtifact && !selectedArtifact)) {

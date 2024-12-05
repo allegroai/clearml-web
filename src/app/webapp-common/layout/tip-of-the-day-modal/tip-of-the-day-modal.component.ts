@@ -1,35 +1,49 @@
-import {Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject, signal} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {addMessage} from '../../core/actions/layout.actions';
 import {Tip} from '../../shared/services/tips.service';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {FormsModule} from '@angular/forms';
 
 export interface TipsModalData {
   tips: Tip[];
   visitedIndex: number;
-  hideDontShow: boolean
+  hideDontShow: boolean;
 }
 
 
 @Component({
   selector: 'sm-tip-of-the-day-modal',
   templateUrl: './tip-of-the-day-modal.component.html',
-  styleUrls: ['./tip-of-the-day-modal.component.scss']
+  styleUrls: ['./tip-of-the-day-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DialogTemplateComponent,
+    ClickStopPropagationDirective,
+    SaferPipe,
+    TooltipDirective,
+    MatCheckbox,
+    FormsModule
+  ],
+  standalone: true
 })
 export class TipOfTheDayModalComponent {
-  public tipIndex: number;
-  public tips: Tip[];
+  public tips = signal<Tip[]>(this.data.tips);
+  private visitedIndex = signal(0);
+  public hideDontShow = signal<boolean>(this.data.hideDontShow);
+  public tipIndex = signal(0);
   neverShowAgain: boolean;
-  private visitedIndex: number = 0;
-  public hideDontShow: boolean;
 
   constructor(public matDialogRef: MatDialogRef<TipOfTheDayModalComponent>, private store: Store,
               @Inject(MAT_DIALOG_DATA) public data: TipsModalData) {
-    this.tips = data.tips;
-    this.hideDontShow = data.hideDontShow;
-    this.visitedIndex = data.visitedIndex % this.tips.length;
-    this.tipIndex = this.visitedIndex;
+    this.visitedIndex.set(data.visitedIndex % this.tips().length);
+    this.tipIndex.set(this.visitedIndex());
     this.saveIndexInLocalstorage();
     this.matDialogRef.beforeClosed().subscribe(res => this.neverShowAgain && !res ? this.matDialogRef.close(this.neverShowAgain) : false);
   }
@@ -39,18 +53,18 @@ export class TipOfTheDayModalComponent {
   }
 
   prev() {
-    this.tipIndex = (this.tips.length + this.tipIndex - 1) % this.tips.length;
+    this.tipIndex.set((this.tips().length + this.tipIndex() - 1) % this.tips().length);
   }
 
   next() {
-    this.tipIndex = (this.tipIndex + 1) % this.tips.length;
+    this.tipIndex.set((this.tipIndex() + 1) % this.tips().length);
     this.saveIndexInLocalstorage();
   }
 
   private saveIndexInLocalstorage() {
-    if (this.visitedIndex <= this.tipIndex) {
-      this.visitedIndex = (this.tipIndex + 1);
-      window.localStorage.setItem('tipVisitedIndex', `${this.visitedIndex}`);
+    if (this.visitedIndex() <= this.tipIndex()) {
+      this.visitedIndex.set(this.tipIndex() + 1);
+      window.localStorage.setItem('tipVisitedIndex', `${this.visitedIndex()}`);
     }
   }
 }

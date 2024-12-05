@@ -1,15 +1,12 @@
 import {Injectable} from '@angular/core';
-import {TASK_TYPES} from '../../app.constants';
-import {TAGS, TASKS_STATUS} from '../../webapp-common/tasks/tasks.constants';
+import {TASK_TYPES} from '~/app.constants';
+import {TAGS, TASKS_STATUS} from '@common/tasks/tasks.constants';
 import {Task} from '../model/tasks/task';
 import {DEFAULT_QUEUE_TAG} from '../variables';
+import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 @Injectable()
 export class BlTasksService {
-
-  constructor() {
-  }
-
   private previouslyUsedQueue;
 
   getDefaultQueue(queues) {
@@ -24,11 +21,11 @@ export class BlTasksService {
     return queue.system_tags && queue.system_tags.includes(DEFAULT_QUEUE_TAG);
   }
 
-  canEnqueue(task: Task): boolean {
+  canEnqueue(task: ISelectedExperiment): boolean {
     return !!(task && (TASKS_STATUS.CREATED === task.status || TASKS_STATUS.STOPPED === task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
   }
 
-  canDequeue(task: Task): boolean {
+  canDequeue(task: ISelectedExperiment): boolean {
     return !!(task && TASKS_STATUS.QUEUED === task.status);
   }
 

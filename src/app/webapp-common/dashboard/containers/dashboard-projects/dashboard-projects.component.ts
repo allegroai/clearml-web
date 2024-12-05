@@ -1,10 +1,4 @@
-import {
-  Component,
-  Output,
-  EventEmitter,
-  ElementRef,
-  inject, viewChild, effect
-} from '@angular/core';
+import {Component, effect, ElementRef, EventEmitter, inject, Output, viewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {fromEvent} from 'rxjs';
@@ -14,10 +8,9 @@ import {selectRecentProjects, selectRecentProjectsCount} from '../../common-dash
 import {getRecentProjects} from '../../common-dashboard.actions';
 import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
 import {resetSelectedProject, setSelectedProjectId} from '@common/core/actions/projects.actions';
-import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {filter, take, throttleTime} from 'rxjs/operators';
+import {throttleTime} from 'rxjs/operators';
 import {isExample} from '@common/shared/utils/shared-utils';
-import { CARDS_IN_ROW } from '../../common-dashboard.const';
+import {CARDS_IN_ROW} from '../../common-dashboard.const';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
@@ -40,9 +33,6 @@ export class DashboardProjectsComponent {
 
   constructor() {
     this.store.dispatch(resetSelectedProject());
-    this.store.select(selectCurrentUser)
-      .pipe(filter(user => !!user), take(1))
-      .subscribe(() => this.store.dispatch(getRecentProjects()));
 
     effect(() => {
       if (this.header()) {

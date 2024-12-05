@@ -16,7 +16,7 @@ export class UniqueInListSyncValidatorDirective implements Validator {
 
 export function uniqueInListValidator(prefix: string): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const existingNames = control.value.map(c => c[prefix]?.value ?? c[prefix]);
+    const existingNames = control.value.map(c => c[prefix]?.value ?? c[prefix]).filter(c => c);
     const forbidden = hasDuplicates(existingNames);
     return existingNames && forbidden ? {[`uniqueName-${prefix}`]: duplicatesMap(existingNames)} : null;
   };

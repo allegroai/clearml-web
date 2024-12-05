@@ -101,6 +101,11 @@ export const routes: Routes = [
     loadChildren: () => import('./webapp-common/reports/reports.module').then(m => m.ReportsModule)
   },
   {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
+  {
+    path: 'endpoints',
+    loadChildren: () => import('./webapp-common/serving/serving.module').then(m => m.ServingModule),
+    canDeactivate: [resetContextMenuGuard]
+  },
   {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
   {path: '**', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
 

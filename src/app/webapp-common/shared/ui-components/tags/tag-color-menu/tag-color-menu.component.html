@@ -45,10 +45,10 @@
   </div>
 
   <cdk-virtual-scroll-viewport itemSize="32" class="tags-list">
-    <div *cdkVirtualFor="let tag of (tags$ | async) | filter:filterText:'caption'" class="tag-line">
+    <div *cdkVirtualFor="let tag of (tags$ | ngrxPush) | filter:filterText:'caption'" class="tag-line">
       <div data-id="tagOption" class="caption ellipsis">{{tag.caption}}</div>
       <div
-        *ngIf="(tag.colorObservable | async) as colors"
+        *ngIf="(tag.colorObservable | ngrxPush) as colors"
         class="tag pointer"
         data-id="tagColorButton"
         [style.backgroundColor]="$any(colors)?.background"

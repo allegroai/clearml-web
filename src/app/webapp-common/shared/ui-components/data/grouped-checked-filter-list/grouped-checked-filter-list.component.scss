@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@import 'variables';
 
 :host {
   display: flex;
@@ -33,11 +33,6 @@
         color: $purple;
       }
     }
-
-    .mat-content {
-      padding-left: 5px;
-    }
-
   }
 
   .mat-expansion-panel {
@@ -74,21 +69,29 @@
   align-items: center;
   padding: 30px 24px 6px 0;
   font-size: 12px;
-  color: $blue-480;
+  height: 36px;
 }
 
 .list {
   flex: 1;
   overflow: scroll;
-  padding-right: 12px;
+  padding-right: 24px;
 
   mat-expansion-panel {
     box-shadow: none;
     border-radius: 0;
 
     mat-expansion-panel-header {
-      padding: 0 2px 0 0;
+      padding: 0;
 
+      .has-selected {
+        margin: 0 24px 0 auto;
+        background-color: $purple;
+        width: 6px;
+        height: 6px;
+        border-radius: 6px;
+        align-self: center;
+      }
     }
   }
 
@@ -98,10 +101,7 @@
     overflow: hidden;
     white-space: nowrap;
     display: inline-block;
-
-    &:hover {
-      color: $purple;
-    }
+    max-width: calc(100% - 42px);
   }
 
   mat-expansion-panel-header {
@@ -116,7 +116,7 @@
     display: flex;
     align-items: center;
     height: 32px;
-    padding: 0 16px;
+    padding: 0 6px;
     margin-right: 4px;
     border-radius: 4px;
     font-family: $font-family-base, sans-serif;
@@ -149,6 +149,6 @@
 :host-context(.hyper-params-custom-col) {
   .actions,
   .list {
-    padding-left: 12px;
+    padding-left: 24px;
   }
 }

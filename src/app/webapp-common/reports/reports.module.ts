@@ -47,6 +47,19 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {ReportCardComponent} from '@common/reports/report-card/report-card.component';
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
+import {PushPipe} from '@ngrx/component';
+import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
+import {
+  PaginatedEntitySelectorComponent
+} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
+import {
+  InvalidPrefixValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/invalid-prefix-validator.directive';
+import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
+import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
+import {
+  UniquePathValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-path-validator.directive';
 
 
 const reportsSyncedKeys = ['orderBy', 'sortOrder'];
@@ -94,7 +107,14 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ScrollEndDirective,
     ClickStopPropagationDirective,
     ShowTooltipIfEllipsisDirective,
-    DotsLoadMoreComponent
+    DotsLoadMoreComponent,
+    PushPipe,
+    StringIncludedInArrayPipe,
+    PaginatedEntitySelectorComponent,
+    InvalidPrefixValidatorDirective,
+    ProjectLocationPipe,
+    ShortProjectNamePipe,
+    UniquePathValidatorDirective
   ],
   declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportDialogComponent,
     CreateNewReportFormComponent, ReportComponent],

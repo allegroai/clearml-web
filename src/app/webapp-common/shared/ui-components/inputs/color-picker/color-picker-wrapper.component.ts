@@ -23,6 +23,20 @@ export const presetColors = [
   '#d5d728',
 ];
 
+export const presetColorsDark = [
+  '#21a2da',  // muted blue
+  '#ff7f0e',  // safety orange
+  '#2ca02c',  // cooked asparagus green
+  '#e65c5c',  // brick red
+  '#9467bd',  // muted purple
+  '#edd913',  // curry yellow-green
+  '#cc796e',  // chestnut brown
+  '#e377c2',  // raspberry yogurt pink
+  '#7f7f7f',  // middle gray
+  '#17becf',   // blue-teal
+  '#f44778',
+  '#cbcd24',
+];
 
 @Component({
   selector: 'sm-color-picker-wrapper',

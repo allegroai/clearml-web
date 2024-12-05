@@ -4,7 +4,7 @@
     <div class="label">Y-axis</div>
     <sm-metric-variant-selector [title]="scatter? 'Metric' :'Select Performance Metric'" class="param-selector"
                                 [selectedMetricVariants]="selectedMetric? [selectedMetric]: []"
-                                [metricVariants]="metricsResults$ | async"
+                                [metricVariants]="metricsResults$ | ngrxPush"
                                 (selectMetricVariant)="metricVariantSelected($event)"
                                 (clearSelection)="clearMetricsSelection()"
     ></sm-metric-variant-selector>
@@ -12,7 +12,7 @@
     <div class="metric-title">Coordinates</div>
     <sm-metric-variant-selector class="param-selector" [title]="'Performance Metrics'"
                                 [selectedMetricVariants]="selectedMetrics" [multiSelect]="true" [skipValueType]="false"
-                                [metricVariants]="metricsResults$ | async"
+                                [metricVariants]="metricsResults$ | ngrxPush"
                                 (selectMetricVariant)="multiMetricVariantSelected($event)"
                                 (removeMetric)="multiMetricVariantSelected({addCol: false, variant: $event, valueType:$event.valueType})"
                                 (clearSelection)="clearMetricsSelection()"
@@ -26,7 +26,7 @@
                      [title]="'Select Parameters'"
                      [selectedHyperParams]="selectedHyperParams"
                      [single]="scatter"
-                     [selectFilteredItems]="selectHideIdenticalHyperParams$ | async"
+                     [selectFilteredItems]="selectHideIdenticalHyperParams$ | ngrxPush"
                      [selectedItemsListMapper]="selectedItemsListMapper"
                      (selectedItems)="selectedParamsChanged($event)"
                      (clearSelection)="clearParamsSelection()"></sm-param-selector>
@@ -35,10 +35,10 @@
     <div class="metric-title">Additional data point information</div>
     <sm-metric-variant-selector class="param-selector"
                                 [title]="'Select Metrics'"
-                                [selectedMetricVariants]="(selectedMetricsHoverInfo$ | async)"
+                                [selectedMetricVariants]="(selectedMetricsHoverInfo$ | ngrxPush)"
                                 [multiSelect]="true"
                                 [skipValueType]="true"
-                                [metricVariants]="metricsResults$ | async"
+                                [metricVariants]="metricsResults$ | ngrxPush"
                                 (selectMetricVariant)="metricVariantForHoverSelected($event)"
                                 (removeMetric)="metricVariantForHoverSelected({addCol: false, variant: $event, valueType:null})"
                                 (clearSelection)="clearMetricsSelectionForHover()"
@@ -46,9 +46,9 @@
     <sm-param-selector class="param-selector"
                        [title]="'Select Parameters'"
                        [itemsList]="hyperParams"
-                       [selectedHyperParams]="selectedParamsHoverInfo$ | async"
+                       [selectedHyperParams]="selectedParamsHoverInfo$ | ngrxPush"
                        [single]="false"
-                       [selectFilteredItems]="selectHideIdenticalHyperParams$ | async"
+                       [selectFilteredItems]="selectHideIdenticalHyperParams$ | ngrxPush"
                        [selectedItemsListMapper]="selectedItemsListMapper"
                        (selectedItems)="selectedParamsForHoverChanged($event)"
                        (clearSelection)="clearParamsForHoverSelection()"></sm-param-selector>
@@ -56,18 +56,18 @@
 </div>
 
 <div class="graphs-container h-100">
-  @if ((experiments$ | async).length > 1) {
+  @if ((experiments$ | ngrxPush).length > 1) {
     @if (scatter && !!selectedMetric && selectedHyperParams?.length > 0) {
       <sm-compare-scatter-plot [params]="selectedHyperParams"
                                [metric]="selectedMetric | metricVariantToPath: true"
                                [metricName]="selectedMetric | metricVariantToName: true"
-                               [experiments]="experiments$ | async"
-                               [extraHoverInfoParams]="selectedParamsHoverInfo$ |async"
-                               [extraHoverInfoMetrics]="selectedMetricsHoverInfo$ | async"></sm-compare-scatter-plot>
+                               [experiments]="experiments$ | ngrxPush"
+                               [extraHoverInfoParams]="selectedParamsHoverInfo$ |ngrxPush"
+                               [extraHoverInfoMetrics]="selectedMetricsHoverInfo$ | ngrxPush"></sm-compare-scatter-plot>
     }
    @else if (!scatter && selectedMetrics.length > 0 && selectedHyperParams?.length > 0) {
-      @if (plotlyReady$ | async) {
-        <sm-parallel-coordinates-graph [experiments]="experiments$ | async"
+      @if (plotlyReady$ | ngrxPush) {
+        <sm-parallel-coordinates-graph [experiments]="experiments$ | ngrxPush"
                                        [metrics]="selectedMetrics"
                                        [parameters]="selectedHyperParams"
                                        (createEmbedCode)="createEmbedCode($event)"></sm-parallel-coordinates-graph>

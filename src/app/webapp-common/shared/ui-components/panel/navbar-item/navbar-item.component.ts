@@ -1,10 +1,12 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { TooltipDirective } from '../../indicators/tooltip/tooltip.directive';
 
 @Component({
   selector: 'sm-navbar-item',
   templateUrl: './navbar-item.component.html',
   styleUrls: ['./navbar-item.component.scss'],
   standalone: true,
+  imports: [TooltipDirective]
 })
 export class NavbarItemComponent {
 
@@ -12,7 +14,8 @@ export class NavbarItemComponent {
   @Input() active: boolean;
   @Input() direction: 'bottom' | 'top' = 'bottom';
   @Input() subHeader: string;
-  @Input() multi: boolean = false;
-  @Input() large: boolean = true;
+  @Input() badge: string;
+  @Input() badgeTooltip: string;
+  @Input() large = true;
   @Output() itemSelected = new EventEmitter<string>();
 }

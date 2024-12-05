@@ -21,6 +21,7 @@ import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} fr
 import {AsyncPipe, NgIf} from '@angular/common';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {PushPipe} from '@ngrx/component';
 
 @Component({
   selector: 'sm-tag-color-menu',
@@ -39,7 +40,8 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     AsyncPipe,
     FilterPipe,
     ClickStopPropagationDirective,
-    CdkFixedSizeVirtualScroll
+    CdkFixedSizeVirtualScroll,
+    PushPipe
   ]
 })
 export class TagColorMenuComponent implements OnDestroy {

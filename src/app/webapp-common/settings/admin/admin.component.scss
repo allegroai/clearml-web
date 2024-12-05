@@ -13,11 +13,11 @@ $tab-width: 15vw;
 
 
   header {
-    padding: 20px 24px;
+    padding: 20px 0;
   }
 
   .main {
-    padding: 0 24px;
+    padding: 0;
   }
 
 
@@ -56,6 +56,7 @@ $tab-width: 15vw;
     border-radius: 4px;
     border: solid 1px $blue-500;
     background-color: $blue-650;
+    margin-bottom: 24px;
     padding: 16px;
 
     .read-only-title {

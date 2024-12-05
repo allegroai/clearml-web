@@ -13,7 +13,7 @@ import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
 })
 export class WorkersTableComponent extends BaseTableView {
 
-  public cols: Array<ISmCol>;
+  public cols: ISmCol[];
   public readonly WORKERS_TABLE_COL_FIELDS = WORKERS_TABLE_COL_FIELDS;
   private _workers: WorkerExt[];
 
@@ -88,5 +88,8 @@ export class WorkersTableComponent extends BaseTableView {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   emitSelection(selection: any[]) {
+  }
+
+  openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {
   }
 }

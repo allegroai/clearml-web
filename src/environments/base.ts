@@ -60,6 +60,7 @@ export interface Environment {
   baseHref?: string;
   displayTips: boolean;
   onlyPasswordLogin: boolean;
+  blockUserScript?: boolean;
 }
 
 export const BASE_ENV = {
@@ -88,7 +89,7 @@ export const BASE_ENV = {
   hideUpdateNotice: false,
   showSurvey: false,
   accountAdministration: false,
-  useFilesProxy: false,
+  useFilesProxy: true,
   legal: {TOULink: 'https://allegro.ai/legal-platform-tou/'},
   plotlyURL: 'app/webapp-common/assets/plotly-2.31.1.min.js',
   slackLink: 'https://joinslack.clear.ml',

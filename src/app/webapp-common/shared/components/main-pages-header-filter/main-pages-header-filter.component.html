@@ -1,16 +1,16 @@
 <div mat-button class='cell pointer'>
-  <i [class]="'al-icon ' + ((showOnlyUserWork$ | async)||  ((tagsFilters$ | async)?.length > 0)? 'al-ico-filter-on':'al-ico-filter-off')" [matMenuTriggerFor]="menu"><span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span></i>
+  <i [class]="'al-icon ' + ((showOnlyUserWork$ | ngrxPush)||  ((tagsFilters$ | ngrxPush)?.length > 0)? 'al-ico-filter-on':'al-ico-filter-off')" [matMenuTriggerFor]="menu"><span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span></i>
 </div>
 <mat-menu #menu="matMenu" class="light-theme" (close)="closeMenu()">
   <button mat-menu-item
           smClickStopPropagation
           class="user-filter-button"
           (click)="switchUserFocus()">
-    <i [class.al-ico-success]="showOnlyUserWork$ | async" class="al-icon sm-md" data-id="MyworkCheckbox"></i>
+    <i [class.al-ico-success]="showOnlyUserWork$ | ngrxPush" class="al-icon sm-md" data-id="MyworkCheckbox"></i>
     <div class="me-3" data-id="MyWorkFilterOption">My Work</div>
   </button>
   <button mat-menu-item [matMenuTriggerFor]="subMenu" class="d-flex align-items-center">
-    <i [class.hidden]="!((tagsFilters$ | async)?.length > 0)" class="filter-point al-icon sm-md al-ico-success" data-id="TagCheckbox" ></i>
+    <i [class.hidden]="!((tagsFilters$ | ngrxPush)?.length > 0)" class="filter-point al-icon sm-md al-ico-success" data-id="TagCheckbox" ></i>
     <span data-id="TagOption" >Tags</span>
   </button>
   <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu()">
@@ -29,7 +29,7 @@
     <div class="results scroll"  smClickStopPropagation>
       <sm-checkbox-three-state-list
         [supportExcludeFilter]="true"
-        [checkedList]="tagsFilters$ | async"
+        [checkedList]="tagsFilters$ | ngrxPush"
         [options]="tagsLabelValue | filter : searchTerm: 'label'"
         (filterChanged)="emitFilterChangedCheckBox( $event)"
       > </sm-checkbox-three-state-list>
@@ -38,7 +38,7 @@
   </mat-menu>
   <hr/>
   <button mat-menu-item
-          [disabled]="!((showOnlyUserWork$ | async) ||  ((tagsFilters$ | async)?.length > 0))"
+          [disabled]="!((showOnlyUserWork$ | ngrxPush) ||  ((tagsFilters$ | ngrxPush)?.length > 0))"
           smClickStopPropagation
           class="user-filter-button"
           (click)="clearAll()">

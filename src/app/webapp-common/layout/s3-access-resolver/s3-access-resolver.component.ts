@@ -16,6 +16,10 @@ export interface S3AccessDialogData {
   credentialsError: string;
 }
 
+export interface S3AccessDialogResult extends Credentials {
+  success: boolean;
+}
+
 @Component({
   selector: 'sm-s3-access-resolver',
   templateUrl: './s3-access-resolver.component.html',
@@ -73,7 +77,7 @@ export class S3AccessResolverComponent {
     }
   }
 
-  saveS3Credentials(newCredential) {
+  saveS3Credentials(newCredential: Credentials) {
     this.matDialogRef.close({
       success : true,
       ...newCredential

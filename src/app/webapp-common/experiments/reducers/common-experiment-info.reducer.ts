@@ -1,36 +1,40 @@
 import * as actions from '../actions/common-experiments-info.actions';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {experimentSections, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {
   activateEdit,
   deactivateEdit,
   deleteHyperParamsSection,
+  downloadArtifacts,
+  downloadFailed,
+  downloadSuccess,
   experimentDataUpdated,
   experimentDetailsUpdated,
+  getExperimentArtifacts,
+  getExperimentUncommittedChanges,
+  resetExperimentInfo,
   saveExperiment,
   saveExperimentConfigObj,
   saveExperimentSection,
   saveHyperParamsSection,
   setExperiment,
+  setExperimentArtifacts,
   setExperimentErrors,
   setExperimentFormErrors,
+  setExperimentInfoData,
+  setExperimentOperationLog,
   setExperimentSaving,
+  setExperimentUncommittedChanges,
   setSelectedPipelineStep,
   updateExperimentAtPath,
-  getExperimentArtifacts,
-  downloadArtifacts,
-  resetExperimentInfo,
-  setExperimentInfoData,
-  updateExperimentInfoData,
-  getExperimentUncommittedChanges,
-  setExperimentUncommittedChanges,
-  setExperimentArtifacts,
-  downloadSuccess,
-  downloadFailed
+  updateExperimentInfoData
 } from '../actions/common-experiments-info.actions';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {experimentSections, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {set} from 'lodash-es';
 import {setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
 import {ActionCreator, createReducer, on, ReducerTypes} from '@ngrx/store';
+import {
+  TasksGetOperationsLogResponseOperations
+} from '~/business-logic/model/tasks/tasksGetOperationsLogResponseOperations';
 
 
 export interface CommonExperimentInfoState {
@@ -38,7 +42,7 @@ export interface CommonExperimentInfoState {
   selectedPipelineStep: IExperimentInfo;
   pipelineRunDialogTask: IExperimentInfo;
   infoData: IExperimentInfo;
-  errors: { [key: string]: any } | null;
+  errors: Record<string, any> | null;
   showExtraDataSpinner: boolean;
   activeSectionEdit: boolean;
   saving: boolean;
@@ -47,6 +51,8 @@ export interface CommonExperimentInfoState {
   userKnowledge: Map<experimentSectionsEnum, boolean>;
   artifactsExperimentId: string;
   downloading: boolean;
+  downloadingExperimentOperationLog: boolean;
+  operationLog: TasksGetOperationsLogResponseOperations[];
 }
 
 export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
@@ -68,6 +74,8 @@ export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
   } as any,
   artifactsExperimentId: null,
   downloading: false,
+  downloadingExperimentOperationLog: false,
+  operationLog: null
 };
 
 export const commonExperimentInfoReducers = [
@@ -93,6 +101,7 @@ export const commonExperimentInfoReducers = [
   on(downloadSuccess, downloadFailed, (state): CommonExperimentInfoState => ({...state, downloading: false})),
   on(setExperimentErrors, (state, action): CommonExperimentInfoState => ({...state, errors: {...state.errors, ...action}})),
   on(resetExperimentInfo, (state): CommonExperimentInfoState => ({...state, infoData: null})),
+  on(setExperimentOperationLog, (state, action): CommonExperimentInfoState => ({...state, operationLog: action.operationLog})),
   on(setExperimentInfoData, (state, action): CommonExperimentInfoState => ({
     ...state,
     infoData: {
@@ -109,7 +118,7 @@ export const commonExperimentInfoReducers = [
   })),
   on(getExperimentUncommittedChanges, (state, action): CommonExperimentInfoState => ({
     ...state,
-    showExtraDataSpinner: !(action as ReturnType<typeof actions.getExperimentUncommittedChanges>).autoRefresh
+    showExtraDataSpinner: !action.autoRefresh
   })),
   on(setExperimentUncommittedChanges, (state, action): CommonExperimentInfoState => ({
     ...state,

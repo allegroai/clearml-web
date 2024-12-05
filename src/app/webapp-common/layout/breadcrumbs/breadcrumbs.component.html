@@ -3,10 +3,11 @@
     <span class="workspace">{{activeWorkspace.name}}</span>
     <i class="al-icon al-ico-slash"></i>
   }
-  @for (breadcrumbGroup of breadcrumbs() ; track breadcrumbGroup; let lastGroup = $last; let
+
+  @for (breadcrumbGroup of breadcrumbs() ; track $index; let lastGroup = $last; let
     firstGroup = $first) {
     @if (!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable)) {
-      @for (breadcrumb of breadcrumbGroup ; track breadcrumb; let lastCrumb = $last; let firstCrumb = $first) {
+      @for (breadcrumb of breadcrumbGroup ; track (breadcrumb.name+breadcrumb.url); let index= $index; let lastCrumb = $last; let firstCrumb = $first) {
         <span class="sub-projects-breadcrumbs" [class.last]="lastCrumb && lastGroup">
           @if (breadcrumb.hidden) {
             <i class="al-icon al-ico-ghost sm me-1 align-ghost"></i>
@@ -16,6 +17,9 @@
               [class.first]="firstCrumb && firstGroup"
               [routerLink]="breadcrumb.url">
             {{breadcrumb.name}}</a>
+            @if (breadcrumb.badge) {
+              <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300">{{breadcrumb.badge}}</span>
+            }
           } @else {
             <div #crumb class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb">
               <div class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis
@@ -25,6 +29,9 @@
               }
               @if (breadcrumb.tags?.length) {
                 <sm-tag-list [tags]="breadcrumb.tags"></sm-tag-list>
+              }
+              @if (breadcrumb.badge) {
+                <span class="badge" [smTooltip]="breadcrumb.badgeTooltip" [matTooltipShowDelay]="300">{{breadcrumb.badge}}</span>
               }
             </div>
           }

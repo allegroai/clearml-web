@@ -1,25 +1,32 @@
-import {Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {updateCredentialLabel} from '@common/core/actions/common-auth.actions';
 import {OrganizationGetUserCompaniesResponseCompanies} from '~/business-logic/model/organization/organizationGetUserCompaniesResponseCompanies';
-import {Observable} from 'rxjs';
-import {CredentialKeyExt, selectNewCredential} from '@common/core/reducers/common-auth-reducer';
+import {selectNewCredential} from '@common/core/reducers/common-auth-reducer';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {AdminDialogTemplateComponent} from '@common/settings/admin/admin-dialog-template/admin-dialog-template.component';
 
 @Component({
   selector: 'sm-create-credential-dialog',
   templateUrl: './create-credential-dialog.component.html',
-  styleUrls: ['./create-credential-dialog.component.scss']
+  styleUrls: ['./create-credential-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    DialogTemplateComponent,
+    AdminDialogTemplateComponent
+  ]
 })
   export class CreateCredentialDialogComponent {
-  public newCredential$: Observable<CredentialKeyExt>;
+  private store = inject(Store);
+  public data = inject<{
+    credentials: any;
+    workspace?: OrganizationGetUserCompaniesResponseCompanies
+  }>(MAT_DIALOG_DATA);
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {credentials: any; workspace?: OrganizationGetUserCompaniesResponseCompanies},
-    private store: Store
-  ) {
-    this.newCredential$ = this.store.select(selectNewCredential);
-  }
+
+  protected newCredential = this.store.selectSignal(selectNewCredential);
 
   updateLabel({credential, label}) {
     this.store.dispatch(updateCredentialLabel({credential, label}));

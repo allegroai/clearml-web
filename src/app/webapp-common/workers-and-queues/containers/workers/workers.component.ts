@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {getSelectedWorker, workersTableSortChanged} from '../../actions/workers.actions';
+import {getSelectedWorker, WorkerExt, workersTableSortChanged} from '../../actions/workers.actions';
 import {selectSelectedWorker, selectWorkers, selectWorkersTableSortFields} from '../../reducers/index.reducer';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
@@ -34,11 +34,10 @@ export class WorkersComponent implements OnInit {
         const selectedWorker = workers.find(worker => worker.id === this.routerWorkerId);
         this.selectWorker(selectedWorker);
       });
-
   }
 
 
-  public selectWorker(worker) {
+  public selectWorker(worker: WorkerExt) {
     this.store.dispatch(getSelectedWorker({worker}));
     return this.router.navigate(
       [],

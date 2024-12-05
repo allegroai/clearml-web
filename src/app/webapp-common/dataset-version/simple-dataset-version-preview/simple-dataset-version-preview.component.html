@@ -1,17 +1,21 @@
-<div class="preview-container" *ngIf="selected?.id">
-  <sm-experiment-output-plots #plots
-                              class="dataset-version-preview"
-                              [class.hidden-like]="plots.plotsList?.length < 1"
-                              [isDatasetVersionPreview]="true"
-                              [selected]="selected">
-  </sm-experiment-output-plots>
+@if (selected()?.id) {
+  <div class="preview-container">
+    <sm-experiment-output-plots #plots
+      class="dataset-version-preview"
+      [class.hidden-like]="plots.plotsList?.length < 1"
+      [isDatasetVersionPreview]="true"
+      [selected]="selected()">
+    </sm-experiment-output-plots>
     <sm-debug-images #debugImages
-                     class="dataset-version-preview"
-                     [class.hidden]="!debugImages.debugImages?.[selected.id]?.data"
-                     [isDarkTheme]="true"
-                     [disableStatusRefreshFilter]="true"
-                     [selected]="selected" >
+      class="dataset-version-preview"
+      [class.hidden]="!debugImages.debugImages?.[selected().id]?.data"
+      [isDarkTheme]="true"
+      [disableStatusRefreshFilter]="true"
+      [selected]="selected()" >
     </sm-debug-images>
-  <div *ngIf="plots.plotsList !== undefined && plots.plotsList.length < 1 && debugImages.debugImages !== null && !debugImages.debugImages?.[selected.id]?.data" class="no-data flex-middle">No preview to show</div>
-</div>
+    @if (plots.plotsList !== undefined && plots.plotsList.length < 1 && debugImages.debugImages !== null && !debugImages.debugImages?.[selected().id]?.data) {
+      <div class="no-data flex-middle">No preview to show</div>
+    }
+  </div>
+}
 

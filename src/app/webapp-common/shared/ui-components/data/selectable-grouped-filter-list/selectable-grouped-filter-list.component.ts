@@ -1,5 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {isEqual} from 'lodash-es';
+import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, Output} from '@angular/core';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
@@ -33,41 +32,19 @@ export const buildMetricsList = (metrics: MetricVariantResult[]): GroupedList =>
   ]
 })
 export class SelectableGroupedFilterListComponent {
-  private _searchTerm: string;
-  private _list: GroupedList;
-  public filteredList: GroupedList;
-  public searchText: string;
 
-  @Input() set list(list: GroupedList) {
-    if (!isEqual(this._list, list)) {
-      this.hideChildrenForHiddenParent(list);
-    }
-    this._list = list;
-    this.filteredList = this.filterList(list, this.searchTerm);
-  }
+  list = input<GroupedList>();
+  searchTerm = input<string>();
+  checkedList = input<string[]>([]);
+  titleLabel = input<string>();
 
-  get list() {
-    return this._list;
-  }
-
-  @Input() set searchTerm(searchTerm: string) {
-    this.filteredList = this.list ? this.filterList(this.list, searchTerm) : [];
-    this._searchTerm = searchTerm;
-  }
-
-  get searchTerm() {
-    return this._searchTerm;
-  }
-
-  @Input() checkedList: Array<any> = [];
-  @Input() titleLabel: string;
-  @Input() checkAllIcon: string;
   @Output() itemSelect = new EventEmitter<string>();
   @Output() hiddenChanged = new EventEmitter<string[]>();
   @Output() searchTermChanged = new EventEmitter<string>();
 
+  filteredList = computed(() => this.filterList(this.list(), this.searchTerm()))
 
-  filterList(list, searchTerm) {
+  filterList(list: GroupedList, searchTerm: string) {
     if (!searchTerm || searchTerm === '') {
       return list;
     } else {
@@ -91,43 +68,49 @@ export class SelectableGroupedFilterListComponent {
     }
   }
 
-  private hideChildrenForHiddenParent(list: GroupedList) {
-    const newHiddenList = this.checkedList ? [...this.checkedList] : [];
-    let hiddenListChanged = false;
-    Object.entries(list).forEach(([parent, children]) => {
-      if (this.checkedList?.includes(parent) && Object.keys(children).length > 0) {
-        hiddenListChanged = true;
-        Array.prototype.push.apply(newHiddenList, (Object.keys(children).map(child => parent + child)));
-      }
-    });
-    if (hiddenListChanged) {
-      this.hiddenChanged.emit(Array.from(new Set(newHiddenList)));
-    }
-  }
+  // private hideChildrenForHiddenParent(list: GroupedList) {
+  //   let newCheckList = this.checkedList() ? [...this.checkedList()] : [];
+  //   let hiddenListChanged = false;
+  //   Object.entries(list).forEach(([parent, children]) => {
+  //     if (!this.checkedList()?.includes(parent)) {
+  //       hiddenListChanged = true;
+  //       const remove = Object.keys(children).map(child => parent + child)
+  //       newCheckList = newCheckList.filter(item => !remove.includes(item))
+  //     }
+  //   });
+  //   if (hiddenListChanged) {
+  //     this.hiddenChanged.emit(Array.from(new Set(newCheckList)));
+  //   }
+  // }
 
   onSearchTermChanged(value: string) {
-    this.searchText = value;
     this.searchTermChanged.emit(value);
   }
 
   public toggleHide({pathString, parent}) {
-    let newHiddenList = this.checkedList.includes(pathString) ? this.checkedList.filter(i => i !== pathString) : [...this.checkedList, pathString];
-    newHiddenList = this.AreAllChildrenHidden(parent, newHiddenList) ? [...newHiddenList, parent] : newHiddenList.filter(i => i !== parent);
-    this.hiddenChanged.emit(newHiddenList);
+    let newCheckedList = this.checkedList().includes(pathString) ? this.checkedList().filter(i => i !== pathString) : [...this.checkedList(), pathString];
+    if (this.shouldHidePrent(parent, newCheckedList)) {
+      newCheckedList = newCheckedList.filter(i => i !== parent);
+    } else {
+      if (!newCheckedList.includes(parent)) {
+        newCheckedList = [...newCheckedList, parent];
+      }
+    }
+    this.hiddenChanged.emit(newCheckedList);
   }
 
-  private AreAllChildrenHidden(parent, newHiddenList: any[]) {
-    return Object.keys(this.list[parent]).every(item => newHiddenList.includes(parent + item));
+  private shouldHidePrent(parent: string, checkedList: string[]) {
+    return !Object.keys(this.list()[parent]).some(item => checkedList.includes(parent + item));
   }
 
   toggleHideAll() {
-    if (Object.keys(this.checkedList).length > 0) {
+    if (Object.keys(this.checkedList()).length > 0) {
       this.hiddenChanged.emit([]);
     } else {
       const allValues = [];
-      Object.keys(this.list).forEach(key => {
+      Object.keys(this.list()).forEach(key => {
         allValues.push(key);
-        Object.keys(this.list[key]).forEach(itemKey => {
+        Object.keys(this.list()[key]).forEach(itemKey => {
           allValues.push(key + itemKey);
         });
       });
@@ -137,18 +120,19 @@ export class SelectableGroupedFilterListComponent {
 
   toggleHideGroup(event) {
     const key = event.key;
-    let allValues = [...this.checkedList];
+    let allValues = [...this.checkedList()];
     if (event.hide) {
       allValues = !allValues.includes(key) ? [...allValues, key] : allValues;
-      Object.keys(this.list[key]).forEach(itemKey => {
+      Object.keys(this.list()[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
         if (!allValues.includes(keyItemKey)) {
           allValues.push(keyItemKey);
         }
       });
     } else {
-      allValues = allValues.filter(i => !i.startsWith(key));
-      Object.keys(this.list[key]).forEach(itemKey => {
+      const parentKey = `${key} / `
+      allValues = allValues.filter(i => !i.startsWith(parentKey) && i !== key);
+      Object.keys(this.list()[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
         if (allValues.includes(keyItemKey)) {
           allValues = allValues.filter(longKey => longKey !== (keyItemKey));

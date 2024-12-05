@@ -1,9 +1,9 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Subscription, combineLatest} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
-import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
-import {filter, skip, take} from 'rxjs/operators';
+import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {debounceTime, filter, take} from 'rxjs/operators';
 import {setDeep} from '@common/core/actions/projects.actions';
 import {getRecentProjects, getRecentExperiments} from '@common/dashboard/common-dashboard.actions';
 import {selectFirstLogin} from '@common/core/reducers/view.reducer';
@@ -29,7 +29,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public recentTasks$ = this.store.select(selectRecentTasks);
   public width: number;
   private welcomeSub: Subscription;
-  private subscriptions = new Subscription();
 
   constructor() {
     this.store.dispatch(initSearch({payload: 'Search for all'}));
@@ -41,12 +40,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => this.router.navigate(['search'], {relativeTo: this.activatedRoute, queryParamsHandling: 'preserve'}));
 
-    this.subscriptions.add(this.store.select(selectShowOnlyUserWork).pipe(
-      skip(1),
-    ).subscribe(() => {
-      this.store.dispatch(getRecentProjects());
-      this.store.dispatch(getRecentExperiments());
-    }));
+   combineLatest([
+     this.store.select(selectShowOnlyUserWork),
+     this.store.select(selectCurrentUser)
+   ])
+     .pipe(
+       debounceTime(100),
+       takeUntilDestroyed(),
+       filter(([, user]) => !!user),
+     )
+     .subscribe(() => {
+       this.store.dispatch(getRecentProjects());
+       this.store.dispatch(getRecentExperiments());
+     });
 
     this.welcomeSub = this.store.select(selectFirstLogin)
       .pipe(

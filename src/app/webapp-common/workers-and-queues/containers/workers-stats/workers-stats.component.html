@@ -1,36 +1,46 @@
 <div class="header d-flex justify-content-between">
   <div class="d-flex align-items-center">
-    <div *ngIf="!activeWorker" class="title">Workers Utilization</div>
-    <mat-form-field *ngIf="activeWorker" appearance="outline" class="dark-outline thin param-selector no-bottom">
-      <mat-select
-        [ngModel]="currentParam"
-        (ngModelChange)="chartParamChange($event)"
-        name="chart-param"
-        panelClass="dark-outline"
-      >
-        <mat-option *ngFor="let chartParam of chartParamOptions" [value]="chartParam.value">
-          {{chartParam.label}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <i *ngIf="statsError$ | async"
-       class="warnning fas fa-exclamation-triangle"
-       smTooltip="Data temporarily not available">
-    </i>
+    @if (!activeWorker()) {
+      <div class="title">Workers Utilization</div>
+    }
+    @if (activeWorker()) {
+      <mat-form-field appearance="outline" class="dark-outline thin param-selector no-bottom">
+        <mat-select
+          [ngModel]="currentParam()"
+          (ngModelChange)="chartParamChange($event)"
+          name="chart-param"
+          panelClass="dark-outline"
+          >
+          @for (chartParam of chartParamOptions; track chartParam.label) {
+            <mat-option [value]="chartParam.value">
+              {{chartParam.label}}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (statsError()) {
+      <i
+        class="warnning fas fa-exclamation-triangle"
+        smTooltip="Data temporarily not available">
+      </i>
+    }
   </div>
   <mat-form-field appearance="outline" class="dark-outline thin time-selector no-bottom">
-    <mat-select [ngModel]="currentTimeFrame" (ngModelChange)="timeFrameChange($event)" name="time-frame" panelClass="dark-outline">
-      <mat-option *ngFor="let timeFrame of timeFrameOptions" [value]="timeFrame.value">
-        {{timeFrame.label}}
-      </mat-option>
+    <mat-select [ngModel]="currentTimeFrame()" (ngModelChange)="timeFrameChange($event)" name="time-frame" panelClass="dark-outline">
+      @for (timeFrame of timeFrameOptions; track timeFrame.label) {
+        <mat-option [value]="timeFrame.value">
+          {{timeFrame.label}}
+        </mat-option>
+      }
     </mat-select>
   </mat-form-field>
 </div>
 <div #chart class="line-chart-container">
   <sm-line-chart
     class="h-100"
-    [showLoadingOverlay]="refreshChart"
-    [data]="chartData"
-    [yLabel]="yAxisLabel"
+    [showLoadingOverlay]="chartState().refreshChart()"
+    [data]="chartData()"
+    [yLabel]="yAxisLabel()"
   ></sm-line-chart>
 </div>

@@ -20,14 +20,14 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   public selectedEntitiesKey: string;
   public table: TableComponent<{id: string}>;
   public menuBackdrop: boolean;
-  public searchValues: { [colId: string]: string } = {};
-  public filtersOptions: { [colId: string]: IOption[] } = {};
-  public filtersValues: { [colId: string]: any } = {};
-  public tableSortFieldsObject: { [fieldName: string]: { index: number; field: string; order: TableSortOrderEnum } } = {};
+  public searchValues: Record<string, string> = {};
+  public filtersOptions: Record<string, IOption[]> = {};
+  public filtersValues: Record<string, any> = {};
+  public tableSortFieldsObject: Record<string, { index: number; field: string; order: TableSortOrderEnum }> = {};
   protected prevSelected: string;
   protected prevDeselect: string;
   private _entityType: EntityTypeEnum;
-  public convertStatusMap: { [status: string]: string };
+  public convertStatusMap: Record<string, string>;
   protected waitForClick: number;
 
   @Input() contextMenuActive: boolean;
@@ -76,6 +76,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any; andFilter?: boolean }>;
   @Output() columnsReordered = new EventEmitter<string[]>();
   @Output() cardsCollapsedChanged = new EventEmitter();
+  @Output() closePanel = new EventEmitter();
   @ViewChildren(TableComponent) tables: QueryList<TableComponent<{id: string}>>;
 
   ngAfterViewInit(): void {
@@ -191,8 +192,9 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
 
   afterTableInit() {
     const key = this.selectedEntitiesKey.slice(0, -1);
-    if (this[key]) {
-      window.setTimeout(() => this.table?.scrollToElement(this[key]), 200);
+    const selectedObject = this[key] || this[`${key}s`]?.[0];
+    if (selectedObject) {
+      window.setTimeout(() => this.table?.scrollToElement(selectedObject), 200);
     }
   }
 
@@ -200,5 +202,21 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.table = null;
+  }
+
+  abstract openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean });
+
+  private clickDelayHandle: number;
+  cardClicked($event: MouseEvent, experiment) {
+    if (this.clickDelayHandle) {
+      window.clearTimeout(this.clickDelayHandle);
+      this.clickDelayHandle = null;
+      this.closePanel.emit()
+    } else {
+      this.clickDelayHandle = window.setTimeout(() => {
+        this.openContextMenu({e: $event, rowData: experiment, backdrop: true});
+        this.clickDelayHandle = null;
+      }, 250)
+    }
   }
 }

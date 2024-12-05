@@ -9,7 +9,7 @@ import {
 } from '../table-duration-sort-base.component';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {distinctUntilChanged, debounceTime, filter} from 'rxjs/operators';
-import {isNil} from 'lodash-es';
+import {isEqual, isNil} from 'lodash-es';
 import {
   TableFilterDurationErrorComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
@@ -59,7 +59,7 @@ export class TableFilterDurationNumericComponent extends TableDurationSortBaseCo
         takeUntilDestroyed(),
         debounceTime(500),
         filter(() => this.iterationsForm.valid),
-        distinctUntilChanged()
+        distinctUntilChanged((a, b) => isEqual(a, b))
       )
       .subscribe( ({greaterThan, lessThan}) => {
         !!greaterThan != this.greaterThan.checked && this.setCheckBox(!this.greaterThan.checked, 'greaterThan', false);

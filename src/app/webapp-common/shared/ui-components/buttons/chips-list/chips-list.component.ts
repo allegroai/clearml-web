@@ -3,7 +3,7 @@ import {ChipsComponent} from '@common/shared/ui-components/buttons/chips/chips.c
 import {trackByIndex} from '@common/shared/utils/forms-track-by';
 import {Subscription} from 'rxjs';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgForOf, NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'sm-chips-list',
@@ -13,10 +13,8 @@ import {NgForOf, NgIf} from '@angular/common';
   standalone: true,
   imports: [
     ChipsComponent,
-    TooltipDirective,
-    NgForOf,
-    NgIf
-  ]
+    TooltipDirective
+]
 })
 export class ChipsListComponent implements AfterViewInit, OnDestroy {
 

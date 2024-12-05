@@ -12,6 +12,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {IsEmptyPipe} from '@common/shared/pipes/is-empty.pipe';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
+
 
 const declarations = [
   ExperimentSettingsComponent,
@@ -30,7 +32,8 @@ const declarations = [
     MatExpansionModule,
     TooltipDirective,
     ShowTooltipIfEllipsisDirective,
-    IsEmptyPipe
+    IsEmptyPipe,
+    MatSlideToggle,
   ],
   declarations   : [declarations],
   exports        : [...declarations]

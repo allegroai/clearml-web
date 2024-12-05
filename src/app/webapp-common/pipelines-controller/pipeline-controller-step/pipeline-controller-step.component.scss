@@ -76,6 +76,9 @@
   &.completed {
     background-color: mix($pipeline-completed, $blue-950, 20%);
   }
+  &.published {
+    background-color: mix($pipeline-published, $blue-950, 20%);
+  }
 }
 
 //  STEP FOOTER
@@ -111,5 +114,8 @@
   }
   &.completed {
     background-color: $pipeline-completed
+  }
+  &.published {
+    background-color: $pipeline-published
   }
 }

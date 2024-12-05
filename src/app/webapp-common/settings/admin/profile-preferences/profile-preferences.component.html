@@ -5,14 +5,14 @@
       (change)="statsChange($event)"
       [checked]="show()"
       color="accent"
-      ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ms-2"></i></span>
+      ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ms-3"></i></span>
     </mat-slide-toggle>
   }
   <mat-slide-toggle
     (change)="toggleExamples($event)"
     [checked]="hideExamples()"
     color="accent"
-    >Don’t show ClearML examples
+    >Don't show ClearML examples
   </mat-slide-toggle>
   @if (supportReScaling) {
     <mat-slide-toggle
@@ -24,7 +24,7 @@
         data-id="hidpiInfoIcon"
         smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
       ></i>
-      <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
+      <a href="#" class="reload hidden ms-3" [class.hidden]="!disableHidpiChanged" (click)="$event.preventDefault(); reload($event)">Reload to apply</a>
     </mat-slide-toggle>
   }
   @if (tipsService.hasTips()) {
@@ -32,17 +32,20 @@
       (change)="setNeverShowTipsAgain($event)"
       [checked]="neverShowTipsAgain()?.includes(popupId)"
       color="accent"
-      >Don’t show pro tips periodically
+      >Don't show pro tips periodically
     </mat-slide-toggle>
   }
   <mat-slide-toggle
     (change)="toggleBlockUserScript($event)"
     [checked]="blockUserScripts()"
+    [disabled]="config.configuration().blockUserScript"
     color="accent"
     >Block running user's scripts in the browser
     <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
        data-id="blockScriptsInfoIcon"
-       smTooltip="Block any user and 3rd party scripts from running anywhere in the WebApp. Note that if this is turned on, you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports."
+       [smTooltip]="config.configuration().blockUserScript ?
+         'User scripts are blocked by system administrator. you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports.' :
+         'Block any user and 3rd party scripts from running anywhere in the WebApp. Note that if this is turned on, you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports.'"
     ></i>
   </mat-slide-toggle>
   <div class="d-flex">
@@ -55,7 +58,7 @@
         data-id="hideSpecificargInfoIcon"
         smTooltip="Redact the values for the specified container environment variables in the experiment execution page"
       ></i>
-      <span class="reload highlight pointer ms-3" data-id="editButton" (click)="$event.preventDefault(); editHideSpecificContainerArguments()">Edit</span>
+      <a href="#" class="reload highlight ms-3" data-id="editButton" (click)="$event.preventDefault(); editHideSpecificContainerArguments()">Edit</a>
     </mat-slide-toggle>
   </div>
 

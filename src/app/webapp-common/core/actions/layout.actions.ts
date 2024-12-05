@@ -95,6 +95,7 @@ export const firstLogin = createAction(
 );
 
 export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());
+export const neverShowChangesAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_CHANGES_AGAIN', props<{ version: string }>());
 export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARGUMENTS', props<{ redactedArguments: { key: string } [] }>());
 export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{ hide: boolean }>());
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');

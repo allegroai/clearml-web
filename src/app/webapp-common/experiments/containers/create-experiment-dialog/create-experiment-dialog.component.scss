@@ -85,3 +85,10 @@ mat-form-field {
   display: flex;
   gap: 12px;
 }
+
+.add-argument {
+  display: inline-flex;
+  align-items: center;
+  color: $purple;
+  gap: 2px;
+}

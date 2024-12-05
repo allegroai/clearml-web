@@ -28,12 +28,12 @@ export interface MetricColumn {
 
 export const excludedKey = '__$not';
 
-const metricVariantDelimiter = '\u203A'
+const metricVariantDelimiter = '\u203A';
 
 export const MetricValueTypeStrings = {
   value: '(Last)',
   max_value: '(Max)',
-  min_value: '(Min)',
+  min_value: '(Min)'
 };
 
 export const getValueTypeName = (valueType: MetricValueType) => MetricValueTypeStrings[valueType] ?? valueType;
@@ -156,7 +156,7 @@ export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[]
 
 export const decodeHyperParam = (col: ISmCol): { name: string; section: string } => {
   const [section, ...name] = col.id.replace('hyperparams.', '').split('.');
-  return { section, name: name.join('.') };
+  return {section, name: name.join('.')};
 };
 
 export const createMetricColumn = (column: MetricColumn, projectId: string): ISmCol => ({
@@ -165,7 +165,7 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   sortable: true,
   filterable: true,
   filterType: ColHeaderFilterTypeEnum.durationNumeric,
-  header: `${column.metric} ${metricVariantDelimiter} ${column.variant}${getValueTypeName(column.valueType) ? ' ' + getValueTypeName(column.valueType): ''}`,
+  header: `${column.metric} ${metricVariantDelimiter} ${column.variant}${getValueTypeName(column.valueType) ? ' ' + getValueTypeName(column.valueType) : ''}`,
   hidden: false,
   /* eslint-disable @typescript-eslint/naming-convention */
   metric_hash: column.metricHash,
@@ -178,9 +178,9 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   variantName: column.variant
 });
 
-export const createCompareMetricColumn = (column:  MetricVariantResult): Partial<ISmCol> => ({
+export const createCompareMetricColumn = (column: MetricVariantResult, hideList = []): Partial<ISmCol> => ({
   id: `last_metrics.${column.metric_hash}.${column.variant_hash}.value`,
-  hidden: false,
+  hidden: hideList.includes(`${column.metric} - ${column.variant}`)
 });
 
 export const createMetadataCol = (key, projectId): ISmCol => ({
@@ -209,4 +209,16 @@ export const createFiltersFromStore = (_tableFilters: { [key: string]: FilterMet
     returnTableFilters[currentFilterName] = value;
     return returnTableFilters;
   }, {});
+};
+
+export const decodeURIComponentSafe = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch (error) {
+    if (error.name === 'URIError') {
+      return decodeURIComponent(value.replace(/%(?![0-9][0-9a-fA-F]+)/g, '%25'));
+    } else {
+      throw error;
+    }
+  }
 };

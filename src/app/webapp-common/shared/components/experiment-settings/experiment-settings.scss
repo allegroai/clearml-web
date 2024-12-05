@@ -1,9 +1,11 @@
 @import "variables";
 
 :host {
-  & {
+  display: flex;
+  &.settings {
     display: inline-block;
   }
+
 }
 
 .btn {

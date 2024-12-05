@@ -12,10 +12,6 @@ import {messagesReducer} from '@common/core/reducers/messages-reducer';
 import {projectsReducer} from '@common/core/reducers/projects.reducer';
 import {routerReducer} from '@common/core/reducers/router-reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
-import {
-  EXPERIMENTS_COMPARE_METRICS_CHARTS_
-} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
-import {compareSyncedKeys} from '@common/experiments-compare/experiments-compare.module';
 import {PROJECTS_PREFIX} from '@common/projects/common-projects.consts';
 import {CHOOSE_COLOR_PREFIX} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 import {colorSyncedKeys} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
@@ -27,10 +23,10 @@ import {USERS_PREFIX, VIEW_PREFIX} from '~/app.constants';
 import {ProjectsEffects} from '~/core/effects/projects.effects';
 import {loginReducer} from '~/features/login/login.reducer';
 import {projectSyncedKeys} from '~/features/projects/projects.module';
-import {authReducer} from '~/features/settings/containers/admin/auth.reducers';
+import {authReducer} from '~/core/reducers/auth.reducers';
 import {AdminService} from '~/shared/services/admin.service';
 import {UserEffects} from './effects/users.effects';
-import {usageStatsReducer} from './reducers/usage-stats.reducer';
+import {usageStatsReducer, userStatsFeatureKey} from './reducers/usage-stats.reducer';
 import {usersReducer} from './reducers/users.reducer';
 import {viewReducer} from './reducers/view.reducer';
 import {UsageStatsService} from './services/usage-stats.service';
@@ -49,7 +45,7 @@ export const reducers = {
   users: usersReducer,
   login: loginReducer,
   rootProjects: projectsReducer,
-  userStats: usageStatsReducer
+  [userStatsFeatureKey]: usageStatsReducer
 };
 
 const syncedKeys = [

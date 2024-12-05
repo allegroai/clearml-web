@@ -4,7 +4,7 @@
       <i class="al-icon al-ico-add sm me-2"></i><span>NEW QUEUE</span>
     </button>
   }
-  <sm-refresh-button (setAutoRefresh)="setAutoRefresh($event)"></sm-refresh-button>
+<!--  <sm-refresh-button (setAutoRefresh)="setAutoRefresh($event)"></sm-refresh-button>-->
 </div>
 <sm-queue-stats [queue]="selectedQueue()"></sm-queue-stats>
 <as-split class="flex-grow-1" (transitionEnd)="table.table.resize(); table.afterTableInit()" [gutterSize]=1>

@@ -10,30 +10,30 @@
           autocomplete="off"
           smClickStopPropagation
           placeholder="Search for experiments"
-          [ngModel]="(searchTerm$ | async)?.query"
+          [ngModel]="(searchTerm$ | ngrxPush)?.query"
           (input)="searchTermChanged(searchExperiments.value)"
         >
       </mat-form-field>
       <sm-clear-filters-button
-        [tableFilters]="(tableFilters$ | async)"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
         (clearTableFilters)="clearTableFilters()"
       ></sm-clear-filters-button>
     </div>
     <div class="hide-table show-table">
       <sm-experiments-table
         class="align-self-stretch"
-        [selectionMode]="null"
+        selectionMode="single"
         [reorderableColumns]="false"
         [minimizedView]="false"
         [tableCols]="tableCols"
-        [experiments]="experiments$ | async"
-        [tableFilters]="(tableFilters$ | async)"
+        [experiments]="experiments$ | ngrxPush"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
         [tags]="tags"
-        [noMoreExperiments]="noMoreExperiments$ | async"
-        [systemTags]="systemTags$ | async"
+        [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
+        [systemTags]="systemTags$ | ngrxPush"
         [entityType]="entityTypes.experiment"
-        [split]="selectSplitSize$ | async"
-        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+        [split]="selectSplitSize$ | ngrxPush"
+        (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (loadMoreExperiments)="getNextExperiments()"
         (filterChanged)="filterChanged($event)"
         (columnResized)="resizeCol($event)"

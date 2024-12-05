@@ -46,16 +46,24 @@ $btn-font-family: $font-family-base;
   --bs-border-width: 1px;
 
 
-  // @import '~bootstrap/scss/bootstrap.scss';
+  // @import 'bootstrap/scss/bootstrap.scss';
   @import 'bootstrap/scss/bootstrap-reboot';
-  @import 'bootstrap/scss/bootstrap-grid';
   @import 'bootstrap/scss/bootstrap-utilities';
   @import "bootstrap/scss/buttons";
-  @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
 
   label {
     display: inline-flex;
+  }
+
+  a {
+    color: $blue-100;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    &:not(.mat-mdc-list-item, .item, .mat-mdc-menu-item, .al-icon, .mdc-tab):hover {
+      color: #fff;
+      text-decoration: underline;
+    }
   }
 
   .btn {
@@ -237,16 +245,23 @@ $btn-font-family: $font-family-base;
   $input-height: map-get($light-theme-input, height);
   $label-margin-bottom: 0;
 
-  //@import '~bootstrap/scss/bootstrap.scss';
+  //@import 'bootstrap/scss/bootstrap.scss';
   @import 'bootstrap/scss/bootstrap-reboot';
-  @import 'bootstrap/scss/bootstrap-grid';
   @import 'bootstrap/scss/bootstrap-utilities';
   @import "bootstrap/scss/grid";
   @import "bootstrap/scss/buttons";
-  @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
 
   --bs-border-width: 1px;
+
+  a {
+    color: $purple;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    &:not(.mat-mdc-list-item, .mat-mdc-menu-item, .mdc-tab):hover {
+      color: $purple;
+    }
+  }
 
   .btn {
     font-size: 12px;

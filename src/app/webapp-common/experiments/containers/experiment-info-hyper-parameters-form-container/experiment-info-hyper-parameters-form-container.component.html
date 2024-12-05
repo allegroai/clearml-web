@@ -1,10 +1,10 @@
-<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-editable-section #parameterSection
                      class="light-theme"
-                     *ngIf="(selectedSectionHyperParams$| async).length>0 || propSection"
-                     [editable]="(isExample$ | async) !== true && ((editable$ | async) || propSection)"
+                     *ngIf="(selectedSectionHyperParams$| ngrxPush).length>0 || propSection"
+                     [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection)"
                      [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
-                     [saving]="saving$ | async"
+                     [saving]="saving$ | ngrxPush"
                      [forceButtons]="!!searchedText"
                      (cancelClicked)="cancelHyperParametersChange(); executionParamsForm.cancel()"
                      (saveClicked)="sectionSaved()"
@@ -26,10 +26,10 @@
     #executionParamsForm
     class="form-section"
     [searchedText]="searchedText"
-    [editable]="(isExample$ | async) !== true && ((editable$ | async) || propSection) && parameterSection.inEditMode"
+    [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection) && parameterSection.inEditMode"
     [section]="selectedSection"
-    [formData]="(selectedSectionHyperParams$ | async) | sort:'name'"
-    [size]="size$ | async"
+    [formData]="(selectedSectionHyperParams$ | ngrxPush) | sort:'name'"
+    [size]="size$ | ngrxPush"
     (formDataChanged)="onFormValuesChanged($event)"
     (searchCounterChanged)="searchCounterChanged($event)"
     (resetSearch)="search.clear(false)"

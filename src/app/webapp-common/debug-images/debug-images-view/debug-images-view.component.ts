@@ -1,4 +1,4 @@
-import {Component, Input, Output, viewChildren} from '@angular/core';
+import {Component, ElementRef, inject, Input, Output, viewChildren} from '@angular/core';
 import {EventEmitter} from '@angular/core';
 import {ThemeEnum} from '@common/constants';
 import {DebugSampleEvent, Iteration} from '@common/debug-images/debug-images-types';
@@ -10,6 +10,7 @@ import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtu
   styleUrls: ['./debug-images-view.component.scss']
 })
 export class DebugImagesViewComponent {
+  protected ref = inject<ElementRef<HTMLElement>>(ElementRef);
   public themeEnum = ThemeEnum;
 
   public trackFrame = item => `${item?.key} ${item?.timestamp}`;

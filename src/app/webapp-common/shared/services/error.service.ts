@@ -27,6 +27,7 @@ export class ErrorService {
 
   private codes = {
     400: {
+      50: this.template`Account reached the maximum number of credentials.`,
       51: this.template`This operation could not be completed at this time. Please try again later. \n${'resultMsg'}`,
       52: this.template`Could not complete identity verification. The provider may be down - Please try again later`,
       53: this.template`Could not complete identity verification. The provider may be down - Please try again later`,

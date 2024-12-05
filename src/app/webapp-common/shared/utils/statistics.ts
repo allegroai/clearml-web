@@ -1,5 +1,6 @@
 import {last} from 'lodash-es';
 import {maxInArray} from '@common/shared/utils/helpers.util';
+import {ResourceUsageSeries} from '~/business-logic/model/workers/resourceUsageSeries';
 
 export interface DataPoint {
   date: string;
@@ -124,4 +125,20 @@ export function removeFullRangeMarkers(topics: Topic[]) {
 export function addFullRangeMarkers(topics: Topic[], fromDate: number, toDate: number) {
   topics[0].dates.splice(0, 0, {date: (new Date(fromDate * 1000)).toISOString(), value: null});
   topics[0].dates.push({date: (new Date(toDate * 1000)).toISOString(), value: null});
+}
+
+export function activitySeriesToTopic(data: ResourceUsageSeries, topicIndex: number, forceTitle?: string) {
+  if (!data) {
+    return null;
+  }
+  return {
+    topic: topicIndex,
+    topicName: forceTitle ?? data.title,
+    topicID: forceTitle ?? data.title,
+    dates: data.dates?.map((date, i) => ({
+      originalDate: date,
+      date: new Date(date).toISOString(),
+      value: data.values[i],
+    })) ?? []
+  } as Topic;
 }

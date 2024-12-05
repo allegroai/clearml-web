@@ -8,6 +8,8 @@
       [active]="route.isActive"
       [routerLink] = "route.link"
       [subHeader]="archivedMode() && route.subHeader"
+      [badge]="route.badge"
+      [badgeTooltip]="route.badgeTooltip"
       (click)="setFeature(route.featureName ?? route.header)"
     ></sm-navbar-item>
   }

@@ -5,7 +5,7 @@ import { SettingsComponent } from '../settings/settings.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SharedModule} from '~/shared/shared.module';
 import {MatExpansionModule} from '@angular/material/expansion';
-import {WebappConfigurationComponent} from '@common/settings/webapp-configuration/webapp-configuration.component';
+import {WebappConfigurationComponent} from '~/features/settings/containers/webapp-configuration/webapp-configuration.component';
 import {WorkspaceConfigurationComponent} from '@common/settings/workspace-configuration/workspace-configuration.component';
 import {ProfileKeyStorageComponent} from '@common/settings/admin/profile-key-storage/profile-key-storage.component';
 import {ProfileNameComponent} from '@common/settings/admin/profile-name/profile-name.component';
@@ -38,6 +38,8 @@ import {AdminDialogTemplateComponent} from '@common/settings/admin/admin-dialog-
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {ProfilePreferencesComponent} from '@common/settings/admin/profile-preferences/profile-preferences.component';
+import {PushPipe} from '@ngrx/component';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
 
 
 
@@ -48,13 +50,9 @@ import {ProfilePreferencesComponent} from '@common/settings/admin/profile-prefer
     UserCredentialsComponent,
     AdminFooterActionsComponent,
     AdminCredentialTableComponent,
-    S3AccessComponent,
-    CreateCredentialDialogComponent,
     AdminFooterComponent,
     ProfileNameComponent,
-    ProfileKeyStorageComponent,
     WorkspaceConfigurationComponent,
-    WebappConfigurationComponent,
     RedactedArgumentsDialogComponent
   ],
   imports: [
@@ -85,12 +83,17 @@ import {ProfilePreferencesComponent} from '@common/settings/admin/profile-prefer
     TimeAgoPipe,
     ShowTooltipIfEllipsisDirective,
     ProfilePreferencesComponent,
+    S3AccessComponent,
+    CreateCredentialDialogComponent,
+    WebappConfigurationComponent,
+    ProfileKeyStorageComponent,
+    PushPipe,
+    IdBadgeComponent,
   ],
   exports: [
     UserCredentialsComponent,
     AdminFooterComponent,
     ProfileNameComponent,
-    WebappConfigurationComponent,
   ]
 })
 export class SettingsModule { }

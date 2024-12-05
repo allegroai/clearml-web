@@ -10,6 +10,8 @@ export enum EntityTypeEnum {
   dataset = 'version',
   simpleDataset = 'dataset',
   report = 'report',
+  endpoint = 'endpoint',
+  endpointsContainer = 'endpoints container'
 }
 
 export enum CircleTypeEnum {

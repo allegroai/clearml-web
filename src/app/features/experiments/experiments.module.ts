@@ -12,29 +12,62 @@ import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/
 import {AngularSplitModule} from 'angular-split';
 import {CommonLayoutModule} from '@common/layout/layout.module';
 import {DebugImagesModule} from '@common/debug-images/debug-images.module';
-import {ExperimentInfoExecutionComponent} from '@common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
+import {
+  ExperimentInfoExecutionComponent
+} from '@common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatListModule} from '@angular/material/list';
 import {ExperimentOutputComponent} from './containers/experiment-ouptut/experiment-output.component';
 import {ExperimentInfoNavbarComponent} from './containers/experiment-info-navbar/experiment-info-navbar.component';
-import {ExperimentInfoHyperParametersComponent} from '@common/experiments/containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component';
-import {ExperimentInfoArtifactItemComponent} from '@common/experiments/containers/experiment-info-artifact-item/experiment-info-artifact-item.component';
-import {ExperimentGeneralInfoComponent} from '@common/experiments/dumb/experiment-general-info/experiment-general-info.component';
-import {ExperimentArtifactItemViewComponent} from '@common/experiments/dumb/experiment-artifact-item-view/experiment-artifact-item-view.component';
-import {ExperimentHyperParamsNavbarComponent} from '@common/experiments/dumb/experiment-hyper-params-navbar/experiment-hyper-params-navbar.component';
-import {ExperimentExecutionSourceCodeComponent} from '@common/experiments/dumb/experiment-execution-source-code/experiment-execution-source-code.component';
-import {ExperimentInfoEditDescriptionComponent} from '@common/experiments/dumb/experiment-info-edit-description/experiment-info-edit-description.component';
-import {ExperimentOutputModelViewComponent} from '@common/experiments/dumb/experiment-output-model-view/experiment-output-model-view.component';
-import {ExperimentInfoGeneralComponent} from '@common/experiments/containers/experiment-info-general/experiment-info-general.component';
+import {
+  ExperimentInfoHyperParametersComponent
+} from '@common/experiments/containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component';
+import {
+  ExperimentInfoArtifactItemComponent
+} from '@common/experiments/containers/experiment-info-artifact-item/experiment-info-artifact-item.component';
+import {
+  ExperimentGeneralInfoComponent
+} from '@common/experiments/dumb/experiment-general-info/experiment-general-info.component';
+import {
+  ExperimentArtifactItemViewComponent
+} from '@common/experiments/dumb/experiment-artifact-item-view/experiment-artifact-item-view.component';
+import {
+  ExperimentHyperParamsNavbarComponent
+} from '@common/experiments/dumb/experiment-hyper-params-navbar/experiment-hyper-params-navbar.component';
+import {
+  ExperimentExecutionSourceCodeComponent
+} from '@common/experiments/dumb/experiment-execution-source-code/experiment-execution-source-code.component';
+import {
+  ExperimentInfoEditDescriptionComponent
+} from '@common/experiments/dumb/experiment-info-edit-description/experiment-info-edit-description.component';
+import {
+  ExperimentOutputModelViewComponent
+} from '@common/experiments/dumb/experiment-output-model-view/experiment-output-model-view.component';
+import {
+  ExperimentInfoGeneralComponent
+} from '@common/experiments/containers/experiment-info-general/experiment-info-general.component';
 import {BaseClickableArtifactComponent} from '@common/experiments/dumb/base-clickable-artifact.component';
-import {ExperimentModelsFormViewComponent} from '@common/experiments/dumb/experiment-models-form-view/experiment-models-form-view.component';
-import {ExperimentArtifactsNavbarComponent} from '@common/experiments/dumb/experiment-artifacts-navbar/experiment-artifacts-navbar.component';
-import {ExperimentInfoArtifactsComponent} from '@common/experiments/containers/experiment-info-aritfacts/experiment-info-artifacts.component';
-import {ExperimentInfoHeaderComponent} from '@common/experiments/dumb/experiment-info-header/experiment-info-header.component';
-import {ExperimentInfoTaskModelComponent} from '@common/experiments/containers/experiment-info-task-model/experiment-info-task-model.component';
-import {ExperimentOutputScalarsComponent} from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
-import {ExperimentInfoModelComponent} from '@common/experiments/containers/experiment-info-model/experiment-info-model.component';
-import {ExperimentInfoHyperParametersFormContainerComponent} from '@common/experiments/containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
+import {
+  ExperimentModelsFormViewComponent
+} from '@common/experiments/dumb/experiment-models-form-view/experiment-models-form-view.component';
+import {
+  ExperimentInfoArtifactsComponent
+} from '@common/experiments/containers/experiment-info-aritfacts/experiment-info-artifacts.component';
+import {
+  ExperimentInfoHeaderComponent
+} from '@common/experiments/dumb/experiment-info-header/experiment-info-header.component';
+import {
+  ExperimentInfoTaskModelComponent
+} from '@common/experiments/containers/experiment-info-task-model/experiment-info-task-model.component';
+import {
+  ExperimentOutputScalarsComponent
+} from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
+import {
+  ExperimentInfoModelComponent
+} from '@common/experiments/containers/experiment-info-model/experiment-info-model.component';
+import {
+  ExperimentInfoHyperParametersFormContainerComponent
+} from '@common/experiments/containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
 import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
 import {RouterModule} from '@angular/router';
 import {ScrollingModule} from '@angular/cdk/scrolling';
@@ -51,7 +84,9 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
-import {InfoHeaderStatusIconLabelComponent} from '@common/shared/experiment-info-header-status-icon-label/info-header-status-icon-label.component';
+import {
+  InfoHeaderStatusIconLabelComponent
+} from '@common/shared/experiment-info-header-status-icon-label/info-header-status-icon-label.component';
 import {NAPipe} from '@common/shared/pipes/na.pipe';
 import {SortPipe} from '@common/shared/pipes/sort.pipe';
 import {safeAngularUrlParameterPipe} from '@common/shared/pipes/safeAngularUrlParameter.pipe';
@@ -86,8 +121,18 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {SelectQueueModule} from '@common/experiments/shared/components/select-queue/select-queue.module';
+import {PushPipe} from '@ngrx/component';
+import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+import {
+  ExperimentOperationsLogComponent
+} from '@common/experiments/dumb/experiment-operations-log/experiment-operations-log.component';
+import {
+  ExperimentArtifactsNavbarComponent
+} from '@common/experiments/dumb/experiment-artifacts-navbar/experiment-artifacts-navbar.component';
 
 
 @NgModule({
@@ -152,12 +197,15 @@ import {SelectQueueModule} from '@common/experiments/shared/components/select-qu
     HesitateDirective,
     ShowTooltipIfEllipsisDirective,
     SelectQueueModule,
+    PushPipe,
+    ExperimentHeaderComponent,
+    ExperimentOperationsLogComponent,
+    ExperimentArtifactsNavbarComponent,
   ],
   declarations: [
     ExperimentsComponent,
     ExperimentInfoExecutionComponent,
     ExperimentOutputComponent,
-    ExperimentInfoNavbarComponent,
     ExperimentInfoNavbarComponent,
     BaseClickableArtifactComponent,
     ExperimentInfoHeaderComponent,
@@ -171,7 +219,6 @@ import {SelectQueueModule} from '@common/experiments/shared/components/select-qu
     ExperimentOutputScalarsComponent,
     ExperimentInfoHyperParametersComponent,
     ExperimentInfoHyperParametersFormContainerComponent,
-    ExperimentArtifactsNavbarComponent,
     ExperimentInfoArtifactsComponent,
     ExperimentHyperParamsNavbarComponent,
     ExperimentInfoArtifactItemComponent,

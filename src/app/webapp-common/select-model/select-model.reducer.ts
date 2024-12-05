@@ -22,6 +22,8 @@ export interface SelectModelState {
   scrollId: string;
   globalFilter: string;
   showArchive: boolean;
+  frameworks: string[];
+  tags: string[];
 }
 
 const selectModelInitState: SelectModelState = {
@@ -37,7 +39,9 @@ const selectModelInitState: SelectModelState = {
   tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   scrollId: null,
   globalFilter: null,
-  showArchive: null
+  showArchive: null,
+  frameworks: [],
+  tags: []
 };
 
 
@@ -90,6 +94,10 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
       return state;
     case actions.showArchive.type:
       return {...state, showArchive: action.showArchive};
+    case actions.setFrameworks.type:
+      return {...state, frameworks: action.frameworks};
+    case actions.setTags.type:
+      return {...state, tags: action.tags};
   }
 }
 
@@ -105,3 +113,5 @@ export const selectViewMode = createSelector(models, (state): ModelsViewModesEnu
 export const selectSelectedModels = createSelector(models, (state): Array<any> => state.selectedModels);
 export const selectNoMoreModels = createSelector(models, (state): boolean => state.noMoreModels);
 export const selectShowArchive = createSelector(models, (state): boolean => state.showArchive);
+export const selectFrameworks = createSelector(models, (state): string[] => state.frameworks);
+export const selectTags = createSelector(models, (state): string[] => state.tags);

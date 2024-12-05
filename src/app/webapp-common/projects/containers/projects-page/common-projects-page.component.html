@@ -1,18 +1,19 @@
 <sm-projects-list
-  [noMoreProjects]="noMoreProjects$ | async"
-  [projects]="projectsList$ | async"
+  [noMoreProjects]="noMoreProjects$ | ngrxPush"
+  [projects]="projectsList$ | ngrxPush"
   [showLast]="searching"
   (deleteProjectClicked)="deleteProject($event)"
   (loadMore)="loadMore()"
   (projectCardClicked)="projectCardClicked($event)"
   (projectNameChanged)="projectNameChanged($event)"
   (createNewProjectClicked)="openProjectDialog('create', $event)"
+  (projectEditClicked)="openProjectDialog('edit', $event)"
   (moveToClicked)="openProjectDialog('move', $event)"
 >
   <sm-projects-header
     (orderByChanged)="orderByChanged($event)"
-    [sortByField]="projectsOrderBy$ | async"
-    [sortOrder]="projectsSortOrder$ | async"
+    [sortByField]="projectsOrderBy$ | ngrxPush"
+    [sortOrder]="projectsSortOrder$ | ngrxPush"
   >
     <button class="btn btn-cml-primary d-flex align-items-center" data-id="New Project"
             (click)="openProjectDialog('create')">

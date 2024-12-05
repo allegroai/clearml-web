@@ -33,6 +33,8 @@ import {TableCardComponent} from '@common/shared/ui-components/data/table-card/t
 import {TableModule} from 'primeng/table';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {PushPipe} from '@ngrx/component';
+
 
 
 const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent, SelectModelHeaderComponent, ModelsTableComponent];
@@ -62,7 +64,8 @@ const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent
     TableCardComponent,
     TableModule,
     ShowTooltipIfEllipsisDirective,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    PushPipe,
   ],
   declarations: DECLERATIONS,
   exports     : DECLERATIONS

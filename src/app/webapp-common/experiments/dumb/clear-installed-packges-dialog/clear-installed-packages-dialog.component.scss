@@ -1,0 +1,35 @@
+@import "variables";
+.sub-header{
+  color: $blue-500;
+}
+.al-ico-info-circle {
+  display: flex;
+  align-items: center;
+  height: 18px;
+}
+.mat-mdc-radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.buttons {
+  margin-top: 48px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  left: 50%;
+  position: relative;
+  transform: translateX(-50%);
+
+
+  button {
+    width: 130px;
+    text-transform: uppercase;
+  }
+
+  .yes-button {
+    margin-left: 16px;
+  }
+}

@@ -19,5 +19,6 @@ export class ProjectCardMenuComponent {
   @Output() moveToClicked = new EventEmitter<Project>();
   @Output() newProjectClicked = new EventEmitter<Project>();
   @Output() projectNameInlineActivated = new EventEmitter();
+  @Output() projectEditClicked = new EventEmitter<Project>();
   @Input() project;
 }

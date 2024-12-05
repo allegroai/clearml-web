@@ -5,32 +5,49 @@
 <div class="experiment-output-container light-theme" [class.minimized]="minimized">
   <sm-experiment-info-header
     [experiment]="selectedExperiment"
-    [infoData]="infoData$ | async"
+    [infoData]="infoData$ | ngrxPush"
     [editable]="!isExample"
     [showMenu]="true"
     [minimized]="minimized"
-    [isSharedAndNotOwner]="isSharedAndNotOwner$ | async"
+    [isSharedAndNotOwner]="isSharedAndNotOwner$ | ngrxPush"
     (experimentNameChanged)="updateExperimentName($event)"
     (closeInfoClicked)="closePanel()"
     (minimizeClicked)="minimizeView()"
     (maximizedClicked)="maximize()"
-  >
-  </sm-experiment-info-header>
-    <sm-experiment-info-navbar [minimized]="minimized" [splitSize]="selectSplitSize$ | async">
-    <span class="refresh-position" refresh>
-      <sm-experiment-settings
-        [class.maximized]="!minimized"
-        [showSettings]="routerConfig.includes('scalar') && minimized"
-        (toggleSettings)="toggleSettingsBar()">
-      </sm-experiment-settings>
-      <sm-refresh-button
-        *ngIf=" ! minimized"
-        class="light-theme"
-        (setAutoRefresh)="setAutoRefresh($event)"
-      >
-      </sm-refresh-button>
+  ></sm-experiment-info-header>
+  <sm-experiment-info-navbar [minimized]="minimized" [splitSize]="selectSplitSize$ | ngrxPush">
+    @if ((routerConfig.includes('scalar') && minimized) || !minimized ) {
+      <div class="scalar-buttons" leftButtons></div>
+    }
+    @if ((routerConfig.includes('scalar') && minimized) || !minimized ) {
+      <span class="refresh-position" refresh>
+      <div class="scalar-buttons">
+        @if (routerConfig.includes('scalar')) {
+          <div class="table-graph-toggle" [class.maximized]="!minimized">
+            <i class="al-icon pointer al-color blue-400"
+               [smTooltip]="(metricValuesView$ | async)===false? 'Metric values': 'Graphs'"
+               [class]="(metricValuesView$ | async)===false? 'al-ico-table-view': 'al-ico-charts-view'"
+               (click)="toggleTableView()"
+            ></i>
+          </div>
+        }
+        @if ((metricValuesView$ | async) === false && routerConfig.includes('scalar') && minimized) {
+          <sm-experiment-settings
+            [class.maximized]="!minimized"
+            [showSettings]="routerConfig.includes('scalar') && minimized"
+            (toggleSettings)="toggleSettingsBar()"
+          ></sm-experiment-settings>
+        }
+      </div>
+        @if (!minimized){
+          <sm-refresh-button
+            class="light-theme"
+            (setAutoRefresh)="setAutoRefresh($event)"
+          ></sm-refresh-button>
+        }
     </span>
-    </sm-experiment-info-navbar>
+    }
+  </sm-experiment-info-navbar>
   <div class="output-body" [class.minimized]="minimized" #scrollContainer>
     <router-outlet class="output-outlet" (activate)="onActivate($event, scrollContainer)"></router-outlet>
   </div>

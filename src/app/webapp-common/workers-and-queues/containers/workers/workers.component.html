@@ -1,17 +1,17 @@
-<sm-workers-graph [worker]="selectedWorker$ | async" class="overflow-hidden"></sm-workers-graph>
+<sm-workers-graph [activeWorker]="selectedWorker$ | ngrxPush" class="overflow-hidden"></sm-workers-graph>
 <as-split class="flex-grow-1" [gutterSize]=1>
   <as-split-area [size]="50">
     <sm-workers-table
       class="mt-2"
-      [workers]="workers$ | async"
-      [selectedWorker]="selectedWorker$ | async"
+      [workers]="workers$ | ngrxPush"
+      [selectedWorker]="selectedWorker$ | ngrxPush"
       (sortedChanged)="sortedChanged($event)"
-      [tableSortFields]="tableSortFields$ | async"
+      [tableSortFields]="tableSortFields$ | ngrxPush"
       (workerSelected)="selectWorker($event)">
     </sm-workers-table>
   </as-split-area>
-  <as-split-area [size]="50" [visible]="!!(selectedWorker$| async)">
-    <sm-worker-info [selectedWorker]="selectedWorker$ | async"
+  <as-split-area [size]="50" [visible]="!!(selectedWorker$| ngrxPush)">
+    <sm-worker-info [selectedWorker]="selectedWorker$ | ngrxPush"
       (deselectWorker)="selectWorker(null)">
     </sm-worker-info>
   </as-split-area>

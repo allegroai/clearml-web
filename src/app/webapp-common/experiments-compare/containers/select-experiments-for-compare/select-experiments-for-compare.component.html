@@ -16,11 +16,11 @@
       <div class="d-flex-center">
         <mat-slide-toggle
           class="me-2"
-          [checked]="showArchived$ | async"
+          [checked]="showArchived$ | ngrxPush"
           (change)="showArchived($event)"
         >Include Archived</mat-slide-toggle>
         <sm-clear-filters-button
-          [tableFilters]="(tableFilters$ | async)"
+          [tableFilters]="(tableFilters$ | ngrxPush)"
           (clearTableFilters)="clearTableFilters()"
         ></sm-clear-filters-button>
       </div>
@@ -32,22 +32,22 @@
         [selectionMode]="null"
         [reorderableColumns]="false"
         [minimizedView]="false"
-        [colsOrder]="(tableColsOrder$ | async)"
-        [tableCols]="tableCols$| async"
-        [users]="users$ | async"
-        [projects]="projects$ | async"
+        [colsOrder]="(tableColsOrder$ | ngrxPush)"
+        [tableCols]="tableCols$| ngrxPush"
+        [users]="users$ | ngrxPush"
+        [projects]="projects$ | ngrxPush"
         [selectedExperiments]="selectedExperimentsIds | idToObjectsArray"
-        [experiments]="experiments$ | async"
-        [experimentTypes]="types$ | async"
-        [tableFilters]="(tableFilters$ | async)"
-        [tableSortFields]="(tableSortFields$ | async)"
-        [tableSortOrder]="(tableSortOrder$ | async)"
-        [tags]="tags$ | async"
-        [hyperParamsOptions]="hyperParamsOptions$ | async"
-        [activeParentsFilter]="activeParentsFilter$ | async"
-        [parents]="parent$ | async"
-        [noMoreExperiments]="noMoreExperiments$ | async"
-        [systemTags]="systemTags$ | async"
+        [experiments]="experiments$ | ngrxPush"
+        [experimentTypes]="types$ | ngrxPush"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
+        [tableSortFields]="(tableSortFields$ | ngrxPush)"
+        [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
+        [tags]="tags$ | ngrxPush"
+        [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
+        [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
+        [parents]="parent$ | ngrxPush"
+        [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
+        [systemTags]="systemTags$ | ngrxPush"
         [entityType]="entityTypes.experiment"
         (tagsMenuOpened)="refreshTagsList()"
         (typesMenuOpened)="refreshTypesList()"
@@ -57,8 +57,7 @@
         (filterChanged)="filterChanged($event)"
         (filterSearchChanged)="filterSearchChanged($event)"
         (columnResized)="resizeCol($event)"
-      >
-      </sm-experiments-table>
+      ></sm-experiments-table>
     </div>
   </div>
   <div class="buttons">
@@ -71,5 +70,4 @@
       CANCEL
     </button>
   </div>
-
 </sm-dialog-template>

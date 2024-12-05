@@ -4,28 +4,32 @@
       <i class="close al-icon al-ico-dialog-x" (click)="drawer.close(); filterValue = ''" data-id="closeToggleGraph"></i>
     </div>
     <div class="list-container">
-      <sm-selectable-grouped-filter-list
-        [list]="metricVariantList"
-        [checkedList]="settings.selectedMetricsScalar"
-        [searchTerm]="listSearchTerm"
-        (hiddenChanged)="selectedMetricsChanged($event)"
-        (searchTermChanged)="searchTermChanged($event)"
-      >
-      </sm-selectable-grouped-filter-list>
+      @if (settings) {
+        <sm-selectable-grouped-filter-list
+          [checkedList]="settings.selectedMetricsScalar"
+          [searchTerm]="listSearchTerm"
+          [list]="metricVariantList"
+          (hiddenChanged)="selectedMetricsChanged($event)"
+          (searchTermChanged)="searchTermChanged($event)"
+        ></sm-selectable-grouped-filter-list>
+      }
     </div>
   </mat-drawer>
 
   <mat-drawer-content>
 
-    <div *ngIf="dataTable?.length === 0" class="no-output">
-      <i class="i-no-table-data"></i>
-      <h4>NO METRICS</h4>
-    </div>
+    @if (dataTable?.length === 0) {
+      <div class="no-output">
+        <i class="i-no-table-data"></i>
+        <h4>NO METRICS</h4>
+      </div>
+    }
 
-    <div *ngIf="dataTable?.length > 0 && dataTableFiltered?.length === 0" class="no-output all-filtered-message">
-      All metrics hidden. <a class="link" (click)="clear(); showAll()">Clear filters</a>
-
-    </div>
+    @if (dataTable?.length > 0 && dataTableFiltered?.length === 0) {
+      <div class="no-output all-filtered-message">
+        All metrics hidden. <a class="link" (click)="clear(); showAll()">Clear filters</a>
+      </div>
+    }
 
     <p-table
       [value]="dataTableFiltered"
@@ -43,39 +47,41 @@
             <div class="filter-header">
               <button class="btn btn-icon" [class.is-filtered]="dataTable?.length > dataTableFiltered?.length">
                 <i [class]="'al-icon pointer ' + (dataTable?.length > dataTableFiltered?.length ? 'al-ico-filter-on':'al-ico-filter-off')"
-                   [smTooltip]="dataTableFiltered?.length + '/' + dataTable?.length + ' filtered'"
-                   [matTooltipDisabled]="dataTableFiltered?.length === dataTable?.length"
-                   [showTooltip]="showFilterTooltip"
-                   (click)="filterOpen = !filterOpen">
+                  [smTooltip]="dataTableFiltered?.length + '/' + dataTable?.length + ' filtered'"
+                  [matTooltipDisabled]="dataTableFiltered?.length === dataTable?.length"
+                  [showTooltip]="showFilterTooltip"
+                  (click)="filterOpen = !filterOpen">
                   <span class="path1"></span><span class="path2"></span>
                 </i>
               </button>
               <mat-form-field appearance="outline" class="light-theme mat-light no-bottom">
                 <input #filterRef
-                       name="filter"
-                       [formControl]="variantFilter"
-                       placeholder="Search metric"
-                       matInput
-                       autocomplete="off">
+                  name="filter"
+                  [formControl]="variantFilter"
+                  placeholder="Search metric"
+                  matInput
+                  autocomplete="off">
                 <i matSuffix class="al-icon sm-md search-icon me-2" [class]="variantFilter.value? 'al-ico-dialog-x pointer' : 'al-ico-search'"
-                   (click)="variantFilter.value && clear(); filterRef.focus()"
-                   smClickStopPropagation></i>
+                  (click)="variantFilter.value && clear(); filterRef.focus()"
+                smClickStopPropagation></i>
               </mat-form-field>
             </div>
           </th>
-          <th *ngFor="let exp of experiments; trackBy: trackById" class="experiment-header">
-            <span #dot class="experiment-color"
-                  [style.background-color]="experimentsColor[exp.id]"
-                  [colorButtonRef]="dot"
-                  [smChooseColor]="experimentsColor[exp.id]"
-                  [stringToColor]="(exp.orgName ?? exp.name) + '-' + exp.id"></span>
-            <span class="experiment-name"
-                  [smEllipsisMiddleDirective]="exp.name"
-                  [smTooltip]="exp.name"
-                  [delay]="0"
-                  [triggerEllipsis]="experiments.length"
-            >{{ exp.name }}</span>
-          </th>
+          @for (exp of experiments; track exp.id) {
+            <th class="experiment-header">
+              <span #dot class="experiment-color"
+                [style.background-color]="experimentsColor[exp.id]"
+                [colorButtonRef]="dot"
+                [smChooseColor]="experimentsColor[exp.id]"
+              [stringToColor]="(exp.orgName ?? exp.name) + '-' + exp.id"></span>
+              <span class="experiment-name"
+                [smEllipsisMiddleDirective]="exp.name"
+                [smTooltip]="exp.name"
+                [delay]="0"
+                [triggerEllipsis]="experiments.length"
+              >{{ exp.name }}</span>
+            </th>
+          }
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-metricVariant>
@@ -86,20 +92,28 @@
           <td class="variants-column" [class.freeze-divider]="scrolled" pFrozenColumn>
             <div class="variant-cell">
               <span class="ellipsis variant-name" [smTooltip]="metricVariant.variant" smShowTooltipIfEllipsis>{{ metricVariant.variant }}</span>
-              <i *ngIf="metricVariant.min === metricVariant.max"
-                 class="al-icon al-ico-equal-outline sm row-info-icon"
-                 smTooltip="All scalars have the same value in this row"></i>
+              @if (metricVariant.min === metricVariant.max) {
+                <i
+                  class="al-icon al-ico-equal-outline sm row-info-icon"
+                smTooltip="All scalars have the same value in this row"></i>
+              }
             </div>
           </td>
-          <td class="value-cell" *ngFor="let exp of experiments; trackBy: trackById">
-            <div class="value">
-              <span class="value-text" smShowTooltipIfEllipsis [smTooltip]="metricVariant.values[exp.id]?.[valuesMode.key]">{{ metricVariant.values[exp.id]?.[valuesMode.key] }}</span>
-              <ng-container *ngIf="(selectShowRowExtremes$ | async) && metricVariant.min !== metricVariant.max">
-                <span *ngIf="metricVariant.values[exp.id]?.[valuesMode.key] === metricVariant.max" class="tag tag-max">MAX</span>
-                <span *ngIf="metricVariant.values[exp.id]?.[valuesMode.key] === metricVariant.min" class="tag tag-min">MIN</span>
-              </ng-container>
-            </div>
-          </td>
+          @for (exp of experiments; track exp.id) {
+            <td class="value-cell">
+              <div class="value">
+                <span class="value-text" smShowTooltipIfEllipsis [smTooltip]="metricVariant.values[exp.id]?.[valuesMode.key]">{{ metricVariant.values[exp.id]?.[valuesMode.key] }}</span>
+                @if ((selectShowRowExtremes$ | ngrxPush) && metricVariant.min !== metricVariant.max) {
+                  @if (metricVariant.values[exp.id]?.[valuesMode.key] === metricVariant.max) {
+                    <span class="tag tag-max">MAX</span>
+                  }
+                  @if (metricVariant.values[exp.id]?.[valuesMode.key] === metricVariant.min) {
+                    <span class="tag tag-min">MIN</span>
+                  }
+                }
+              </div>
+            </td>
+          }
         </tr>
       </ng-template>
     </p-table>

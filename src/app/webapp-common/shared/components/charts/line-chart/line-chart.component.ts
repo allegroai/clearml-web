@@ -2,7 +2,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   viewChild,
-  input, computed, signal, effect,
+  input, computed, signal, effect
 } from '@angular/core';
 import {BaseChartDirective} from 'ng2-charts';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -25,7 +25,7 @@ declare module 'chart.js' {
       dash?: [number, number];
       width?: number;
       drawY?: boolean;
-    }
+    };
   }
 }
 
@@ -41,9 +41,9 @@ export interface concatLatestFrom {
 }
 
 @Component({
-  selector       : 'sm-line-chart',
-  templateUrl    : './line-chart.component.html',
-  styleUrls      : ['./line-chart.component.scss'],
+  selector: 'sm-line-chart',
+  templateUrl: './line-chart.component.html',
+  styleUrls: ['./line-chart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -52,13 +52,13 @@ export interface concatLatestFrom {
   ]
 })
 export class LineChartComponent {
-  lineChartPlugins: Plugin<'line'>[] =  [{
+  lineChartPlugins: Plugin<'line'>[] = [{
     id: 'hoverLine',
     afterDatasetsDraw: (chart, _, opts) => {
       const {
         ctx,
         tooltip,
-        chartArea: { top, bottom}
+        chartArea: {top, bottom}
       } = chart;
 
       if (tooltip.opacity) {
@@ -74,6 +74,15 @@ export class LineChartComponent {
         ctx.closePath();
         ctx.setLineDash([]);
       }
+
+      // Hack to fix tooltip position on cursor
+      if (tooltip.y < 0.1) {
+        if (tooltip.caretX > chart.width / 2) {
+          tooltip.x = tooltip.caretX - tooltip.width - 10;
+        } else {
+          tooltip.x = tooltip.caretX + 10;
+        }
+      }
     }
   }];
   public lineChartType: ChartType = 'line';
@@ -81,7 +90,7 @@ export class LineChartComponent {
   private chart = viewChild(BaseChartDirective);
   animationDuration = signal(500);
 
-  colorScheme= input(['#a4a1fb', '#ff8a15']);
+  colorScheme = input(['#a4a1fb', '#ff8a15']);
   yTickFormatter = input<(value: number) => string>(val => filesize(val, fileSizeConfigCount));
   yLabel = input<string>();
   showLoadingOverlay = input(false);
@@ -94,7 +103,7 @@ export class LineChartComponent {
     }
 
     return {
-      datasets: topics?.map((topic, index) => this.createDataset(topic, index)) ?? [],
+      datasets: topics?.map((topic, index) => this.createDataset(topic, index)) ?? []
     };
   });
 
@@ -108,12 +117,13 @@ export class LineChartComponent {
     },
     elements: {
       line: {
-        tension: 0.5,
-      },
+        tension: 0.5
+      }
     },
     interaction: {
       intersect: false,
-      mode: 'index',
+      mode: 'nearest',
+      axis: 'x'
     },
     scales: {
       x: {
@@ -122,7 +132,7 @@ export class LineChartComponent {
           autoSkip: true,
           autoSkipPadding: 50,
           maxRotation: 0,
-          color: '#c1cdf3',
+          color: '#c1cdf3'
         },
         time: {
           tooltipFormat: 'P pp',
@@ -133,7 +143,7 @@ export class LineChartComponent {
             minute: 'p',
             second: 'pp'
           }
-        },
+        }
       },
       y: {
         title: {display: !!this.yLabel(), text: this.yLabel(), color: '#c1cdf3'},
@@ -149,9 +159,9 @@ export class LineChartComponent {
         },
         grid: {
           display: true,
-          color: '#39405f',
+          color: '#39405f'
         }
-      },
+      }
     },
 
     plugins: {
@@ -162,7 +172,7 @@ export class LineChartComponent {
           color: '#dce0ee',
           font: {weight: 'normal', size: 12},
           padding: 20,
-          usePointStyle: true,
+          usePointStyle: true
         }
 
       },
@@ -181,26 +191,31 @@ export class LineChartComponent {
       hoverLine: {
         dash: [6, 6],
         color: '#8492c2',
-        width: 1,
-      },
+        width: 1
+      }
     },
 
     parsing: {
       xAxisKey: 'date',
       yAxisKey: 'value'
     }
-  } as ChartOptions<'line'>))
+  } as ChartOptions<'line'>));
+  private reservedColors: Record<string, string> = {};
   private createDataset(topic: Topic, index: number) {
+    const currentChart = this.chart().chart;
+    const newIndex = currentChart?.data.datasets.findIndex(dataset => dataset.label === topic.topicName);
+    this.reservedColors[topic.topicName] = this.reservedColors[topic.topicName] ?? this.colorScheme()[index % this.colorScheme().length];
     return {
       data: topic.dates,
       label: topic.topicName,
       pointRadius: 0,
       pointBorderColor: '#1a1e2c',
-      borderWidth: 2,
+      borderWidth: 1.4,
       lineTension: 0.1,
-      pointBackgroundColor: this.colorScheme()[index % this.colorScheme.length],
-      borderColor: this.colorScheme()[index % this.colorScheme().length],
-      backgroundColor: this.colorScheme()[index % this.colorScheme().length]
+      pointBackgroundColor: this.reservedColors[topic.topicName],
+      borderColor: this.reservedColors[topic.topicName],
+      backgroundColor: this.reservedColors[topic.topicName],
+      ...(newIndex > -1 && currentChart?.data.datasets.length > newIndex && {hidden: !currentChart.isDatasetVisible(newIndex)})
     };
   }
 

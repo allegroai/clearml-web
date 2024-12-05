@@ -34,7 +34,7 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     headerType: ColHeaderTypeEnum.sortFilter,
     filterable: true,
     sortable: true,
-    isParam: true,
+    isParam: false,
     searchableFilter: true,
     asyncFilter: true,
     paginatedFilterPageSize: rootProjectsPageSize,

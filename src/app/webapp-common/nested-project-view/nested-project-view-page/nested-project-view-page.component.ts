@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
+import {Component, effect, EventEmitter, input, Input, Output, TemplateRef} from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {trackById} from '@common/shared/utils/forms-track-by';
@@ -23,9 +23,16 @@ export class NestedProjectViewPageComponent {
   circleTypeEnum = CircleTypeEnum;
   entityTypeEnum = ProjectTypeEnum;
 
-  @Input() totalVirtualCards: number = 0;
+  constructor() {
+    effect(() => {
+      if (this.projectsList()) {
+        this.loading = false;
+      }
+    });
+  }
+  @Input() totalVirtualCards = 0;
   @Input() entityType: ProjectTypeEnum;
-  @Input() projectsList: Project[];
+  projectsList = input<Project[]>();
   @Input() allExamples: boolean;
   @Input() showExamples: boolean;
   @Input() searching: boolean;
@@ -34,7 +41,7 @@ export class NestedProjectViewPageComponent {
   @Input() projectsTags: string[];
   @Input() noMoreProjects: boolean;
   @Input() cardContentTemplateRef: TemplateRef<any>;
-  @Input() cardContentFooterTemplateRef: TemplateRef<any>;
+  @Input() cardContentFooterTemplateRef: TemplateRef<{$implicit: Project}>;
   @Output() cardClicked = new EventEmitter<{ hasSubProjects: boolean; id: string; name: string }>();
   @Output() toggleNestedView = new EventEmitter<boolean>();
   @Output() orderByChanged = new EventEmitter();
@@ -42,5 +49,10 @@ export class NestedProjectViewPageComponent {
   @Output() deleteProjectClicked = new EventEmitter<Project>();
   @Output() removeTag = new EventEmitter<{ project: Project; tag: string }>();
   @Output() loadMore = new EventEmitter();
+  loading: boolean;
 
+  loadMoreAction() {
+    this.loading = true;
+    this.loadMore.emit();
+  }
 }

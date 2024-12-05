@@ -6,6 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {PushPipe} from '@ngrx/component';
 
 
 
@@ -17,7 +18,8 @@ import {SaferPipe} from '@common/shared/pipes/safe.pipe';
     MatProgressSpinnerModule,
     ScrollingModule,
     ExperimentSharedModule,
-    SaferPipe
+    SaferPipe,
+        PushPipe
   ]
 })
 export class ExperimentOutputLogModule { }

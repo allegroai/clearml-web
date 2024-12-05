@@ -1,5 +1,4 @@
-import {NgIf} from '@angular/common';
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {DebugImagesModule} from '@common/debug-images/debug-images.module';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 
@@ -10,11 +9,10 @@ import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-s
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExperimentSharedModule,
-    DebugImagesModule,
-    NgIf
-  ],
+    DebugImagesModule
+],
   standalone: true
 })
 export class SimpleDatasetVersionPreviewComponent {
-  @Input() selected: {id: string};
+  selected = input.required<{id: string}>();
 }

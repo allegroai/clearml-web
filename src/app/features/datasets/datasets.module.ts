@@ -9,6 +9,8 @@ import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.m
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {PushPipe} from '@ngrx/component';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 
 
 @NgModule({
@@ -21,7 +23,9 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     ProjectsSharedModule,
     LabeledFormFieldDirective,
     ButtonToggleComponent,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    PushPipe,
+    DotsLoadMoreComponent
   ],
   declarations: [
     SimpleDatasetsComponent,

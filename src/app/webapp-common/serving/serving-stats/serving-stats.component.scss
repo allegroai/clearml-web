@@ -1,0 +1,42 @@
+@import "variables";
+@import "../../../../webapp-common/layout/layout.scss";
+
+:host {
+  display: block;
+  height: $graph-height;
+  min-height: $graph-height;
+  padding: 20px 20px 0;
+  background-color: $black;
+  border-bottom: 1px solid $dark-grey-blue;
+
+  .header {
+    padding: 0 4px;
+    margin-bottom: 12px;
+
+    .title {
+      font-size: 15px;
+    }
+
+    .time-selector {
+      width: 180px;
+      position: relative;
+    }
+
+    .param-selector {
+      width: 210px;
+      position: relative;
+    }
+
+    .warnning {
+      margin-left: 10px;
+      line-height: 20px;
+      color: $neon-yellow;
+    }
+  }
+
+  .line-chart-container {
+    height: calc(100% - 48px);
+    position: relative;
+    z-index: 500;
+  }
+}

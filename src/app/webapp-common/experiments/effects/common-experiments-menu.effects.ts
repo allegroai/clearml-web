@@ -57,15 +57,16 @@ import {ITableExperiment} from '@common/experiments/shared/common-experiment-mod
 import * as projectsActions from '@common/core/actions/projects.actions';
 import {PipelinesStartPipelineResponse} from '~/business-logic/model/pipelines/pipelinesStartPipelineResponse';
 import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
+import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdExResponse';
 
-export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
+export const getChildrenExperiments = (tasksApi, parents, filters?: Record<string, any>): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({
-    /* eslint-disable @typescript-eslint/naming-convention */
+
     page_size: 2000,
     only_fields: ['name', 'status'],
     status: [TaskStatusEnum.Queued, TaskStatusEnum.InProgress],
     parent: parents.map(p => p.id), ...(filters && filters)
-    /* eslint-enable @typescript-eslint/naming-convention */
+
   })
     .pipe(
       map((res: TasksGetAllExResponse) => res.tasks),
@@ -102,12 +103,12 @@ export class CommonExperimentsMenuEffects {
     switchMap(([action, selectedEntity]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
         return this.apiTasks.tasksEnqueueMany({
-          /* eslint-disable @typescript-eslint/naming-convention */
+
           ids,
           queue: action.queue.id, ...((!action.queue.id) && {queue_name: action.queue.name}),
           validate_tasks: true,
           ...( action.verifyWatchers && {verify_watched_queue: true})
-          /* eslint-enable @typescript-eslint/naming-convention */
+
         })
           .pipe(
             mergeMap((res: TasksEnqueueManyResponse) => [
@@ -170,13 +171,13 @@ export class CommonExperimentsMenuEffects {
     concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) =>
       this.apiTasks.tasksGetAllEx({
-        /* eslint-disable @typescript-eslint/naming-convention */
+
         project: projectId,
         type: [TaskTypeEnum.Controller],
         ...(action.task && {id: [action.task]}),
         ...(!action.task && {order_by: ['-started'], page_size: 1}),
         only_fields: PIPELINE_INFO_ONLY_FIELDS
-        /* eslint-enable @typescript-eslint/naming-convention */
+
       }).pipe(
         mergeMap((res: TasksGetAllExResponse) => [
           menuActions.setControllerForStartPipelineDialog({task: res?.tasks[0] as unknown as IExperimentInfo}),
@@ -212,13 +213,13 @@ export class CommonExperimentsMenuEffects {
     concatLatestFrom(() => this.store.select(selectTableMode)),
     switchMap(([action, ]) => this.apiTasks.tasksClone({
         task: action.originExperiment.id,
-        /* eslint-disable @typescript-eslint/naming-convention */
+
         ...(action.cloneData?.project?.value && {new_task_project: action.cloneData.project.value}),
         new_task_comment: action.cloneData.comment,
         new_task_name: action.cloneData.name,
         new_project_name: action.cloneData.newProjectName,
         ...(action.cloneData.forceParent && {new_task_parent: action.originExperiment.id})
-        /* eslint-enable @typescript-eslint/naming-convention */
+
       } as TasksCloneRequest)
         .pipe(
           mergeMap((res: TasksCloneResponse) => {
@@ -292,14 +293,14 @@ export class CommonExperimentsMenuEffects {
       action => this.apiTasks.tasksMove({
         ids: action.selectedEntities.map(exp => exp.id),
         project: action.project.id,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         project_name: action.project.name
       })
         .pipe(
           tap((res) => this.router.navigate([`projects/${action.project.id ? action.project.id : res.project_id ?? '*'}/experiments/${action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''}`], {queryParamsHandling: 'merge'})),
           concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
           mergeMap(([, selectedExperiment]) => [
-            viewActions.resetExperiments(),
+            viewActions.resetExperiments({}),
             viewActions.setSelectedExperiments({experiments: []}),
             ...action.selectedEntities.map(exp => this.setExperimentIfSelected(selectedExperiment, exp.id, {project: action.project ?? '*'})),
             deactivateLoader(action.type),
@@ -448,7 +449,7 @@ export class CommonExperimentsMenuEffects {
           if (routerConfig.includes('output') && routerParams?.experimentId === experiments[0].id) {
             actions.push(experimentDetailsUpdated({
               id: experiments[0].id,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               changes: {system_tags: [...(experiments[0]?.system_tags.filter(t => t !== 'shared') ?? []), 'archived'].sort()}
             }));
           }
@@ -509,7 +510,7 @@ export class CommonExperimentsMenuEffects {
           if (routerConfig.includes('output') && routerParams?.experimentId === experiments[0].id) {
             actions.push(experimentDetailsUpdated({
               id: experiments[0].id,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               changes: {system_tags: experiments[0]?.system_tags.filter(tag => tag !== 'archived')}
             }));
           }
@@ -537,7 +538,7 @@ export class CommonExperimentsMenuEffects {
       } else {
         return this.apiTasks.tasksGetAllEx({
           id: [action.experimentId],
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           only_fields: ['execution.queue.id']
         });
       }
@@ -547,6 +548,28 @@ export class CommonExperimentsMenuEffects {
       return this.router.navigate(['/workers-and-queues/queues'], {queryParams: {id: queue.id}});
     })
   ), {dispatch: false});
+
+  navigateToWorker = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(menuActions.navigateToWorker),
+      concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
+      switchMap(([action, info]) => {
+        if (action.experimentId === info?.id && info?.last_worker) {
+          return of({tasks: [info]});
+        } else {
+          return this.apiTasks.tasksGetByIdEx({
+            id: [action.experimentId],
+            only_fields: ['last_worker']
+          });
+        }
+      }),
+      map((res: TasksGetByIdExResponse) => {
+        const worker = (res.tasks[0]).last_worker;
+        // return this.router.navigate(['/workers-and-queues/queues'], {queryParams: {id: queue.id}});
+        this.router.navigate(['workers-and-queues', 'workers'], {queryParams: {id: worker}});
+      })
+    )
+  }, {dispatch: false});
 
 
   isSelectedExpInCheckedExps(checked: ISelectedExperiment[], selected: IExperimentInfo): boolean {

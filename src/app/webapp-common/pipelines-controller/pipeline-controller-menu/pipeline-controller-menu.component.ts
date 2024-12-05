@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {selectionDisabledAbort, selectionDisabledContinue} from '@common/shared/entity-page/items.utils';
 import * as commonMenuActions from '@common/experiments/actions/common-experiments-menu.actions';
@@ -15,18 +15,15 @@ import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info
 @Component({
   selector: 'sm-controller-menu',
   templateUrl: './pipeline-controller-menu.component.html',
-  styleUrls: ['./pipeline-controller-menu.component.scss']
+  styleUrls: ['./pipeline-controller-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   entityTypeEnum = EntityTypeEnum;
 
-  constructor() {
-    super();
-  }
-
   runPipelineController(runNew = false) {
     this.dialog.open<RunPipelineControllerDialogComponent, {task: ISelectedExperiment}, RunPipelineResult>(RunPipelineControllerDialogComponent, {
-      data: {task: runNew ? null : this._experiment}
+      data: {task: runNew ? null : this.experiment()}
     }).afterClosed()
       .pipe(filter(res => !!res.confirmed))
       .subscribe((res) => {
@@ -39,17 +36,17 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   }
 
   continueController() {
-    const selectedExperiments = this.selectedExperiments ? selectionDisabledContinue(this.selectedExperiments).selectedFiltered : [this._experiment];
+    const selectedExperiments = this.selectedExperiments() ? selectionDisabledContinue(this.selectedExperiments()).selectedFiltered : [this.experiment()];
 
     this.store.dispatch(commonMenuActions.enqueueClicked({
       selectedEntities: selectedExperiments,
-      queue: this._experiment.execution?.queue,
+      queue: this.experiment().execution?.queue,
       verifyWatchers: false
     }));
   }
 
   abortControllerPopup() {
-    const selectedExperiments = this.selectedExperiments ? selectionDisabledAbort(this.selectedExperiments).selectedFiltered : [this._experiment];
+    const selectedExperiments = this.selectedExperiments() ? selectionDisabledAbort(this.selectedExperiments()).selectedFiltered : [this.experiment()];
     this.store.dispatch(abortAllChildren({experiments: selectedExperiments}));
   }
 }

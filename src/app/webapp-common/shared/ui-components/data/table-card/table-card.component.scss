@@ -17,6 +17,13 @@
     ". tags"
     ". data";
   }
+  &.no-selection {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+    "card-name"
+    "tags"
+    "data";
+  }
 }
 
 .cbx { grid-area: cbx; margin-right: auto; }
@@ -32,6 +39,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 12px;
+}
+
+.no-selection .data {
+  margin-top: 0;
 }
 
 

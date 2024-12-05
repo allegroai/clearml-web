@@ -28,5 +28,6 @@ export interface GetCurrentUserResponseUserObject {
     /**
      * User preferences
      */
-    preferences?: object;
+    preferences?: any;
+    created_in_version?: string;
 }

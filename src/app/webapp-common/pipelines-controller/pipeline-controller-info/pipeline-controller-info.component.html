@@ -1,4 +1,4 @@
-<sm-pipeline-info [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity" data-id="pipelineInfo"></sm-pipeline-info>
+<sm-pipeline-info [entity]="selected$ | ngrxPush" [project]="projectId$ | ngrxPush" [step]="selectedEntity" data-id="pipelineInfo"></sm-pipeline-info>
 <div class="console-button">
   <button class="btn btn-cml-primary d-flex align-items-center" (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
     <i class="al-icon al-ico-console sm me-3"></i>DETAILS
@@ -12,44 +12,50 @@
   (click)="selectStep()"
   (keyup)="selectStep()"
   data-id="pipelineContainer"
->
-  <ng-container *ngIf="dagModel$ | async as dagModel">
-    <div *ngFor="let row of dagModel" class="level" [style.width.px]="chartWidth">
-      <sm-pipeline-controller-step
-        #taskEl
-        *ngFor="let step of row; trackBy: trackByStepId" [step]="step"
-        [selected]="selectedEntity && selectedEntity.id === step?.id"
-        (click)="$event.stopPropagation(); !taskEl.selected && selectStep(step)"
-        (openConsole)="openLog()"
-      ></sm-pipeline-controller-step>
-    </div>
-    <svg class="arrows"
-         [class.selected]="selectedEntity?.id"
-         *ngIf="chartWidth"
-         [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
-         [style.width.px]="chartWidth"
-         [style.height.px]="50 + 132 * dagModel?.length"
-    >
-      <g
-        *ngFor="let arrow of arrows; trackBy: trackArrows"
-        [class.selected]="arrow.selected"
-        [class.outgoing]="arrow.outgoing"
-      >
-        <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
-        <polygon
-          points="0,-6 12,0, 0,6"
-          [attr.transform]="arrow.headTransform"
-        />
-      </g>
-    </svg>
-  </ng-container>
+  >
+  @if (dagModel$ | ngrxPush; as dagModel) {
+    @for (row of dagModel; track $index) {
+      <div class="level" [style.width.px]="chartWidth">
+        @for (step of row; track step.id) {
+          <sm-pipeline-controller-step
+            #taskEl
+            [step]="step"
+            [selected]="selectedEntity && selectedEntity.id === step?.id"
+            (click)="$event.stopPropagation(); !taskEl.selected() && selectStep(step)"
+            (openConsole)="openLog()"
+          ></sm-pipeline-controller-step>
+        }
+      </div>
+    }
+    @if (chartWidth) {
+      <svg class="arrows"
+        [class.selected]="selectedEntity?.id"
+        [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
+        [style.width.px]="chartWidth"
+        [style.height.px]="50 + 132 * dagModel?.length"
+        >
+        @for (arrow of arrows; track arrow.path) {
+          <g
+            [class.selected]="arrow.selected"
+            [class.outgoing]="arrow.outgoing"
+            >
+            <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
+            <polygon
+              points="0,-6 12,0, 0,6"
+              [attr.transform]="arrow.headTransform"
+              />
+          </g>
+        }
+      </svg>
+    }
+  }
 </div>
 <div class="results-panel" [class.extend]="showLog" [class.maximized]="maximizeResults" data-id="resultsPanel">
-  <ng-container *ngIf="showLog">
+  @if (showLog) {
     <div class="header toggle" >
       <div class="log-name">
         <i class="al-icon al-ico-console me-2"></i>
-        <span>{{(selected$ | async)?.name}}</span>
+        <span>{{(selected$ | ngrxPush)?.name}}</span>
       </div>
       <sm-button-toggle
         [value]="detailsPanelMode"
@@ -65,25 +71,31 @@
         <i tabindex="1003" class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)" (keyup)="openLog(false)" data-id="closeResultPanel"></i>
       </div>
     </div>
-    <div [ngSwitch]="detailsPanelMode" class="content">
-      <sm-simple-dataset-version-preview
-        *ngSwitchCase="statusOption.preview" [selected]="(selected$ | async)"
-      ></sm-simple-dataset-version-preview>
-      <sm-experiment-output-log
-        *ngSwitchCase="statusOption.log"
-        [experiment]="selected$ | async"
-        [isDarkTheme]="true"
-        [showHeader]="false"
-      ></sm-experiment-output-log>
-      <ng-container *ngSwitchCase="statusOption.code" >
-        <div *ngIf="stepDiff; else empty" class="ace" #aceEditor></div>
-        <ng-template #empty>
-          <div class="no-code" data-id="noCode">
-            <i class="icon no-output-icon i-no-code-dark"></i>
-            <h4>NO CODE</h4>
-          </div>
-        </ng-template>
-      </ng-container>
+    <div class="content">
+      @switch (detailsPanelMode) {
+        @case (statusOption.preview) {
+          <sm-simple-dataset-version-preview
+            [selected]="(selected$ | ngrxPush)"
+          ></sm-simple-dataset-version-preview>
+        }
+        @case (statusOption.log) {
+          <sm-experiment-output-log
+            [experiment]="selected$ | ngrxPush"
+            [isDarkTheme]="true"
+            [showHeader]="false"
+          ></sm-experiment-output-log>
+        }
+        @case (statusOption.code) {
+          @if (stepDiff) {
+            <div class="ace" #aceEditor></div>
+          } @else {
+            <div class="no-code" data-id="noCode">
+              <i class="icon no-output-icon i-no-code-dark"></i>
+              <h4>NO CODE</h4>
+            </div>
+          }
+        }
+      }
     </div>
-  </ng-container>
+  }
 </div>

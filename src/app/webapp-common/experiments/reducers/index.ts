@@ -21,6 +21,7 @@ import {EXPERIMENT_COMMENT} from '@common/experiments/dumb/experiment-general-in
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
 import {selectIsDeepMode, selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
+import {Task} from '~/business-logic/model/tasks/task';
 
 export const selectExperimentsList = createSelector(experimentsView, state => state.experiments);
 export const selectTableRefreshList = createSelector(experimentsView, state => !!state.refreshList);
@@ -151,6 +152,8 @@ export const selectGraphsPerRow = createSelector(experimentOutput, state => stat
 export const selectHyperParamsVariants = createSelector(experimentsView, state => state.hyperParams);
 export const selectHyperParamsOptions = createSelector(experimentsView, (state): Record<ISmCol['id'], string[]> => state.hyperParamsOptions);
 export const selectPipelineSelectedStep = createSelector(experimentInfo, state => state.selectedPipelineStep);
+export const selectExperimentOperationLog = createSelector(experimentInfo, state => state.operationLog);
+export const selectExperimentDownloadingOperationLog = createSelector(experimentInfo, state => state.downloadingExperimentOperationLog);
 export const selectPipelineSelectedStepWithFallback = createSelector( selectSelectedExperiment, selectPipelineSelectedStep, (selectedController, selectedStep) => selectedStep ?? selectedController)
 export const selectStartPipelineDialogTask = createSelector(experimentInfo, state => state.pipelineRunDialogTask);
 
@@ -163,12 +166,17 @@ export const selectLogLoading = createSelector(experimentOutput, (state) => stat
 export const selectTotalLogLines = createSelector(experimentOutput, (state) => state.totalLogLines);
 
 export const selectShowSettings = createSelector(experimentOutput, (state) => state.showSettings);
+export const selectMetricValuesView = createSelector(experimentOutput, (state) => state.metricValuesView);
 export const selectSelectedExperimentSettings = createSelector(experimentOutput, selectSelectedExperiment,
   (output, currentExperiment): ExperimentSettings => currentExperiment && output.settingsList?.find((setting) => setting.id === currentExperiment.id));
 export const selectSelectedSettingsHiddenPlot = createSelector(selectSelectedExperimentSettings,
   settings => settings?.hiddenMetricsPlot ?? []);
 export const selectSelectedSettingsHiddenScalar = createSelector(selectSelectedExperimentSettings,
   settings => settings?.hiddenMetricsScalar ?? []);
+export const selectSelectedSettingsTableMetric = createSelector(selectSelectedExperimentSettings,
+  settings => settings?.selectedMetricTable ?? null);
+export const selectSelectedSettingsModelTableMetric = createSelector(selectSelectedModelSettings,
+  settings => settings?.selectedMetricTable ?? null);
 export const selectSelectedSettingsSmoothWeight = createSelector(selectSelectedExperimentSettings,
   settings => settings?.smoothWeight === undefined ? 0 : settings.smoothWeight);
 export const selectSelectedSettingsSmoothType = createSelector(selectSelectedExperimentSettings,
@@ -213,6 +221,7 @@ export const selectExperimentHyperParamsSelectedSectionParams =
   createSelector(selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute,
     (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => Object.entries(get(hyperparams, section, {})).map(([, value]) => value));
 export const selectScalarSingleValue = createSelector(experimentOutput, (state): Array<EventsGetTaskSingleValueMetricsResponseValues> => state.scalarSingleValue);
+export const selectLastMetricsValues = createSelector(experimentOutput, (state): Task['last_metrics'] => state.lastMetrics);
 
 
 const selectMetricHistogram = createSelector(experimentOutput, state => state.metricsHistogramCharts);

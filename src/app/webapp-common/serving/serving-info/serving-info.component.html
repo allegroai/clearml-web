@@ -1,0 +1,15 @@
+<div class="serving-info-container">
+  <div class="tab-nav" [class.minimized]="minimized">
+    <span class="leave for grid"></span>
+    <sm-router-tab-nav-bar
+      [splitSize]="splitSize$ | ngrxPush"
+      [links]="links"
+    ></sm-router-tab-nav-bar>
+    <span class="refresh-position">
+      <i class="al-icon al-ico-dialog-x pointer" (click)="closePanel()"></i>
+    </span>
+  </div>
+  <div class="serving-info-body">
+    <router-outlet></router-outlet>
+  </div>
+</div>

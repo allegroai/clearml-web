@@ -53,7 +53,7 @@
           }
 
           <mat-autocomplete #auto="matAutocomplete">
-            @for (option of filteredOptions | async; track option.name) {
+            @for (option of filteredOptions | ngrxPush; track option.name) {
               <mat-option [value]="option.name">
                 {{option.name}}
               </mat-option>
@@ -62,7 +62,7 @@
           <ng-content></ng-content>
           @if (touLink() && !hideTou()) {
             <div class="terms-of-use">
-              <span>By signing up you agree to Allegro AI’s <a class="link" [href]="touLink()" target="_blank">Privacy Policy and Terms of Use</a>.</span>
+              <span>By signing up you agree to ClearML’s <a class="link" [href]="touLink()" target="_blank">Privacy Policy and Terms of Use</a>.</span>
             </div>
           }
         </form>

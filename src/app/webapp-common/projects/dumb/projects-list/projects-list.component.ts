@@ -17,11 +17,13 @@ export class ProjectsListComponent {
   private _projects: Project[];
   public projectsNames: string[];
   totalVirtualCards = 1;
+  public loading: boolean;
 
   @Input() set projects(projects: Array<Project>) {
     this._projects = projects;
     this.projectsNames = projects?.map(p => p.basename);
     this.totalVirtualCards = projects?.[1]?.['isRoot'] ? 2 : 1;
+    this.loading = false;
   }
 
   get projects() {
@@ -36,5 +38,10 @@ export class ProjectsListComponent {
   @Output() loadMore = new EventEmitter();
   @Output() moveToClicked = new EventEmitter<Project>();
   @Output() createNewProjectClicked = new EventEmitter<Project>();
+  @Output() projectEditClicked = new EventEmitter<Project>();
 
+  loadMoreAction() {
+    this.loading = true;
+    this.loadMore.emit();
+  }
 }

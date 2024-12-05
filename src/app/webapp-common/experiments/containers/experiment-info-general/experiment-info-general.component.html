@@ -1,8 +1,8 @@
 <sm-experiment-general-info
   data-id="infoPanelDetail"
-  [experiment]="selectedExperiment$ | async"
-  [experimentComment]="(experimentInfoData$ | async)?.comment"
-  [editable]="(editable$ | async)"
+  [experiment]="selectedExperiment$ | ngrxPush"
+  [experimentComment]="(experimentInfoData$ | ngrxPush)?.comment"
+  [editable]="(editable$ | ngrxPush)"
   [isExample]="isExample"
   (commentChanged)="commentChanged($event)"
 ></sm-experiment-general-info>

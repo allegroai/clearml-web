@@ -1,55 +1,35 @@
-import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, viewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectDefaultNestedModeForFeature, selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
-import {fromEvent, Observable} from 'rxjs';
-import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
+import {fromEvent} from 'rxjs';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {searchDeactivate} from '@common/dashboard-search/dashboard-search.actions';
-import {selectRouterConfig} from '@common/core/reducers/router-reducer';
-import {map} from 'rxjs/operators';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {selectFirstRouterConfig} from '@common/core/reducers/router-reducer';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
-  selector   : 'sm-side-nav',
+  selector: 'sm-side-nav',
   templateUrl: './side-nav.component.html',
-  styleUrls  : ['./side-nav.component.scss'],
+  styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SideNavComponent implements AfterViewInit {
-  public selectedProjectId$: Observable<any>;
-  currentUser: any;
-  environment = ConfigurationService.globalEnvironment;
-  public scrolling: boolean;
-  public defaultNestedModeForFeature$: Observable<{ [p: string]: boolean }>;
-  public baseRouteConfig$: Observable<string>;
+export class SideNavComponent {
+  public store = inject(Store);
+  private configService = inject(ConfigurationService);
 
-  @ViewChild('container') container: ElementRef<HTMLDivElement>;
-
-
-  constructor(public store: Store<any>, private cdr: ChangeDetectorRef) {
-    this.selectedProjectId$ = this.store.select(selectSelectedProjectId);
-    this.defaultNestedModeForFeature$ = this.store.select(selectDefaultNestedModeForFeature);
-    this.store.select(selectCurrentUser).subscribe((res) => this.currentUser = res);
-    this.baseRouteConfig$ = this.store.select(selectRouterConfig).pipe(map(conf => conf?.[0]));
-
-    fromEvent(window, 'resize').subscribe(() => {
-      const scrolling = this.container.nativeElement.scrollHeight > this.container.nativeElement.clientHeight;
-      if (scrolling !== this.scrolling) {
-        this.scrolling = scrolling;
-        this.cdr.detectChanges();
-      }
-      this.scrolling = scrolling;
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.scrolling = this.container.nativeElement.scrollHeight > this.container.nativeElement.clientHeight;
-  }
+  private container = viewChild<ElementRef<HTMLDivElement>>('container');
+  protected baseRouteConfig = this.store.selectSignal(selectFirstRouterConfig);
+  protected environment = this.configService.configuration;
+  protected defaultNestedModeForFeature = this.store.selectSignal(selectDefaultNestedModeForFeature);
+  protected currentUser = this.store.selectSignal(selectCurrentUser);
+  private resize = toSignal(fromEvent(window, 'resize'));
+  protected scrolling = computed(() => {
+    this.resize();
+    return this.container()?.nativeElement.scrollHeight > this.container()?.nativeElement.clientHeight
+  });
 
   public resetSearch() {
     this.store.dispatch(searchDeactivate());
-  }
-
-  get guestUser(): boolean {
-    return this.currentUser && this.currentUser?.role === 'guest';
   }
 }

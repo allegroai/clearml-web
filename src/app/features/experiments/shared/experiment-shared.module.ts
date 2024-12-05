@@ -3,7 +3,6 @@ import {CommonModule} from '@angular/common';
 import {ExperimentConverterService} from './services/experiment-converter.service';
 import { ExperimentMenuComponent } from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {ExperimentMenuExtendedComponent} from '../containers/experiment-menu-extended/experiment-menu-extended.component';
-import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
 import {ExperimentExecutionParametersComponent} from '@common/experiments/dumb/experiment-execution-parameters/experiment-execution-parameters.component';
 import {CloneDialogComponent} from '@common/experiments/shared/components/clone-dialog/clone-dialog.component';
 import {ExperimentSystemTagsComponent} from '@common/experiments/shared/components/experiments-system-tags/experiment-system-tags.component';
@@ -79,6 +78,7 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
 import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
 import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/select-hyper-params-for-custom-col/select-hyper-params-for-custom-col.component';
+import {PushPipe} from '@ngrx/component';
 
 export const experimentSyncedKeys = [
   'view.projectColumnsSortOrder',
@@ -132,7 +132,6 @@ const DECLARATIONS = [
   AbortAllChildrenDialogComponent,
   ExperimentExecutionParametersComponent,
   ExperimentsTableComponent,
-  ExperimentHeaderComponent,
   ExperimentOutputPlotsComponent,
 ];
 
@@ -198,6 +197,7 @@ const DECLARATIONS = [
     ExperimentCustomColsMenuComponent,
     SelectMetricForCustomColComponent,
     SelectHyperParamsForCustomColComponent,
+    PushPipe,
   ],
   declarations   : [...DECLARATIONS],
   providers      : [

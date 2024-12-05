@@ -89,11 +89,11 @@ export class ReportComponent implements OnInit, OnDestroy {
     th: {border: '1px solid gray'},
     td: {border: '1px solid gray'},
     details: {border: '1px solid #ccc', margin: '6px 0', padding: '6px'},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     code: {'white-space': 'pre'},
     iframe: {border: 'none', width: '840px'}
   };
-  public widthExpanded: boolean = false;
+  public widthExpanded = false;
   public handleUpload: (files: File[]) => Promise<UploadResult[]>;
   public showDescription = false;
   public resources: { unused: boolean; url: string }[];
@@ -132,7 +132,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         .subscribe(id => this.store.dispatch(getReport({id})))
     );
 
-    this.handleUpload = (files: Array<File>): Promise<UploadResult[]> => {
+    this.handleUpload = (files: File[]): Promise<UploadResult[]> => {
       this.store.dispatch(activeLoader('upload'));
       const filesServerUrl = convertToReverseProxy(HTTP.FILE_BASE_URL);
 
@@ -180,7 +180,10 @@ export class ReportComponent implements OnInit, OnDestroy {
             .forEach(file => {
               const url = `reports/${this.report.id}/${replaceSlash(file.name)}`;
               formData.append(url, file);
-              results.push({name: file.name, url: `${filesServerUrl}/${url}`, isImg: true});
+              results.push({
+                name: file.name,
+                url: `${filesServerUrl}/${encodeURI(url)}`,
+                isImg: true});
             });
 
           return this.http.post(filesServerUrl, formData, {withCredentials: true})
@@ -194,7 +197,7 @@ export class ReportComponent implements OnInit, OnDestroy {
                 this.store.dispatch(deactivateLoader('upload'));
                 this.store.dispatch(updateReport({
                   id: this.report.id,
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
+
                   changes: {report_assets: Array.from(new Set((this.report.report_assets || []).concat(results.map(r => r.url))))}
                 }));
                 return results;

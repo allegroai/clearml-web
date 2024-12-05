@@ -1,26 +1,30 @@
 <div class="experiment-compare-container light-theme">
   <sm-experiment-compare-header
-      [entityType]="entityType"
+    [entityType]="entityType"
   ></sm-experiment-compare-header>
   <div class="experiment-compare-body">
 
-    <div class="global-legend-container" [class.show]="(showGlobalLegend$ | async)" data-id="globalLegendContainer">
+    <div class="global-legend-container" [class.show]="(showGlobalLegend$ | ngrxPush)" data-id="globalLegendContainer">
       <div class="global-legend">
-        <div data-id="experimentLegend" class="legend-experiment" *ngFor="let exp of globalLegendData$ | async; trackBy: trackById">
-          <span #dot class="experiment-color"
+        @for (exp of globalLegendData$ | ngrxPush; track exp.id) {
+          <div data-id="experimentLegend" class="legend-experiment">
+            <span #dot class="experiment-color"
               data-id="experimentLegendColor"
               [style.background-color]="experimentsColor[exp.id]"
               [colorButtonRef]="dot"
               [smChooseColor]="experimentsColor[exp.id]"
               [stringToColor]="exp.name + '-' + exp.id"
-          ></span>
-          <span class="experiment-name"
-                [smTooltip]="duplicateNamesObject[exp.name] ? '' : exp.name" smShowTooltipIfEllipsis>
-            <a class="ellipsis" [routerLink]="buildUrl(exp)" [queryParams]="{archive: exp.systemTags.includes('archived') || undefined}" [matTooltipShowDelay]="400" [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : ''">{{exp.name}}</a>
-          </span>
-          <sm-tag-list [tags]="exp.tags"></sm-tag-list>
-          <i *ngIf="(globalLegendData$ | async)?.length > 1" class="al-icon al-ico-dialog-x sm remove-experiment" (click)="removeExperiment(exp)" data-id="removeExperimentButton"></i>
-        </div>
+            ></span>
+            <span class="experiment-name"
+              [smTooltip]="duplicateNamesObject[exp.name] ? '' : exp.name" smShowTooltipIfEllipsis>
+              <a class="ellipsis" [routerLink]="buildUrl(exp)" [queryParams]="{archive: exp.systemTags.includes('archived') || undefined}" [matTooltipShowDelay]="400" [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : ''">{{exp.name}}</a>
+            </span>
+            <sm-tag-list [tags]="exp.tags"></sm-tag-list>
+            @if ((globalLegendData$ | ngrxPush)?.length > 1) {
+              <i class="al-icon al-ico-dialog-x sm remove-experiment" (click)="removeExperiment(exp)" data-id="removeExperimentButton"></i>
+            }
+          </div>
+        }
         <!--        <button class="btn btn-secondary legend-add" (click)="openAddExperimentSearch()"><i class="al-icon al-ico-plus" data-id="addExperimentToCompareButton"></i></button>-->
       </div>
       <i class="al-icon al-ico-dialog-x close-legend" (click)="closeLegend()" data-id="closeLegend"></i>

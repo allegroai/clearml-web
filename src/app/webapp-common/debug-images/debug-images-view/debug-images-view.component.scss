@@ -50,11 +50,18 @@
       background:transparent;
     }
 
-
     ::ng-deep .mat-expansion-panel-content {
       .mat-expansion-panel-body {
         height: 400px;
         padding: 12px 0 12px 28px;
+      }
+    }
+
+    &.short-list {
+      ::ng-deep .mat-expansion-panel-content {
+        .mat-expansion-panel-body {
+          height: 220px;
+        }
       }
     }
 

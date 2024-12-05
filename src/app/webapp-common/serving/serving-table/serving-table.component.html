@@ -1,0 +1,182 @@
+<div class="table-container" [class.card-view]="minimizedView">
+  <sm-table
+    [cardHeight]="84"
+    [cardsCollapsed]="cardsCollapsed"
+    [initialColumns]="initialColumns"
+    [selectionMode]="selectionMode"
+    [tableData]="endpoints"
+    [noMoreData]="true"
+    [resizableColumns]="enableMultiSelect"
+    [columns]="tableCols"
+    [reorderableColumns]="reorderableColumns && enableMultiSelect"
+    [scrollable]="true"
+    [columnsOrder]="colsOrder"
+    [lazyLoading]="true"
+    [selection]="selectedEndpoint"
+    [checkedItems]="selectedEndpoints"
+    [activeContextRow]="contextEndpoint"
+    [contextMenuOpen]="contextMenuActive"
+    [minimizedView]="minimizedView"
+    [minimizedTableHeader]="'ENDPOINTS LIST'"
+    [sortFields]="tableSortFields"
+    [keyboardControl]="true"
+    [autoLoadMore]="true"
+    [noDataTemplate]="noData"
+    (colReordered)="columnsReordered.emit($event)"
+    (rowSelectionChanged)="onRowSelectionChanged($event)"
+    (rowClicked)="tableRowClicked($event)"
+    (rowDoubleClicked)="endpointSelectionChanged.emit({endpoint: $event.data, openInfo: !minimizedView})"
+    (loadMoreClicked)="onLoadMoreClicked()"
+    (sortChanged)="onSortChanged($event.isShift, $event.field)"
+    (columnResized)="columnResized.emit($event)"
+    (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
+  >
+    <ng-template let-col pTemplate="cardFilter">
+      <sm-table-card-filter-template
+        [options]="filtersOptions"
+        [value]="filtersValues"
+        [columns]="initialColumns"
+        [filterMatch]="filtersMatch"
+        fixedOptionsSubheader="System tags"
+        (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
+        (filterChanged)="tableAllFiltersChanged($event)"
+        (menuOpened)="columnFilterOpened($event)"
+        (menuClosed)="columnFilterClosed($event)"
+        (clearAll)="clearAllFilters.emit(tableFilters)"
+      ></sm-table-card-filter-template>
+    </ng-template>
+
+    <!--SORT FILTER TEMPLATE-->
+
+    <ng-template let-col pTemplate="sort-filter">
+      <sm-table-filter-sort-template
+        [column]="col"
+        [value]="filtersValues[col.id]"
+        [searchValue]="searchValues[col.id]"
+        [options]="filtersOptions[col.id] | filter:searchValues[col.id]:'label'"
+        [sortOrder]="tableSortFieldsObject[col.id]"
+        [fixedOptionsSubheader]="col.id === filtersOptions.TAGS ? 'System tags' : ''"
+        [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
+        (sortOrderChanged)="onSortChanged($event, col.id)"
+        (filterChanged)="tableFilterChanged(col, $event);"
+        (searchValueChanged)="searchValueChanged($event, col.id, col.asyncFilter)"
+        (menuOpened)="columnFilterOpened(col)"
+        (menuClosed)="columnFilterClosed(col)"
+      >
+      </sm-table-filter-sort-template>
+    </ng-template>
+
+    <!--BODY TEMPLATE-->
+
+    <ng-template let-col
+                 let-endpoint="rowData"
+                 pTemplate="body">
+      @switch (col.id) {
+        @case (endpointsTableColFields.name) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.endpoint">
+            {{ endpoint?.endpoint }}
+          </span>
+        }
+        <!--        @case (endpointssTableColFields.tags) {-->
+          <!--          <sm-tag-list [tags]="endpoint.tags" [sysTags]="getSysTags(endpoint)"></sm-tag-list>-->
+          <!--        }-->
+        @case (endpointsTableColFields.id) {
+          <!--          <sm-id-badge [id]="endpoint.id" [short]="false"></sm-id-badge>-->
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.id">
+            {{ endpoint?.id }}
+          </span>
+        }
+        @case (endpointsTableColFields.modelName) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.model">
+            {{ endpoint?.model }}
+          </span>
+        }
+        @case (endpointsTableColFields.endpointURL) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.url">
+            {{ endpoint?.url }}
+          </span>
+        }
+        @case (endpointsTableColFields.instances) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.instances">
+            {{ endpoint?.instances | number }}
+          </span>
+        }
+        @case (endpointsTableColFields.uptime) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.uptime_sec">
+            {{ endpoint?.uptime_sec | duration }}
+          </span>
+        }
+        @case (endpointsLoadingTableColFields.age) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.age">
+            {{ endpoint?.age_sec | duration }}
+          </span>
+        }
+        @case (endpointsLoadingTableColFields.inputSize) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.input_size">
+            {{ endpoint?.input_size | filesize : fileSizeConfigStorage }}
+          </span>
+        }
+        @case (endpointsTableColFields.totalRequests) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.requests">
+            {{ endpoint?.requests | number }}
+          </span>
+        }
+        @case (endpointsTableColFields.rpm) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.requests_min">
+            {{ endpoint?.requests_min | number }}
+          </span>
+        }
+        @case (endpointsTableColFields.latency) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="endpoint?.latency_ms">
+            {{ endpoint?.latency_ms }}ms
+          </span>
+        }
+        @default {
+          @if (col.type === 'metadata') {
+            <span smShowTooltipIfEllipsis
+                  [smTooltip]="endpoint | colGetter: col">{{ endpoint | colGetter: col }}</span>
+          } @else {
+            <sm-hyper-param-metric-column [roundedMetricValue]="roundedMetricValues[col.id]"
+                                          [col]="col"
+                                          [experiment]="endpoint"
+                                          (expandClicked)="columnsWidthChanged($event)">
+            </sm-hyper-param-metric-column>
+          }
+        }
+      }
+    </ng-template>
+
+    <ng-template let-endpoint="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
+      <sm-table-card
+        [selected]="selected"
+        [cardName]="endpoint.endpoint"
+        [columns]="tableCols"
+        [rowData]="endpoint"
+        [checked]="isRowSelected(endpoint)"
+        [activeContextRow]="contextEndpoint"
+        [contextMenuOpen]="contextMenuActive"
+        [compactColDataTemplate]="compactCol"
+        [entityType]="entityType"
+        [tagsTemplate]="tagList"
+        [noSelection]="true"
+        [class.no-tags]="true"
+      >
+        <span class="uptime ms-auto">Uptime: {{ endpoint.uptime_sec | duration }}</span>
+
+      </sm-table-card>
+      <ng-template #compactCol>
+        @if (!cardsCollapsed) {
+          <span class="model-name" [@inOutAnimation]>{{ endpoint.model }}</span>
+        }
+
+      </ng-template>
+      <ng-template #tagList>
+      </ng-template>
+
+    </ng-template>
+  </sm-table>
+</div>
+
+<ng-template #noData>
+  <sm-serving-empty-state class="center-message"></sm-serving-empty-state>
+</ng-template>

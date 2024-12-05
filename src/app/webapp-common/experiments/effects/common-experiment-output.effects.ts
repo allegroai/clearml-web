@@ -1,17 +1,26 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
-import {catchError, expand, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
-import {Log, setExperimentScalarSingleValue} from '../actions/common-experiment-output.actions';
+import {
+  Log,
+  setExperimentMetricsVariantValues,
+  setExperimentScalarSingleValue
+} from '../actions/common-experiment-output.actions';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
-import {selectExperimentHistogramCacheAxisType, selectPipelineSelectedStep, selectSelectedSettingsxAxisType} from '../reducers';
+import {
+  selectExperimentHistogramCacheAxisType,
+  selectPipelineSelectedStep,
+  selectSelectedSettingsxAxisType
+} from '../reducers';
 import {refreshExperiments} from '../actions/common-experiments-view.actions';
 import {EventsGetTaskLogResponse} from '~/business-logic/model/events/eventsGetTaskLogResponse';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
@@ -19,6 +28,7 @@ import {EMPTY} from 'rxjs';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {EventsGetTaskPlotsResponse} from '~/business-logic/model/events/eventsGetTaskPlotsResponse';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
 
 
 @Injectable()
@@ -26,6 +36,7 @@ export class CommonExperimentOutputEffects {
 
   constructor(
     private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
+    private modelsApi: ApiModelsService,
     private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService
   ) {
   }
@@ -50,7 +61,7 @@ export class CommonExperimentOutputEffects {
           this.store.select(selectSelectedExperiment),
           this.store.select(selectPipelineSelectedStep)),
         mergeMap(([res, selectedTask, pipeStep]: [EventsGetTaskLogResponse, IExperimentInfo, IExperimentInfo]) => [
-          ...([pipeStep?.id, selectedTask.id].includes(action.id ) ?
+          ...([pipeStep?.id, selectedTask.id].includes(action.id) ?
               [
                 outputActions.setExperimentLog({
                   events: res.events.map((e: Log) => ({...e, msg: e.msg?.replace(/\0/g, '')})),
@@ -71,7 +82,9 @@ export class CommonExperimentOutputEffects {
           requestFailed(error),
           deactivateLoader(action.type),
           deactivateLoader(refreshExperiments.type),
-          ...(action.refresh || action.from || action.autoRefresh ? [] : [setServerError(error, null, 'Failed to fetch log')]),
+          ...(action.refresh || action.from || action.autoRefresh
+            // hide weird missing id error
+          || error.error.meta.result_subcode === 101 ? [] : [setServerError(error, null, 'Failed to fetch log')]),
           outputActions.setExperimentLogLoading({loading: false})
         ])
       )
@@ -115,11 +128,33 @@ export class CommonExperimentOutputEffects {
     )
   ));
 
+  fetchExperimentScalarMetricVariantsTableData$ = createEffect(() => this.actions$.pipe(
+    ofType(outputActions.experimentScalarRequested),
+    filter(action=> !action.model),
+    switchMap((action) => this.apiTasks.tasksGetAllEx({
+      id: [action.experimentId],
+      only_fields: ['last_metrics']
+    })),
+    mergeMap((res) => [setExperimentMetricsVariantValues({lastMetrics: res?.tasks[0].last_metrics})]
+    )
+  ));
+
+  fetchModelScalarMetricVariantsTableData$ = createEffect(() => this.actions$.pipe(
+    ofType(outputActions.experimentScalarRequested),
+    filter(action=> !!action.model),
+    switchMap((action) => this.modelsApi.modelsGetAllEx({
+      id: [action.experimentId],
+      only_fields: ['last_metrics']
+    })),
+    mergeMap((res) => [setExperimentMetricsVariantValues({lastMetrics: res?.models[0].last_metrics})]
+    )
+  ));
+
   fetchExperimentScalar$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentScalarRequested),
-    concatLatestFrom( (action) => [
-      this.store.select(selectSelectedSettingsxAxisType(action.model)),
-      this.store.select(selectExperimentHistogramCacheAxisType)
+    concatLatestFrom((action) => [
+        this.store.select(selectSelectedSettingsxAxisType(action.model)),
+        this.store.select(selectExperimentHistogramCacheAxisType)
       ]
     ),
     switchMap(([action, axisType, prevAxisType]) => {

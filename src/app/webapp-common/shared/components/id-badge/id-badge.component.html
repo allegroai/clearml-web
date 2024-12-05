@@ -1,10 +1,10 @@
 <div
   class="pointer id-number"
-  [smTooltip]="'Copy full ID\n' + id"
+  [smTooltip]="caption() + '\n' + id()"
   customClass="break-line"
 
   ngxClipboard
-  [cbContent]="id"
+  [cbContent]="id()"
   (cbOnSuccess)="copied.emit()"
   smClickStopPropagation
   data-id="copyUserId"
@@ -12,5 +12,5 @@
   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="18" viewBox="0 0 22 18">
     <rect class="id-rect" width="22" height="18"/>
     <path class="id-text" d="M6,5h2v8h-2V5ZM16,8.5v1c0,1.93-1.57,3.5-3.5,3.5h-3.5V5h3.5c1.93,0,3.5,1.57,3.5,3.5ZM14,8.5c0-.83-.67-1.5-1.5-1.5h-1.5v4h1.5c.83,0,1.5-.67,1.5-1.5v-1Z" />
-  </svg>@if(!short && id){<span class="hash" data-id="userId">{{id?.slice(0, 8)}}<span class="three-dots">...</span></span>}
+  </svg>@if(!short() && id()){<span class="hash" data-id="userId">{{id()?.slice(0, 8)}}<span class="three-dots">...</span></span>}
 </div>

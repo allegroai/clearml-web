@@ -1,0 +1,15 @@
+<div class="header d-flex justify-content-between">
+  <div class="d-flex align-items-center">
+    <div class="title">{{ metricType().label }}</div>
+  </div>
+</div>
+<div #chart class="line-chart-container">
+  <sm-line-chart
+    class="h-100"
+    [colorScheme]="presetColors"
+    [showLoadingOverlay]="refreshChart()"
+    [data]="chartData()"
+    [yLabel]="yAxisLabel()"
+    [yTickFormatter]="tickFormater"
+  ></sm-line-chart>
+</div>

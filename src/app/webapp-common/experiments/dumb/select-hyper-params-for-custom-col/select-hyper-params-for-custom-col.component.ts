@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {GroupedCheckedFilterListComponent} from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
+import {GroupedCheckedFilterListComponent, HyperParams} from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
@@ -17,7 +17,7 @@ export class SelectHyperParamsForCustomColComponent {
 
   public metricsCols: string[];
 
-  @Input() hyperParams: any[];
+  @Input() hyperParams: Record<string, HyperParams<{ checked: boolean; value: string }>>;
   @Output() getMetricsToDisplay      = new EventEmitter();
   @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
   @Output() goBack                   = new EventEmitter();

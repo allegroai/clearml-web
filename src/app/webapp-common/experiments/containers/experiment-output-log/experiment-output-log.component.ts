@@ -80,13 +80,6 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
             this.store.dispatch(activeLoader(getExperimentLog.type));
             this.store.dispatch(getExperimentLog({ id: this.currExperiment.id, direction: null }));
           }
-          // else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
-          //   this.store.dispatch(getExperimentLog({
-          //     id: this.currExperiment.id,
-          //     direction: !this.logRef?.orgLogs ? 'prev' : 'next',
-          //     from: last(this.logRef?.orgLogs)?.timestamp
-          //   }));
-          // }
         })
     );
   }

@@ -36,3 +36,5 @@ export function validateJson(obj) {
   }
   return true;
 }
+
+export const NotOnlyWhiteSpacePattern =  /^(?!\s*$).+/;

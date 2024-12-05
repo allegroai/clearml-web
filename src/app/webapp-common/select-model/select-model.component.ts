@@ -3,9 +3,10 @@ import {Store} from '@ngrx/store';
 import * as actions from './select-model.actions';
 import {clearTableFilter, setSelectedModels, showArchive} from './select-model.actions';
 import {
-  selectGlobalFilter, selectModels, selectNoMoreModels, selectSelectedModels, selectSelectedModelsList, selectSelectModelTableFilters, selectShowArchive, selectTableSortFields, selectViewMode
+  selectFrameworks,
+  selectGlobalFilter, selectModels, selectNoMoreModels, selectSelectedModels, selectSelectedModelsList, selectSelectModelTableFilters, selectShowArchive, selectTableSortFields, selectTags, selectViewMode
 } from './select-model.reducer';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, of, Subscription} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
@@ -13,9 +14,7 @@ import {SelectedModel, TableModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from '../models/models.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
-import {selectMetadataColsForProject, selectMetadataColsOptions, selectModelsFrameworks, selectModelsTags, selectModelTableColumns} from '../models/reducers';
 import {User} from '~/business-logic/model/users/user';
-import * as modelsActions from '../models/actions/models-view.actions';
 import {SortMeta} from 'primeng/api';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
 import {debounceTime, distinctUntilChanged, map, tap} from 'rxjs/operators';
@@ -53,10 +52,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
 
   public selectedProject: Project;
   private selectedModels: Array<SelectedModel>;
-  private columns$: Observable<ISmCol[]>;
-  private metadataTableCols$: Observable<ISmCol[]>;
   public tableCols$: Observable<ISmCol[]>;
-  public metadataColsOptions$: Observable<Record<string, string[]>>;
   public showArchive$: Observable<boolean>;
 
   constructor(private store: Store,
@@ -83,7 +79,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.noMoreModels$ = this.store.select(selectNoMoreModels);
     this.showArchive$ = this.store.select(selectShowArchive);
     this.users$ = this.store.select(selectAllProjectsUsers);
-    this.tags$ = this.store.select(selectModelsTags);
+    this.tags$ = this.store.select(selectTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.subs.add(this.store.select(selectSelectedProject).pipe(debounceTime(100))
       .subscribe(selectedProject => {
@@ -92,19 +88,12 @@ export class SelectModelComponent implements OnInit, OnDestroy {
           this.store.dispatch(actions.tableFilterChanged({col: {id: 'project.name'}, value: [selectedProject.id]}));
         }
       }));
-    this.frameworks$ = this.store.select(selectModelsFrameworks);
+    this.frameworks$ = this.store.select(selectFrameworks);
 
     this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
 
-    this.metadataColsOptions$ = this.store.select(selectMetadataColsOptions);
-    this.columns$ = this.store.select(selectModelTableColumns);
-    this.metadataTableCols$ = this.store.select(selectMetadataColsForProject);
-    this.tableCols$ = combineLatest([this.columns$, this.metadataTableCols$])
+    this.tableCols$ = of(this.tableCols)
       .pipe(
-        map(([tableCols, metricCols]) =>
-          (tableCols.length > 0 ? tableCols : this.tableCols)
-            .concat(metricCols.map(col => ({...col, metric: true})))
-        ),
         distinctUntilChanged((a, b) => isEqual(a, b)),
         map(cols => cols.filter(col => (!col.hidden || col.id === 'project.name')).map(col => ({
             ...col,
@@ -126,9 +115,9 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(actions.getNextModels());
+    this.store.dispatch(actions.getFrameworks());
+    this.store.dispatch(actions.getTags());
     this.data.selectedModels && this.store.dispatch(actions.getSelectedModels({selectedIds: this.data.selectedModels}));
-    this.store.dispatch(modelsActions.getAllProjectsFrameworks());
-    this.store.dispatch(modelsActions.getTagsForAllProjects());
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
   }
 

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, viewChild} from '@angular/core';
 import {ControllersComponent} from '@common/pipelines-controller/controllers.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable} from 'rxjs';
@@ -10,6 +10,9 @@ import {take, withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {setExperiment} from '@common/experiments/actions/common-experiments-info.actions';
+import {
+  SimpleDatasetVersionMenuComponent
+} from '@common/dataset-version/simple-dataset-version-menu/simple-dataset-version-menu.component';
 
 @Component({
   selector: 'sm-simple-dataset-versions',
@@ -17,6 +20,7 @@ import {setExperiment} from '@common/experiments/actions/common-experiments-info
   styleUrls: ['./simple-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss']
 })
 export class SimpleDatasetVersionsComponent extends ControllersComponent implements OnInit {
+  override contextMenu = viewChild.required(SimpleDatasetVersionMenuComponent);
   isArchived: boolean;
 
   protected override getParamId(params) {
@@ -57,7 +61,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
 
   override createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<Array<any>>;
+    selected$: Observable<any[]>;
     showAllSelectedIsActive$: Observable<boolean>;
     tags$: Observable<string[]>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
@@ -70,7 +74,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
   }
 
   override downloadTableAsCSV() {
-    this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Datasets`);
+    this.table().table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Datasets`);
   }
   override setupBreadcrumbsOptions() {
     this.sub.add(this.selectedProject$.pipe(

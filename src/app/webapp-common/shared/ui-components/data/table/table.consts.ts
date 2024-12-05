@@ -26,6 +26,7 @@ export interface ISmCol {
   header?: string; // the title header.
   label?: string; // Labels to show in cards mode..
   hidden?: boolean; // the column visibility.
+  includeInDownload?: boolean;
   frozen?: boolean;
   headerType?: ColHeaderTypeEnum;
   filterType?: ColHeaderFilterTypeEnum;

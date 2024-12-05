@@ -1,4 +1,4 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {combineLatest, filter, Subscription} from 'rxjs';
@@ -27,7 +27,10 @@ export interface RunPipelineResult {
   styleUrls: ['./run-pipeline-controller-dialog.component.scss']
 })
 export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
-  public queues: Array<Queue>;
+  public dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef<ConfirmDialogComponent>);
+  private store = inject(Store);
+  public data = inject<{ task }>(MAT_DIALOG_DATA);
+  public queues: Queue[];
   public selectedQueue: Queue;
   public queues$ = this.store.select(selectQueuesList);
   public baseController$ = this.store.select(selectStartPipelineDialogTask);
@@ -38,15 +41,11 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   private baseControllerSub: Subscription;
   private selectedQueueSub: Subscription;
 
-  constructor(
-    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    private store: Store,
-    @Inject(MAT_DIALOG_DATA) public data: { task }
-  ) {
-    if (data?.task?.hyperparams?.Args) {
-      this.store.dispatch(setControllerForStartPipelineDialog({task: data.task}));
+  constructor() {
+    if (this.data?.task?.hyperparams?.Args) {
+      this.store.dispatch(setControllerForStartPipelineDialog({task: this.data.task}));
     } else {
-      this.store.dispatch(getControllerForStartPipelineDialog({task: data.task?.id}));
+      this.store.dispatch(getControllerForStartPipelineDialog({task: this.data.task?.id}));
     }
 
     this.queuesSub = this.queues$.subscribe(queues => {

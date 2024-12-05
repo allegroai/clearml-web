@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
+import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
 import * as actions from '../actions/projects.actions';
 import {
   downloadForGetAll,
@@ -112,17 +114,19 @@ export class ProjectsEffects {
           order_by: ['name'],
           only_fields: ['name', 'company'],
           search_hidden: showHidden,
-            _any_: {pattern: escapeRegex(action.searchString), fields: ['name']},
+            _any_: {pattern: escapeRegex(action.searchString), fields: ['name', 'id']},
           scroll_id: !!action.loadMore && scrollId ? scrollId : null
         } as ProjectsGetAllExRequest),
         !action.loadMore && action.searchString?.length > 2 ?
           this.projectsApi.projectsGetAllEx({
-            page_size: 1,
             only_fields: ['name', 'company'],
             search_hidden: showHidden,
               _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']},
             /* eslint-enable @typescript-eslint/naming-convention */
-          } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
+          } as ProjectsGetAllExRequest)
+            .pipe(
+              map((res: ProjectsGetAllExResponse) => res.projects.filter(project => project.name === action.searchString)),
+            ) :
           of([]),
         !action.loadMore && filters['project.name']?.value.length ?
           this.projectsApi.projectsGetAllEx({

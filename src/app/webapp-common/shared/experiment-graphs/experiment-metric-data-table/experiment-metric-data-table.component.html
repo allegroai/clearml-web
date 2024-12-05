@@ -1,0 +1,97 @@
+<mat-drawer-container autosize class="h-100">
+  <mat-drawer #drawer [opened]="filterOpen" mode="over" (closedStart)="filterOpen = false" class="mat-elevation-z0">
+    <div class="head">
+      <i class="close al-icon al-ico-dialog-x" (click)="drawer.close()" data-id="closeToggleGraph"></i>
+    </div>
+    <div class="list-container">
+      <sm-selectable-grouped-filter-list
+        [list]="metricVariantList$() | ngrxPush"
+        [checkedList]="computedSelectedMetricsScalar()"
+        [searchTerm]="listSearchTerm()"
+        (hiddenChanged)="selectedMetricsChanged.emit($event)"
+        (searchTermChanged)="searchTermChanged($event)"
+      >
+      </sm-selectable-grouped-filter-list>
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div *ngIf="dataTable()?.length === 0" class="no-output">
+      <i class="i-no-table-data"></i>
+      <h4>NO METRICS</h4>
+    </div>
+
+    <div *ngIf="dataTable()?.length > 0 && dataTableFiltered()?.length === 0" class="no-output all-filtered-message">
+      All metrics hidden. <a class="link" (click)="clear()">Clear filters</a>
+    </div>
+
+    <p-table
+      [value]="dataTableFiltered()"
+      [scrollable]="true"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="50"
+      [rowTrackBy]="trackByFunction"
+      styleClass="p-mt-3"
+      scrollHeight="flex"
+      [class.empty-state]="dataTableFiltered()?.length < 1"
+      [class.no-rows]="dataTableFiltered()?.length < 1">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="filter-header-cell" [class.freeze-divider]="scrolled" pFrozenColumn [colSpan]="2">
+            <div class="filter-header">
+              <button class="btn btn-icon" [class.is-filtered]="dataTable()?.length > dataTableFiltered()?.length">
+                <i [class]="'al-icon pointer ' + (dataTable()?.length > dataTableFiltered()?.length ? 'al-ico-filter-on':'al-ico-filter-off')"
+                   [smTooltip]="dataTableFiltered()?.length + '/' + dataTable()?.length + ' filtered'"
+                   [matTooltipDisabled]="dataTableFiltered()?.length === dataTable()?.length"
+                   [showTooltip]="showFilterTooltip"
+                   (click)="filterOpen = !filterOpen">
+                  <span class="path1"></span><span class="path2"></span>
+                </i>
+              </button>
+              <mat-form-field appearance="outline" class="light-theme mat-light no-bottom">
+                <input #filterRef
+                       name="filter"
+                       [formControl]="variantFilter"
+                       placeholder="Search metric"
+                       matInput
+                       autocomplete="off">
+                <i matSuffix class="al-icon sm-md search-icon me-2" [class]="variantFilter.value? 'al-ico-dialog-x pointer' : 'al-ico-search'"
+                   (click)="variantFilter.value && clearSearch(); filterRef.focus()"
+                   smClickStopPropagation></i>
+              </mat-form-field>
+            </div>
+          </th>
+          <th *ngFor="let col of colKeys; trackBy: trackByFunction" class="experiment-header">
+            <span class="experiment-name"
+            >{{ col | uppercase }}</span>
+          </th>
+
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-metricVariant>
+        <tr [class.first-row]="metricVariant.firstMetricRow">
+          <td class="metrics-column" pFrozenColumn>
+            <span class="ellipsis" [smTooltip]="metricVariant.firstMetricRow ? metricVariant.metric : ''" smShowTooltipIfEllipsis>{{ metricVariant.firstMetricRow ? metricVariant.metric : '' }}</span>
+          </td>
+          <td class="variants-column" [class.freeze-divider]="scrolled" pFrozenColumn>
+            <div class="variant-cell">
+              <span class="ellipsis variant-name" [smTooltip]="metricVariant.variant" smShowTooltipIfEllipsis>{{ metricVariant.variant }}</span>
+              <i *ngIf="metricVariant.min === metricVariant.max"
+                 class="al-icon al-ico-equal-outline sm row-info-icon"
+                 smTooltip="All values are the same in this row"></i>
+            </div>
+          </td>
+          @for (col of colKeys; track $index) {
+            <td>
+              <div class="value">
+                <span class="value-text" smShowTooltipIfEllipsis [smTooltip]="metricVariant[col]">{{ metricVariant[col] }}</span>
+              </div>
+
+            </td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+
+  </mat-drawer-content>
+</mat-drawer-container>

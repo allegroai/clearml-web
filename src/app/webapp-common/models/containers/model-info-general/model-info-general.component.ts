@@ -20,18 +20,7 @@ export class ModelInfoGeneralComponent implements OnDestroy, OnInit{
   public isExample: boolean;
   private selectedModelSubscription: Subscription;
 
-  constructor(private store: Store, private adminService: AdminService, private cdr: ChangeDetectorRef,
-  ) {
-
-  }
-
-  showModel(model) {
-    this.store.dispatch(resetDontShowAgainForBucketEndpoint());
-    const modelSignedUri = this.adminService.signUrlIfNeeded(model.uri);
-    if (modelSignedUri) {
-      window.open(createModelLink(model.uri, model.id, modelSignedUri));
-    }
-  }
+  constructor(private store: Store) {}
 
   commentChanged(comment) {
     this.store.dispatch(updateModelDetails({id: this.selectedModel.id, changes: {comment}}));
@@ -47,7 +36,6 @@ export class ModelInfoGeneralComponent implements OnDestroy, OnInit{
       .subscribe(model => {
         this.isExample = isExample(model);
         this.selectedModel = model;
-        // this.cdr.detectChanges();
       });
   }
 

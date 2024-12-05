@@ -3,49 +3,125 @@
 :host {
   display: inline-block;
 
-  .no-wrap {
-    white-space: nowrap;
-  }
-
   .refresh-wrapper {
-    width: 24px;
-    padding-left: 5px;
-    overflow: hidden;
-    transition: all 0.5s 0.5s, background 0.5s 0s;
-
-    &.allow-autorefresh:hover {
-      background: $blue-600;
-      border-radius: 4px;
-      width: 164px;
-      padding-right: 12px;
+    &.show-menu {
+      .tooltip-container, .tip {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+    .btn.btn-icon:hover {
+      background-color: transparent;
+      .path_arrows {
+        fill: $blue-200;
+      }
     }
   }
 
-  .refresh-icon {
-    margin: 10px;
-    font-size: 20px;
-    color: $blue-300;
+  .refresh {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      height: inherit;
+      width: inherit;
+      position: absolute;
+    }
   }
 
-  .autorefresh-checkbox {
-    margin-left: 6px;
+  .tooltip-container {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 64px;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: $blue-600;
+    color: $blue-250;
+    line-height: normal;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+    transition: opacity 0.3s 0.3s;
+
+    .toggle-label {
+      color: $blue-300;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+
+      &.enabled {
+        color: $neon-yellow
+      }
+    }
+  }
+
+  .tip {
+    opacity: 0;
+    pointer-events: none;
+    content: '';
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    right: 60px;
+    transform: rotate(45deg);
+    background-color: $blue-600;
+    transition: opacity 0.3s 0.3s;
   }
 
   &.light-theme {
     border-radius: 4px;
 
-    .refresh-wrapper.allow-autorefresh:hover {
-      background: $blue-25;
+    .refresh-wrapper {
+      .btn.btn-icon {
+        background-color: transparent;
+        &:hover {
+          .path_arrows {
+            fill: $blue-500;
+          }
+        }
+      }
+      .path_arrows {
+        fill: $blue-400;
+      }
     }
 
-    .al-icon {
-      .path1:before {
-        color: $blue-500
+    .path_play, .path_pause {
+      fill: $purple;
+    }
+
+    .tooltip-container, .tip {
+      background-color: $blue-50;
+      color: $blue-600;
+
+      .toggle-label.enabled {
+        color: $purple;
       }
-      .path2:before {
-        color: $purple
+
+      .btn {
+        background-color: transparent;
       }
     }
   }
+}
 
+.rotate {
+  display: inline-block;
+  animation: rotation 1 0.5s linear;
+}
+
+@keyframes rotation {
+  from{
+    transform: rotate(0deg);
+  }
+
+  to{
+    transform: rotate(180deg);
+  }
 }

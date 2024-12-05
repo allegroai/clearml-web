@@ -4,7 +4,7 @@ import {
   viewChild,
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {interval, combineLatest, switchMap, fromEvent} from 'rxjs';
+import {interval, combineLatest, switchMap, fromEvent, startWith} from 'rxjs';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {queueActions} from '../../actions/queues.actions';
 import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
@@ -59,7 +59,7 @@ export class QueueStatsComponent {
     combineLatest([
       toObservable(this.waitChartRef),
       this.store.select(selectQueuesStatsTimeFrame),
-      fromEvent(window, 'resize')
+      fromEvent(window, 'resize').pipe(startWith(0))
     ])
       .pipe(
         takeUntilDestroyed(),
@@ -68,7 +68,7 @@ export class QueueStatsComponent {
           const range = parseInt(timeFrame, 10);
           let width = waitChartRef?.nativeElement.clientWidth ?? 1000;
           width = Math.min(0.8 * width, 1000);
-          return Math.max(Math.floor(range / width), 5);
+          return Math.max(Math.floor(range / width), 40);
         }),
         switchMap(granularity => interval(granularity * 1000))
       )

@@ -58,7 +58,7 @@ export class SelectAutocompleteForTemplateFormsComponent implements ControlValue
   isNewName = false;
   onChange: (any) => void;
   onTouch: () => void;
-  onValidate: () => void;
+  onValidate: (any) => void;
 
   protected control = new FormControl();
 
@@ -93,7 +93,7 @@ export class SelectAutocompleteForTemplateFormsComponent implements ControlValue
       const value = this.value();
       this.onChange && this.onChange(this.control.value);
       this.onTouch && this.onTouch();
-      this.onValidate && this.onValidate();
+      this.onValidate && this.onValidate(this.value());
     });
   }
 

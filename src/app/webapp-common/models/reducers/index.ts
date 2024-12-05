@@ -56,8 +56,7 @@ export const selectModelTableColumns = createSelector(selectModelsHiddenTableCol
   } as ISmCol)));
 export const selectMetadataColumns = createSelector(selectModelsView, state=> state.metadataCols);
 export const selectMetadataColsForProject = createSelector(selectMetadataColumns, selectSelectedProjectId, selectModelsHiddenTableCols, selectModelsTableColsWidth, (metadataCols, projectId, hidden, colWidth) =>
-  metadataCols
-    .filter(metaCol => metaCol.projectId === projectId)
+  metadataCols?.filter(metaCol => metaCol.projectId === projectId)
     .map(col => ({
       ...col,
       hidden: !!hidden[col.id],

@@ -142,13 +142,16 @@ $header-height: 60px;
     display: inline-block;
     font-size: 12px;
     font-weight: 500;
-    color: $blue-800;
     margin-right: 6px;
     max-width: 300px;
-    > a:hover {
-      text-decoration: underline;
-      text-underline-offset: 4px;
-      text-decoration-color: $blue-300;
+    > a {
+      color: $blue-800;
+      &:hover {
+        color: $blue-900;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        text-decoration-color: $blue-300;
+      }
     }
   }
 

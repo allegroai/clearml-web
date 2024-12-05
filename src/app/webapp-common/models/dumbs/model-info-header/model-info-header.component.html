@@ -34,11 +34,11 @@
           class="line-item"
           [model]="model"
           [selectedModel]="model"
-          [tagsFilterByProject]="tagsFilterByProject$ | async"
+          [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
           [selectedDisableAvailableIsMultiple]="false"
           [selectedDisableAvailable]="selectedDisableAvailable"
-          [projectTags]="projectTags$ | async"
-          [companyTags]="companyTags$ | async"
+          [projectTags]="projectTags$ | ngrxPush"
+          [companyTags]="companyTags$ | ngrxPush"
           [numSelected]="1"
           (tagSelected)="addTag($event)">
         </sm-model-menu-extended>
@@ -69,9 +69,9 @@
         class="light-theme"
         #tagsMenu
         [tags]="model?.tags"
-        [tagsFilterByProject]="allProjects || (tagsFilterByProject$ | async)"
-        [projectTags]="(allProjects ? companyTags$ : projectTags$) | async"
-        [companyTags]="allProjects ? null : companyTags$ | async"
+        [tagsFilterByProject]="allProjects || (tagsFilterByProject$ | ngrxPush)"
+        [projectTags]="(allProjects ? companyTags$ : projectTags$) | ngrxPush"
+        [companyTags]="allProjects ? null : companyTags$ | ngrxPush"
         (tagSelected)="addTag($event)"
       ></sm-tags-menu>
     </div>

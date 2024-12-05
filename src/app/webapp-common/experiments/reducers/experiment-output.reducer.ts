@@ -7,6 +7,7 @@ import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {createReducer, on} from '@ngrx/store';
 import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {Task} from '~/business-logic/model/tasks/task';
 
 
 export interface ExperimentOutputState {
@@ -22,7 +23,9 @@ export interface ExperimentOutputState {
   logFilter: string;
   logLoading: boolean;
   showSettings: boolean;
+  metricValuesView: boolean;
   scalarSingleValue: Array<EventsGetTaskSingleValueMetricsResponseValues>;
+  lastMetrics: Task['last_metrics'];
   graphsPerRow: number;
 }
 
@@ -30,6 +33,7 @@ export interface ExperimentSettings {
   id: string;
   hiddenMetricsScalar: Array<string>;
   hiddenMetricsPlot: Array<string>;
+  selectedMetricTable: string[];
   selectedMetricsScalar: Array<string>;
   selectedMetricsPlot: Array<string>;
   selectedHyperParams: Array<string>;
@@ -52,10 +56,12 @@ export const experimentOutputInitState: ExperimentOutputState = {
   beginningOfLog: false,
   settingsList: [],
   scalarSingleValue:[],
+  lastMetrics: null,
   searchTerm: '',
   logFilter: null,
   logLoading: false,
   showSettings: false,
+  metricValuesView: false,
   graphsPerRow: 2
 };
 
@@ -107,6 +113,7 @@ export const experimentOutputReducer = createReducer(
   on(actions.setHistogram, (state, action) => ({...state, metricsHistogramCharts: action.histogram, cachedAxisType: action.axisType})),
   on(actions.setExperimentPlots, (state, action) => ({...state, metricsPlotsCharts: action.plots})),
   on(actions.setExperimentScalarSingleValue, (state, action) => ({...state, scalarSingleValue: action.values})),
+  on(actions.setExperimentMetricsVariantValues, (state, action) => ({...state, lastMetrics: action.lastMetrics})),
   on(actions.setExperimentSettings, (state, action) => {
     let newSettings: ExperimentSettings[];
     const changes = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
@@ -136,5 +143,6 @@ export const experimentOutputReducer = createReducer(
   on(actions.setLogFilter, (state, action) => ({...state, logFilter: (action as ReturnType<typeof actions.setLogFilter>).filter})),
   on(actions.resetLogFilter, state => ({...state, logFilter: null})),
   on(actions.toggleSettings, state => ({...state, showSettings: !state.showSettings})),
+  on(actions.toggleMetricValuesView, state => ({...state, metricValuesView: !state.metricValuesView})),
   on(actions.setGraphsPerRow, (state, action) => ({...state, graphsPerRow: action.graphsPerRow})),
 );

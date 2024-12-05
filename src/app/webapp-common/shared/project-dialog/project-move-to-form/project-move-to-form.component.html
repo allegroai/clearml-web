@@ -35,7 +35,7 @@
       <mat-error>Please provide a Project</mat-error>
     }
     @if (errors?.minlength) {
-      <mat-error>Please provide a project name longer than 3 characters</mat-error>
+      <mat-error>Project name should be at least 3 characters long</mat-error>
     }
     @if (errors?.uniqueName && !projectInput?.errors?.required) {
       <mat-error>Can't move a project to its current location</mat-error>

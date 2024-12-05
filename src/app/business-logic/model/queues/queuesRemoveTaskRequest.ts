@@ -21,4 +21,8 @@ export interface QueuesRemoveTaskRequest {
      * Task id
      */
     task: string;
+    /**
+     * If set to \'true\' then change the removed task status to the one it had prior to   enqueuing or \'created\'
+     */
+    update_task_status?: boolean;
 }

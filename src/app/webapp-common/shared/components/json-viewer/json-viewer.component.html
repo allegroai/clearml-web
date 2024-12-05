@@ -4,7 +4,7 @@
     [matTreeNodePadding]="segment.level + 1"
     [matTreeNodePaddingIndent]="12"
   >
-    <section [ngClass]="['segment', 'segment-type-' + segment.type]">
+    <section [class]="['segment', 'segment-type-' + segment.type]">
       <section
         matTreeNodeToggle
         class="segment-main"
@@ -29,7 +29,7 @@
     [matTreeNodePaddingIndent]="12"
     [disabled]="!segment.expandable"
   >
-    <section class="segment" [ngClass]="'segment-type-' + segment.type">
+    <section class="segment" [class]="'segment-type-' + segment.type">
       <section
         matTreeNodeToggle
         class="segment-main expandable"

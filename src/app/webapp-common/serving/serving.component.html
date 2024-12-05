@@ -1,0 +1,79 @@
+<div class="w-100 model-header">
+  <sm-serving-header
+    [minimizedView]="minimizedView"
+    [tableCols]="filteredTableCols$ | ngrxPush"
+    [tableFilters]="tableFilters$ | ngrxPush"
+    [tableMode]="firstEndpoint ? (tableMode$ | ngrxPush) : 'table'"
+    [hideNavigation]="viewMode === 'loading'"
+    [noData]="!((endpoints$ | ngrxPush)?.length > 0)"
+    (setAutoRefresh)="setAutoRefresh($event)"
+    (selectedTableColsChanged)="selectedTableColsChanged($event)"
+    (selectedMetricToShow)="selectedMetricToShow($event)"
+    (selectMetadataKeysActiveChanged)="getCustomMetrics()"
+    (removeColFromList)="removeColFromList($event)"
+    (clearTableFilters)="clearTableFiltersHandler($event)"
+    (tableModeChanged)="modeChanged($event)"
+    (downloadTableAsCSV)="downloadTableAsCSV()"
+
+  ></sm-serving-header>
+</div>
+<div class="models-body">
+  <as-split #split
+            [gutterSize]=1
+            [useTransition]="true"
+            [gutterDblClickDuration]="400"
+            (gutterClick)="clickOnSplit()"
+            (gutterDblClick)="closePanel()"
+            (dragEnd)="splitSizeChange($event)"
+            (dragStart)="disableInfoPanel()"
+            (transitionEnd)="endpointsTable.table.resize(); endpointsTable.afterTableInit()"
+            [class.opened]="minimizedView && (selectSplitSize$ | ngrxPush) <= 1"
+            [class.closed]="minimizedView && (selectSplitSize$ | ngrxPush) >= 99"
+  >
+    <as-split-area
+      [size]="100 - splitInitialSize"
+      [minSize]="1"
+      [maxSize]="99"
+      [visible]="true"
+    >
+      <sm-serving-table
+        #endpointsTable
+        class="w-100 align-self-stretch"
+        selectionMode="single"
+        [endpoints]="endpoints$ | ngrxPush"
+        [tableCols]="tableCols$ | ngrxPush"
+        [minimizedView]="minimizedView"
+        [systemTags]="systemTags$ | ngrxPush"
+        [tableSortFields]="(tableSortFields$ | ngrxPush)"
+        [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
+        [colsOrder]="(tableColsOrder$ | ngrxPush)"
+        [selectedEndpoints]="selectedEndpoints$ | ngrxPush"
+        [selectedEndpoint]="selectedEndpoint$ | ngrxPush"
+        [split]="selectSplitSize$ | ngrxPush"
+        [enableMultiSelect]="true"
+        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [modelNames]="modelNamesOptions$ | ngrxPush"
+        [inputTypes]="inputTypesOptions$ | ngrxPush"
+        [preprocessArtifact]="preprocessArtifactOptions$ | ngrxPush"
+        [entityType]="entityType"
+        (columnsReordered)="columnsReordered($event)"
+        (endpointSelectionChanged)="endpointSelectionChanged($event)"
+        (endpointsSelectionChanged)="endpointsSelectionChanged($event)"
+        (tagsMenuOpened)="refreshTagsList()"
+        (sortedChanged)="sortedChanged($event)"
+        (columnResized)="columnResized($event)"
+        (filterChanged)="filterChanged($event)"
+        (filterSearchChanged)="filterSearchChanged($event)"
+        (loadMoreEndpoints)="getNextEndpoints()"
+        (clearAllFilters)="clearTableFiltersHandler($event)"
+        (cardsCollapsedChanged)="cardsCollapsedToggle()"
+      >
+      </sm-serving-table>
+    </as-split-area>
+    <as-split-area [size]="splitInitialSize" [visible]="minimizedView">
+      <router-outlet></router-outlet>
+    </as-split-area>
+  </as-split>
+</div>
+

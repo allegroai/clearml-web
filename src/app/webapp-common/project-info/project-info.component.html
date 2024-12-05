@@ -25,7 +25,7 @@
     [class.editor]="editor.editMode"
     [data]="info"
     [readOnly]="example"
-    [blockUserScripts]="blockUserScripts$ | async"
+    [blockUserScripts]="blockUserScripts$ | ngrxPush"
     (saveInfo)="saveInfo($event)"
   >
     <div no-data class="flex-middle overview-placeholder" *ngIf="!example">

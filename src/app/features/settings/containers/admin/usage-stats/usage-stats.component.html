@@ -1,4 +1,4 @@
-@if(!demo) {
+@if(!demo() && supported()) {
   <mat-slide-toggle
     (change)="statsChange($event)"
     [checked]="allowed()">Send anonymous usage data (Global setting)</mat-slide-toggle>

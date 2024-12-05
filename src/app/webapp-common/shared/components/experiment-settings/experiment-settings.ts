@@ -9,6 +9,11 @@ export class ExperimentSettingsComponent {
 
   @Input() disabled                  = false;
   @Input() showSettings              = false;
+  @Input() tableView              = false;
   @Output() toggleSettings           = new EventEmitter();
+
+
+
+
 }
 

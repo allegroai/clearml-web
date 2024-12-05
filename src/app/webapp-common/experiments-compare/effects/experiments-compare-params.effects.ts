@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import {Store} from '@ngrx/store';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, filter, map, mergeMap, switchMap} from 'rxjs/operators';

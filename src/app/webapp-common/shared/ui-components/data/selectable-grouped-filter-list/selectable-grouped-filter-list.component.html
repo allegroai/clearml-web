@@ -1,8 +1,8 @@
 <div class="d-flex justify-content-between mb-2">
-  <span class="font-weight-bold">{{titleLabel}}</span>
+  <span class="font-weight-bold">{{titleLabel()}}</span>
 </div>
 <sm-search
-  [value]="searchText"
+  [value]="searchTerm()"
   [minimumChars]="0"
   [debounceTime]="0"
   class="underline-search"
@@ -10,14 +10,13 @@
   (valueChanged)="onSearchTermChanged($event)"
 ></sm-search>
 <div class="toggle-all-text">
-  <span (click)="toggleHideAll()">{{checkedList?.length === 0 ? 'Show all' : 'Hide all'}}</span>
+  <span (click)="toggleHideAll()">{{checkedList()?.length === 0 ? 'Show all' : 'Hide all'}}</span>
 </div>
 <sm-grouped-selectable-list
-  [list]="filteredList"
-  [searchTerm]="searchTerm"
-  [checkedList]="checkedList"
+  [list]="filteredList()"
+  [searchTerm]="searchTerm()"
+  [checkedList]="checkedList()"
   (itemSelect)="itemSelect.emit($event)"
   (itemCheck)="toggleHide($event)"
   (groupChecked)="toggleHideGroup($event)"
->
-</sm-grouped-selectable-list>
+></sm-grouped-selectable-list>

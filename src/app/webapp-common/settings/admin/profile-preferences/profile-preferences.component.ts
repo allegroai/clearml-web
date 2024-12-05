@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {neverShowPopupAgain, setHideRedactedArguments} from '@common/core/actions/layout.actions';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {Store} from '@ngrx/store';
 import {popupId, TipsService} from '@common/shared/services/tips.service';
 import {selectHideRedactedArguments, selectNeverShowPopups} from '@common/core/reducers/view.reducer';
@@ -31,7 +32,8 @@ export class ProfilePreferencesComponent {
 
   private store = inject(Store);
   private dialog = inject(MatDialog);
-  public tipsService = inject(TipsService);
+  protected config = inject(ConfigurationService);
+  protected tipsService = inject(TipsService);
   public featuresEnum = FeaturesEnum;
   public supportReScaling = window['chrome'] || window['safari'];
   public disableHidpiChanged: boolean = false;

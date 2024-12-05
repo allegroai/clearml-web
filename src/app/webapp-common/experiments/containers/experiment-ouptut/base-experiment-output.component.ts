@@ -3,7 +3,7 @@ import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/rout
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
-import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {
@@ -11,12 +11,21 @@ import {
   selectIsSharedAndNotOwner,
   selectSelectedExperiment
 } from '~/features/experiments/reducers';
-import {resetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
+import {
+  resetExperimentMetrics,
+  toggleMetricValuesView,
+  toggleSettings
+} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
 import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
-import {selectIsExperimentInEditMode, selectSelectedExperiments, selectSplitSize} from '../../reducers';
+import {
+  selectIsExperimentInEditMode,
+  selectMetricValuesView,
+  selectSelectedExperiments,
+  selectSplitSize
+} from '../../reducers';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
@@ -50,6 +59,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   private toMaximize = false;
   public selectSplitSize$: Observable<number>;
   private selectedProject$: Observable<Project>;
+  public metricValuesView$: Observable<boolean>;
 
 
   constructor(
@@ -65,7 +75,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectSplitSize$ = this.store.select(selectSplitSize);
     this.selectedProject$ = this.store.select(selectSelectedProject);
-
+    this.metricValuesView$ = this.store.select(selectMetricValuesView);
 
 
   }
@@ -73,7 +83,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   ngOnInit() {
     this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.minimized = !routerConfig.includes('output');
-      if (!this.minimized){
+      if (!this.minimized) {
         this.setupBreadcrumbsOptions();
       }
       this.routerConfig = routerConfig;
@@ -89,7 +99,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         withLatestFrom(this.store.select(selectSelectedExperiments))
       ).subscribe(([experimentId, selectedExperiments]) => {
         this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId) as unknown as IExperimentInfo;
-        this.isExample = isReadOnly( this.selectedExperiment);
+        this.isExample = isReadOnly(this.selectedExperiment);
         this.isDevelopment = isDevelopment(this.selectedExperiment);
         this.store.dispatch(resetExperimentMetrics());
         this.store.dispatch(infoActions.resetExperimentInfo());
@@ -99,13 +109,14 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
 
     this.subs.add(this.refresh.tick
       .pipe(
+        debounceTime(5000), // Fix loop - getExperimentInfo trigger tick
         withLatestFrom(this.isExperimentInEditMode$),
         filter(([, isExperimentInEditMode]) => !isExperimentInEditMode && !this.minimized)
       ).subscribe(([auto]) => {
         if (auto === null) {
           this.store.dispatch(infoActions.autoRefreshExperimentInfo({id: this.experimentId}));
         } else {
-          this.store.dispatch(infoActions.getExperimentInfo({id: this.experimentId}));
+          this.store.dispatch(infoActions.getExperimentInfo({id: this.experimentId, autoRefresh: auto}));
         }
       })
     );
@@ -114,7 +125,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       .pipe(filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
-        this.isExample = isReadOnly( this.selectedExperiment);
+        this.isExample = isReadOnly(this.selectedExperiment);
         this.isDevelopment = isDevelopment(this.selectedExperiment);
       })
     );
@@ -143,6 +154,10 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.store.dispatch(toggleSettings());
   }
 
+  toggleTableView() {
+    this.store.dispatch(toggleMetricValuesView());
+  }
+
   updateExperimentName(name) {
     if (name.trim().length > 2) {
       this.store.dispatch(experimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
@@ -163,13 +178,16 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.store.dispatch(headerActions.setTabs({contextMenu: null}));
     this.toMaximize = true;
   }
+
   onActivate(e, scrollContainer) {
     scrollContainer.scrollTop = 0;
   }
+
   closePanel() {
     this.store.dispatch(experimentsActions.setTableMode({mode: 'table'}));
     return this.router.navigate(['..'], {relativeTo: this.route, queryParamsHandling: 'merge'});
   }
+
   setupBreadcrumbsOptions() {
     this.subs.add(this.selectedProject$.pipe(
     ).subscribe((selectedProject) => {

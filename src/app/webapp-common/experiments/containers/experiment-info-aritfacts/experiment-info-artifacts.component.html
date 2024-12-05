@@ -2,10 +2,10 @@
   let-modelInfo="modelInfo"
   let-editable="editable"
   [ngTemplateOutletContext]="{
-    modelInfo: modelInfo$ | async,
-    editable: editable$ | async
+    modelInfo: modelInfo$ | ngrxPush,
+    editable: editable$ | ngrxPush
   }" [ngTemplateOutlet]="selfie" #selfie>
-  <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+  <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
   <as-split 
     class="light-theme"
     [unit]="'pixel'" 
@@ -20,8 +20,8 @@
         [inputModels]="modelInfo?.input"
         [editable]="editable"
         [activeSection]="activeSection"
-        [routerConfig]="routerConfig$ | async"
-        [selectedArtifactKey]="selectedId$ | async"
+        [routerConfig]="routerConfig$ | ngrxPush"
+        [selectedArtifactKey]="selectedId$ | ngrxPush"
       ></sm-experiment-artifacts-navbar>
     </as-split-area>
     <as-split-area>

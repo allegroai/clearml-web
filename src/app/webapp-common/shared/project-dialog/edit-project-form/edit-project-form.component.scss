@@ -1,0 +1,32 @@
+:host {
+  .create-project-button {
+    padding: 32px 12px 0;
+  }
+  mat-form-field {
+    width: 100%;
+
+    .project-description {
+      min-height: 68px;
+    }
+  }
+  .creat-new-suffix {
+    display: inline-block;
+    margin-right: 18px;
+    font-size: 14px;
+    transform: translateY(-4px);
+  }
+
+  .errors {
+    min-height: 20px;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 32px;
+    button {
+      min-width: 112px;
+    }
+  }
+}

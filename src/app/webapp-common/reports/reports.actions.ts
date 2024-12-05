@@ -1,13 +1,13 @@
 import {createAction, props} from '@ngrx/store';
-import {ReportsCreateRequest} from '~/business-logic/model/reports/reportsCreateRequest';
 import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGetAllExResponse';
 import {IReport} from './reports.consts';
+import {IReportsCreateRequest} from '@common/reports/report-dialog/report-dialog.component';
 
 export const REPORTS_PREFIX = 'REPORTS_';
 
 export const createReport = createAction(
   REPORTS_PREFIX + 'CREATE_REPORT',
-  props<{ reportsCreateRequest: ReportsCreateRequest }>()
+  props<{ reportsCreateRequest: IReportsCreateRequest }>()
 );
 
 export const resetReports = createAction(REPORTS_PREFIX + '[reset reports]');

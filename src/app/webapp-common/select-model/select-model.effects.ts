@@ -1,6 +1,7 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {concatLatestFrom} from '@ngrx/operators';
 import * as actions from './select-model.actions';
 import {getNextModels, getSelectedModels, setSelectedModels, setSelectedModelsList} from './select-model.actions';
 import * as exSelectors from './select-model.reducer';
@@ -11,7 +12,7 @@ import {get} from 'lodash-es';
 import {MODEL_TAGS, MODELS_TABLE_COL_FIELDS} from '../models/shared/models.const';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {requestFailed} from '../core/actions/http.actions';
-import {activeLoader, deactivateLoader, setServerError} from '../core/actions/layout.actions';
+import {activeLoader, addMessage, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {addMultipleSortColumns} from '../shared/utils/shared-utils';
 import {of} from 'rxjs';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -19,20 +20,63 @@ import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllE
 import {SortMeta} from 'primeng/api';
 import {createFiltersFromStore, encodeOrder, excludedKey, getTagsFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
-import {selectMetadataColsForProject} from '@common/models/reducers';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 
 @Injectable()
 export class SelectModelEffects {
   private selectModelsOnlyFields = ['created', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'design', 'company', 'project.name', 'comment', 'last_update'];
 
-  constructor(private actions$: Actions, private store: Store, private apiModels: ApiModelsService) {
-  }
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+  private apiModels = inject(ApiModelsService);
+  private apiProjects = inject(ApiProjectsService);
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(actions.getNextModels, actions.globalFilterChanged, actions.tableSortChanged, actions.tableFilterChanged),
     map(action => activeLoader(action.type))
+  ));
+
+  getFrameworksEffect = createEffect(() => this.actions$.pipe(
+    ofType(actions.getFrameworks),
+    concatLatestFrom(() =>
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId ?? '*')),
+    ),
+    switchMap(([, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' ? [projectId] : []})
+      .pipe(
+        mergeMap(res => [
+          actions.setFrameworks({frameworks: res.frameworks.concat(null)}),
+        ]),
+        catchError(error => [
+          requestFailed(error),
+          addMessage('warn', 'Fetch frameworks failed', [{
+            name: 'More info',
+            actions: [setServerError(error, null, 'Fetch frameworks failed')]
+          }])]
+        )
+      )
+    )
+  ));
+
+  getTagsEffect = createEffect(() => this.actions$.pipe(
+    ofType(actions.getTags),
+    concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId ?? '*'))),
+    switchMap(([, projectId]) => this.apiProjects.projectsGetModelTags({
+      projects: (projectId === '*') ? [] : [projectId]
+    }).pipe(
+      mergeMap(res => [
+        actions.setTags({tags: res.tags.concat(null)}),
+      ]),
+      catchError(error => [
+        requestFailed(error),
+        addMessage('warn', 'Fetch tags failed', [{
+          name: 'More info',
+          actions: [setServerError(error, null, 'Fetch tags failed')]
+        }])]
+      )
+    ))
   ));
 
   tableSortChange = createEffect(() => this.actions$.pipe(
@@ -92,7 +136,7 @@ export class SelectModelEffects {
 
   getGetAllQuery(
     scrollId: string, projectId: string, searchQuery: string, orderFields: SortMeta[],
-    tableFilters: { [s: string]: FilterMetadata }, showArchived: boolean, metadataCols: ISmCol[]
+    tableFilters: { [s: string]: FilterMetadata }, showArchived: boolean
   ): ModelsGetAllExRequest {
     const userFilter = get(tableFilters, [MODELS_TABLE_COL_FIELDS.USER, 'value']);
     const tagsFilter = tableFilters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.value;
@@ -120,7 +164,7 @@ export class SelectModelEffects {
         }
       }),
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
-      only_fields: [...this.selectModelsOnlyFields, ...metadataCols.map(col => col.id)],
+      only_fields: this.selectModelsOnlyFields,
       ...(tableFilters?.[MODELS_TABLE_COL_FIELDS.READY]?.value.length == 1 && !!tableFilters) ?
         {ready: tableFilters?.[MODELS_TABLE_COL_FIELDS.READY]?.value[0] === 'true'} : {ready: undefined},
       ...(!window.location.href.includes('compare') && {ready: true}),
@@ -139,11 +183,10 @@ export class SelectModelEffects {
           this.store.select(exSelectors.selectGlobalFilter),
           this.store.select(exSelectors.selectTableSortFields),
           this.store.select(exSelectors.selectSelectModelTableFilters),
-          this.store.select(exSelectors.selectShowArchive),
-          this.store.select(selectMetadataColsForProject),
+          this.store.select(exSelectors.selectShowArchive)
         ]),
-        switchMap(([scrollId, projectId, gb, sortFields, filters, showArchive, metadataCols]) =>
-          this.apiModels.modelsGetAllEx(this.getGetAllQuery(scrollId, projectId, gb, sortFields, filters, showArchive, metadataCols))
+        switchMap(([scrollId, projectId, gb, sortFields, filters, showArchive]) =>
+          this.apiModels.modelsGetAllEx(this.getGetAllQuery(scrollId, projectId, gb, sortFields, filters, showArchive))
         )
       );
   }

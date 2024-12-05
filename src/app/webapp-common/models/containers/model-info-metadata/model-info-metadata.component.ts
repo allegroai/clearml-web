@@ -8,6 +8,18 @@ import {activateModelEdit, cancelModelEdit, saveMetaData} from '../../actions/mo
 import {cloneDeep, toInteger} from 'lodash-es';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {filter, map} from 'rxjs/operators';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {FormsModule} from '@angular/forms';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {PushPipe} from '@ngrx/component';
+import {UuidPipe} from '@common/shared/pipes/uuid.pipe';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {PrimeTemplate} from 'primeng/api';
+import {MatInput} from '@angular/material/input';
+import {
+  UniqueInListSync2ValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-in-list-sync-validator-2.directive';
 
 export interface IModelMetadataMap {
   [key: string]: IModelMetadataItem;
@@ -24,7 +36,20 @@ export interface IModelMetadataItem {
   selector: 'sm-model-info-metadata',
   templateUrl: './model-info-metadata.component.html',
   styleUrls: ['./model-info-metadata.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    EditableSectionComponent,
+    SectionHeaderComponent,
+    MatFormFieldModule,
+    MatInput,
+    PushPipe,
+    UuidPipe,
+    TableComponent,
+    PrimeTemplate,
+    UniqueInListSync2ValidatorDirective,
+    FormsModule
+  ]
 })
 export class ModelInfoMetadataComponent implements OnInit, OnDestroy {
   public selectedModel$: Observable<SelectedModel>;

@@ -1,100 +1,103 @@
 <sm-dialog-template iconClass="al-icon {{resetMode? 'i-alert' : 'al-ico-trash'}}" [header]="header" [displayX]="false">
-  <ng-container *ngIf="!inProgress; else inProgressTemplate">
-
+  @if (!inProgress) {
     <!---------------- RESET POPUP -------------->
-    <div *ngIf="resetMode; else deleteTemplate">
-      <b [innerHTML]="entityName"></b> will be reset.<br>
-      <br/>
-      <div *ngIf="devWarning">
-        <div><b>Note: resetting a DEV experiment</b> Any subsequent runs of the experiment will overwrite any changes made to it in the Web-App.<br>
-        To avoid this, <b>clone the experiment</b> and work with the cloned experiment.</div>
-        <br/>
+    @if (resetMode) {
+      <div class="mb-3">
+        <span class="entity-name ellipsis inline" [smTooltip]="entityName" smShowTooltipIfEllipsis>{{entityName}}</span>
+        will be reset.
       </div>
-    </div>
-
-    <!---------------- DELETE POPUP -------------->
-    <ng-template #deleteTemplate>
-      <div class="text-center">Are you sure you want to delete
-        <span *ngIf="numSelected === 1">"</span><b [innerHTML]="entityName"></b><span *ngIf="numSelected === 1">"</span>? <br/>
-        {{bodyMessage}}</div>
-
-      <br/>
-    </ng-template>
-
-    <div class="delete-artifacts-checkbox" [class.hidden-important]="hideDeleteArtifacts">
-      <mat-checkbox
-        #checkboxInput="ngModel"
-        [(ngModel)]="deleteArtifacts"
-        name="isApprove"
-        [class.me-3]="resetMode"
-      >Remove all related artifacts and debug samples from ClearML file server
-      </mat-checkbox>
-    </div>
-    <div class="buttons">
-      <button cdkFocusInitial (click)="delete()"
-             data-id="DeleteButton" class="btn btn-neon yes-button">{{resetMode ? 'RESET' : 'DELETE'}}
-      </button>
-      <button (click)="closeDialog(false)"
-              data-id="CancelButton" class="btn btn-outline-neon">CANCEL
-      </button>
-    </div>
-  </ng-container>
-
-  <!---------------- PROGRESS BAR -------------->
-
-  <ng-template #inProgressTemplate>
-
-    <div>Deleting <span *ngIf="progressPercent > 0">{{progressPercent}}%</span></div>
-    <mat-progress-bar class="progress-bar" [mode]="progressPercent? 'determinate' : 'indeterminate'"
-                      [value]="progressPercent">
-    </mat-progress-bar>
-
-    <ng-container *ngIf="totalFilesNumber > 0">
-      <div *ngIf="!showFinishMessage; else successMessage" class="progress-message">
-        Deleting artifacts. This may take some time. Please do not close the window.
+    @if (devWarning) {
+      <div class="mb-3">
+        <b>Note: resetting a DEV experiment</b> Any subsequent runs of the experiment will overwrite any changes made to it in the Web-App.
+        <div>
+          To avoid this, <b>clone the experiment</b> and work with the cloned experiment.</div>
       </div>
-      <ng-template #successMessage>
-        <div class="progress-message success">
-          <i class="al-icon al-ico-success sm-md me-2"></i>The artifacts were deleted
+    }
+    } @else {
+      <div class="d-flex text-center">
+        <span>Are you sure you want to delete @if (numSelected === 1) {"}</span>
+        <span  class="entity-name ellipsis inline" [class.mx-1]="numSelected > 1" [smTooltip]="entityName" smShowTooltipIfEllipsis>{{entityName}}</span>
+        <span>@if (numSelected === 1) {"} ?</span>
+      </div>
+      <div class="mb-3">
+        {{bodyMessage}}
+      </div>
+    }
+      <!---------------- DELETE POPUP -------------->
+      <div class="delete-artifacts-checkbox" [class.hidden-important]="hideDeleteArtifacts">
+        <mat-checkbox
+          #checkboxInput="ngModel"
+          [(ngModel)]="deleteArtifacts"
+          name="isApprove"
+          [class.me-3]="resetMode"
+          >Remove all related artifacts and debug samples from ClearML file server
+        </mat-checkbox>
+      </div>
+      <div class="buttons">
+        <button cdkFocusInitial (click)="delete()"
+          data-id="DeleteButton" class="btn btn-neon yes-button">{{resetMode ? 'RESET' : 'DELETE'}}
+        </button>
+        <button (click)="closeDialog(false)"
+          data-id="CancelButton" class="btn btn-outline-neon">CANCEL
+        </button>
+      </div>
+    } @else {
+      <div>Deleting @if (progressPercent > 0) {
+        <span>{{progressPercent}}%</span>
+      }</div>
+      <mat-progress-bar class="progress-bar" [mode]="progressPercent? 'determinate' : 'indeterminate'"
+        [value]="progressPercent">
+      </mat-progress-bar>
+      @if (totalFilesNumber > 0) {
+        @if (!showFinishMessage) {
+          <div class="progress-message">
+            Deleting artifacts. This may take some time. Please do not close the window.
+          </div>
+        } @else {
+          <div class="progress-message success">
+            <i class="al-icon al-ico-success sm-md me-2"></i>The artifacts were deleted
+          </div>
+        }
+      }
+      <div [class.visible]="(failedEntities$ | ngrxPush)?.length > 0" class="files-list-container">
+        <div (click)="openToggleEntities()" class="pointer">
+          <i class="more-info-icon fa fa-angle-right" [class]="{'info-open': isOpenEntities}"></i>The following {{entityType}}s were not deleted:
         </div>
-      </ng-template>
-    </ng-container>
-
-    <div [class.visible]="(failedEntities$ | async)?.length > 0" class="files-list-container">
-      <div (click)="openToggleEntities()" class="pointer">
-        <i class="more-info-icon fa fa-angle-right" [ngClass]="{'info-open': isOpenEntities}"></i>The following {{entityType}}s were not deleted:
-      </div>
-      <div class="more-info" [ngClass]="{'info-open': isOpenEntities}">
-        <ul class="list-container">
-          <li *ngFor="let entity of (failedEntities$ | async)">
-            <div>{{entity.name}}</div>
-            <div class="error-reason">{{entity.message}}</div>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <div [class.visible]="failedFiles?.length > 0" class="files-list-container">
-      <div (click)="openToggle()" class="pointer">
-        <i class="more-info-icon fa fa-angle-right" [ngClass]="{'info-open': isOpen}"></i>The following artifacts were not deleted:
-      </div>
-      <div class="more-info mono" [ngClass]="{'info-open': isOpen}">
-        <sm-copy-clipboard label="" [clipboardText]="failedFiles.join('\n')"
-                           class="copy ps-2 light"
-        ></sm-copy-clipboard>
-        <a></a>
-        <div *ngFor="let file of failedFiles | slice:0:1000">
-          <div>{{file}}</div>
+        <div class="more-info" [class]="{'info-open': isOpenEntities}">
+          <ul class="list-container">
+            @for (entity of (failedEntities$ | ngrxPush); track entity) {
+              <li>
+                <div>{{entity.name}}</div>
+                <div class="error-reason">{{entity.message}}</div>
+              </li>
+            }
+          </ul>
         </div>
-        <div *ngIf="failedFiles.length > 1000">** Additional artifacts may be left **</div>
       </div>
-    </div>
-    <br><br>
-    <div class="buttons">
-      <button (click)="closeDialog(true)"
-              class="btn btn-neon" [disabled]="progressPercent < 100">CLOSE
-      </button>
-    </div>
-  </ng-template>
-
-</sm-dialog-template>
+      <div [class.visible]="failedFiles?.length > 0" class="files-list-container">
+        <div (click)="openToggle()" class="pointer">
+          <i class="more-info-icon fa fa-angle-right" [class]="{'info-open': isOpen}"></i>The following artifacts were not deleted:
+        </div>
+        <div class="more-info mono" [class]="{'info-open': isOpen}">
+          <sm-copy-clipboard label="" [clipboardText]="failedFiles.join('\n')"
+            class="copy ps-2 light"
+          ></sm-copy-clipboard>
+          <a></a>
+          @for (file of failedFiles | slice:0:1000; track file) {
+            <div>
+              <div>{{file}}</div>
+            </div>
+          }
+          @if (failedFiles.length > 1000) {
+            <div>** Additional artifacts may be left **</div>
+          }
+        </div>
+      </div>
+      <br><br>
+      <div class="buttons">
+        <button (click)="closeDialog(true)"
+          class="btn btn-neon" [disabled]="progressPercent < 100">CLOSE
+        </button>
+      </div>
+    }
+  </sm-dialog-template>

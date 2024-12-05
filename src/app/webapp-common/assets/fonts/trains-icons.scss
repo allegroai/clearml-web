@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?luezm6') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?h2mp1v') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,9 +23,41 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.al-ico-close-circle {
+  &:before {
+    content: $al-ico-close-circle;
+  }
+}
+.al-ico-bullhorn {
+  &:before {
+    content: $al-ico-bullhorn;
+  }
+}
+.al-ico-view-horizontal {
+  &:before {
+    content: $al-ico-view-horizontal;
+  }
+}
+
+.al-ico-model-endpoints {
+  &:before {
+    content: $al-ico-model-endpoints;
+  }
+}
+.al-ico-vm {
+  &:before {
+    content: $al-ico-vm;
+  }
+}
+.al-ico-retry {
+  &:before {
+    content: $al-ico-retry;
+  }
+}
 .al-ico-link-off {
   &:before {
-    content: $al-ico-link-off; 
+    content: $al-ico-link-off;
   }
 }
 .al-ico-policy {

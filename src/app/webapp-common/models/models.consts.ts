@@ -29,13 +29,6 @@ export const STATUS = {
   DRAFT    : 'Draft'
 };
 
-export const VIEWS = {
-  TREE : 'TREE',
-  TABLE: 'TABLE'
-};
-
-export const ASC = 1;
-export const DESC = -1;
 export const MODELS_TABLE_COLS: ISmCol[] = [
   {
     id              : MODELS_TABLE_COL_FIELDS.SELECTED,

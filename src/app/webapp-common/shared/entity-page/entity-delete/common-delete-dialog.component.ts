@@ -1,7 +1,6 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {htmlTextShort} from '../../utils/shared-utils';
 import {Task} from '~/business-logic/model/tasks/task';
 import {
   selectEntitiesFailedToDelete,
@@ -34,13 +33,13 @@ export interface DeleteData {
 })
 export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
 
-  private unsubscribe$: Subject<boolean> = new Subject();
+  private unsubscribe$ = new Subject<boolean>();
   public header: string;
   public filesNumber$: Observable<number>;
   public entityName: string;
   public failedFiles$: Observable<string[]>;
   public failedEntities$: Observable<{ id: string; name: string; message: string }[]>;
-  public inProgress: boolean = false;
+  public inProgress = false;
   public totalFilesNumber: number;
   public progressPercent: number;
   public noFilesToDelete: boolean;
@@ -49,12 +48,12 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
   public entityType: EntityTypeEnum;
   public numSelected: number;
   public bodyMessage: string;
-  public showFinishMessage: boolean = false;
+  public showFinishMessage = false;
   private readonly useCurrentEntity: boolean;
   private readonly entity: Task;
   public failedFiles: string[];
   private readonly includeChildren: boolean;
-  public deleteArtifacts: boolean = true;
+  public deleteArtifacts = true;
   public resetMode: boolean;
   public devWarning: boolean;
   public hideDeleteArtifacts: boolean;
@@ -75,8 +74,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.numSelected = data.numSelected;
     const name = DOMPurify.sanitize(data.entity?.name);
     this.entityName = data.numSelected === 1 ?
-      data.entityType === EntityTypeEnum.project ?
-        htmlTextShort(name.split('/').pop()) : htmlTextShort(name) :
+      data.entityType === EntityTypeEnum.project ? name.split('/').pop() : name :
       `${data.numSelected} ${data.entityType}s`;
     this.header = `${data.resetMode ? 'Reset' : 'Delete'} ${data.entityType}${data.numSelected > 1 ? 's' : ''}`;
     this.bodyMessage = this.getMessageByEntity(data.entityType, data.projectStats);

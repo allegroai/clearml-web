@@ -234,3 +234,14 @@ span {
   color: #8491c2;
   font-size: 20px;
 }
+
+
+.badge {
+  margin-left: 12px;
+  background-color: $purple;
+  color: white;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  text-transform: none;
+}

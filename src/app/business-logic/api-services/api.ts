@@ -1,3 +1,7 @@
 export * from './tasks.service';
-import { TasksService } from './tasks.service';
-export const APIS = [TasksService];
+
+export interface ApiOptions {
+  headers?: Record<string, string>;
+  adminQuery?: boolean;
+  userId?: string;
+}

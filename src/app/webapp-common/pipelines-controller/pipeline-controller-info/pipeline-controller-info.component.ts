@@ -1,13 +1,12 @@
 import {
   AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef,
-  Component,
+  Component, effect,
   ElementRef, HostListener, inject,
   NgZone,
   OnDestroy,
   OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
 import {fromEvent, Observable, Subscription} from 'rxjs';
@@ -18,7 +17,7 @@ import {selectRouterParams} from '../../core/reducers/router-reducer';
 import * as commonInfoActions from '../../experiments/actions/common-experiments-info.actions';
 import {
   getSelectedPipelineStep,
-  setSelectedPipelineStep
+  setSelectedPipelineStep, StepStatusEnum, TreeStep
 } from '../../experiments/actions/common-experiments-info.actions';
 import {selectPipelineSelectedStepWithFallback} from '../../experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
@@ -27,32 +26,6 @@ import {Ace, edit} from 'ace-builds';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
-import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-
-export enum StepStatusEnum {
-  queued = 'queued',
-  pending = 'pending',
-  skipped = 'skipped',
-  cached = 'cached',
-  executed = 'executed',
-  running = 'running',
-  failed = 'failed',
-  aborted = 'aborted',
-  completed = 'completed'
-}
-
-export interface TreeStep {
-  base_task_id: string,
-  queue: string,
-  parents: string[],
-  executed: string;
-  status: StepStatusEnum;
-  job_type: TaskTypeEnum;
-  job_started: number;
-  job_ended: number;
-  job_code_section: string;
-  job_id: string;
-}
 
 export interface PipelineItem extends DagModelItem {
   name: string;
@@ -65,8 +38,8 @@ export interface Arrow {
   path2?: string;
   headTransform: string;
   selected: boolean;
-  targetId: number;
-  sourceId: number;
+  targetId: string;
+  sourceId: string;
   outgoing?: boolean;
 }
 
@@ -87,11 +60,9 @@ export enum StatusOption {
 })
 
 export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChildren('taskEl', {read: ElementRef}) tasksElements!: QueryList<ElementRef>;
-  @ViewChild('start', {read: ElementRef}) startingElement: ElementRef;
-  @ViewChild('end', {read: ElementRef}) endingElement: ElementRef;
-  @ViewChild('diagramContainer') diagramContainer: ElementRef<HTMLDivElement>;
-  @ViewChildren('aceEditor') private aceEditorElements: QueryList<ElementRef>;
+  tasksElements = viewChildren('taskEl', {read: ElementRef});
+  diagramContainer = viewChild<ElementRef<HTMLDivElement>>('diagramContainer');
+  private aceEditorElement = viewChild<ElementRef<HTMLDivElement>>('aceEditor');
   private aceEditor: Ace.Editor;
   private sub = new Subscription();
   private dragging: boolean;
@@ -113,8 +84,6 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   detailsPanelMode = StatusOption.log;
   defaultDetailsMode = StatusOption.log;
 
-  trackArrows = (index: number, arrow: Arrow) => arrow.path;
-  trackByStepId = (index: number, step) => step.stepId;
   public maximizeResults: boolean;
   protected _dagManager: DagManagerUnsortedService<PipelineItem>;
   protected store: Store;
@@ -155,6 +124,13 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
     this.projectId$ = this.store.select(selectRouterParams)
       .pipe(map(params => params?.projectId));
+
+
+    effect(() => {
+      if(this.aceEditorElement()) {
+        this.initAceEditor();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -166,7 +142,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
           this.detailsPanelMode = this.getPanelMode();
         }
         this.infoData = task;
-        const width = this.diagramContainer?.nativeElement.getBoundingClientRect().width;
+        const width = this.diagramContainer()?.nativeElement.getBoundingClientRect().width;
         this.chartWidth = Math.max(Number.isNaN(width) ? 0 : width, 4000);
         this.dagModel$ = this._dagManager.dagModel$
           .pipe(filter(model => model?.length > 0), tap(model =>
@@ -177,7 +153,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
         window.setTimeout(() => {
           if (!this.skipAutoCenter) {
-            const element = this.diagramContainer.nativeElement;
+            const element = this.diagramContainer().nativeElement;
             element.scroll({left: (element.scrollWidth - element.getBoundingClientRect().width) / 2});
           }
           this.removeLines();
@@ -238,29 +214,21 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       parentIds: [0].concat(pipelineObj[key].parents.map(parent => sortedNodes.indexOf(parent) + 1)),
       name: key,
       branchPath: 1,
-      data: {
-        ...pipelineObj[key],
-        ...(
-          this.infoData.status === TaskStatusEnum.Stopped &&
-          [TaskStatusEnum.Queued, TaskStatusEnum.InProgress, 'running'].includes(pipelineObj[key].status) &&
-          {status: 'aborted'}
-        )
-      }
+      data: pipelineObj[key],
     } as PipelineItem));
   }
 
   ngAfterViewInit(): void {
-    this.sub.add(this.aceEditorElements.changes.subscribe(() => this.initAceEditor()));
 
-    fromEvent(this.diagramContainer.nativeElement, 'wheel')
+    fromEvent(this.diagramContainer().nativeElement, 'wheel')
       .pipe(throttleTime(1000))
       .subscribe(() => {
       this.skipAutoCenter = true;
     });
 
-    const mousedown$ = fromEvent(this.diagramContainer.nativeElement, 'mousedown');
+    const mousedown$ = fromEvent(this.diagramContainer().nativeElement, 'mousedown');
     const mouseup$ = fromEvent(document, 'mouseup');
-    const mousemove$ = fromEvent(this.diagramContainer.nativeElement, 'mousemove');
+    const mousemove$ = fromEvent(this.diagramContainer().nativeElement, 'mousemove');
 
     this.sub.add(mousedown$
       .pipe(
@@ -280,9 +248,9 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         ))
       )
       .subscribe(({x, y}: { x: number; y: number }) => {
-        this.diagramContainer.nativeElement.scrollTo({
-          top: this.diagramContainer.nativeElement.scrollTop - y,
-          left: this.diagramContainer.nativeElement.scrollLeft - x,
+        this.diagramContainer().nativeElement.scrollTo({
+          top: this.diagramContainer().nativeElement.scrollTop - y,
+          left: this.diagramContainer().nativeElement.scrollLeft - x,
         });
       })
     );
@@ -295,14 +263,14 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   drawLines() {
     const pipeLineItems = this._dagManager.getSingleDimensionalArrayFromModel();
     this.arrows = [];
-    this.diagramRect = this.diagramContainer.nativeElement.getBoundingClientRect();
+    this.diagramRect = this.diagramContainer().nativeElement.getBoundingClientRect();
     pipeLineItems.forEach((pipeLineItem) => {
       pipeLineItem.parentIds.forEach((parentId: number) => {
         if (parentId > 0) {
-          const parent: ElementRef<HTMLDivElement> = this.tasksElements.find(
-            (b: ElementRef) => parentId === +b.nativeElement.children[0].id
+          const parent: ElementRef<HTMLDivElement> = this.tasksElements().find((b: ElementRef) =>
+            parentId === +b.nativeElement.children[0].id
           );
-          const self: ElementRef<HTMLDivElement> = this.tasksElements.find(
+          const self: ElementRef<HTMLDivElement> = this.tasksElements().find(
             (b: ElementRef) => +b.nativeElement.children[0].id === pipeLineItem.stepId
           );
           if (parent?.nativeElement && self?.nativeElement) {
@@ -318,8 +286,8 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
               headTransform: `translate(${ex},${ey}) rotate(${ae})`,
               selected: false,
               outgoing: false,
-              sourceId: parentId,
-              targetId: pipeLineItem.stepId,
+              sourceId: `${parentId}`,
+              targetId: `${pipeLineItem.stepId}`,
             });
           }
         }
@@ -339,7 +307,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       try {
         this.stepDiff = JSON.parse(this.infoData.configuration[step.data?.job_code_section || step.id]?.value)?.script?.diff;
         this.aceEditor?.getSession().setValue(this.stepDiff);
-      } catch (e) {
+      } catch {
         this.stepDiff = null;
         if (this.defaultDetailsMode === StatusOption.code) {
           this.detailsPanelMode = this.defaultDetailsMode;
@@ -376,13 +344,13 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   }
 
   private initAceEditor() {
-    const aceEditorElement = this.aceEditorElements.first;
+    const aceEditorElement = this.aceEditorElement()?.nativeElement;
     if (!aceEditorElement) {
       this.aceEditor = null;
       return;
     }
     this.zone.runOutsideAngular(() => {
-      const aceEditor = edit(aceEditorElement.nativeElement) as Ace.Editor;
+      const aceEditor = edit(aceEditorElement) as Ace.Editor;
       this.aceEditor = aceEditor;
       aceEditor.setOptions({
         readOnly: true,
@@ -422,8 +390,8 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
   protected highlightArrows() {
     this.arrows = this.arrows?.map(arrow => {
-      const isTarget = arrow.targetId === this.selectedEntity?.stepId;
-      const isSource = arrow.sourceId === this.selectedEntity?.stepId;
+      const isTarget = arrow.targetId === `${this.selectedEntity?.stepId}`;
+      const isSource = arrow.sourceId === `${this.selectedEntity?.stepId}`;
       return {...arrow, selected: isTarget || isSource, outgoing: isSource};
     }).sort((a, b) => (a.selected === b.selected) ? 0 : a.selected ? 1 : -1);
   }

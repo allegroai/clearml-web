@@ -18,23 +18,30 @@ import {
   selectSignedUrls
 } from '@common/core/reducers/common-auth-reducer';
 import {EMPTY, forkJoin, of} from 'rxjs';
-import {S3AccessDialogData, S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
+import {
+  S3AccessDialogData,
+  S3AccessDialogResult,
+  S3AccessResolverComponent
+} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
 import {isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
 import {isFileserverUrl} from '~/shared/utils/url';
 import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {concatLatestFrom} from '@ngrx/operators';
+import {selectExtraCredentials} from '~/core/reducers/auth.reducers';
+import {ErrorService} from '@common/shared/services/error.service';
 
 @Injectable()
 export class CommonAuthEffects {
   private signAfterPopup: Action[] = [];
-  private openPopup: { [bucketName: string]: boolean } = {};
+  private openPopup: Record<string, boolean> = {};
 
   constructor(
     private actions: Actions,
     private credentialsApi: ApiAuthService,
     private store: Store,
     private adminService: AdminService,
+    private errorService: ErrorService,
     private matDialog: MatDialog
   ) {
   }
@@ -60,7 +67,7 @@ export class CommonAuthEffects {
   revokeCredential = createEffect(() => this.actions.pipe(
     ofType(authActions.credentialRevoked),
     concatLatestFrom(() => [
-      this.store.select(selectRouterQueryParams).pipe(map(params => params.userId)),
+      this.store.select(selectRouterQueryParams).pipe(map(params => params.userId))
     ]),
     mergeMap(([action, userId]) => this.credentialsApi.authRevokeCredentials(
       {access_key: action.accessKey}, {userId}).pipe(
@@ -79,18 +86,18 @@ export class CommonAuthEffects {
   createCredential = createEffect(() => this.actions.pipe(
     ofType(authActions.createCredential),
     concatLatestFrom(() => [
-      this.store.select(selectRouterQueryParams).pipe(map(params => params.userId)),
+      this.store.select(selectRouterQueryParams).pipe(map(params => params.userId))
     ]),
     mergeMap(([action, userId]) =>
-      this.credentialsApi.authCreateCredentials({label: action.label},
-        {userId}).pipe(
+      this.credentialsApi.authCreateCredentials({label: action.label}, {userId}).pipe(
         mergeMap(({credentials}) => [
           authActions.addCredential({newCredential: credentials, workspaceId: action.workspace?.id}),
+          ...(action.openCredentialsPopup && [authActions.createCredentialPopup({...action})] || []),
           deactivateLoader(action.type)
         ]),
         catchError(error => [
           requestFailed(error),
-          setServerError(error, null, 'Unable to create credentials'),
+          setServerError(error, null, this.errorService.getErrorMsg(error?.error)),
           authActions.addCredential({newCredential: {}, workspaceId: action.workspace?.id}),
           deactivateLoader(action.type)])
       ))
@@ -99,7 +106,7 @@ export class CommonAuthEffects {
   updateCredentialLabel = createEffect(() => this.actions.pipe(
     ofType(authActions.updateCredentialLabel),
     concatLatestFrom(() => this.store.select(selectRouterQueryParams).pipe(map(params => params.userId))),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     mergeMap(([action, userId]) =>
       this.credentialsApi.authEditCredentials({access_key: action.credential.access_key, label: action.label},
         {userId}).pipe(
@@ -124,6 +131,12 @@ export class CommonAuthEffects {
 
   signUrl = createEffect(() => this.actions.pipe(
     ofType(authActions.getSignedUrl),
+    switchMap(action => this.store.select(selectExtraCredentials)
+      .pipe(
+        filter(c => c !== null),
+        map(() => action)
+      )
+    ),
     filter(action => !!action.url),
     mergeMap(action =>
       of(action).pipe(
@@ -158,11 +171,25 @@ export class CommonAuthEffects {
     return this.actions.pipe(
       ofType(authActions.signUrls),
       filter(action => action.sign.length > 0),
-      concatLatestFrom(() => this.store.select(selectSignedUrls)),
+      switchMap(action => this.store.select(selectExtraCredentials)
+        .pipe(
+          filter(c => c !== null),
+          map(() => action)
+        )
+      ),
+      concatLatestFrom(() => [
+        this.store.select(selectSignedUrls)
+      ]),
       mergeMap(([action, prevSigns]) =>
         forkJoin(action.sign.map(req =>
           of(action).pipe(
-            switchMap(() => this.adminService.signUrlIfNeeded(req.url, req.config, prevSigns[req.url])),
+            concatLatestFrom(() =>
+              this.store.select(selectSignedUrl(req.url))
+            ),
+            switchMap(([, signedUrl]) => (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime() ||
+                (isFileserverUrl(req.url) && req.config?.disableCache) ||
+                (req.config?.error && isGoogleCloudUrl(req.url) && !signedUrl.signed.includes('X-Amz-Signature'))
+              ) ? this.adminService.signUrlIfNeeded(req.url, req.config, prevSigns[req.url]) : of({type: 'none'})),
             map(res => ({res, orgUrl: req.url}))
           )
         )).pipe(
@@ -189,8 +216,10 @@ export class CommonAuthEffects {
                   })];
                 }
                 case 'sign':
-                  return setSignedUrls({signed: groups['sign'].map((res: {res: SignResponse, orgUrl: string}) =>
-                      ({url: res.orgUrl, signed: res.res.signed, expires: res.res.expires}))});
+                  return setSignedUrls({
+                    signed: groups['sign'].map((res: { res: SignResponse, orgUrl: string }) =>
+                      ({url: res.orgUrl, signed: res.res.signed, expires: res.res.expires}))
+                  });
                 default:
                   return null;
               }
@@ -199,8 +228,8 @@ export class CommonAuthEffects {
               .flat();
           })
         )
-      ),
-    )
+      )
+    );
   });
 
   s3popup = createEffect(() => this.actions.pipe(
@@ -215,23 +244,26 @@ export class CommonAuthEffects {
       if (action?.credentials?.Bucket) {
         this.openPopup[action.credentials.Bucket] = true;
       }
-      return this.matDialog.open(S3AccessResolverComponent, {data: action as S3AccessDialogData, maxWidth: 700}).afterClosed().pipe(
-        concatLatestFrom(() => this.store.select(selectS3BucketCredentialsBucketCredentials)),
-        switchMap(([data, bucketCredentials]) => {
-          const actions = [...this.signAfterPopup];
-          this.signAfterPopup = [];
-          if (data) {
-            if (!data.success) {
-              const emptyCredentials = bucketCredentials.find((cred => cred?.Bucket === data.bucket)) === undefined;
-              const dontAskAgainForBucketName = emptyCredentials ? '' : data.bucket + data.endpoint;
-              return [authActions.cancelS3Credentials({dontAskAgainForBucketName})];
+      return this.matDialog.open<S3AccessResolverComponent, S3AccessDialogData, S3AccessDialogResult>(
+        S3AccessResolverComponent, {data: action, maxWidth: 700}
+      ).afterClosed()
+        .pipe(
+          concatLatestFrom(() => this.store.select(selectS3BucketCredentialsBucketCredentials)),
+          switchMap(([data, bucketCredentials]) => {
+            const actions = [...this.signAfterPopup];
+            this.signAfterPopup = [];
+            if (data) {
+              if (!data.success) {
+                const emptyCredentials = bucketCredentials.find((cred => cred?.Bucket === data.Bucket)) === undefined;
+                const dontAskAgainForBucketName = emptyCredentials ? '' : data.Bucket + data.Endpoint;
+                return [authActions.cancelS3Credentials({dontAskAgainForBucketName})];
+              }
+              return [authActions.saveS3Credentials({newCredential: data}), ...actions];
             }
-            return [authActions.saveS3Credentials({newCredential: data}), ...actions];
-          }
-          return actions;
-        }),
-        finalize(() => action?.credentials?.Bucket && delete this.openPopup[action.credentials.Bucket])
-      );
+            return actions;
+          }),
+          finalize(() => action?.credentials?.Bucket && delete this.openPopup[action.credentials.Bucket])
+        );
     })
   ));
 }
