@@ -1,11 +1,6 @@
-@import "variables";
-
 :host {
   .label {
     font-size: 12px;
-  }
-  .disabled {
-      color: $blue-250 !important;
   }
   .input-border-duration-container {
     position: relative;
@@ -13,7 +8,7 @@
       width: calc(100% - 15px);
 
       &:invalid {
-        background-color: $error-color;
+        background-color: var(--color-error);
       }
     }
 

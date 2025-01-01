@@ -12,60 +12,29 @@ export const TIME_FORMAT_STRING = 'MMM d yyyy H:mm';
 
 export const ICONS = {
   ALERT: 'al-ico-alert',
-  CREATED: 'fa-plus',
-  MINUS: 'fa-minus',
   CHART: 'al-ico-info-max',
   QUEUED: 'al-ico-manage-queue',
   RETRY: 'al-ico-retry',
   ENQUEUE: 'al-ico-enqueue',
   DEQUEUE: 'al-ico-dequeue',
-  IN_PROGRESS: 'fa-hourglass-half',
   STOPPED: 'al-ico-abort',
   STOPPED_ALL: 'al-ico-abort-all',
-  RESUME: 'fa-hourglass-half',
-  CLOSED: 'fa-circle-o',
-  FAILED: 'fa-times',
-  FALSE: 'fa-times',
+  FAILED: 'al-ico-dialog-x',
+  FALSE: 'al-ico-dialog-x',
   PUBLISHED: 'al-ico-publish',
-  PUBLISHING: 'fa-spinner',
-  TRUE: 'fa-check',
-  ANNOTATION: 'fa-puzzle-piece',
-  DATASET: 'fa-puzzle-piece',
-  TASK: 'fa-briefcase',
-  MODEL: 'fa-cube',
   SHOW: 'al-ico-show',
   ARCHIVE: 'al-ico-archive',
   RESTORE: 'al-ico-restore',
   COMPARE: 'al-ico-compare',
   HIDE: 'al-ico-hide',
-  COMPLETED: 'fa-circle',
-  ABORTED: 'fa-circle',
-  UNKNOWN: 'fa-question-circle',
-  TESTING: 'fa-balance-scale',
-  IMPORT: 'fa-download',
-  TRAINING: 'fa-cube',
-  ANNOTATION_MANUAL: 'fa-edit',
-  ADMIN: 'fa-cogs',
-  DATASET_IMPORT: 'fa-download',
-  WARNING: 'fa-exclamation-triangle',
-  OUTPUT: 'fa-folder-open',
-  EXECUTION: 'fa-terminal',
   LIST: 'al-ico-list-view',
   REMOVE: 'al-ico-trash',
   MOVE_TO: 'al-ico-move-to',
   PLUGIN: 'al-ico-plugin',
   ADD: 'fa-plus',
-  TREE: 'fa-code-branch',
   TABLE: 'al-ico-table-view',
   DETAILS: 'al-ico-experiment-view',
-  SELECTED: 'fa-check-square-o',
-  PROJECT: 'fa-list-alt',
-  FOCUS: 'fa-crosshairs',
-  LOG: 'fa-file-text-o',
-  METRICS: 'fa-chart-area',
-  TOKEN: 'fa-key',
   EDIT: 'al-ico-edit',
-  EDITABLE: 'fa-pencil',
   RESET: 'al-ico-reset',
   CLONE: 'al-ico-clone',
   EXTEND: 'al-ico-extend',
@@ -82,7 +51,6 @@ export const ICONS = {
 };
 
 export type IconNames = keyof typeof ICONS;
-export type ObjectKeysRecord<T extends object> = { [P in keyof T]: P };
 export type IconsValues = typeof ICONS[keyof typeof ICONS];
 
 export const PALLET = {
@@ -131,15 +99,7 @@ export const timeFrameOptions: IOption[] = [
   {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}
 ];
 
-export interface ReportsApiMultiplotsResponse {
-  [metric: string]: {
-    [variant: string]: {
-      [expId: string]: {
-        [iteration: string]: {
+export type ReportsApiMultiplotsResponse = Record<string, Record<string, Record<string, Record<string, {
           name: string;
-          plots: Array<MetricsPlotEvent>;
-        };
-      };
-    };
-  };
-}
+          plots: MetricsPlotEvent[];
+        }>>>>;

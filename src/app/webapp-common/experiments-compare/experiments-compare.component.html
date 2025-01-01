@@ -21,13 +21,16 @@
             </span>
             <sm-tag-list [tags]="exp.tags"></sm-tag-list>
             @if ((globalLegendData$ | ngrxPush)?.length > 1) {
-              <i class="al-icon al-ico-dialog-x sm remove-experiment" (click)="removeExperiment(exp)" data-id="removeExperimentButton"></i>
+              <button mat-icon-button class="small-button" (click)="removeExperiment(exp)" data-id="removeExperimentButton">
+                <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" class="sm"></mat-icon>
+              </button>
             }
           </div>
         }
-        <!--        <button class="btn btn-secondary legend-add" (click)="openAddExperimentSearch()"><i class="al-icon al-ico-plus" data-id="addExperimentToCompareButton"></i></button>-->
       </div>
-      <i class="al-icon al-ico-dialog-x close-legend" (click)="closeLegend()" data-id="closeLegend"></i>
+      <button mat-icon-button (click)="closeLegend()" data-id="closeLegend">
+        <mat-icon class="al-ico-dialog-x"></mat-icon>
+      </button>
     </div>
 
     <router-outlet></router-outlet>

@@ -3,7 +3,7 @@ import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {GetParamMetricValuePipe} from '@common/experiments/shared/components/hyper-param-metric-column/get-param-metric-value.pipe';
 import {GetVariantWithoutRoundPipe} from '@common/experiments/shared/components/hyper-param-metric-column/get-variant-without-round.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'sm-hyper-param-metric-column',
@@ -13,14 +13,13 @@ import {NgIf} from '@angular/common';
   imports: [
     GetParamMetricValuePipe,
     GetVariantWithoutRoundPipe,
-    TooltipDirective,
-    NgIf
-  ],
+    TooltipDirective
+],
   standalone: true
 })
 export class HyperParamMetricColumnComponent {
 
-  @Input() roundedMetricValue: { [expId: string]: boolean } = {};
+  @Input() roundedMetricValue: Record<string, boolean> = {};
   @Input() col: any;
   @Input() experiment: any;
   @Output() expandClicked = new EventEmitter<{ columnId: string; width: number }>();

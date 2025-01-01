@@ -19,7 +19,6 @@ export class DebugImagesViewComponent {
   @Input() isMergeIterations;
   @Input() title;
   @Input() iterations: Iteration[];
-  @Input() isDarkTheme = false;
   @Input() isDatasetVersionPreview = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();

@@ -3,7 +3,7 @@ import {
   Component,
   computed,
   OnDestroy,
-  OnInit,
+  OnInit, signal,
   viewChild,
 } from '@angular/core';
 import {
@@ -26,35 +26,31 @@ import {
   selectSelectedExperimentsDisableAvailable,
   selectSelectedTableExperiment,
   selectShowAllSelectedIsActive,
-  selectShowCompareScalarSettings,
-  selectSplitSize, selectTableCompareView,
+  selectShowCompareScalarSettings, selectSplitSize,
+  selectTableCompareView,
   selectTableFilters,
   selectTableMode,
   selectTableRefreshList,
   selectTableSortFields
 } from './reducers';
-import {selectCompanyTags, selectIsArchivedMode, selectIsDeepMode, selectProjectSystemTags, selectSelectedProjectId, selectTagsFilterByProject} from '../core/reducers/projects.reducer';
+import {selectCompanyTags, selectIsArchivedMode, selectIsDeepMode, selectProjectSystemTags, selectRouterProjectId, selectSelectedProjectId, selectTagsFilterByProject} from '../core/reducers/projects.reducer';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map, skip, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {combineLatest, Observable} from 'rxjs';
-import {selectAppVisible, selectBackdropActive} from '../core/reducers/view.reducer';
+import {selectBackdropActive} from '../core/reducers/view.reducer';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
-import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
+import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
 import {selectIsSharedAndNotOwner, selectMetricsLoading, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as experimentsActions from './actions/common-experiments-view.actions';
-import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
 import {createCompareMetricColumn, createMetricColumn, decodeColumns, decodeFilter, decodeOrder, decodeURIComponentSafe} from '../shared/utils/tableParamEncode';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
 import {groupHyperParams} from '../shared/utils/shared-utils';
-import {selectCurrentUser} from '../core/reducers/users-reducer';
-import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -87,6 +83,8 @@ import {
   CreateExperimentDialogComponent
 } from '@common/experiments/containers/create-experiment-dialog/create-experiment-dialog.component';
 import {RetryFooterItem} from '@common/shared/entity-page/footer-items/retry-footer-item';
+import {computedPrevious} from 'ngxtension/computed-previous';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -100,59 +98,85 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   public tableCols = INITIAL_EXPERIMENT_TABLE_COLS;
 
   public entityTypeEnum = EntityTypeEnum;
-  public experiments$: Observable<ITableExperiment[]>;
-  public selectedExperimentsHasUpdate$: Observable<boolean>;
-  public noMoreExperiments$: Observable<boolean>;
-  public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
-  public selectedExperiments$: Observable<ITableExperiment[]>;
-  public isArchived$: Observable<boolean>;
-  public tableFilters$: Observable<Record<string, FilterMetadata>>;
-  public filteredTableCols$: Observable<ISmCol[]>;
-  public tableCols$: Observable<ISmCol[]>;
-  public metricVariants$: Observable<MetricVariantResult[]>;
-  public compareSelectedMetricsPlots$: Observable<ISmCol[]>;
-  public compareSelectedMetricsScalars$: Observable<ISmCol[]>;
-  public hyperParams$: Observable<any[]>;
-  public hyperParamsOptions$: Observable<Record<ISmCol['id'], string[]>>;
-  public selectedTableExperiment$ = this.store.select(selectSelectedTableExperiment);
-  public selectedExperimentsDisableAvailable$: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
-  public backdropActive$: Observable<boolean>;
-  public metricLoading$: Observable<boolean>;
-  public tableColsOrder$: Observable<string[]>;
-  public parents$: Observable<ProjectsGetTaskParentsResponseParents[]>;
-  public activeParentsFilter$: Observable<ProjectsGetTaskParentsResponseParents[]>;
-  public tags$: Observable<string[]>;
-  public companyTags$: Observable<string[]>;
-  public tagsFilterByProject$: Observable<boolean>;
-  public systemTags$: Observable<string[]>;
-  public types$: Observable<string[]>;
-  public currentUser$: Observable<GetCurrentUserResponseUserObject>;
-  public selectedExperiment$: Observable<IExperimentInfo>;
-  public isSharedAndNotOwner$: Observable<boolean>;
   public readOnlySelection: boolean;
   public contextMenuActive: boolean;
-  public tableMode$: Observable<'table' | 'info' | 'compare'>;
-  public isPipeline$: Observable<boolean>;
   protected override entityType = EntityTypeEnum.experiment;
   public singleRowContext: boolean;
-  public selectedDisableAvailable;
   public firstExperiment: ITableExperiment;
   public menuBackdrop: boolean;
   protected setTableModeAction = experimentsActions.setTableMode;
-  protected inEditMode$: Observable<boolean>;
   private sortFields: SortMeta[];
-  protected isAppVisible$: Observable<boolean>;
-  private searchQuery$: Observable<SearchState['searchQuery']>;
   protected override parents: ProjectsGetTaskParentsResponseParents[];
+
+  protected override selectSplitSize$ = this.store.select(selectSplitSize);
+  protected override showAllSelectedIsActive$ = this.store.select(selectShowAllSelectedIsActive);
+  protected isPipeline$ = this.store.select(selectIsPipelines);
+  protected tableSortFields$ = this.store.select(selectTableSortFields).pipe(tap(field => this.sortFields = field));
+  protected backdropActive$ = this.store.select(selectBackdropActive);
+  protected noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
+  protected tableFilters$ = this.store.select(selectTableFilters);
+  protected isArchived$ = this.store.select(selectIsArchivedMode);
+  protected selectedExperimentsDisableAvailable$ = this.store.select(selectSelectedExperimentsDisableAvailable);
+  protected selectedExperimentsHasUpdate$ = this.store.select(selectTableRefreshList);
+  protected checkedExperiments$ = this.store.select(selectSelectedExperiments)
+    .pipe(tap((selectedExperiments: ITableExperiment[]) => {
+      this.checkedExperiments = selectedExperiments;
+      this.readOnlySelection = this.checkedExperiments.some(exp => isReadOnly(exp));
+    }));
+  protected searchQuery$ = this.store.select(selectSearchQuery);
+  protected inEditMode$ = this.store.select(selectIsExperimentInEditMode);
+  protected isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
+  protected parents$ = this.store.select(selectExperimentsParents).pipe(tap(parents => this.parents = parents));
+  protected activeParentsFilter$ = this.store.select(selectActiveParentsFilter);
+  protected types$ = this.store.select(selectExperimentsTypes);
+  protected tags$ = this.store.select(selectExperimentsTags);
+  protected tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+  protected companyTags$ = this.store.select(selectCompanyTags);
+  protected systemTags$ = this.store.select(selectProjectSystemTags);
+  protected tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
+  protected metricVariants$ = this.store.select(selectMetricVariants);
+  protected metricLoading$ = this.store.select(selectMetricsLoading);
+  protected hyperParamsOptions$ = this.store.select(selectHyperParamsOptions);
+  protected hyperParams$ = this.store.select(selectHyperParamsVariants).pipe(
+    map(hyperParams => groupHyperParams(hyperParams.filter(hp => hp.section !== 'properties' || hp.name !== 'version')))
+  );
+  protected experiments$ = this.store.select(selectExperimentsList)
+    .pipe(
+      filter(experiments => experiments !== null),
+      withLatestFrom(this.isArchived$),
+      // lil hack for hiding archived task after they have been archived from task info or footer...
+      map(([experiments, showArchived]) => filterArchivedExperiments(experiments, showArchived)));
+
+  protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
+
+
+  protected tableCols$ = this.filteredTableCols$.pipe(
+    distinctUntilChanged((a, b) => isEqual(a, b)),
+    map(cols => cols.filter(col => !col.hidden))
+  );
+  protected tableMode = this.store.selectSignal(selectTableMode);
+    // .pipe(tap(tableMode => this.tableMode = tableMode));
+  protected showCompareScalarSettings$ = this.store.select(selectShowCompareScalarSettings);
+  protected compareSelectedMetricsScalars$ = this.store.select(selectCompareSelectedMetrics('scalars'));
+  protected compareSelectedMetricsPlots$ = this.store.select(selectCompareSelectedMetrics('plots'));
+  protected selectedExperiment$ = this.store.select(selectSelectedExperiment);
+  protected selectedTableExperiment = toSignal(this.store.select(selectSelectedTableExperiment)
+    .pipe(distinctUntilChanged((a, b) => a?.id === b?.id)));
+  private previousTableExperiment = computedPrevious(this.selectedTableExperiment);
+  protected selectionState = computed(() => ({
+    prevExperiment: this.previousTableExperiment(),
+    highlited: signal( this.selectedTableExperiment() ?? this.previousTableExperiment())
+  }));
+  protected highlited = computed(() => this.tableMode() === 'compare' ? null : this.selectionState().highlited());
+
 
   table = viewChild(ExperimentsTableComponent);
   contextMenuExtended = viewChild.required(ExperimentMenuExtendedComponent);
   public contextMenu = computed(() => this.contextMenuExtended().contextMenu());
 
-  public tableMode: 'table' | 'info' | 'compare';
+  // public tableMode: 'table' | 'info' | 'compare';
   private previousSelectedIds: string;
-  public showCompareScalarSettings$: Observable<boolean>;
   public metricsVariants$ = this.store.selectSignal(selectMetricVariantForView);
   public tableCompareView$ = this.store.selectSignal(selectTableCompareView);
 
@@ -161,59 +185,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     super();
     this.setSplitSizeAction = experimentsActions.setSplitSize;
     this.addTag = addTag;
-    this.selectSplitSize$ = this.store.select(selectSplitSize);
-    this.isPipeline$ = this.store.select(selectIsPipelines);
-    this.tableSortFields$ = this.store.select(selectTableSortFields).pipe(tap(field => this.sortFields = field));
-    this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
-    this.tableFilters$ = this.store.select(selectTableFilters);
-    this.isArchived$ = this.store.select(selectIsArchivedMode);
-    this.showAllSelectedIsActive$ = this.store.select(selectShowAllSelectedIsActive);
-    this.selectedExperimentsDisableAvailable$ = this.store.select(selectSelectedExperimentsDisableAvailable);
-    this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
-    this.selectedExperimentsHasUpdate$ = this.store.select(selectTableRefreshList);
-    this.selectedExperiments$ = this.store.select(selectSelectedExperiments)
-      .pipe(tap((selectedExperiments: ITableExperiment[]) => {
-        this.selectedExperiments = selectedExperiments;
-        this.readOnlySelection = this.selectedExperiments.some(exp => isReadOnly(exp));
-      }));
-    this.searchQuery$ = this.store.select(selectSearchQuery);
-    this.isAppVisible$ = this.store.select(selectAppVisible);
-    this.inEditMode$ = this.store.select(selectIsExperimentInEditMode);
-    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
-    this.parents$ = this.store.select(selectExperimentsParents).pipe(tap(parents => this.parents = parents));
-    this.activeParentsFilter$ = this.store.select(selectActiveParentsFilter);
-    this.types$ = this.store.select(selectExperimentsTypes);
-    this.tags$ = this.store.select(selectExperimentsTags);
-    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-    this.companyTags$ = this.store.select(selectCompanyTags);
-    this.systemTags$ = this.store.select(selectProjectSystemTags);
-    this.currentUser$ = this.store.select(selectCurrentUser);
-    this.tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
-    this.metricVariants$ = this.store.select(selectMetricVariants);
-    this.metricLoading$ = this.store.select(selectMetricsLoading);
-    this.hyperParamsOptions$ = this.store.select(selectHyperParamsOptions);
-    this.hyperParams$ = this.store.select(selectHyperParamsVariants).pipe(
-      map(hyperParams => groupHyperParams(hyperParams.filter(hp => hp.section !== 'properties' || hp.name !== 'version')))
-    );
-    this.experiments$ = this.store.select(selectExperimentsList)
-      .pipe(
-        filter(experiments => experiments !== null),
-        withLatestFrom(this.isArchived$),
-        // lil hack for hiding archived task after they have been archived from task info or footer...
-        map(([experiments, showArchived]) => filterArchivedExperiments(experiments, showArchived)));
-
-    this.filteredTableCols$ = this.store.select(selectFilteredTableCols);
-
-
-    this.tableCols$ = this.filteredTableCols$.pipe(
-      distinctUntilChanged((a, b) => isEqual(a, b)),
-      map(cols => cols.filter(col => !col.hidden))
-    );
-    this.tableMode$ = this.store.select(selectTableMode).pipe(tap(tableMode => this.tableMode = tableMode));
-    this.showCompareScalarSettings$ = this.store.select(selectShowCompareScalarSettings);
-    this.compareSelectedMetricsScalars$ = this.store.select(selectCompareSelectedMetrics('scalars'));
-    this.compareSelectedMetricsPlots$ = this.store.select(selectCompareSelectedMetrics('plots'));
     this.syncAppSearch();
   }
 
@@ -224,7 +195,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     this.sub.add(this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))).subscribe(() =>
       this.store.dispatch(resetAceCaretsPositions())));
     this.sub.add(combineLatest([
-        this.store.select(selectSelectedProjectId),
+        this.store.select(selectRouterProjectId),
         this.route.queryParams,
         this.store.select(selectCustomColumns)
       ])
@@ -246,7 +217,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
           } else {
             this.projectId = projectId;
             if (this.entityType === this.entityTypeEnum.experiment) {
-              this.setupContextMenu('experiments');
+              this.setupContextMenu('tasks');
             }
             if (params.columns) {
               const [cols, metrics, hyperParams, , allIds] = decodeColumns(params.columns, this.tableCols);
@@ -294,7 +265,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   createFooterItemsRunner = () => this.createFooterItems({
     entitiesType: this.entityType,
     showAllSelectedIsActive$: this.showAllSelectedIsActive$,
-    selected$: this.selectedExperiments$,
+    selected$: this.checkedExperiments$,
     tags$: this.tags$,
     data$: this.selectedExperimentsDisableAvailable$,
     companyTags$: this.companyTags$,
@@ -310,7 +281,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   getSelectedEntities() {
-    return this.selectedExperiments;
+    return this.checkedExperiments;
   }
 
   override createFooterItems(config: {
@@ -395,7 +366,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   onAddTag(tag: string, contextExperiment: ITableExperiment) {
     this.store.dispatch(addTag({
       tag,
-      experiments: this.singleRowContext ? [contextExperiment] : this.selectedExperiments.filter(_selected => !isReadOnly(_selected))
+      experiments: this.singleRowContext ? [contextExperiment] : this.checkedExperiments.filter(_selected => !isReadOnly(_selected))
     }));
     this.store.dispatch(experimentsActions.addProjectsTag({tag}));
   }
@@ -416,7 +387,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   syncAppSearch() {
-    this.store.dispatch(initSearch({payload: 'Search for experiments'}));
+    this.store.dispatch(initSearch({payload: 'Search for tasks'}));
 
     this.sub.add(this.searchQuery$.pipe(skip(1)).subscribe(query => {
       this.store.dispatch(experimentsActions.globalFilterChanged(query));
@@ -434,7 +405,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
             this.firstExperiment = experiments?.[0];
             this.entities = experiments;
             const experimentsIds = this.route.snapshot.firstChild?.params?.ids?.split(',').filter(id => !!id);
-            if (mode === 'compare' && experimentsIds?.length > 0 && this.selectedExperiments.length === 0 && !this.previousSelectedIds) {
+            if (this.getTableModeFromURL() === 'compare' && experimentsIds?.length > 0 && this.checkedExperiments.length === 0 && !this.previousSelectedIds) {
               this.store.dispatch(experimentsActions.getSelectedExperiments({ids: experimentsIds}));
             }
             this.previousSelectedIds = experimentsIds;
@@ -458,7 +429,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
           distinctUntilChanged()
         )
         .subscribe((selectedExperiment) => {
-            this.tableMode = this.getTableModeFromURL();
+            // this.tableMode = this.getTableModeFromURL();
+            this.store.dispatch(experimentsActions.setTableMode({mode: this.getTableModeFromURL()}));
             this.store.dispatch(experimentsActions.setSelectedExperiment({experiment: selectedExperiment}));
           }
         )
@@ -481,12 +453,16 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     }
   }
 
-  experimentSelectionChanged(event: { experiment: ITableExperiment; openInfo?: boolean }) {
-    if ((this.minimizedView || event.openInfo) && event.experiment) {
-       this.store.dispatch(experimentsActions.experimentSelectionChanged({
-        experiment: event.experiment,
-        project: this.selectedProjectId
-      }));
+  experimentSelectionChanged({experiment, openInfo, origin}: { experiment: ITableExperiment; openInfo?: boolean; origin: 'table' | 'row' }) {
+    if (experiment) {
+      if (this.minimizedView || openInfo) {
+        this.store.dispatch(experimentsActions.experimentSelectionChanged({
+          experiment: experiment,
+          project: this.selectedProjectId
+        }));
+      } else if (origin === 'row') {
+        this.selectionState().highlited.update(current => current?.id === experiment.id ? null : experiment);
+      }
     }
   }
 
@@ -507,8 +483,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   compareExperiments() {
     this.router.navigate(
       [
-        `compare-experiments`,
-        {ids: this.selectedExperiments.map(experiment => experiment.id).join(',')}
+        `compare-tasks`,
+        {ids: this.checkedExperiments.map(experiment => experiment.id).join(',')}
       ],
       {relativeTo: this.route.parent.parent});
   }
@@ -676,7 +652,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
 
   modeChanged(mode: 'info' | 'table' | 'compare') {
     if (this.getTableModeFromURL() === mode) {
-      if (this.tableMode !== mode) {
+      if (this.tableMode() !== mode) {
         this.store.dispatch(experimentsActions.setTableMode({mode}));
       }
       return false;
@@ -685,7 +661,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     setTimeout(() => this.createFooterItemsRunner(), 100);
     if (mode === 'info') {
       this.store.dispatch(experimentsActions.experimentSelectionChanged({
-        experiment: this.selectedExperiments?.[0] || this.firstExperiment,
+        experiment: this.selectionState().highlited() || this.checkedExperiments?.[0] || this.firstExperiment,
         project: this.selectedProjectId
       }));
       return Promise.resolve();
@@ -699,6 +675,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   newExperiment() {
     this.dialog.open(CreateExperimentDialogComponent, {
       width: '800px',
+      disableClose: true
     }).afterClosed()
       .pipe(filter(res => !!res))
       .subscribe(data => this.store.dispatch(experimentsActions.createExperiment({data})));
@@ -726,7 +703,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
           },
           ...(isDeep && selectedProject?.id !== '*' && {
             subFeatureBreadcrumb: {
-              name: 'All Experiments'
+              name: 'All Tasks'
             }
           }),
           projectsOptions: {
@@ -736,7 +713,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
             showSelectedProject: selectedProject?.id !== '*',
             ...(selectedProject && {
               selectedProjectBreadcrumb: {
-                name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename,
+                name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename,
                 url: `projects/${selectedProject?.id}/projects`
               }
             })

@@ -1,5 +1,5 @@
-import {Component, Input} from '@angular/core';
-import {NgIf} from '@angular/common';
+import {Component, input } from '@angular/core';
+
 import {CdkScrollable} from '@angular/cdk/overlay';
 
 @Component({
@@ -8,16 +8,15 @@ import {CdkScrollable} from '@angular/cdk/overlay';
   styleUrls: ['./wizard-dialog-step.component.scss'],
   standalone: true,
   imports: [
-    NgIf,
     CdkScrollable
-  ]
+]
 })
 export class WizardDialogStepComponent {
-  @Input() icon: string;
-  @Input() label: string;
-  @Input() subLabel: string;
-  @Input() stepNumber: number  = 0;
-  @Input() hideStep: boolean   = false;
-  @Input() showFooter: boolean = true;
-  @Input() enableIconAnimation = true;
+  icon = input<string>();
+  label = input<string>();
+  subLabel = input<string>();
+  stepNumber = input<number>(0);
+  hideStep = input<boolean>(false);
+  showFooter = input<boolean>(true);
+  enableIconAnimation = input(true);
 }

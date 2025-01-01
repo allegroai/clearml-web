@@ -1,49 +1,62 @@
 @if (S3Form) {
-  <form [formGroup]="S3Form">
-    @if (bucketCredentials.controls.length > 0) {
-      <div class="s3-row header">
-        <div>Bucket</div>
-        <div>Key</div>
-        <div>Secret / SAS</div>
-        <div>Token</div>
-        <div>AWS Region</div>
-        <div>Host (Endpoint)</div>
-      </div>
-    }
-    @for (bucket of bucketCredentials.controls; track bucket) {
-      <div class="s3-row" formArrayName="bucketCredentials">
-        <ng-container [formGroupName]="$index">
-          <input matInput class="form-control" formControlName="Bucket">
-          <input matInput class="form-control" formControlName="Key">
-          <input matInput class="form-control" formControlName="Secret">
-          <input matInput class="form-control" formControlName="Token">
-          <input matInput class="form-control" formControlName="Region" placeholder="us-east-2">
-          <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
-          <div class="d-flex justify-content-end">
-            @if (endpoint.value.startsWith('http://') && secured) {
-              <span class="alert-icon me-2" smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser">
+  <form [formGroup]="S3Form" class="form-container">
+      @if (bucketCredentials.controls.length > 0 || externalCredentials()?.length) {
+        <div class="s3-row header">
+          <div>Bucket</div>
+          <div>Key</div>
+          <div>Secret / SAS</div>
+          <div>Token</div>
+          <div>AWS Region</div>
+          <div>Host (Endpoint)</div>
+        </div>
+      }
+    <div class="credentials-container">
+      @for (bucket of externalCredentials(); track $index) {
+        <div class="s3-row">
+          <div class="value ellipsis">{{ bucket.Bucket }}</div>
+          <div class="value ellipsis">{{ bucket.Key }}</div>
+          <div class="value ellipsis">{{ bucket.Secret }}</div>
+          <div class="value ellipsis">{{ bucket.Token }}</div>
+          <div class="value ellipsis">{{ bucket.Region }}</div>
+          <div class="value ellipsis">{{ bucket.Endpoint }}</div>
+        </div>
+      }
+      @for (bucket of bucketCredentials.controls; track bucket?.value?.Bucket ? bucket.value.Bucket + bucket.value.Endpoint : $index) {
+        <div class="s3-row" formArrayName="bucketCredentials">
+          <ng-container [formGroupName]="$index">
+
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input matInput class="form-control" formControlName="Bucket"></mat-form-field>
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input matInput class="form-control" formControlName="Key"></mat-form-field>
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input matInput class="form-control" formControlName="Secret"></mat-form-field>
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input matInput class="form-control" formControlName="Token"></mat-form-field>
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input matInput class="form-control" formControlName="Region" placeholder="us-east-2"></mat-form-field>
+            <mat-form-field appearance="outline" class="no-bottom">
+              <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
+            </mat-form-field>
+            <div class="d-flex justify-content-end">
+              @if (endpoint.value.startsWith('http://') && secured) {
+                <span class="alert-icon me-2" smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser">
                 <i class="al-icon sm-md al-ico-alert"></i>
               </span>
-            }
-            <i class="al-icon sm-md pointer" [class]="ICONS.REMOVE" (click)="removeBucket($index)" smTooltip="Remove"></i>
-          </div>
-        </ng-container>
-      </div>
-    }
-    @for (bucket of externalCredentials(); track $index) {
-      <div class="s3-row">
-        <div class="value">{{bucket.Bucket}}</div>
-        <div class="value">{{bucket.Key}}</div>
-        <div class="value">{{bucket.Secret}}</div>
-        <div class="value">{{bucket.Token}}</div>
-        <div class="value">{{bucket.Region}}</div>
-        <div class="value">{{bucket.Endpoint}}</div>
-      </div>
-    }
+              }
+              <button mat-icon-button smTooltip="Remove" matTooltipShowDelay="500">
+                <mat-icon fontSet="al" [fontIcon]="ICONS.REMOVE" (click)="removeBucket($index)"></mat-icon>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      }
+    </div>
     <div>
-      <a href="" class="add-button" (click)="$event.preventDefault(); addBucket({})" type="button">
-        <i class="al-icon sm al-ico-plus me-1 vertical-middle"></i>Add access keys
-      </a>
+      <button mat-button (click)="addBucket({})">
+        <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+        Add access keys
+      </button>
     </div>
   </form>
 }

@@ -4,12 +4,11 @@
       <div class="title">Workers Utilization</div>
     }
     @if (activeWorker()) {
-      <mat-form-field appearance="outline" class="dark-outline thin param-selector no-bottom">
+      <mat-form-field appearance="outline" class="param-selector no-bottom">
         <mat-select
           [ngModel]="currentParam()"
           (ngModelChange)="chartParamChange($event)"
           name="chart-param"
-          panelClass="dark-outline"
           >
           @for (chartParam of chartParamOptions; track chartParam.label) {
             <mat-option [value]="chartParam.value">
@@ -20,14 +19,11 @@
       </mat-form-field>
     }
     @if (statsError()) {
-      <i
-        class="warnning fas fa-exclamation-triangle"
-        smTooltip="Data temporarily not available">
-      </i>
+      <mat-icon fontSet="al" fontIcon="al-ico-alert-outline" class="warning" smTooltip="Data temporarily not available"></mat-icon>
     }
   </div>
-  <mat-form-field appearance="outline" class="dark-outline thin time-selector no-bottom">
-    <mat-select [ngModel]="currentTimeFrame()" (ngModelChange)="timeFrameChange($event)" name="time-frame" panelClass="dark-outline">
+  <mat-form-field appearance="outline" class="time-selector no-bottom">
+    <mat-select [ngModel]="currentTimeFrame()" (ngModelChange)="timeFrameChange($event)" name="time-frame">
       @for (timeFrame of timeFrameOptions; track timeFrame.label) {
         <mat-option [value]="timeFrame.value">
           {{timeFrame.label}}

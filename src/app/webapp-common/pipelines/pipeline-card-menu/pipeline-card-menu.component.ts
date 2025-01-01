@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output } from '@angular/core';
 import { ICONS } from '@common/constants';
 import {Project} from '~/business-logic/model/projects/project';
 
@@ -10,10 +10,10 @@ import {Project} from '~/business-logic/model/projects/project';
 export class PipelineCardMenuComponent {
   readonly icons = ICONS;
 
-  @Input() project: Project;
-  @Input() allTags: string[];
-  @Output() run = new EventEmitter();
-  @Output() addTag = new EventEmitter<string>();
-  @Output() rename = new EventEmitter();
-  @Output() delete = new EventEmitter();
+  project = input<Project>();
+  allTags = input<string[]>();
+  run = output();
+  addTag = output<string>();
+  rename = output();
+  delete = output();
 }

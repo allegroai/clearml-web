@@ -1,65 +1,68 @@
-<sm-overlay [backdropActive]="backdropActive"></sm-overlay>
+<sm-overlay [backdropActive]="backdropActive()"></sm-overlay>
 <div class="d-flex">
   <div class="middle-col">
     <div class="d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center model-name-cont">
-        <div class="p-2 icon i-model model-icon l-40"></div>
+        <mat-icon fontSet="al" fontIcon="al-ico-model" class="lg me-3"></mat-icon>
         <sm-inline-edit
           class="edit-name"
           [minLength]="2"
           [required]="true"
-          [originalText]="model?.name"
-          [editable]="editable"
+          [originalText]="model()?.name"
+          [editable]="editable()"
           (textChanged)="onNameChanged($event)"
           (inlineActiveStateChanged)="editExperimentName($event)"
-        >
+          >
           <div class="model-name">
-            <span [smTooltip]="model?.name" smShowTooltipIfEllipsis>{{model?.name}}</span>
+            <span [smTooltip]="model()?.name" smShowTooltipIfEllipsis>{{model()?.name}}</span>
           </div>
         </sm-inline-edit>
       </div>
-      <div class="d-flex align-items-center">
-        <sm-id-badge class="me-3" [id]="model?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
-        <div *ngIf="minimized" (click)="maximizedClicked.emit()"
-             smTooltip="View Full Screen" class="d-flex fullscreen line-item">
-          <i class="al-icon al-ico-info-max pointer" data-id="fullscreenIcon"></i>
-        </div>
+      <div class="d-flex align-items-center gap-3">
+        @if (model()?.id) {
+          <sm-id-badge [id]="model()?.id" (copied)="copyToClipboard()"></sm-id-badge>
+        }
+        @if (minimized()) {
+          <button class="line-item" mat-icon-button (click)="maximizedClicked.emit()" smTooltip="View Full Screen" data-id="fullscreenIcon">
+            <mat-icon fontSet="al" fontIcon="al-ico-info-max"></mat-icon>
+          </button>
+        }
 
-        <div class="line-item" (click)="minimizeClicked.emit()"
-             *ngIf="model && (!minimized) && !isSharedAndNotOwner"
-             smTooltip="View in models table">
-          <i class="al-icon al-ico-info-min al-color pointer" data-id="experimentDetailsView"></i>
-        </div>
+        @if (model() && (!minimized()) && !isSharedAndNotOwner()) {
+          <button class="line-item" mat-icon-button (click)="minimizeClicked.emit()" smTooltip="View in models table" data-id="experimentDetailsView">
+            <mat-icon fontSet="al" fontIcon="al-ico-info-min"></mat-icon>
+          </button>
+        }
         <sm-model-menu-extended
           class="line-item"
-          [model]="model"
-          [selectedModel]="model"
+          [model]="model()"
+          [selectedModel]="model()"
           [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
           [selectedDisableAvailableIsMultiple]="false"
-          [selectedDisableAvailable]="selectedDisableAvailable"
+          [selectedDisableAvailable]="selectedDisableAvailable()"
           [projectTags]="projectTags$ | ngrxPush"
           [companyTags]="companyTags$ | ngrxPush"
           [numSelected]="1"
           (tagSelected)="addTag($event)">
         </sm-model-menu-extended>
-        <div (click)="closeInfoClicked.emit()" class="d-flex align-items-center line-item">
-          <i class="al-icon al-ico-dialog-x pointer" data-id="closeButton"></i>
-        </div>
+        <button class="line-item" mat-icon-button (click)="closeInfoClicked.emit()" data-id="closeButton">
+          <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+        </button>
       </div>
     </div>
     <div class="tags-list">
-      <sm-tag-list
-        *ngIf="editable; else readOnlyTags"
-        [class.menu-open]="tagMenuTrigger?.menuOpen"
-        [sysTags]="sysTags"
-        [tags]="model?.tags"
-        (add)="openTagMenu()"
-        (remove)="removeTag($event)"></sm-tag-list>
-      <ng-template #readOnlyTags>
+      @if (editable()) {
         <sm-tag-list
-          [sysTags]="sysTags"
-          [tags]="model?.tags"></sm-tag-list>
-      </ng-template>
+          [class.menu-open]="tagMenuTrigger()?.menuOpen"
+          [sysTags]="sysTags()"
+          [tags]="model()?.tags"
+          (add)="openTagMenu()"
+        (remove)="removeTag($event)"></sm-tag-list>
+      } @else {
+        <sm-tag-list
+          [sysTags]="sysTags()"
+        [tags]="model()?.tags"></sm-tag-list>
+      }
       <span
         #tagsMenuTrigger="matMenuTrigger"
         [matMenuTriggerFor]="tagsMenu.matMenu"
@@ -68,10 +71,10 @@
       <sm-tags-menu
         class="light-theme"
         #tagsMenu
-        [tags]="model?.tags"
-        [tagsFilterByProject]="allProjects || (tagsFilterByProject$ | ngrxPush)"
-        [projectTags]="(allProjects ? companyTags$ : projectTags$) | ngrxPush"
-        [companyTags]="allProjects ? null : companyTags$ | ngrxPush"
+        [tags]="model()?.tags"
+        [tagsFilterByProject]="allProjects() || (tagsFilterByProject$ | ngrxPush)"
+        [projectTags]="(allProjects() ? companyTags$ : projectTags$) | ngrxPush"
+        [companyTags]="allProjects() ? null : companyTags$ | ngrxPush"
         (tagSelected)="addTag($event)"
       ></sm-tags-menu>
     </div>

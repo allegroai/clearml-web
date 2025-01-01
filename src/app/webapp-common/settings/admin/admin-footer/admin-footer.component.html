@@ -3,9 +3,9 @@
   <div class="version float-right">
     <span>WebApp: </span>
     <span>{{version["docker-image"] || version.version}}</span>
-    <ng-container *ngIf="(serverVersions$ | ngrxPush) as serverVersions">
+    @if ((serverVersions$ | ngrxPush); as serverVersions) {
       <span> • Server: {{serverVersions?.server}}</span>
       <span> • API: {{serverVersions?.api}}</span>
-    </ng-container>
+    }
   </div>
 </footer>

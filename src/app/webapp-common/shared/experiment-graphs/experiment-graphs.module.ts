@@ -6,8 +6,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ResizableModule} from 'angular-resizable-element';
 import {ExperimentGraphsComponent} from './experiment-graphs.component';
 import {GraphSettingsBarComponent} from './graph-settings-bar/graph-settings-bar.component';
-import {GraphScalarDataToMetric} from './graph-scalar-data-to-metric.pipe';
-import {GraphPlotDataToMetric} from './graph-plot-data-to-metric.pipe';
 import {SingleValueSummaryTableComponent} from '../single-value-summary-table/single-value-summary-table.component';
 import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
 import {MatInputModule} from '@angular/material/input';
@@ -17,7 +15,6 @@ import {
 } from '@common/shared/experiment-graphs/experiment-metric-data-table/experiment-metric-data-table.component';
 import {TableModule} from 'primeng/table';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {PushPipe} from '@ngrx/component';
 import {
@@ -27,6 +24,8 @@ import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import { MatIcon } from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 
 
@@ -35,8 +34,6 @@ const declarations= [
   ExperimentMetricDataTableComponent,
   ExperimentGraphsComponent,
   GraphSettingsBarComponent,
-  GraphScalarDataToMetric,
-  GraphPlotDataToMetric,
 ];
 @NgModule({
   declarations,
@@ -53,7 +50,6 @@ const declarations= [
     SingleValueSummaryTableComponent,
     TableModule,
     ClickStopPropagationDirective,
-    LabeledFormFieldDirective,
     MatDrawer,
     MatDrawerContainer,
     MatDrawerContent,
@@ -62,6 +58,8 @@ const declarations= [
     ShowTooltipIfEllipsisDirective,
     TooltipDirective,
     ReactiveFormsModule,
+    MatIcon,
+    MatIconButton
   ]
 })
 export class ExperimentGraphsModule { }

@@ -17,7 +17,10 @@ export const generalLeavingBeforeSaveAlertGuard: CanDeactivateFn<any> = (compone
       body: 'You have unsaved changes. Do you want to stay on this page or leave without saving?',
       yes: 'Leave',
       no: 'Stay',
-      iconClass: 'i-alert',
+      iconClass: 'al-ico-alert',
+      iconColor: 'var(--color-warning)',
+      centerText: true,
+      width: 440
     }
   }).afterClosed()
     .pipe(map(leave => leave));

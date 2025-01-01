@@ -11,7 +11,7 @@
     font-size: 13px;
     line-height: 1.46;
     letter-spacing: normal;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     margin-bottom: 12px;
 
     b {
@@ -39,13 +39,13 @@
     display: flex;
     align-items: center;
     border-radius: 4px;
-    border: solid 1px $cloudy-blue-two;
+    border: solid 1px var(--color-outline);
     height: 36px;
 
     .share-link {
       font-size: 14px;
       line-height: 1.5;
-      color: #404040;
+      color: var(--color-secondary);
       padding: 12px;
       flex: 1;
     }
@@ -57,11 +57,10 @@
       justify-content: center;
       width: 36px;
       height: 36px;
-      border-left: solid 1px $cloudy-blue-two;
-      color: $blue-400;
+      border-left: solid 1px var(--color-outline);
 
       :active {
-        color: $blue-700;
+        color: var(--color-primary);
       }
     }
   }

@@ -1,6 +1,5 @@
 import {Directive, ElementRef, HostListener, Input} from '@angular/core';
-import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import {hexToRgb, normalizeColorToString} from '@common/shared/services/color-hash/color-hash.utils';
+import {colorToString, hexToRgb} from '@common/shared/services/color-hash/color-hash.utils';
 import {Store} from '@ngrx/store';
 import {showColorPicker} from './choose-color.actions';
 
@@ -24,7 +23,7 @@ export class ChooseColorDirective {
     } else {
       this._defaultColor = defaultColor;
     }
-    this.defaultColorString = normalizeColorToString(defaultColor);
+    this.defaultColorString = colorToString(defaultColor);
   }
 
   get defaultColor() {

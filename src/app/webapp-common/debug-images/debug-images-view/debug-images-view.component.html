@@ -1,7 +1,6 @@
 @for (iteration of iterations; track iteration.iter) {
   <mat-expansion-panel
     class="images-section"
-    [class.dark-theme]="isDarkTheme"
     togglePosition="before"
     [expanded]="$first"
     (afterExpand)="resize()"
@@ -24,7 +23,6 @@
       <ng-template #snippetTemplate let-frame>
         <sm-debug-image-snippet
           [frame]="frame"
-          [theme]="isDarkTheme? themeEnum.Dark: themeEnum.Light"
           (imageError)="imageUrlError({frame, experimentId})"
           (imageClicked)="imageClicked.emit({frame})"
           (createEmbedCode)="createEmbedCode.emit({metrics: [frame.metric], variants: [frame.variant], domRect:$event});">

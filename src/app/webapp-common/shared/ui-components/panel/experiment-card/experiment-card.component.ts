@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 import {isEmpty} from 'lodash-es';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ITask} from '~/business-logic/model/al-task';
@@ -28,15 +28,13 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
   ]
 })
 export class ExperimentCardComponent {
+  protected isEmpty = isEmpty;
+  protected TIME_FORMAT_STRING = TIME_FORMAT_STRING;
 
-  public isEmpty = isEmpty;
-
-  @Input() experiment: ITask;
-  @Output() experimentCardClicked = new EventEmitter();
-  TIME_FORMAT_STRING = TIME_FORMAT_STRING;
+  experiment = input<ITask>();
+  experimentCardClicked = output<ITask>();
 
   public experimentClicked() {
-    this.experimentCardClicked.emit(this.experiment);
+    this.experimentCardClicked.emit(this.experiment());
   }
-
 }

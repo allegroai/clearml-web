@@ -40,7 +40,9 @@ export enum ExperimentTagsEnum {
   Development = 'development',
   Hidden = 'archived',
   Shared = 'shared',
-  Pipeline = 'pipeline'
+  Pipeline = 'pipeline',
+  Example = 'example',
+  Dataset = 'dataset'
 }
 
 export const EXPERIMENTS_TAGS = {

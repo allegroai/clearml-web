@@ -1,24 +1,8 @@
-@import "../../../../webapp-common/shared/ui-components/styles/variables";
-@import "../../../../webapp-common/shared/ui-components/styles/mixins/common";
-
-.category-link{
-  padding-right: 24px;
-  color: $blue-300;
-  &:hover {
-    color: $blue-200;
-  }
-  &.active {
-    color: $neon-yellow;
-  }
-}
-
-.search-container{
-  height: calc(100% - 24px);
-  .tabs {
-    @include recent-title();
-  }
+.mat-mdc-tab-group {
+  --mat-tab-header-label-text-size: 14px;
 }
 
 .page-container {
-  height: calc(100% - 35px);
+  height: calc(100% - 67px);
+  margin-top: 18px;
 }

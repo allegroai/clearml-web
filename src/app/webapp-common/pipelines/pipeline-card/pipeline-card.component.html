@@ -1,10 +1,10 @@
 <sm-card class="project-card"
-         (click)="projectClicked()"
-         [isExample]="!['All Experiments'].includes(project.name) && !isRootProject && (!project.company || ! project.company.id)"
-         [isFolder]="false"
-         [oneTabMode]="true"
-         [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
->
+  (click)="projectClicked()"
+  [isExample]="!['All Tasks'].includes(project.name) && !isRootProject && (!project.company || ! project.company.id)"
+  [showFolder]="false"
+  [oneTabMode]="true"
+  [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
+  >
   <div secondTab class="sub-projects-list">
     <cdk-virtual-scroll-viewport [itemSize]="30" [minBufferPx]="440" [maxBufferPx]="660" class="h-100">
       <a
@@ -20,46 +20,49 @@
   <div header-content [class.rename-state]="editName.active">
     <div class="d-flex justify-content-between align-items-center card-name">
       <sm-inline-edit #editName
-                      class="title edit-name dark"
-                      [originalText]="project.name | shortProjectName"
-                      [editable]="true"
-                      [minLength]="2"
-                      [required]="true"
-                      pattern="^[^\/]{2,}$"
-                      [forbiddenString]="[]"
-                      [inlineDisabled]="true"
-                      (textChanged)="prepareProjectNameForChange($event)"
-      >
+        class="title edit-name dark"
+        [originalText]="project.name | shortProjectName"
+        [editable]="true"
+        [minLength]="2"
+        [required]="true"
+        pattern="^[^\/]{2,}$"
+        [forbiddenString]="[]"
+        [inlineDisabled]="true"
+        (textChanged)="prepareProjectNameForChange($event)"
+        >
         <span class="d-flex align-items-center">
-        <span class="project-name"
-              [smTooltip]="project.name | cleanProjectPath"
-              smShowTooltipIfEllipsis
-        >{{project.name | shortProjectName}} </span><i *ngIf="!hideProjectPathIcon && (project.name | cleanProjectPath:
-         false)"
-                                                       [smTooltip]="project.name | cleanProjectPath: false"
-                                                       class="al-icon al-ico-project-path sm ms-2"></i></span>
+          <span class="project-name"
+            [smTooltip]="project.name | cleanProjectPath"
+            smShowTooltipIfEllipsis
+          >{{project.name | shortProjectName}} </span>@if (!hideProjectPathIcon && (project.name | cleanProjectPath:
+          false)) {
+          <i
+            [smTooltip]="project.name | cleanProjectPath: false"
+          class="al-icon al-ico-project-path sm ms-2"></i>
+        }</span>
       </sm-inline-edit>
-      <sm-pipeline-card-menu
-        class="menu-wrapper"
-        *ngIf="!hideMenu"
-        [project]="project"
-        [allTags]="allTags"
-        (run)="run.emit()"
-        (rename)="editName.inlineActivated()"
-        (addTag)="addTag.emit($event)"
-        (delete)="delete.emit()"
-        data-id="pipelineCardMenu"
-      ></sm-pipeline-card-menu>
+      @if (!hideMenu) {
+        <sm-pipeline-card-menu
+          class="menu-wrapper"
+          [project]="project"
+          [allTags]="allTags()"
+          (run)="run.emit()"
+          (rename)="editName.inlineActivated()"
+          (addTag)="addTag.emit($event)"
+          (delete)="delete.emit()"
+          data-id="pipelineCardMenu"
+        ></sm-pipeline-card-menu>
+      }
     </div>
-    <span
-      *ngIf="project.stats?.active?.last_task_run; else: noRun"
-      class="last-run"
-      [smTooltip]="project.stats?.active?.last_task_run | date: timeFormatString"
-      matTooltipPosition="after"
-    >Last run {{project.stats?.active?.last_task_run | timeAgo}}</span>
-    <ng-template #noRun>
+    @if (project.stats?.active?.last_task_run) {
+      <span
+        class="last-run"
+        [smTooltip]="project.stats?.active?.last_task_run | date: timeFormatString"
+        matTooltipPosition="after"
+      >Last run {{project.stats?.active?.last_task_run | timeAgo}}</span>
+    } @else {
       <div class="last-run">No pipeline runs yet</div>
-    </ng-template>
+    }
   </div>
   <div class="d-flex justify-content-around w-100">
     <ng-template></ng-template>
@@ -85,15 +88,15 @@
     ></sm-circle-counter>
   </div>
   <div footer class="footer-tags">
-    <sm-tag-list
-      *ngIf="!hideMenu; else: ReadOnlyTags"
-      class="w-100"
-      [tags]="project.tags"
-      (remove)="removeTag.emit($event)"
-      smClickStopPropagation
-    ></sm-tag-list>
-    <ng-template #ReadOnlyTags>
+    @if (!hideMenu) {
+      <sm-tag-list
+        class="w-100"
+        [tags]="project.tags"
+        (remove)="removeTag.emit($event)"
+        smClickStopPropagation
+      ></sm-tag-list>
+    } @else {
       <sm-tag-list [tags]="project.tags"></sm-tag-list>
-    </ng-template>
+    }
   </div>
 </sm-card>

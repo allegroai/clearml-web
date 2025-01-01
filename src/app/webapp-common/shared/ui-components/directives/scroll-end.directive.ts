@@ -28,7 +28,7 @@ export class ScrollEndDirective implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        this.scrollDirection = (this.previousEntry?.boundingClientRect.bottom === 0 || this.previousEntry?.boundingClientRect.bottom > entry.boundingClientRect.bottom)
+        this.scrollDirection = (this.previousEntry?.boundingClientRect.bottom === undefined || this.previousEntry?.boundingClientRect.bottom === 0 || this.previousEntry?.boundingClientRect.bottom > entry.boundingClientRect.bottom)
           ? ScrollEndDirection.down : ScrollEndDirection.up;
 
         if (!this.previousEntry?.isIntersecting && entry.isIntersecting && this.scrollDirection === this.desiredDirection) {

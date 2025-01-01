@@ -1,6 +1,7 @@
-import {Component, Input, TemplateRef} from '@angular/core';
+import {Component, TemplateRef, input, computed} from '@angular/core';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {NgTemplateOutlet} from '@angular/common';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
   selector: 'sm-table-card',
@@ -12,22 +13,17 @@ import {NgTemplateOutlet} from '@angular/common';
   ]
 })
 export class TableCardComponent {
+  columns = input<ISmCol[]>();
+  cardName = input<string>();
+  rowData = input<{id: string}>();
+  activeContextRow = input<{id: string}>();
+  contextMenuOpen = input<boolean>();
+  entityType = input<EntityTypeEnum>()
+  selected = input<boolean>();
+  checked = input<boolean>();
+  noSelection = input(false);
+  tagsTemplate = input<TemplateRef<unknown>>();
+  compactColDataTemplate = input<TemplateRef<unknown>>();
 
-  public hasTypeIcon: boolean;
-
-  @Input() columns;
-  @Input() cardName;
-  @Input() rowData;
-  @Input() activeContextRow;
-  @Input() contextMenuOpen;
-  @Input() set entityType(entityType: EntityTypeEnum) {
-    this.hasTypeIcon = entityType === EntityTypeEnum.experiment;
-  }
-
-  @Input() selected;
-  @Input() checked: boolean;
-  @Input() noSelection = false;
-  @Input() tagsTemplate: TemplateRef<any>;
-  @Input() compactColDataTemplate: TemplateRef<any>;
-
+  protected hasTypeIcon = computed(() => this.entityType() === EntityTypeEnum.experiment);
 }

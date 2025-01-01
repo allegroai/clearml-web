@@ -1,11 +1,15 @@
 <div class="sm-card-list-header">
   <div class="recent-title">
-    <sm-menu [header]="sortByTitle" class="menu" panelClasses="light-theme">
-      <sm-menu-item itemLabel="Recent" (itemClicked)="orderByChanged.emit('last_update')" [sortOrder]="sortByTitle==='RECENT' && sortOrder" data-id="Recent"></sm-menu-item>
-      <sm-menu-item itemLabel="Name" (itemClicked)="orderByChanged.emit('basename')" [sortOrder]="sortByTitle==='NAME' && sortOrder"></sm-menu-item>
+    <sm-menu [header]="sortByTitle()" class="menu">
+      <sm-menu-item itemLabel="Recent" (itemClicked)="orderByChanged.emit('last_update')" [sortOrder]="sortByTitle()==='RECENT' && sortOrder()" data-id="Recent"></sm-menu-item>
+      <sm-menu-item itemLabel="Name" (itemClicked)="orderByChanged.emit('basename')" [sortOrder]="sortByTitle()==='NAME' && sortOrder()"></sm-menu-item>
     </sm-menu>
-    <sm-show-only-user-work *ngIf="!enableTagsFilter"></sm-show-only-user-work>
-    <sm-main-pages-header-filter *ngIf="enableTagsFilter" [allTags]="tags"></sm-main-pages-header-filter>
+    @if (!enableTagsFilter()) {
+      <sm-show-only-user-work></sm-show-only-user-work>
+    }
+    @if (enableTagsFilter()) {
+      <sm-main-pages-header-filter [allTags]="tags()"></sm-main-pages-header-filter>
+    }
     <ng-content select="[left-items]"></ng-content>
   </div>
   <div>

@@ -4,7 +4,7 @@
   border-bottom: 1px solid #efefef;
 
   &.minimized {
-    grid-template-columns: 0 1fr 90px;
+    grid-template-columns: 0 1fr 108px;
   }
 
   @media(max-width: 1200px) {

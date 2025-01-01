@@ -1,21 +1,22 @@
-@if (showIcon){
-  <i class="icon xs" [class]="'i-'+ status" ></i>
-}
-@if (showLabel) {
-  <div
-    class="ellipsis label"
-    [class.with-spinner]="showSpinner && progress"
-  >{{experimentsStatusLabels[status] || status}}</div>
-}
-@if (showSpinner && enableSpinner) {
-  <mat-progress-spinner
-    class="spinner"
-    [class.show]="showSpinner && progress"
-    [value]="progress"
-    [diameter]="18"
-    color="accent"
-  ></mat-progress-spinner>
-} @else {
-  <div></div>
-}
-
+<div class="status-icon-container" [class.hide-label]="!showLabel()" [class.show-spinner]="enableSpinner()" [class]="status()">
+  @if (showIcon()){
+    <mat-icon [class.inline]="inline()" fontSet="al" [fontIcon]="statusIcon()"></mat-icon>
+  }
+  @if (showLabel()) {
+    <div
+      class="ellipsis label"
+      [class.with-spinner]="showSpinner() && progress()"
+    >{{experimentsStatusLabels[status()] || status()}}</div>
+  }
+  @if (showSpinner() && enableSpinner()) {
+    <mat-progress-spinner
+      class="spinner"
+      [class.show]="showSpinner() && progress()"
+      [value]="progress()"
+      [diameter]="18"
+      color="accent"
+    ></mat-progress-spinner>
+  } @else {
+    <div></div>
+  }
+</div>

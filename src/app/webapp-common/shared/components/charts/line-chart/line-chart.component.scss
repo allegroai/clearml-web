@@ -5,7 +5,10 @@
 
   display: block;
   position: relative;
-  background-color: var(--line-chart-background-color, $black);
+  background-color: transparent;
+  // background-color: var(--color-surface);
+  border-radius: 6px;
+  overflow: hidden;
 
   .overlay {
     position: absolute;
@@ -13,12 +16,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--line-chart-background-color, $black);
+    background-color: var(--color-surface-container-lowest);
 
     .loading {
       display: flex;
       align-items: center;
-      transform: translateY(#{-1 * $chart-bar-height * 0.5});
+      // transform: translateY(#{-1 * $chart-bar-height * 0.5});
     }
 
     .text {
@@ -27,7 +30,6 @@
 
       &.no-data {
         margin: 0;
-        color: $blue-280;
         opacity: 0.5;
       }
     }

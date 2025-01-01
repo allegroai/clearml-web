@@ -42,10 +42,10 @@ export enum CheckboxState {
 ]
 })
 export class CheckboxThreeStateListComponent {
-  @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
+  @Input() options: { label: string; value: string; tooltip?: string }[];
   @Input() supportExcludeFilter: boolean;
 
-  @Input() set checkedList(checkedList: Array<string>) {
+  @Input() set checkedList(checkedList: string[]) {
     if (Array.isArray(checkedList)) {
       if (this.supportExcludeFilter) {
         const {value, exclude} = separateValueAndExcludeFromFilters(checkedList);

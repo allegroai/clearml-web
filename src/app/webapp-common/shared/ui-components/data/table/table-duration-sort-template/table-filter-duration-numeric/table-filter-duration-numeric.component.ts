@@ -20,8 +20,9 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {
   KeydownStopPropagationDirective
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 const getDurationValue = (value: IDurationThan) => value.checked ? `${value.value}` : '';
 
@@ -38,8 +39,9 @@ const getDurationValue = (value: IDurationThan) => value.checked ? `${value.valu
     ReactiveFormsModule,
     ClickStopPropagationDirective,
     KeydownStopPropagationDirective,
-    LabeledFormFieldDirective
-],
+    MatIcon,
+    MatIconButton
+  ],
   standalone: true
 
 })

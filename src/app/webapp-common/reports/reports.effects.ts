@@ -386,7 +386,7 @@ export class ReportsEffects {
         data: {
           title: 'DELETE',
           body: '<p class="text-center">Permanently Delete Report</p>',
-          yes: 'Delete',
+          yes: 'DELETE',
           no: 'Cancel',
           iconClass: 'al-ico-trash',
           width: 430

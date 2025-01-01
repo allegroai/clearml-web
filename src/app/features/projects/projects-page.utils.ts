@@ -10,7 +10,7 @@ import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsG
 
 export const isDeletableProject = readyForDeletion => (readyForDeletion.experiments.unarchived + readyForDeletion.models.unarchived) === 0;
 
-export const popupEntitiesListConst = 'experiments, dataviews pipelines or dataset';
+export const popupEntitiesListConst = 'tasks, pipelines or dataset';
 
 export const getDeleteProjectPopupStatsBreakdown = (readyForDeletion, statsSubset: 'archived' | 'unarchived' | 'total', experimentCaption) => {
   const errors = [
@@ -31,7 +31,7 @@ export const readyForDeletionFilter = readyForDeletion => !(readyForDeletion.exp
 export const isDatasets = (snapshot: ActivatedRouteSnapshot) => snapshot.firstChild.routeConfig.path === 'datasets';
 
 export const routeConfToProjectType = (routeConf: string[]) => routeConf[0];
-export const getNoProjectsReRoute = ((routeConf: string[]) => 'experiments');
+export const getNoProjectsReRoute = (() => 'tasks');
 export const isNestedDatasets = (routeConf: string[]) => ['simple'].includes(routeConf?.[1]);
 
 export const getFeatureProjectRequest = (snapshot: ActivatedRouteSnapshot, nested: boolean, searchQuery: any, selectedProjectName: any, selectedProjectId: any): ProjectsGetAllExRequest => {

@@ -1,0 +1,132 @@
+<sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
+<sm-experiment-header
+  [tableCols]="filteredTableCols$| ngrxPush"
+  [isArchived]="isArchived$ | ngrxPush"
+  [metricVariants]="metricVariants$ | ngrxPush"
+  [hyperParams]="hyperParams$ | ngrxPush"
+  [minimizedView]="minimizedView"
+  [isMetricsLoading]="metricLoading$ | ngrxPush"
+  [tableFilters]="tableFilters$ | ngrxPush"
+  [tableMode]="firstExperiment ? tableMode() : 'table'"
+  [rippleEffect]="tableModeAwareness$ | ngrxPush"
+  [noData]="!((experiments$ | ngrxPush)?.length > 0)"
+  (isArchivedChanged)="archivedChanged($event)"
+  (selectedTableColsChanged)="selectedTableColsChanged($event)"
+  (getMetricsToDisplay)="getMetricsToDisplay()"
+  (selectedMetricToShow)="selectedMetricToShow($event)"
+  (selectedHyperParamToShow)="selectedHyperParamToShow($event)"
+  (removeColFromList)="removeColFromList($event)"
+  (setAutoRefresh)="setAutoRefresh($event)"
+  (clearSelection)="clearSelection()"
+  (clearTableFilters)="clearTableFiltersHandler($event)"
+  (tableModeChanged)="modeChanged($event); tableModeUserAware()"
+  (downloadTableAsCSV)="downloadTableAsCSV()"
+  (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
+>
+</sm-experiment-header>
+<div class="experiment-body"
+     [class.footer-visible]="(checkedExperiments$ | ngrxPush)?.length > 1 || (showAllSelectedIsActive$ |ngrxPush)">
+  <as-split #split
+            [gutterSize]=1
+            [useTransition]="true"
+            [gutterDblClickDuration]="400"
+            (gutterClick)="clickOnSplit()"
+            (gutterDblClick)="closePanel()"
+            (dragEnd)="splitSizeChange($event)"
+            (dragStart)="disableInfoPanel()"
+            (transitionEnd)="experimentsTable.table?.resize(100); experimentsTable.afterTableInit()"
+            [class.opened]="(minimizedView$ | ngrxPush) && (selectSplitSize$ | ngrxPush) <= 1"
+            [class.closed]="(minimizedView$ | ngrxPush) && (selectSplitSize$ | ngrxPush) >= 99"
+  >
+    <as-split-area
+      [size]="100 - (splitInitialSize)"
+      [minSize]="1"
+      [maxSize]="99"
+    >
+      <sm-experiments-table
+        #experimentsTable
+        class="align-self-stretch"
+        selectionMode="single"
+        [projects]="(projectsOptions$ | ngrxPush)"
+        [initialColumns]="tableCols"
+        [colsOrder]="(tableColsOrder$ | ngrxPush)"
+        [tableCols]="tableCols$ | ngrxPush"
+        [experiments]="$any(experiments$ | ngrxPush)"
+        [users]="users$ | ngrxPush"
+        [hyperParamsOptions]="hyperParamsOptions$ | ngrxPush"
+        [activeParentsFilter]="activeParentsFilter$ | ngrxPush"
+        [parents]="parents$ | ngrxPush"
+        [experimentTypes]="types$ | ngrxPush"
+        [tags]="tags$ | ngrxPush"
+        [systemTags]="systemTags$ | ngrxPush"
+        [tableSortFields]="(tableSortFields$ | ngrxPush)"
+        [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
+        [tableFilters]="(tableFilters$ | ngrxPush)"
+        [checkedExperiments]="checkedExperiments$ | ngrxPush"
+        [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
+        [selectedExperiment]="highlited()"
+        [minimizedView]="(minimizedView$ | ngrxPush)"
+        [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
+        [split]="selectSplitSize$ | ngrxPush"
+        [contextMenuTemplate]="contextMenuExtendedTemplate"
+        [contextMenuActive]="contextMenuActive"
+        [entityType]="entityType"
+        [cardsCollapsed]="cardsCollapsed$ | ngrxPush"
+        [cardHeight]="112"
+        (experimentSelectionChanged)="experimentSelectionChanged($event)"
+        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+        (sortedChanged)="sortedChanged($event)"
+        (filterChanged)="filterChanged($event)"
+        (filterSearchChanged)="filterSearchChanged($event)"
+        (tagsMenuOpened)="refreshTagsList()"
+        (typesMenuOpened)="refreshTypesList()"
+        (loadMoreExperiments)="getNextExperiments()"
+        (columnsReordered)="columnsReordered($event)"
+        (columnResized)="columnResized($event)"
+        (contextMenu)="onContextMenuOpen($event)"
+        (removeTag)="removeTag($event)"
+        (clearAllFilters)="clearTableFiltersHandler($event)"
+        (cardsCollapsedChanged)="cardsCollapsedToggle()"
+        (closePanel)="closePanel()"
+      >
+      </sm-experiments-table>
+    </as-split-area>
+    <as-split-area
+      [size]="splitInitialSize"
+      [visible]="minimizedView$ | ngrxPush"
+      style="overflow: hidden"
+    >
+      <sm-open-dataset-version-info></sm-open-dataset-version-info>
+    </as-split-area>
+  </as-split>
+</div>
+
+<sm-entity-footer
+  [footerState]="footerState$ | ngrxPush"
+  [footerItems]="footerItems"
+  (footerItemClick)="onFooterHandler($event, entityType)"
+  (tagSelected)="tagSelected($event, 'experiments')"
+></sm-entity-footer>
+
+<ng-template #contextMenuExtendedTemplate let-contextExperiment>
+  <!--    TODO: fix selectedExperimentsDisableAvailable selector -->
+  <sm-open-dataset-version-menu
+    [experiment]="contextExperiment"
+    [selectedExperiment]="selectedExperiment$ | ngrxPush"
+    [selectedExperiments]="singleRowContext ? (selectedExperiment$ | ngrxPush) ? [(selectedExperiment$ | ngrxPush)] : undefined : checkedExperiments"
+    [selectedDisableAvailableIsMultiple]="!singleRowContext"
+    [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable((selectedExperiment$ | ngrxPush) || contextExperiment ) : (selectedExperimentsDisableAvailable$ | ngrxPush)"
+    [numSelected]="singleRowContext ? 1 : checkedExperiments.length"
+    [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+    [projectTags]="tags$ | ngrxPush"
+    [companyTags]="companyTags$ | ngrxPush"
+    [activateFromMenuButton]="false"
+    [useCurrentEntity]="singleRowContext"
+    [minimizedView]="true"
+    [tableMode]="!(minimizedView$ | ngrxPush)"
+    [backdrop]="menuBackdrop"
+    (tagSelected)="onAddTag($event, contextExperiment)"
+    (menuOpened)="setContextMenuStatus(true)"
+    (menuClosed)="setContextMenuStatus(false)"
+  ></sm-open-dataset-version-menu>
+</ng-template>

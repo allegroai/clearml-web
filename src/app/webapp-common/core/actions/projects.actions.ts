@@ -204,7 +204,6 @@ export const setBlockUserScript = createAction(
   PROJECTS_PREFIX + ' [set block users scripts]',
   props<{ block: boolean }>()
 );
-
 export const setDefaultNestedModeForFeature = createAction(
   PROJECTS_PREFIX + ' [set defaultNestedModeForFeature]',
   props<{ feature: string; isNested: boolean }>()

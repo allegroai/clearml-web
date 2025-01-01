@@ -6,7 +6,8 @@
   [class.show-menu]="showMenu()"
 >
   <button
-    class="btn btn-icon refresh"
+    mat-icon-button
+    class="refresh"
     data-id="Auto Refresh"
     (click)="$event.preventDefault(); refresh()"
     [delay]="300"
@@ -45,7 +46,7 @@
       <span class="toggle-label" [class.enabled]="autoRefreshState()">AUTO REFRESH</span>
     </mat-slide-toggle>
     <div class="mx-3">•</div>
-    <button class="btn btn-icon px-0" (click)="refresh()">REFRESH</button>
+    <button mat-button (click)="refresh()">REFRESH</button>
   </div>
   <div class="tip"></div>
 </div>

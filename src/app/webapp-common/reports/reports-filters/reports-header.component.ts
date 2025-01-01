@@ -1,38 +1,27 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
   selector: 'sm-reports-header',
   templateUrl: './reports-header.component.html',
-  styleUrls: ['./reports-header.component.scss']
+  styleUrls: ['./reports-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReportsHeaderComponent {
 
-  public queryString: string = null;
-  public sortByTitle: string;
+  archive = input<boolean>();
+  disableCreate = input(false);
+  disableSort = input(false);
+  sortOrder = input<TableSortOrderEnum>();
+  allTags = input<string[]>([]);
+  projectId = input<string>();
+  sortByField = input<string>();
 
-  @Input() archive: boolean;
-  @Input() disableCreate = false;
-  @Input() disableSort = false;
-  @Input() activeSearch: boolean;
-  @Input() sortOrder: TableSortOrderEnum;
-  @Input() allTags: string[] = [];
-  @Input() projectId;
+  sortByTitle = computed(() => this.sortByField().includes('name') ? 'NAME' : 'RECENT')
 
-
-  @Input() set sortByField(sortByField: string) {
-    this.sortByTitle = sortByField.includes('name') ? 'NAME' : 'RECENT';
-  }
-
-  @Output() reportsFilterChanged = new EventEmitter<string>();
-  @Output() orderByChanged = new EventEmitter<string>();
-  @Output() createReportClicked = new EventEmitter<string>();
-  @Output() archiveToggled = new EventEmitter<boolean>();
-  @Output() toggleNestedView = new EventEmitter<boolean>();
-
-
-  filterReports(queryString) {
-    this.reportsFilterChanged.emit(queryString);
-    this.queryString = queryString;
-  }
+  reportsFilterChanged = output<string>();
+  orderByChanged = output<string>();
+  createReportClicked = output<string>();
+  archiveToggled = output<boolean>();
+  toggleNestedView = output<boolean>();
 }

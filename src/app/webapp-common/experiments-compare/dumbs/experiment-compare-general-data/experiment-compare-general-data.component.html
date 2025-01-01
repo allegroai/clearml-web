@@ -11,10 +11,7 @@
 </header>
 <sm-tag-list [tags]="tags"></sm-tag-list>
 <div class="general-info" data-id="generalInfo">
-  @if (experimentsStatusLabels[experiment.status]) {
-    <i [class]="'me-1 icon sm bw i-'+ experiment.status"></i>
-  }
-  <span>{{experimentsStatusLabels[experiment.status] ?? experiment.status}}</span>
+    <sm-status-icon-label [status]="experiment.status"></sm-status-icon-label>
   @if (experiment.last_iteration !== undefined) {
     <span class="dot"></span>
     <span class="flex-shrink-0">{{experiment.last_iteration | number | NA}} iterations</span>

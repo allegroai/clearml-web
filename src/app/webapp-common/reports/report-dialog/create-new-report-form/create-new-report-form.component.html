@@ -1,14 +1,20 @@
 <form [formGroup]="reportForm" (submit)="reportForm.invalid && send()" class="d-flex flex-column">
   <mat-form-field appearance="outline" class="mat-light">
     <mat-label>Report name</mat-label>
-    <mat-error *ngIf="reportForm.controls.name.errors?.required">Please add name.</mat-error>
-    <mat-error *ngIf="reportForm.controls.name.errors?.uniqueName">Report name already exists.</mat-error>
-    <mat-error *ngIf="reportForm.controls.name.errors?.minlength">Report name should contain more than 3 characters.</mat-error>
+    @if (reportForm.controls.name.errors?.required) {
+      <mat-error>Please add name.</mat-error>
+    }
+    @if (reportForm.controls.name.errors?.uniqueName) {
+      <mat-error>Report name already exists.</mat-error>
+    }
+    @if (reportForm.controls.name.errors?.minlength) {
+      <mat-error>Report name should contain more than 3 characters.</mat-error>
+    }
     <input name="reportName"
-           formControlName="name"
-           matInput
-           autocomplete="off"
-           >
+      formControlName="name"
+      matInput
+      autocomplete="off"
+      >
   </mat-form-field>
   <sm-paginated-entity-selector
     formControlName="project"
@@ -16,27 +22,29 @@
     label="Project"
     placeHolder="Search for project path"
     [isRequired]="true"
-    [createNewSuffix]="!loading() && projects() !== null && reportForm.controls.project.value && !(reportForm.controls.project.value | stringIncludedInArray: projectsNames())"
+    [createNewSuffix]="!projectsState().loading() && projects() !== null && reportForm.controls.project.value && !(reportForm.controls.project.value | stringIncludedInArray: projectsNames())"
     (getEntities)="loadMore($event, false)"
     (loadMore)="loadMore($event, true)"
     (createNewSelected)="createNewSelected($event)"
   ></sm-paginated-entity-selector>
 
-  <mat-form-field appearance="outline">
-    <mat-error *ngIf="reportForm.controls.description?.invalid">Please add description.
-    </mat-error>
+  <mat-form-field appearance="outline" class="mt-4">
+    @if (reportForm.controls.description?.invalid) {
+      <mat-error>Please add description.
+      </mat-error>
+    }
     <mat-label>Description</mat-label>
     <textarea class="report-description"
-              formControlName="description"
-              matInput
+      formControlName="description"
+      matInput
     ></textarea>
   </mat-form-field>
-  <div class="w-100 create-report-button">
-    <button
-      class="btn btn-dark-fill center"
-      data-id="Create Report"
-      [disabled]="reportForm.invalid"
-      (click)="send()">CREATE REPORT
+  <mat-dialog-actions>
+    <button mat-flat-button
+            data-id="Create Report"
+            [mat-dialog-close]="true"
+            [disabled]="reportForm.invalid"
+            (click)="send()">CREATE REPORT
     </button>
-  </div>
+  </mat-dialog-actions>
 </form>

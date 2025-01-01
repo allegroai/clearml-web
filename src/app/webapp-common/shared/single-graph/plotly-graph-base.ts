@@ -1,15 +1,32 @@
-import {Subscription} from 'rxjs';
-import {Component, inject, Input, OnDestroy} from '@angular/core';
+import {Subject, Subscription} from 'rxjs';
+import {Component, computed, inject, input, Input, OnDestroy} from '@angular/core';
 import plotly from 'plotly.js';
-import {selectScaleFactor} from '@common/core/reducers/view.reducer';
+import {selectScaleFactor, selectThemeMode} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
-import { TinyColor } from '@ctrl/tinycolor';
+import {TinyColor} from '@ctrl/tinycolor';
+import {explicitEffect} from 'ngxtension/explicit-effect';
 
-export const DARK_THEME_GRAPH_LINES_COLOR = '#39405f';
-export const DARK_THEME_GRAPH_TICK_COLOR = '#c1cdf3';
+export const Colors = {
+  dark: {
+    font: '#e3e2e6',
+    lines: '#424955',
+    tick: '#9ea1a8',
+    legend: '#bfc7d5',
+    icon: '#a1c9ff',
+    iconActive: '#fff'
+},
+  light: {
+    font: '#1a1c1e',
+    lines: '#d6dae9',
+    tick: '#666',
+    legend: '#666',
+    icon: '#0060a8',
+    iconActive: '#00152c'
+    },
+};
+
 export interface VisibleExtFrame extends ExtFrame {
   id: string;
-  visible: boolean;
 }
 
 export interface ExtFrame extends Omit<plotly.Frame, 'data' | 'layout'> {
@@ -50,6 +67,7 @@ export interface ExtData extends plotly.PlotData {
   isSmoothed: boolean;
   originalMetric?: string;
   fakePlot?: boolean;
+  seriesName?: string;
 }
 
 @Component({
@@ -57,19 +75,30 @@ export interface ExtData extends plotly.PlotData {
   template: ''
 })
 export abstract class PlotlyGraphBaseComponent implements OnDestroy {
+
+
+  store = inject(Store);
+  public scaleFactor = this.store.selectSignal(selectScaleFactor);
+
   protected sub = new Subscription();
   protected colorSub: Subscription;
   public isSmooth = false;
-  public scaleFactor: number;
-  protected store: Store;
+  public shouldRefresh = false;
+  protected drawGraph$ = new Subject<{ forceRedraw?: boolean; forceSkipReact?: boolean; noTimer?: boolean }>();
 
-  @Input() isCompare= false;
+  darkTheme = input<boolean>(null);
+  @Input() isCompare = false;
 
+  theme = this.store.selectSignal(selectThemeMode);
+  protected isDarkTheme = computed(() => this.darkTheme() !== null ? this.darkTheme() : this.theme() === 'dark');
+  protected themeColors = computed(() => this.isDarkTheme() ? Colors.dark : Colors.light);
 
-  protected constructor() {
-    this.store = inject(Store);
-    this.sub.add(this.store.select(selectScaleFactor).subscribe(scaleFactor => this.scaleFactor = scaleFactor));
-  }
+  koko = explicitEffect(
+    [this.isDarkTheme],
+    () => {
+      this.shouldRefresh = true;
+      this.drawGraph$.next({noTimer: true})
+    });
 
   public _reColorTrace(trace: ExtData, newColor: number[]): void {
     if (Array.isArray(trace.line?.color) || Array.isArray(trace.marker?.color)) {
@@ -85,7 +114,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     }
     if (trace.line) {
       trace.line.color = colorString;
-    }  else {
+    } else {
       // Guess that a graph without a lne or a marker should have a line, may cause havoc
       trace.line = {};
       trace.line.color = colorString;
@@ -107,7 +136,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     const taskId = chart.task;
     const namesHash = {};
     for (let i = 0; i < data.length; i++) {
-      if (!data[i].name || data[i].name === chart.variant || data[i].name.endsWith('</span>') || data[i].name.endsWith(`.${(data[i].task || taskId).substring(0, 6)}`)) {
+      if (data[0].type === 'parcoords' || !data[i].name || data[i].name === chart.variant || data[i].name.endsWith('</span>') || data[i].name.endsWith(`.${(data[i].task || taskId).substring(0, 6)}`)) {
         continue;
       }
       const name = data[i].name;
@@ -132,7 +161,7 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     // Case all series in plot has same colorKey (same task name)
     const duplicateColorKey = Array.from(new Set(data.map(plot => plot.colorKey))).length < data.length;
     if (duplicateColorKey && chart.variants?.length > 0) {
-      data.forEach((plot => plot.colorKey = plot.name))
+      data.forEach((plot => plot.colorKey = plot.name));
     }
 
     return data;

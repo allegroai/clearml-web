@@ -1,31 +1,34 @@
 <mat-drawer-container autosize class="light-theme h-100">
-  <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
-    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()" data-id="closeFindPlot"></i>
+  <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized" [autoFocus]="true">
     <div class="list-container">
-      <sm-selectable-filter-list
-        *ngIf="plotsList !== undefined"
-        checkAllIcon="al-ico-show"
-        placeholder="Find plots"
-        [list]="plotsList"
-        [checkedList]="selectedMetrics"
-        [searchTerm]="searchTerm"
-        (itemSelect)="metricSelected($event)"
-        (hiddenChanged)="hiddenListChanged($event)"
-        (searchTermChanged)="searchTermChanged($event)"
-      >
-      </sm-selectable-filter-list>
+      @if (plotsList !== undefined) {
+        <sm-selectable-filter-list
+          checkAllIcon="al-ico-show"
+          placeholder="Find plots"
+          [list]="plotsList"
+          [checkedList]="selectedMetrics"
+          [searchTerm]="searchTerm"
+          (itemSelect)="metricSelected($event)"
+          (hiddenChanged)="hiddenListChanged($event)"
+          (searchTermChanged)="searchTermChanged($event)"
+          >
+        </sm-selectable-filter-list>
+      }
     </div>
+    @if (minimized) {
+      <button mat-icon-button class="close sm" (click)="drawer.close()" data-id="closeFindPlot">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
+    }
   </mat-drawer>
   <mat-drawer-content class="overflow-hidden">
-    <div class="hover-button" *ngIf="minimized">
-      <button
-        class="btn btn-secondary"
-        (click)="drawer.open()"
-        smTooltip="Toggle Graphs"
-      >
-        <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
-      </button>
-    </div>
+    @if (minimized) {
+      <div class="hover-button">
+        <button mat-flat-button class="icon-only" (click)="drawer.open()" smTooltip="Toggle Graphs" data-id="eyeIcon">
+          <mat-icon fontSet="al" fontIcon="al-ico-eye-outline"></mat-icon>
+        </button>
+      </div>
+    }
     <sm-experiment-graphs
       [class.dark-theme]="dark"
       [isGroupGraphs]="true"
@@ -38,7 +41,7 @@
       [exportForReport]="!modelsFeature"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
-    >
+      >
     </sm-experiment-graphs>
   </mat-drawer-content>
 </mat-drawer-container>

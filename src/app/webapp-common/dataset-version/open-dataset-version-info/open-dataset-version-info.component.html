@@ -1,0 +1,113 @@
+<sm-open-dataset-version-details
+  [entity]="selected$ | ngrxPush"
+  [project]="projectId$ | ngrxPush"
+  [step]="selectedEntity()"
+  (editDescription)="editDescription($event)"
+></sm-open-dataset-version-details>
+<div class="console-button">
+  <button mat-flat-button data-id="detailsButton" (click)="toggleDetails()">
+    <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
+    DETAILS
+  </button>
+</div>
+<div
+  #diagramContainer
+  class="pipeline-container"
+  [class.extend]="showLog()"
+  (click)="selectStep()"
+  >
+  @if (dagModel$ | ngrxPush; as dagModel) {
+    @for (row of dagModel | reverse; track row) {
+      <div class="level" [style.width.px]="chartWidth">
+        @for (step of row | uniqueBy: 'stepId'; track step.id) {
+          <sm-dataset-version-step
+            #taskEl
+            [step]="step"
+            [selected]="selectedEntity()?.id === step?.id"
+            (click)="$event.stopPropagation(); !taskEl.selected() && selectStep(step)"
+            (openConsole)="openLog()"
+          ></sm-dataset-version-step>
+        }
+      </div>
+    }
+    @if (chartWidth) {
+      <svg class="arrows"
+        [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
+        [style.width.px]="chartWidth"
+        [style.height.px]="50 + 132 * dagModel?.length"
+        >
+        @for (arrow of highlightedArrows$ | ngrxPush; track arrow.path) {
+          <g
+            [class.selected]="arrow.selected"
+            >
+            <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
+            <polygon
+              points="0,-6 12,0, 0,6"
+              [attr.transform]="arrow.headTransform"
+              />
+          </g>
+        }
+      </svg>
+    }
+  }
+</div>
+<div class="results-panel" [class.extend]="showLog()" [class.maximized]="maximizeResults">
+  @if (showLog()) {
+    <div class="header toggle">
+      <div class="log-name">
+        <i class="al-icon al-ico-console me-2"></i>
+        @if ((selected$ | ngrxPush); as selected) {
+          <span>
+            {{selected?.name}}@if (selected?.runtime?.version) {
+            v{{selected.runtime.version}}
+          }
+        </span>
+      }
+    </div>
+    <sm-button-toggle
+      [value]="detailsPanelMode()"
+        [options]="[
+          {label: 'CONTENT', value: statusOption.content},
+          {label: 'PREVIEW', value: statusOption.preview},
+          {label: 'CONSOLE', value: statusOption.log}
+        ]"
+      (valueChanged)="detailsPanelMode.set($event)"
+    ></sm-button-toggle>
+    <div class="close gap-3">
+      <button mat-icon-button (click)="toggleResultSize()" data-id="expandButton">
+        <mat-icon fontSet="al" [fontIcon]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'"></mat-icon>
+      </button>
+      <button mat-icon-button (click)="openLog(false)" data-id="closeButton">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="content">
+    @switch (detailsPanelMode()) {
+      @case (statusOption.log) {
+        @defer (when detailsPanelMode() === statusOption.log) {
+          <sm-experiment-output-log
+            [experiment]="selected$ | ngrxPush"
+            [showHeader]="false"
+          ></sm-experiment-output-log>
+        }
+      }
+      @case (statusOption.preview) {
+        @defer (when detailsPanelMode() === statusOption.preview) {
+          <sm-open-dataset-version-preview [selected]="(selected$ | ngrxPush)">
+          </sm-open-dataset-version-preview>
+        }
+      }
+      @case (statusOption.content) {
+        @defer (when detailsPanelMode() === statusOption.content) {
+          <sm-open-dataset-version-content
+            class="h-100"
+            [id]="selectedEntity()?.data?.job_id"
+            [data]="(selected$ | ngrxPush)?.configuration?.['Dataset Content']?.value"
+          ></sm-open-dataset-version-content>
+        }
+      }
+    }
+  </div>
+}
+</div>

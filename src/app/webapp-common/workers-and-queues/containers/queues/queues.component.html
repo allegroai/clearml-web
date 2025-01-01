@@ -1,20 +1,26 @@
 <div class="queues-header">
   @if (queuesManager) {
-    <button  class="btn btn-cml-primary d-flex align-items-center" (click)="addQueue()">
-      <i class="al-icon al-ico-add sm me-2"></i><span>NEW QUEUE</span>
+    <button mat-flat-button (click)="addQueue()">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+      NEW QUEUE
     </button>
   }
 <!--  <sm-refresh-button (setAutoRefresh)="setAutoRefresh($event)"></sm-refresh-button>-->
 </div>
 <sm-queue-stats [queue]="selectedQueue()"></sm-queue-stats>
-<as-split class="flex-grow-1" (transitionEnd)="table.table.resize(); table.afterTableInit()" [gutterSize]=1>
+<as-split
+  class="flex-grow-1"
+  [gutterSize]=1 [useTransition]="true"
+  (transitionEnd)="table.table.resize(); table.afterTableInit()"
+>
   <as-split-area [size]="50">
     <sm-queues-table
-      #table class="mt-2"
+      #table
       [queues]="queues()"
       [selectedQueue]="selectedQueue()"
-      (sortedChanged)="sortedChanged($event)"
       [tableSortFields]="tableSortFields()"
+      [short]="!(shortScreen$ | ngrxPush)"
+      (sortedChanged)="sortedChanged($event)"
       (deleteQueue)="deleteQueue($event)"
       (renameQueue)="renameQueue($event)"
       (clearQueue)="clearQueue($event)"

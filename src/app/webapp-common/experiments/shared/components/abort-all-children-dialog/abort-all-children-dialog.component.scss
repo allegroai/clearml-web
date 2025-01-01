@@ -4,23 +4,4 @@
       width: 640px;
     }
   }
-
-  .buttons {
-    margin-top: 48px;
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: center;
-    left: 50%;
-    position: relative;
-    transform: translateX(-50%);
-
-    button {
-      width: 130px;
-      text-transform: uppercase;
-    }
-    .yes-button {
-      margin-left: 16px;
-    }
-  }
 }

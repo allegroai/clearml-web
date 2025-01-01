@@ -34,6 +34,7 @@ export const reducer = createReducer(
     data: state.data?.map(queue => queue.id === action.queue?.id ? action.queue : queue) ?? null
   })),
   on(queueActions.setStats, (state, action): State => ({...state, stats: action.data})),
+  on(queueActions.resetQueues, (): State => ({...initQueues})),
   on(queueActions.resetStats, (state): State => ({...state, stats: initQueues.stats})),
   on(queueActions.setStatsParams, (state, action): State =>
     ({...state, selectedStatsTimeFrame: action.timeFrame, stats: initQueues.stats})),

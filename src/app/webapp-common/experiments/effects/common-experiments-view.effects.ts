@@ -121,6 +121,7 @@ import {EventsGetMultiTaskMetricsResponse} from '~/business-logic/model/events/e
 import {TasksCreateResponse} from '~/business-logic/model/tasks/tasksCreateResponse';
 import {ErrorService} from '@common/shared/services/error.service';
 import * as menuActions from '@common/experiments/actions/common-experiments-menu.actions';
+import {TasksCreateRequest} from '~/business-logic/model/tasks/tasksCreateRequest';
 
 
 @Injectable()
@@ -258,9 +259,9 @@ export class CommonExperimentsViewEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          addMessage('warn', 'Fetch Experiments failed', error?.meta && [{
+          addMessage('warn', 'Fetch Tasks failed', error?.meta && [{
             name: 'More info',
-            actions: [setServerError(error, null, 'Fetch Experiments failed')]
+            actions: [setServerError(error, null, 'Fetch Tasks failed')]
           }])
         ])
       )
@@ -328,9 +329,9 @@ export class CommonExperimentsViewEffects {
               return [
                 requestFailed(error),
                 deactivateLoader(action.type),
-                ...(action.autoRefresh ? [] : [addMessage('warn', 'Fetch Experiments failed', error?.meta && [{
+                ...(action.autoRefresh ? [] : [addMessage('warn', 'Fetch Tasks failed', error?.meta && [{
                   name: 'More info',
-                  actions: [setServerError(error, null, 'Fetch Experiments failed')]
+                  actions: [setServerError(error, null, 'Fetch Tasks failed')]
                 }])])
               ];
             })
@@ -371,9 +372,9 @@ export class CommonExperimentsViewEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          addMessage('warn', 'Fetch Experiments failed', error?.meta && [{
+          addMessage('warn', 'Fetch Tasks failed', error?.meta && [{
             name: 'More info',
-            actions: [setServerError(error, null, 'Fetch Experiments failed')]
+            actions: [setServerError(error, null, 'Fetch Tasks failed')]
           }])
         ])
       )
@@ -678,7 +679,7 @@ export class CommonExperimentsViewEffects {
     catchError(error => [
       requestFailed(error),
       deactivateLoader(exActions.selectAllExperiments.type),
-      setServerError(error, null, 'Fetch experiments for selection failed')
+      setServerError(error, null, 'Fetch tasks for selection failed')
     ])
   ));
 
@@ -738,11 +739,11 @@ export class CommonExperimentsViewEffects {
     const activeChildUrl = activeChild ? getRouteFullUrl(activeChild) : '';
     if (selectedExperiment) {
       this.router.navigate(
-        [module, experimentProject, 'experiments', selectedExperiment.id].concat(activeChild ? activeChildUrl.split('/') : []),
+        [module, experimentProject, 'tasks', selectedExperiment.id].concat(activeChild ? activeChildUrl.split('/') : []),
         {queryParamsHandling: 'preserve'}
       );
     } else {
-      this.router.navigate([module, experimentProject, 'experiments'], {
+      this.router.navigate([module, experimentProject, 'tasks'], {
         queryParamsHandling: 'preserve',
         replaceUrl
       });
@@ -994,7 +995,8 @@ export class CommonExperimentsViewEffects {
           working_dir: action.data.directory,
           entry_point: action.data.script,
           binary: action.data.binary,
-          requirements: action.data.requirements === 'manual' ? {pip: action.data.pip} : null
+          requirements: action.data.requirements === 'manual' ? {pip: action.data.pip} : null,
+          diff: action.data.uncommited
         },
         hyperparams: {
           Args: action.data.args
@@ -1006,24 +1008,26 @@ export class CommonExperimentsViewEffects {
             }, {})
         },
         ...(action.data.output && {output_dest: action.data.output}),
-        ...((action.data.docker.image || action.data.taskInit) && {
           container: {
-            image: action.data.docker.image,
-            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venv ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? '-e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`.trimStart(),
-            setup_shell_script: action.data.docker.script
+            ...(action.data.docker.image && {
+              image: action.data.docker.image,
+              setup_shell_script: action.data.docker.script
+            }),
+            arguments: `${action.data.docker.args}${action.data.taskInit ? ' -e CLEARML_AGENT_FORCE_TASK_INIT=1' : ''}${action.data.poetry ? ' -e CLEARML_AGENT_FORCE_POETRY' : ''}${action.data.venv ? ' -e CLEARML_AGENT_SKIP_PIP_VENV_INSTALL=' + action.data.venv : ''}${action.data.requirements === 'skip' ? ' -e CLEARML_AGENT_SKIP_PYTHON_ENV_INSTALL=1' : ''}`
+              .concat(action.data.vars.map(v => ` -e ${v.key}:${v.value}`).join(''))
+              .trimStart(),
           }
-        })
-      }).pipe(
+        } as TasksCreateRequest).pipe(
         map((res: TasksCreateResponse) => exActions.createExperimentSuccess({data: {...action.data, id: res.id}, project: projectId}))
       )),
-      catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to create experiment.\n${this.errService.getErrorMsg(error.error)}`)])
+      catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to create tasks.\n${this.errService.getErrorMsg(error.error)}`)])
     );
   });
 
   createExperimentSuccess = createEffect(() => {
     return this.actions$.pipe(
       ofType(exActions.createExperimentSuccess),
-      map(action => addMessage(MESSAGES_SEVERITY.SUCCESS, `Successfully created experiment ${action.data.name}`, [{name: 'open experiment', actions: [exActions.openExperiment({id: action.data.id, project: action.project})]}]))
+      map(action => addMessage(MESSAGES_SEVERITY.SUCCESS, `Successfully created task ${action.data.name}`, [{name: 'open task', actions: [exActions.openExperiment({id: action.data.id, project: action.project})]}]))
     );
   });
 
@@ -1037,7 +1041,7 @@ export class CommonExperimentsViewEffects {
   openExperiment = createEffect(() => {
     return this.actions$.pipe(
       ofType(exActions.openExperiment),
-      map(action => this.router.navigate(['projects', action.project, 'experiments', action.id]))
+      map(action => this.router.navigate(['projects', action.project, 'tasks', action.id]))
     );
   }, {dispatch: false});
 
@@ -1052,7 +1056,7 @@ export class CommonExperimentsViewEffects {
       }).pipe(
         map(res => res.queue_watched === false ? menuActions.openEmptyQueueMessage({queue: action.data.queue, entityName: action.data.name}) : {type: 'EMPTY'})
       )),
-      catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to enqueue experiment.\n${this.errService.getErrorMsg(error.error)}`)])
+      catchError(error => [addMessage(MESSAGES_SEVERITY.ERROR, `Failed to enqueue tasks.\n${this.errService.getErrorMsg(error.error)}`)])
     );
   });
 }

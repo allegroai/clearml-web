@@ -1,34 +1,34 @@
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogClose} from '@angular/material/dialog';
 import {ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-abort-controller-dialog',
   templateUrl: './abort-controller-dialog.component.html',
   styleUrls: ['./abort-controller-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DialogTemplateComponent,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose
+  ],
+  standalone: true
 })
 export class AbortControllerDialogComponent {
-      public dialogRef = inject<MatDialogRef<AbortControllerDialogComponent>>(MatDialogRef<AbortControllerDialogComponent>);
+  protected data = inject<{
+    tasks: ISelectedExperiment[];
+    shouldBeAbortedTasks: ISelectedExperiment[];
+  }>(MAT_DIALOG_DATA);
+
   public experiments: ISelectedExperiment[];
   shouldBeAbortedTasks: ISelectedExperiment[] = null;
 
   constructor() {
-    const data = inject<{
-      tasks: ISelectedExperiment[];
-      shouldBeAbortedTasks: ISelectedExperiment[];
-    }>(MAT_DIALOG_DATA);
+    this.experiments = this.data.tasks;
+    this.shouldBeAbortedTasks = this.data.shouldBeAbortedTasks;
 
-    this.experiments = data.tasks;
-    this.shouldBeAbortedTasks = data.shouldBeAbortedTasks;
-
-  }
-
-  closeDialog(isConfirmed) {
-    if (isConfirmed) {
-      this.dialogRef.close({shouldBeAbortedTasks: this.shouldBeAbortedTasks});
-    } else {
-      this.dialogRef.close(null);
-    }
   }
 }

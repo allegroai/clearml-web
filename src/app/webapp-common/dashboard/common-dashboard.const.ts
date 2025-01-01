@@ -1,6 +1,6 @@
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
-export type TaskTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'started' | 'last_update' | 'user.name' | 'queue.name' | 'worker.name';
+export type TaskTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'started' | 'last_update' | 'user.name';
 export const CARDS_IN_ROW                  = 6;
 export const RECENT_TASKS_TABLE_COL_FIELDS = {
   RESULT     : 'output.result' as TaskTableColFieldsEnum,
@@ -13,8 +13,6 @@ export const RECENT_TASKS_TABLE_COL_FIELDS = {
   STARTED    : 'started' as TaskTableColFieldsEnum,
   LAST_UPDATE: 'last_update' as TaskTableColFieldsEnum,
   USER       : 'user.name' as TaskTableColFieldsEnum,
-  QUEUE      : 'queue.name' as TaskTableColFieldsEnum,
-  WORKER     : 'worker.name' as TaskTableColFieldsEnum
 };
 
 export const RECENT_EXPERIMENTS_TABLE_COLS: ISmCol[] = [

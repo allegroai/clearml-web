@@ -39,23 +39,23 @@ export const experimentsCompare = state => state.experimentsCompare;
 
 // Details
 export const experimentsDetails = createSelector(experimentsCompare, (state): ExperimentCompareDetailsState => state ? state.details : {});
-export const selectExperimentsDetails = createSelector(experimentsDetails, (state): Array<IExperimentDetail> => state.experiments);
-export const selectModelsDetails = createSelector(experimentsDetails, (state): Array<ModelDetail> => state.models);
+export const selectExperimentsDetails = createSelector(experimentsDetails, (state): IExperimentDetail[] => state.experiments);
+export const selectModelsDetails = createSelector(experimentsDetails, (state): ModelDetail[] => state.models);
 export const selectExperimentIdsDetails = createSelector(selectExperimentsDetails,
-  (experiments): Array<IExperimentDetail['id']> => experiments.map(exp => exp.id));
+  (experiments): IExperimentDetail['id'][] => experiments.map(exp => exp.id));
 export const selectModelIdsDetails = createSelector(selectModelsDetails,
-  (models): Array<ModelDetail['id']> => models.map(model => model.id));
+  (models): ModelDetail['id'][] => models.map(model => model.id));
 
 // Params
 export const experimentsParams = createSelector(experimentsCompare, (state): CompareParamsState => state ? state.params : {});
-export const selectExperimentsParams = createSelector(experimentsParams, (state): Array<ExperimentParams> => state.experiments);
+export const selectExperimentsParams = createSelector(experimentsParams, (state): ExperimentParams[] => state.experiments);
 export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
-  (experiments): Array<IExperimentDetail['id']> => experiments.map(exp => exp.id));
+  (experiments): IExperimentDetail['id'][] => experiments.map(exp => exp.id));
 
 
 // select experiments for compare and header
 export const selectCompareHeader = createSelector(experimentsCompare, state => (state?.compareHeader ?? {}) as CompareHeaderState);
-export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-experiments'));
+export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-tasks'));
 // export const selectIsSelectModel = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-models') || config?.includes('input-model'));
 export const selectIsModels = createSelector(selectRouterConfig, (config): boolean => config?.includes('models'));
 export const selectIsPipelines = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'pipelines');
@@ -85,7 +85,7 @@ export const selectCompareMetricsValuesSortConfig = createSelector(compareMetric
 
 // Charts
 export const compareCharts = createSelector(experimentsCompare, (state): IExperimentCompareChartsState => state ? state.charts : {});
-export const selectSelectedExperiments = createSelector(compareCharts, (state): Array<string> => state ? state.selectedExperiments : []);
+export const selectSelectedExperiments = createSelector(compareCharts, (state): string[] => state ? state.selectedExperiments : []);
 export const selectGlobalLegendData = createSelector(compareCharts, state => state.globalLegendData);
 export const selectCompareHistogramCacheAxisType = createSelector(compareCharts, state => state.cachedAxisType);
 export const selectCompareTasksPlotCharts = createSelector(compareCharts, state => state.metricsPlotsCharts);
@@ -97,7 +97,7 @@ export const selectSelectedExperimentSettings = createSelector(compareCharts, se
   (output, currentExperiments): ExperimentCompareSettings => output.settingsList?.find(setting => setting?.id?.join() === currentExperiments?.join()));
 
 export const selectSelectedSettingsHyperParams = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.selectedHyperParams);
+  (settings): string[] => settings?.selectedHyperParams);
 
 export const selectSelectedSettingsMetric = createSelector(selectSelectedExperimentSettings,
   (settings) => settings?.selectedMetric || null);
@@ -106,7 +106,7 @@ export const selectSelectedSettingsMetrics = createSelector(selectSelectedExperi
   (settings) => settings?.selectedMetrics || null);
 
 export const selectSelectedSettingsHyperParamsHoverInfo = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.selectedParamsHoverInfo || []);
+  (settings): string[] => settings?.selectedParamsHoverInfo || []);
 
 export const selectSelectedSettingsMetricsHoverInfo = createSelector(selectSelectedExperimentSettings,
   (settings) => settings?.selectedMetricsHoverInfo || null);
@@ -115,16 +115,16 @@ export const selectSelectedSettingsValueType = createSelector(selectSelectedExpe
   (settings) => settings?.valueType || 'value');
 
 export const selectSelectedSettingsHiddenScalar = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.hiddenMetricsScalar || []);
+  (settings): string[] => settings?.hiddenMetricsScalar || []);
 
 export const selectSelectedSettingsHiddenPlot = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.hiddenMetricsPlot || []);
+  (settings): string[] => settings?.hiddenMetricsPlot || []);
 
 export const selectSelectedMetricsSettingsScalar = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.selectedMetricsScalar || []);
+  (settings): string[] => settings?.selectedMetricsScalar || []);
 
 export const selectSelectedMetricsSettingsPlot = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => settings?.selectedMetricsPlot);
+  (settings): string[] => settings?.selectedMetricsPlot);
 
 
 export const selectExperimentMetricsSearchTerm = createSelector(compareCharts, (state) => state.searchTerm);

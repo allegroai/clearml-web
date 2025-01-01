@@ -6,19 +6,16 @@
     height: 100%;
     width: 100%;
     line-height: 1.6;
-
-    &.ace-monokai {
-      background-color: $blue-900;
-    }
+    background-color: var(--color-surface-container);
   }
 
-   .copy-button {
-     position: absolute;
-     right: 12px;
-     top: 12px;
-     z-index: 10;
-     opacity: 0;
-   }
+  .copy-button {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    z-index: 10;
+    opacity: 0;
+  }
 
   &:hover {
     .copy-button {

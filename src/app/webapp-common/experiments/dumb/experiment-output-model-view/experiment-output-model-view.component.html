@@ -1,18 +1,22 @@
 <div class="input-model-container">
-  <sm-labeled-row *ngIf="!editable" label="MODEL NAME">
-    <a [href]="'/projects/'+ ((model?.project?.id) ? model?.project?.id : '*')  + '/models/' + model?.id" target="_blank">
-      {{model?.name}}
-    </a>
-    <i *ngIf="model?.uri && !isLocalFile"
-       class="pointer al-icon al-ico-download sm-md ms-2"
-       (click)="artifactFilePathClicked(model.uri)"
-    ></i>
-    <sm-copy-clipboard
-      *ngIf="model?.uri && isLocalFile"
-      label=""
-      class="ps-2 light"
-      [clipboardText]="model.uri"
-      [hideBackground]="true"
-    ></sm-copy-clipboard>
-  </sm-labeled-row>
+  @if (!editable) {
+    <sm-labeled-row label="MODEL NAME">
+      <a [href]="'/projects/'+ ((model?.project?.id) ? model?.project?.id : '*')  + '/models/' + model?.id" target="_blank">
+        {{model?.name}}
+      </a>
+      @if (model?.uri && !isLocalFile) {
+        <i
+          class="pointer al-icon al-ico-download sm-md ms-2"
+          (click)="artifactFilePathClicked(model.uri)"
+        ></i>
+      }
+      @if (model?.uri && isLocalFile) {
+        <sm-copy-clipboard
+          label=""
+          class="ps-2"
+          [clipboardText]="model.uri"
+        ></sm-copy-clipboard>
+      }
+    </sm-labeled-row>
+  }
 </div>

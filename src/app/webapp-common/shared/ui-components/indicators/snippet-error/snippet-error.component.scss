@@ -1,12 +1,11 @@
-@import "variables";
-
 .frame {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   border-radius: 4px;
-  width: 180px;
-  height: 180px;
+  width: 176px;
+  height: 176px;
+  background-color: var(--color-surface-container-high);
 
   .labeled-icon {
     display: flex;
@@ -22,7 +21,7 @@
 
   .label,
   .file-path {
-    color: $blue-300;
+    color: var(--color-on-surface-variant);
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -61,41 +60,19 @@
       visibility: visible;
     }
   }
+  
+  .label {
+    color: var(--color-on-surface-variant);
+  }
 
-
-  // LIGHT THEME
-  // --------------------------
-
-  &.light-theme {
-    background-color: $blue-50;
-    .label {
-      color: $blue-500;
-    }
-    .clickable-icon {
-      color: $blue-500;
-      background-color: transparent;
-      transition: background-color 0.35s;
-      &:hover {
-        background-color: $blue-100;
-      }
+  .clickable-icon {
+    color: var(--color-on-surface-variant);
+    background-color: transparent;
+    transition: background-color 0.35s;
+    &:hover {
+      background-color: var(--color-surface-container-low);
     }
   }
 
-
-  // DARK THEME
-  // --------------------------
-
-  &.dark-theme {
-    background-color: $blue-700;
-    .label {
-      color: $blue-200;
-    }
-    .clickable-icon {
-      color: $blue-300;
-      &:hover {
-        background-color: $blue-500;
-      }
-    }
-  }
 
 }

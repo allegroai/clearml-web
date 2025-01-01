@@ -1,9 +1,9 @@
-@import '../../../shared/ui-components/styles/variables';
+@import "variables";
 
 :host {
 
   .header-container {
-    padding-left: 24px;
+    padding: 0 24px;
     height: 66px;
     transition: background-color 0.5s;
 
@@ -12,36 +12,13 @@
     }
 
     ::ng-deep button {
-      border-color: $blue-600;
+      border-color: var(--color-outline);
       box-shadow: none;
     }
 
     &.archive-mode {
       transition: background-color 0.5s;
-      background-color: #333746;
-
-      ::ng-deep button {
-        border-color: #636e97;
-        box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-      }
-    }
-    .right-buttons {
-      margin-right: 28px;
-      sm-custom-cols-menu {
-        margin-right: 25px;
-      }
-      sm-clear-filters-button {
-        margin-right: 24px;
-      }
-      .download-btn {
-        margin-right: 24px;
-        color: $blue-300;
-
-        &.disabled {
-          opacity: 0.6;
-          cursor: default;
-        }
-      }
+      background-color: var(--color-surface-variant);
     }
   }
 }

@@ -1,17 +1,13 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  ElementRef,
-  ChangeDetectorRef,
-  Renderer2,
-  inject, input, viewChild, effect, signal, computed
-} from '@angular/core';
-import {NgForm} from '@angular/forms';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, inject, input, Renderer2, signal, viewChild} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from '@angular/material/autocomplete';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {ActivatedRoute, Params, Router} from '@angular/router';
+import {NtkmeButtonComponent, NtkmeButtonModule} from '@ctrl/ngx-github-buttons';
+import {PushPipe} from '@ngrx/component';
 import {Store} from '@ngrx/store';
-import {EMPTY, Observable, Subscription} from 'rxjs';
-import {finalize, map, startWith, take, filter, mergeMap, catchError, switchMap, tap} from 'rxjs/operators';
+import {EMPTY, interval, Observable} from 'rxjs';
+import {catchError, filter, finalize, map, mergeMap, startWith, switchMap, take, takeWhile, tap} from 'rxjs/operators';
 import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
 import {LoginMode, loginModes} from '../../shared/services/login.service';
 import {selectInviteId} from '../login-reducer';
@@ -23,15 +19,37 @@ import {UserPreferences} from '../../user-preferences';
 import {setBreadcrumbs} from '@common/core/actions/router.actions';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {userThemeChanged} from '@common/core/actions/layout.actions';
+import {selectUserTheme} from '@common/core/reducers/view.reducer';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {NgOptimizedImage} from '@angular/common';
+import {MatFormField, MatLabel} from '@angular/material/form-field';
+import {MatInput} from '@angular/material/input';
+import {MatButton} from '@angular/material/button';
 
 
 @Component({
   selector: 'sm-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatAutocompleteTrigger,
+    MatProgressSpinner,
+    MatAutocomplete,
+    MatOption,
+    PushPipe,
+    NtkmeButtonModule,
+    NgOptimizedImage,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatButton
+  ]
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent {
   private router = inject(Router);
   private loginService = inject(LoginService);
   private dialog = inject(MatDialog);
@@ -42,41 +60,66 @@ export class LoginComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private ref = inject(ElementRef);
   private renderer = inject(Renderer2);
+  private destroy = inject(DestroyRef);
 
   showSimpleLogin = input<boolean>();
   hideTou = input<boolean>();
-  darkTheme = input(true);
-  private loginForm = viewChild<NgForm>('loginForm');
+  showBackground = input(true);
   private nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
+  private githubButton = viewChild(NtkmeButtonComponent);
   protected environment = this.config.configuration;
+  protected loginMode = this.loginService.loginMode;
 
   protected showLogin = computed(() => this.showSimpleLogin() || [loginModes.password, loginModes.simple].includes(this.loginMode()));
 
   protected isInvite = this.router.url.includes('invite');
-  loginModel: { name: any; password: any } = {
-    name: '',
-    password: ''
-  };
+  protected loginForm = new FormGroup({
+    name: new FormControl<string>('', [Validators.required, Validators.minLength(1), Validators.maxLength(70), Validators.pattern(/.*\S.*/)]),
+    password: new FormControl<string>('', [Validators.minLength(1)]),
+  });
 
   options: any[] = [];
-  filteredOptions: Observable<any[]>;
-  userChanged: Subscription;
-  private sub = new Subscription();
+  filteredOptions$: Observable<any[]>;
   public loginModeEnum = loginModes;
 
   protected loginFailed = signal(false);
   protected showSpinner = signal<boolean>(null);
-  loginMode = signal<LoginMode>(null);
   protected loginTitle = signal<string>(this.isInvite ? '' : 'Login');
   touLink = computed(() => this.environment().legal.TOULink);
   protected notice = computed(() => this.environment().loginNotice);
   protected showGitHub = computed(() => !this.environment().enterpriseServer && !this.environment().communityServer);
   private redirectUrl: string;
 
+  private theme = this.store.selectSignal(selectUserTheme);
+  private originalTheme = signal(this.theme());
+
+  get buttonCaption() {
+    return this.loginMode() === loginModes.simple ? 'START' : 'LOGIN';
+  }
+
   constructor() {
+    this.setTheme(this.environment().communityServer ? 'light' : 'dark');
+
+    this.store.dispatch(setBreadcrumbs({
+      breadcrumbs: [[{
+        name: 'Login',
+        type: CrumbTypeEnum.Feature
+      }]]}));
+
     if (!this.environment().communityServer) {
       this.renderer.addClass(this.ref.nativeElement, 'dark-theme');
     }
+
+    toObservable(this.githubButton)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap(() => interval(100)),
+        filter(() => !!this.githubButton()?.counter),
+        tap(() => this.cdr.markForCheck()),
+        takeWhile(() => !this.githubButton()?.counter),
+      )
+      .subscribe();
+
     effect(() => {
       this.nameInput()?.nativeElement.focus();
     });
@@ -87,21 +130,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         filter(user => !!user),
       )
       .subscribe(() => {
-        this.openLoginNotice();
         this.router.navigateByUrl(this.getNavigateUrl());
       });
-  }
-
-  get buttonCaption() {
-    return this.loginMode() === loginModes.simple ? 'START' : 'LOGIN';
-  }
-
-  ngOnInit() {
-    this.store.dispatch(setBreadcrumbs({
-      breadcrumbs: [[{
-        name: 'Login',
-        type: CrumbTypeEnum.Feature
-      }]]}));
 
     this.store.select(selectInviteId).pipe(
       filter(invite => !!invite),
@@ -111,8 +141,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       const shorterName = inviteInfo.user_given_name || inviteInfo.user_name?.split(' ')[0];
       this.loginTitle.set(!shorterName ? '' : `Accept ${shorterName ? shorterName + '\'s' : ''} invitation and
       join their team`);
-      this.cdr.detectChanges();
     });
+
     this.route.queryParams
       .pipe(
         filter(params => !!params),
@@ -123,62 +153,55 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.redirectUrl = this.redirectUrl.replace('/login', '/dashboard');
       });
 
-    this.sub.add(this.loginService.getLoginMode().pipe(
-      catchError(() => {
-        this.loginMode.set(this.config.configuration().onlyPasswordLogin ? loginModes.error : loginModes.simple);
-        return EMPTY;
-      }),
-      finalize(() => {
-        if (this.loginMode() === loginModes.simple) {
-          this.loginService.getUsers()
-            .pipe(take(1))
-            .subscribe(users => {
-              this.options = users;
-              this.cdr.detectChanges();
-            });
-          if (this.environment().autoLogin && this.redirectUrl && !['/dashboard'].includes(this.redirectUrl)) {
-            this.loginForm().controls['name'].setValue((new Date()).getTime().toString());
-            this.simpleLogin()
+    this.loginService.getLoginMode()
+      .pipe(
+        takeUntilDestroyed(),
+        finalize(() => {
+          if (this.loginMode() === loginModes.simple) {
+            this.loginService.getUsers()
               .pipe(take(1))
-              .subscribe();
+              .subscribe(users => {
+                this.options = users;
+                this.cdr.markForCheck();
+              });
+            if (this.environment().autoLogin && this.redirectUrl && !['/dashboard'].includes(this.redirectUrl)) {
+              this.loginForm.controls['name'].setValue((new Date()).getTime().toString());
+              this.simpleLogin()
+                .pipe(take(1))
+                .subscribe();
+            }
           }
-        }
-      }))
+        }))
       .subscribe((loginMode: LoginMode) => {
-        this.loginMode.set(loginMode);
-        this.cdr.detectChanges();
-      })
-    );
+        if (loginMode === loginModes.password) {
+          this.loginForm.controls['password'].addValidators(Validators.required);
+        }
+        this.cdr.markForCheck();
+      });
 
-    setTimeout(() => {
-      if (!this.loginForm()?.controls['name']) {
-        return;
-      }
+    this.filteredOptions$ = this.loginForm.controls.name.valueChanges
+      .pipe(
+        startWith(''),
+        map(value => this._filter(value))
+      );
 
-      this.filteredOptions = this.loginForm().controls['name'].valueChanges
-        .pipe(
-          startWith(''),
-          map(value => this._filter(value))
-        );
+    // this.loginForm.controls.name.valueChanges
+    //   .pipe(takeUntilDestroyed())
+    //   .subscribe((val: string) => {
+    //     this.loginForm.value.name = val.trim();
+    //     this.cdr.detectChanges();
+    //   });
 
-      this.userChanged = this.loginForm().controls['name'].valueChanges
-        .subscribe((val: string) => {
-          this.loginModel.name = val.trim();
-          this.cdr.detectChanges();
-        });
+    this.destroy.onDestroy(() => {
+      this.setTheme(this.originalTheme());
     });
-
-  }
-
-  ngOnDestroy() {
-    this.userChanged?.unsubscribe();
   }
 
   login() {
     this.showSpinner.set(true);
     if (this.loginMode() === loginModes.password) {
-      const user = this.loginModel.name.trim();
-      const password = this.loginModel.password.trim();
+      const user = this.loginForm.controls.name.value.trim();
+      const password = this.loginForm.controls.password.value.trim();
       this.loginService.passwordLogin(user, password)
         .pipe(
           catchError(() => {
@@ -202,14 +225,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   simpleLogin() {
-    const user = this.options.find(x => x.name === this.loginModel.name);
+    const userName = this.loginForm.controls.name.value.trim();
+    const user = this.options.find(x => x.name === userName);
     if (user) {
       return this.loginService.login(user.id)
         .pipe(
           switchMap(() => this.afterLogin())
         );
     } else {
-      const name = this.loginModel.name.trim();
+      const name = this.loginForm.value.name.trim();
       return this.loginService.autoLogin(name)
         .pipe(
           switchMap(() => this.afterLogin())
@@ -226,7 +250,10 @@ export class LoginComponent implements OnInit, OnDestroy {
           return this.router.navigateByUrl(this.getNavigateUrl());
         }),
         map(res => this.store.dispatch(setPreferences({payload: res}))),
-        tap(() => this.store.dispatch(fetchCurrentUser())),
+        tap(() => {
+          this.store.dispatch(fetchCurrentUser());
+          this.openLoginNotice();
+        }),
       );
   }
 
@@ -248,9 +275,14 @@ export class LoginComponent implements OnInit, OnDestroy {
         data: {
           body: this.environment().loginPopup,
           yes: 'OK',
-          iconClass: 'i-alert'
+          iconClass: 'al-ico-alert',
+          iconColor: 'var(--color-warning)'
         }
       });
     }
+  }
+
+  private setTheme(theme: 'light' | 'dark' | 'system') {
+    this.store.dispatch(userThemeChanged({theme}));
   }
 }

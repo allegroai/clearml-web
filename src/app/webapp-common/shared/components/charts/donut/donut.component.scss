@@ -1,22 +1,3 @@
-@import "variables";
-
-::ng-deep .dark-theme {
-  .legend-entry-name, .legend-entry-value {
-    fill: $blue-250;
-  }
-
-  .donut-text {
-    fill: $blue-250;
-
-    tspan:nth-child(3) {
-      stroke: $blue-800;
-      stroke-width: 0.5px;
-      font-weight: 500;
-      pointer-events: none;
-    }
-  }
-}
-
 .content {
   display: grid;
   grid-auto-rows: 1fr minmax(auto, 33%);
@@ -33,16 +14,15 @@
 
   .slice {
     margin: 6px 12px;
-    color: $blue-300;
     display: inline-flex;
     align-items: center;
     gap: 6px;
 
     &.highlight {
-      color: $blue-200;
+      color: var(--color-secondary);
 
       .circle {
-        box-shadow: 0 0 0 2px $blue-950, 0 0 0 3px var(--sliceColor);
+        box-shadow: 0 0 0 2px var(--color-surface-container-low), 0 0 0 3px var(--sliceColor);
       }
     }
   }
@@ -52,7 +32,7 @@
     height: 10px;
     border-radius: 50%;
     background-color: var(--sliceColor);
-    box-shadow: 0 0 0 2px $blue-950, 0 0 0 3px transparent;
+    box-shadow: 0 0 0 2px var(--color-surface-container-low), 0 0 0 3px transparent;
     cursor: url(../../../../assets/icons/pallete-cursor.svg) 6 0, pointer;
     transition: box-shadow 0.2s;
     &::after {
@@ -64,7 +44,7 @@
   }
 
   .quantity {
-    color: $blue-200;
+    color: var(--color-on-surface);
   }
 }
 
@@ -85,7 +65,7 @@
 
     .caption {
       font-size: 16px;
-      background-color: $blue-950;
+      background-color: var(--color-surface-container-lowest);
       border-radius: 6px;
       padding: 0 8px;
     }

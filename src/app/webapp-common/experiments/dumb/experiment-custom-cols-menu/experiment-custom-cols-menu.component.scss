@@ -1,46 +1,17 @@
-@import 'variables';
-
-.add-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px;
-}
-
 .custom-column-buttons {
   display: flex;
   font-weight: 500;
-  color: $purple;
   cursor: pointer;
   font-size: 14px;
-
-  div:not(.disabled):hover {
-    color: $blue-300;
-    transition: color 0.3s;
-  }
+  gap: 12px;
+  padding: 6px 12px;
 
   .metrics-button {
-    width: 50%;
+    flex: 1;
     white-space: nowrap;
-
-    &.only-one-section {
-      width: 100%;
-    }
 
     .caption {
       margin-top: 4px;
-    }
-    &:first-child:not(.only-one-section) {
-      border-right: 1px solid $blue-200;
-    }
-  }
-}
-
-.dark {
-  .custom-column-buttons .metrics-button {
-    color: $blue-300;
-    &:hover {
-      color: $blue-200;
     }
   }
 }
@@ -62,7 +33,7 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  height: 100px;
+  height: 102px;
 }
 
 .disabled {
@@ -70,6 +41,18 @@
   cursor: default;
 }
 
-.custom-columns-disabled {
-  pointer-events: none;
+.sm-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: normal;
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-outline-variant);
+  font-size: 14px;
+  min-height: 48px;
+}
+
+sm-custom-columns-list {
+  display: block;
+  border-bottom: 1px solid var(--color-outline-variant);
 }

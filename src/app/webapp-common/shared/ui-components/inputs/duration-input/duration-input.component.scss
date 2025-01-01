@@ -1,10 +1,4 @@
-@import "variables";
-
 :host {
-  //padding-right: 10px;
-  //padding-left: 4px;
-  //background-color: #000000;
-  //border-radius: 4px;
   width: 190px;
   text-align: center;
 
@@ -22,14 +16,14 @@
 
     .inputs-container {
       background: black;
-      padding: 0px 12px;
+      padding: 0 12px;
       border-radius: 4px;
       position: relative;
       display: inline-block;
 
       .separator {
         line-height: 32px;
-        color: $blue-300;
+        color: var(--color-surface-container);
 
         &:last-child {
           padding-right: 0;
@@ -37,8 +31,6 @@
       }
 
       .submit {
-        background: $blue-500;
-        color: #fff;
         border-radius: 30px;
         border: none;
         display: flex;

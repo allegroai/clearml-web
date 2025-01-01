@@ -1,17 +1,23 @@
-@import "variables";
-
-
 :host {
+  display: block;
+
   .body {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
     grid-gap: 12px;
+    align-items: normal;
+  }
+  sm-editable-section.in-edit{
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
   }
 
   .header {
     margin-right: -24px;
+
     .cell {
-      border-bottom: 2px solid $blue-100;
+      border-bottom: 1px solid var(--color-outline-variant);
     }
   }
 
@@ -24,7 +30,7 @@
     flex: 1;
     height: 48px;
     line-height: 48px;
-    border-bottom: 1px solid $blue-50;
+    border-bottom: 1px solid var(--color-outline-variant);
     font-weight: 500;
 
     &:last-child {
@@ -40,7 +46,7 @@
   }
 
   form.edit {
-    height: calc(100% - 96px);
+    //height: calc(100% - 96px);
   }
 
   .content {
@@ -48,19 +54,11 @@
     overflow: auto;
   }
 
-  .trash {
-    width: 48px;
-    height: 33px;
-  }
-
-  .plus {
-    width: 48px;
-  }
   .outside-error {
     position: absolute;
     top: 35px;
     left: 90px;
     font-size: 11px;
-    color: red;
+    color: var(--color-error);
   }
 }

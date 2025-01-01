@@ -1,24 +1,23 @@
-<div [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation
-     class="p-0 cell menu-button al-icon al-color blue-300 al-ico-bars-menu"
-></div>
+<button mat-icon-button [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
+  <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
+</button>
 <mat-menu #pipelinesMenu="matMenu">
   <button mat-menu-item (click)="rename.emit()">
-    <i class="al-icon sm-md" [class]="icons.EDIT"></i>Rename
+    <mat-icon fontSet="al" [fontIcon]="icons.EDIT"></mat-icon>Rename
   </button>
   <button mat-menu-item [matMenuTriggerFor]="tagsMenu.matMenu">
-    <i class="al-icon sm-md" [class]="icons.TAG"></i>Add Tag
+    <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>Add Tag
   </button>
   <hr>
   <button mat-menu-item (click)="delete.emit()">
-    <i class="al-icon sm-md" [class]="icons.REMOVE"></i>Delete
+    <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>Delete
   </button>
 </mat-menu>
 <sm-tags-menu
   #tagsMenu
-  class="light-theme"
-  [tags]="project?.tags"
+  [tags]="project()?.tags"
   [tagsFilterByProject]="true"
-  [projectTags]="allTags"
+  [projectTags]="allTags()"
   [companyTags]="null"
   (tagSelected)="addTag.emit($event)">
 </sm-tags-menu>

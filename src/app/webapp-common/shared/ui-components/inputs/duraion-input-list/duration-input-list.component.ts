@@ -15,7 +15,7 @@ import {MatInputModule} from '@angular/material/input';
 import {
   KeydownStopPropagationDirective
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
-import {NgForOf, NgIf} from '@angular/common';
+
 import {trackByIndex} from '@common/shared/utils/forms-track-by';
 
 export type DURATION_INPUT_TYPE = 'hours' | 'seconds' | 'ms' | 'days' | 'minutes';
@@ -42,7 +42,7 @@ export class DurationInput implements DurationInputInterface {
   }
 }
 
-export function durationInputFactory(values: Array<DURATION_INPUT_TYPE | DurationInput | DurationInputInterface>): DurationInput[] {
+export function durationInputFactory(values: (DURATION_INPUT_TYPE | DurationInput | DurationInputInterface)[]): DurationInput[] {
 
   if (!values && values.length === 0) { return null; }
 
@@ -53,12 +53,12 @@ export function durationInputFactory(values: Array<DURATION_INPUT_TYPE | Duratio
 
   // strings = ['ms', 'minutes', 'days']
   if (isUndefined((values[0] as DurationInputInterface).type)) {
-    return (values as unknown as Array<DURATION_INPUT_TYPE>).map( (value) => new DurationInput(value) );
+    return (values as unknown as DURATION_INPUT_TYPE[]).map( (value) => new DurationInput(value) );
   }
 
   // an object {type: 'ms'}
   if (!isUndefined((values[0] as DurationInputInterface).type)) {
-    return (values as unknown as Array<DurationInputInterface>).map( value => new DurationInput(value.type, value.placeholder, value.maxLength));
+    return (values as unknown as DurationInputInterface[]).map( value => new DurationInput(value.type, value.placeholder, value.maxLength));
   }
 
   return null;
@@ -80,15 +80,13 @@ export function durationInputFactory(values: Array<DURATION_INPUT_TYPE | Duratio
     TooltipDirective,
     FormsModule,
     MatInputModule,
-    KeydownStopPropagationDirective,
-    NgIf,
-    NgForOf
-  ]
+    KeydownStopPropagationDirective
+]
 })
 export class DurationInputListComponent extends DurationInputBase implements OnChanges {
   @ViewChildren('inputRef') private elReference: QueryList<ElementRef>;
 
-  @Input() set inputs(inputs: Array<DURATION_INPUT_TYPE | DurationInput | DurationInputInterface> ) {
+  @Input() set inputs(inputs: (DURATION_INPUT_TYPE | DurationInput | DurationInputInterface)[] ) {
     this.data = durationInputFactory(inputs);
     this.data.forEach( input => this.hasTimes[input.type] = true)
   }
@@ -96,7 +94,7 @@ export class DurationInputListComponent extends DurationInputBase implements OnC
   @Input() durationValue;  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
 
   @Output() onResetIcon = new EventEmitter<null>();
-  data: Array<DurationInput>;
+  data: DurationInput[];
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.durationValue) {

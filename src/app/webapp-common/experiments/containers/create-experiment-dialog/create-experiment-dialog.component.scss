@@ -1,12 +1,38 @@
 @import "variables";
 
 :host {
+  --mat-expansion-container-shape: 0;
+  --mat-expansion-header-text-weight: normal;
+
   ::ng-deep .generic-container {
     padding: 32px 24px 0 !important;
+    --mat-stepper-container-color: transparent;
   }
 }
 
-form {
+.mat-expansion-panel {
+  .mat-expansion-panel-header {
+    border-radius: unset;
+    border-bottom: 1px solid var(--color-outline-variant);
+    padding: 16px 24px 0 0;
+  }
+
+  &.mat-expanded {
+    --mat-expansion-container-background-color: transparent;
+
+    .mat-expansion-panel-header {
+      padding: 16px 24px 0 0;
+      border-bottom: initial;
+    }
+
+    ::ng-deep .mat-expansion-panel-body {
+      padding-left: 0;
+    }
+  }
+}
+
+
+form, .edit-section {
   height: calc(94vh - 345px);
   max-height: 520px;
   overflow: auto;
@@ -16,19 +42,17 @@ form {
 h5 {
   font-size: 14px;
   font-weight: normal;
-  color: $blue-500;
+  color: var(--color-on-surface-variant);
   margin: 24px 0 6px;
 }
 
 section {
-  border-top: 1px solid $blue-300;
+  border-top: 1px solid var(--color-outline-variant);
   padding-bottom: 24px;
 }
 
 code {
   font-family: $font-family-monospace;
-  background-color: $blue-50;
-  border: 1px solid $blue-100;
   border-radius: 4px;
   margin: 0 4px;
   padding: 2px 4px;
@@ -47,8 +71,8 @@ mat-form-field {
   margin-left: 16px;
 }
 
-.git .mat-mdc-form-field:first-child {
-  width: 150px;
+.git > .mat-mdc-form-field:first-child {
+  width: 180px;
 }
 
 .checkbox {
@@ -63,9 +87,8 @@ mat-form-field {
   padding: 6px;
 }
 
-.te {
-  color: $blue-100;
-  background-color: $blue-900;
+.text {
+  background-color: var(--color-surface-container-low);
 }
 
 .args-inputs {
@@ -75,20 +98,23 @@ mat-form-field {
   gap: 12px;
 }
 
-.d-flex.gap {
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
 .buttons {
   margin: 24px 0 12px;
   display: flex;
   gap: 12px;
 }
 
-.add-argument {
-  display: inline-flex;
-  align-items: center;
-  color: $purple;
-  gap: 2px;
+sm-code-editor {
+  display: block;
+  height: calc(100% - 90px);
+}
+
+.mat-mdc-form-field {
+  button {
+    height: 26px;
+    padding: 0 12px;
+  }
+}
+.mat-expansion-panel .mat-expansion-panel-header:not([aria-disabled="true"]).cdk-keyboard-focused, .mat-expansion-panel .mat-expansion-panel-header:not([aria-disabled="true"]).cdk-program-focused {
+  background: inherit;
 }

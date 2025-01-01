@@ -10,19 +10,32 @@
     (focusout)="onSearchFocusOut()"
     (valueChanged)="search($event)"
   >
-    <i *ngIf="regexError" class="regexp al-icon al-ico-error-circle pointer" [smTooltip]="regexError" [matTooltipPosition]="'below'"></i>
-    <i
-      class="regexp al-ico-regex pointer"
-      data-id="enableRegexButton"
+    @if (regexError) {
+      <mat-icon class="error regexp" fontSet="al" fontIcon="al-ico-error-circle" inline [smTooltip]="regexError" [matTooltipPosition]="'below'"></mat-icon>
+    }
+    <button mat-icon-button
+      class="regexp sm"
+      [class.active]="regExp"
       smClickStopPropagation
       [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
-      [class.active]="regExp"
-      (click)="toggleRegExp(); searchComponent.searchBarInput.nativeElement.focus();"></i>
+      (click)="toggleRegExp(); searchComponent.searchBarInput.nativeElement.focus();"
+      >
+        <mat-icon fontSet="al" fontIcon="al-ico-regex" data-id="enableRegexButton"></mat-icon>
+      </button>
   </sm-search>
 </span>
-<ng-container *ngIf="searchActive">
-  <i *ngIf="(isSearching$ | ngrxPush); else searchIcon" class="al-icon al-ico-dialog-x pointer" data-id="closeSearchButton" (click)="clearSearch()" smClickStopPropagation></i>
-  <ng-template #searchIcon>
-    <i class="al-icon al-ico-search pointer" (click)="openSearch()" data-id="searchIcon"></i>
-  </ng-template>
-</ng-container>
+@if (searchActive) {
+  @if ((isSearching$ | ngrxPush)) {
+    <button mat-icon-button (click)="clearSearch()" smClickStopPropagation>
+      <mat-icon
+        fontSet="al"
+        fontIcon="al-ico-dialog-x"
+        data-id="closeSearchButton">
+      </mat-icon>
+    </button>
+  } @else {
+    <button mat-icon-button (click)="openSearch()" data-id="searchIcon">
+      <mat-icon fontSet="al" fontIcon="al-ico-search" data-id="search Icon"></mat-icon>
+    </button>
+  }
+}

@@ -1,48 +1,47 @@
-@import "variables";
+mat-drawer-container {
+  width: 100%;
+}
 
-mat-drawer {
-    background-color: #ffffff;
-  }
+mat-drawer-container {
+  --mat-sidenav-container-background-color: var(--color-surface-container-lowest);
+  --mat-sidenav-container-divider-color: var(--color-surface-container-high);
+}
 
-  mat-drawer-container {
-    width: 100%;
-  }
+.hover-button-container {
+  position: relative;
+  left: 30px;
+  top: 20px;
+}
 
-  .hover-button-container {
-    position: relative;
-    left: 30px;
-    top: 20px;
-  }
+.close {
+  cursor: pointer;
+  position: absolute;
+  right: 8px;
+  top: 4px;
+  z-index: 1;
+}
 
-  .close {
-    cursor: pointer;
-    position: absolute;
-    right: 8px;
-    top: 6px;
-    z-index: 1;
+.hover-button {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 14;
+  &.right {
+    left: auto;
+    right: 30px;
   }
-
-  .hover-button {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    z-index: 14;
-    &.right {
-      left: auto;
-      right: 30px;
-    }
-    button {
-      padding: 6px;
-      display: flex;
-      align-items: center;
-    }
+  button {
+    padding: 6px;
+    display: flex;
+    align-items: center;
   }
-  ::ng-deep .no-output {
-    text-align: center;
-    color: $cloudy-blue-two;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: block;
-  }
+}
+::ng-deep .no-output {
+  text-align: center;
+  color: var(--color-on-surface-container);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+}

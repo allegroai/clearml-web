@@ -1,4 +1,3 @@
-@import "variables";
 
 :host {
   position: relative;
@@ -8,7 +7,6 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
-    background-color: white;
     transition: transform 0.5s;
 
     button {
@@ -31,23 +29,7 @@
     }
   }
 
-  ::ng-deep .btn-arrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-  }
 
-  ::ng-deep #refreshIcon .btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    background-color: #e4e5e8;
-    font-size: 15px;
-    color: #9aa5cd;
-    margin: 0 5px;
-
-  }
 }
 
 .header-container {
@@ -56,8 +38,8 @@
   align-items: center;
   height: 100%;
   padding: 0 24px;
-  border-top: 1px solid $blue-50;
-  border-bottom: 1px solid $blue-50;
+  border-top: 1px solid var(--color-surface);
+  border-bottom: 1px solid var(--color-surface);
 
   .actions-container {
     display: flex;
@@ -69,29 +51,36 @@
     }
   }
 
+  .view-mode-select {
+    width: 220px;
+  }
+
   .settings {
     display: flex;
     align-items: center;
-    gap: 24px;
 
     .export-button {
       line-height: 11px;
       padding: 0;
-      color: $blue-400;
+      color: var(--color-on-surface-variant);
     }
   }
 
-  .btn-add-experiment {
+  .add-experiment {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 0 16px;
-    background-color: $blue-50;
-    border-radius: 4px 0 0 4px;
+    border-right: 1px solid var(--color-primary-fixed-dim);
+    border-radius: var(--mdc-filled-button-container-shape) 0 0 var(--mdc-filled-button-container-shape);
     &.plus {
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 var(--mdc-filled-button-container-shape) var(--mdc-filled-button-container-shape) 0;
       padding: 0 12px;
-      margin-left: -1px;
+      min-width: 36px;
+      border-left: var(--color-outline) 1px solid;
+      .mat-icon {
+        margin: unset;
+      }
     }
     &:focus {
       position: relative;

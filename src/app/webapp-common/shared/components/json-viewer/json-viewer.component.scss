@@ -20,6 +20,7 @@ $type-colors: (
   height: 100%;
   overflow: auto;
   position: relative;
+  --mat-tree-node-min-height: 24px;
 
   .segment {
     padding: 2px;
@@ -32,9 +33,8 @@ $type-colors: (
         position: absolute;
         margin-left: -24px;
         line-height: 16px;
-        color: $blue-300;
         &:hover {
-          color: $blue-100;
+          color: var(--color-on-surface-variant);
         }
         &::after {
           display: inline-block;
@@ -56,15 +56,15 @@ $type-colors: (
       }
 
       .segment-key {
-        color: #4E187C;
+        color: #8249ac;
       }
 
       .segment-separator {
-        color: #999;
+        color: var(--color-on-surface-variant);
       }
 
       .segment-value {
-        color: #000;
+        color: var(--color-on-surface);
       }
     }
 
@@ -75,19 +75,18 @@ $type-colors: (
 
   .found {
     &::selection {
-      background-color: $white;
-      color: darken($neon-yellow, 20%);
+      color: var(--color-tertiary-container);
+      background-color: var(--color-on-tertiary-container);
     }
-
-    background-color: lighten($neon-yellow, 20%);
+    background-color: var(--color-tertiary-container);
     border-radius: 4px;
     padding: 0 2px;
-  }
-  .current .found{
-    background-color: lighten($orangada, 10%);
-    &::selection {
-      background-color: $white;
-      color: darken($orangada, 10%);
+    &.current {
+      background-color: var(--color-warning);
+      &::selection {
+        background-color: var(--color-surface-container-lowest);
+        color: var(--color-warning);
+      }
     }
   }
 
@@ -103,10 +102,10 @@ $type-colors: (
   }
   .segment-type-undefined > .segment-main {
     & > .segment-key {
-      color: #999;
+      color: var(--color-on-surface-variant);
     }
     & > .segment-value {
-      background-color: #999;
+      background-color: var(--color-on-surface-variant);
     }
   }
   .segment-type-object > .segment-main,
@@ -121,7 +120,7 @@ $type-colors: (
   }
 
   mat-tree-node {
-    --mat-tree-node-text-size: 13px;
+    --mat-tree-node-text-size: 12px;
     --mat-tree-node-text-font: #{$font-family-monospace};
     line-height: normal;
   }
@@ -134,7 +133,7 @@ $type-colors: (
 
 
       .segment-key {
-        color: $blue-250 !important;
+        color: #A4ADCD !important;
       }
     }
   }

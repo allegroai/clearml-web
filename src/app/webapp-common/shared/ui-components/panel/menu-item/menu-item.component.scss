@@ -1,3 +1,8 @@
+.item-container {
+  display: flex;
+  align-items: center;
+}
+
 .item-label {
   display: flex;
   align-items: center;
@@ -9,17 +14,12 @@
 }
 
 .remove-button {
-  margin-left: auto;
   opacity: 0;
   transition: opacity 0.2s;
-  display: flex;
 }
 
-:host {
-  &:hover {
-
-    .remove-button {
-      opacity: 1;
-    }
+:host:hover {
+  .remove-button {
+    opacity: 1;
   }
 }

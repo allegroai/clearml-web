@@ -1,11 +1,9 @@
-@import "variables";
-
 sm-projects-header {
   height: 64px;
   grid-column: 1 / -1;
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: $blue-800;
+  background-color: var(--color-surface);
   margin-bottom: -12px;
 }

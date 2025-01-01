@@ -166,7 +166,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     on(actions.setNoMoreExperiments, (state, action): ExperimentsViewState => ({...state, noMoreExperiment: action.hasMore})),
     on(actions.setCurrentScrollId, (state, action): ExperimentsViewState => ({...state, scrollId: action.scrollId})),
     on(actions.setHyperParamsFiltersPage, (state, action): ExperimentsViewState => ({...state, hyperParamsFiltersPage: action.page})),
-    on(actions.setSelectedExperiment, (state, action): ExperimentsViewState => ({...state, selectedExperiment: action.experiment})),
+    on(actions.setSelectedExperiment, (state, action): ExperimentsViewState => ({...state, selectedExperiment: action.experiment ?? null})),
     on(actions.setSelectedExperiments, (state, action): ExperimentsViewState => ({
       ...state,
       selectedExperiments: action.experiments,

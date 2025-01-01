@@ -5,8 +5,7 @@ import {
 import {ActivatedRoute} from '@angular/router';
 import {selectSelectedModel} from '@common/models/reducers';
 import {
-  experimentScalarRequested,
-  setExperimentSettings
+  experimentScalarRequested
 } from '@common/experiments/actions/common-experiment-output.actions';
 import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -17,7 +16,7 @@ import {
   selectModelSettingsSmoothType,
   selectModelSettingsSmoothWeight,
   selectModelSettingsXAxisType, selectSelectedSettingsModelTableMetric,
-  selectSelectedSettingsTableMetric,
+
 } from '@common/experiments/reducers';
 import {isEqual} from 'lodash-es';
 
@@ -69,6 +68,5 @@ export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent 
 
   protected override axisChanged() {
     this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, model: true}));
-    this.experimentGraphs.prepareRedraw();
   }
 }

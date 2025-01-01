@@ -20,11 +20,11 @@
           </span>
         </span>
       }
-      <span [smTooltip]="label" smShowTooltipIfEllipsis class="label-text ellipsis" data-id="labelName">{{label}}</span>
+      <span [smTooltip]="label" smShowTooltipIfEllipsis class="label-text ellipsis" data-id="labelName" [style.color]="textColor">{{label}}</span>
       @if (allowRemove) {
-        <span class="pointer" (mousedown)="$event.stopPropagation(); $event.preventDefault()" (click)="remove.emit($event); $event.stopPropagation()">
-          <i class="al-icon al-ico-dialog-x xs pointer" data-id="annotation cross button" ></i>
-        </span>
+        <button mat-icon-button class="xs" [style.color]="textColor" (click)="remove.emit($event); $event.stopPropagation()">
+          <mat-icon fontSet="al" fontIcon="al-ico-dialog-x" data-id="annotation cross button"></mat-icon>
+        </button>
       }
     </span>
   </div>

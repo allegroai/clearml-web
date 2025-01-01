@@ -6,26 +6,26 @@
   [simple]="true"
   [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: lines(), itemSize: 32}"
   [virtualScroll]="true"
-  [rowHeight]="32"
+  [rowHeight]="36"
   [selectionMode]="null"
   [columnResizeMode]="'fit'"
-
->
+  >
   <ng-template let-col let-row="rowData" pTemplate="body">
-    <ng-container [ngSwitch]="col.id">
-      <div *ngSwitchCase="'created'">
-        {{ row?.[col.id] | date:'MMM d yyyy H:mm' }}
-      </div>
-      <ng-container *ngSwitchCase="'operation'">
+    @switch (col.id) {
+      @case ('created') {
+        <div>
+          {{ row?.[col.id] | date:'MMM d yyyy H:mm' }}
+        </div>
+      }
+      @case ('operation') {
         <div>{{OPERATIONS[row.operation]?? (row.operation | titlecase)}}</div>
-      </ng-container>
-      <ng-container *ngSwitchCase="'user'">
+      }
+      @case ('user') {
         <div>{{ row.user?.name }}</div>
-      </ng-container>
-      <ng-container *ngSwitchDefault>
+      }
+      @default {
         <span class="ellipsis" [matTooltipShowDelay]="500" [smTooltip]="row?.[col.id]" smShowTooltipIfEllipsis>{{ row?.[col.id] }}</span>
-      </ng-container>
-    </ng-container>
-
+      }
+    }
   </ng-template>
 </sm-table>

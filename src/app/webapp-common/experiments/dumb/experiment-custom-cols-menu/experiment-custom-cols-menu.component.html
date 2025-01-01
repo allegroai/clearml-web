@@ -1,45 +1,48 @@
 <sm-menu
   #smMenu
-  [iconClass]="menuHeader() ? 'al-icon al-ico-dropdown-arrow' : 'al-icon al-ico-settings al-color pointer create-new-icon ' + (disabled() ? 'pointer-events-none blue-500' : 'blue-300')"
+  [iconClass]="menuHeader() ? 'al-ico-dropdown-arrow' : 'al-ico-settings'"
+  [disabled]="disabled()"
   [header]="menuHeader()"
-  [smMenuClass]="darkTheme() ? 'dark-theme dark custom-columns' : 'light-theme custom-columns'"
+  [smMenuClass]="'custom-columns menu-secondary'"
   data-id="CustomizeColumn"
   [buttonTooltip]="menuTooltip() ?? topTitle()"
   (mouseup)="!disabled() && getMetricsToDisplay.emit()"
   (menuClosed)="customColumnMode.set(customColumnModeEnum.Standard)"
-  [style.pointer-events]="disabled() ? 'none' : 'initial'"
-  >
+>
   @if (!customColumnMode()) {
     <div (click)="$event.stopPropagation()" [class.dark]="darkTheme()">
+      <div class="sm-menu-header">{{topTitle() | uppercase}}</div>
       <sm-custom-columns-list
         [tableCols]="tableCols()"
-        [isLoading]="isLoading()"
         [selectable]="selectable()"
-        [menuTitle]="topTitle() | uppercase"
         (removeColFromList)="removeColFromList.emit($event)"
-        (selectedTableColsChanged)="selectedTableColsChanged.emit($event); !selectable() && smMenu.trigger.closeMenu()"
+        (selectedTableColsChanged)="selectedTableColsChanged.emit($event); !selectable() && smMenu.trigger().closeMenu()"
         >
       </sm-custom-columns-list>
+      <div class="loader" [class.d-none]="!isLoading()">
+        <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      </div>
       <div [class.loading]="isLoading()"
            [class.loaded]="!isLoading()">
         @if (sections().length > 1) {
           <div class="sm-menu-header">{{sectionsTitle()}}</div>
         }
         <div class="custom-column-buttons">
-          <div class="add-button metrics-button"
-            [class.only-one-section]="sections().length === 1"
-            [class.disabled]="!sections()[0]?.options?.length"
-            smClickStopPropagation
+          <button mat-button class="metrics-button"
+            [disabled]="!sections()[0]?.options?.length"
             (click)="$event.stopPropagation(); sections()[0]?.options?.length && customColumnMode.set(customColumnModeEnum.Metrics)"
-            ><i class="al-icon al-ico-plus sm-md me-1"></i><span data-id="Metric Button" class="caption">{{sections()[0]?.title ?? sections()[0]?.name | uppercase}}</span>
-          </div>
+          >
+            <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+            <span data-id="Metric Button" class="caption">{{sections()[0]?.title ?? sections()[0]?.name | uppercase}}</span>
+          </button>
           @if (sections()[1]) {
-            <div class="add-button metrics-button"
-              smClickStopPropagation
-              [class.disabled]="!hasSecondSection()"
+            <button mat-button class="metrics-button"
+              [disabled]="!hasSecondSection()"
               (click)="$event.stopPropagation(); hasSecondSection() && customColumnMode.set(customColumnModeEnum.HyperParams)"
-              ><i class="al-icon al-ico-plus sm-md me-1"></i><span data-id="Hyperparameters Button" class="caption">{{sections()[1]?.title ?? sections()[1]?.name | uppercase}}</span>
-            </div>
+            >
+              <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+              <span data-id="Hyperparameters Button" class="caption">{{sections()[1]?.title ?? sections()[1]?.name | uppercase}}</span>
+            </button>
           }
         </div>
       </div>

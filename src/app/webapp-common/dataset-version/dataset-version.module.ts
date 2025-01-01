@@ -2,23 +2,20 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {RouterModule, Routes} from '@angular/router';
 import {
-  SimpleDatasetVersionsComponent
-} from '@common/dataset-version/simple-dataset-versions/simple-dataset-versions.component';
+  OpenDatasetVersionsComponent
+} from '@common/dataset-version/open-dataset-versions/open-dataset-versions.component';
 import {
-  SimpleDatasetVersionInfoComponent
-} from '@common/dataset-version/simple-dataset-version-info/simple-dataset-version-info.component';
+  OpenDatasetVersionInfoComponent
+} from '@common/dataset-version/open-dataset-version-info/open-dataset-version-info.component';
 import {
-  SimpleDatasetVersionMenuComponent
-} from '@common/dataset-version/simple-dataset-version-menu/simple-dataset-version-menu.component';
+  OpenDatasetVersionMenuComponent
+} from '@common/dataset-version/open-dataset-version-menu/open-dataset-version-menu.component';
 import {
-  SimpleDatasetVersionDetailsComponent
-} from '@common/dataset-version/simple-dataset-version-details/simple-dataset-version-details.component';
+  OpenDatasetVersionDetailsComponent
+} from '@common/dataset-version/open-dataset-version-details/open-dataset-version-details.component';
 import {
-  SimpleDatasetVersionContentComponent
-} from '@common/dataset-version/simple-dataset-version-content/simple-dataset-version-content.component';
-import {
-  SimpleDatasetVersionPreviewComponent
-} from '@common/dataset-version/simple-dataset-version-preview/simple-dataset-version-preview.component';
+  OpenDatasetVersionPreviewComponent
+} from '@common/dataset-version/open-dataset-version-preview/open-dataset-version-preview.component';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
@@ -45,6 +42,10 @@ import {TableModule} from 'primeng/table';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {PushPipe} from '@ngrx/component';
 import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {OpenDatasetVersionContentComponent} from '@common/dataset-version/open-dataset-version-content/open-dataset-version-content.component';
 
 
 
@@ -52,10 +53,10 @@ import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-hea
 export const routes: Routes = [
   {
     path: '',
-    component: SimpleDatasetVersionsComponent,
+    component: OpenDatasetVersionsComponent,
     children: [
       {
-        path: ':versionId', component: SimpleDatasetVersionInfoComponent,
+        path: ':versionId', component: OpenDatasetVersionInfoComponent,
       },
     ]
   }
@@ -64,15 +65,13 @@ export const routes: Routes = [
 
 @NgModule({
   declarations: [
-    SimpleDatasetVersionsComponent,
-    SimpleDatasetVersionMenuComponent,
-    SimpleDatasetVersionInfoComponent,
-    SimpleDatasetVersionDetailsComponent,
-    SimpleDatasetVersionContentComponent,
+    OpenDatasetVersionsComponent,
+    OpenDatasetVersionMenuComponent,
+    OpenDatasetVersionInfoComponent,
+    OpenDatasetVersionDetailsComponent,
     DatasetVersionStepComponent,
   ],
   imports: [
-    SimpleDatasetVersionPreviewComponent,
     CommonModule,
     AngularSplitModule,
     ExperimentSharedModule,
@@ -99,10 +98,13 @@ export const routes: Routes = [
     TableModule,
     ShowTooltipIfEllipsisDirective,
     PushPipe,
-    ExperimentHeaderComponent
-  ],
-  exports: [
-    SimpleDatasetVersionPreviewComponent,
+    ExperimentHeaderComponent,
+    MatIconButton,
+    MatIcon,
+    MatButton,
+    IdBadgeComponent,
+    OpenDatasetVersionPreviewComponent,
+    OpenDatasetVersionContentComponent
   ]
 })
 export class DatasetVersionModule { }

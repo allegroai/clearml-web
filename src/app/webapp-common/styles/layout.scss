@@ -1,0 +1,80 @@
+@import "variables";
+
+.sm-card-list-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 352px);
+  grid-gap: 24px;
+  padding: 0 24px 24px;
+  justify-content: center;
+
+  .load-more {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 15px;
+    grid-column: 1 / -1;
+
+    .load-more-btn {
+      padding: 8px 40px;
+    }
+  }
+}
+
+.sm-card-list-header {
+  display: flex;
+  justify-content: space-between;
+  height: inherit;
+  align-items: center;
+
+  .recent-title {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    gap: 12px;
+
+    & > .menu {
+      font-weight: 500;
+      cursor: pointer;
+    }
+  }
+}
+
+.stick-to-corner {
+  position: absolute !important;
+  top: 0;
+
+  z-index: $generic-base-z-index + 99;
+  margin: 16px;
+
+  &.right {
+    right: 0;
+  }
+
+  &.left {
+    left: 0;
+  }
+}
+
+.no-gutters > [class*="col-"] {
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+.d-flex-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  &.gap {
+    gap: 12px !important;
+  }
+}
+
+.flex-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}

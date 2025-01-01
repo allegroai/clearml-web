@@ -1,6 +1,8 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
 import {User} from '~/business-logic/model/users/user';
-import {NgIf} from '@angular/common';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+
 
 @Component({
   selector: 'sm-update-notifier',
@@ -8,11 +10,12 @@ import {NgIf} from '@angular/common';
   styleUrls: ['./update-notifier.component.scss'],
   standalone: true,
   imports: [
-    NgIf
+    MatIconButton,
+    MatIcon
   ]
 })
 export class UpdateNotifierComponent {
-  public active      = false;
+  public active      = signal(false);
   areAvailableUpdates = false;
   private _availableUpdates: any;
   public newVersionUrl: string;
@@ -26,7 +29,7 @@ export class UpdateNotifierComponent {
     this.newVersionName      = availableUpdates?.['trains-server']?.['version'];
     this._availableUpdates   = availableUpdates;
     if (this.areAvailableUpdates && this.dismissedVersion !== this.newVersionName) {
-      this.active = true;
+      this.active.set(true);
       this.notifierActive.emit(true);
     }
   }
@@ -34,12 +37,12 @@ export class UpdateNotifierComponent {
   @Input() set currentUser(user: User) {
     if (user && user.role == 'guest') {
       this.areAvailableUpdates = false;
-      this.active = false;
+      this.active.set(false);
       this.notifierActive.emit(false);
     } else {
       this.areAvailableUpdates = this._availableUpdates?.['trains-server']?.['newer_available'];
       if (this.areAvailableUpdates && this.dismissedVersion !== this.newVersionName) {
-        this.active = true;
+        this.active.set(true);
         this.notifierActive.emit(true);
       }
     }
@@ -53,13 +56,13 @@ export class UpdateNotifierComponent {
   }
 
   dismiss() {
-    this.active = false;
+    this.active.set(false);
     this.notifierActive.emit(false);
     this.versionDismissed.emit(this.newVersionName);
   }
 
   show() {
-    this.active = true;
+    this.active.set(true);
     this.notifierActive.emit(true);
   }
 }

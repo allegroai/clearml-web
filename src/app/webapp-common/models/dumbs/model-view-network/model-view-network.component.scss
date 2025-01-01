@@ -1,10 +1,7 @@
 @import "../../../layout/layout.scss";
 
 :host {
-  .dark {
-    background-color: $blue-600;
-    color: #ffffff;
-  }
+
 
   .copy-textarea {
     position: absolute;

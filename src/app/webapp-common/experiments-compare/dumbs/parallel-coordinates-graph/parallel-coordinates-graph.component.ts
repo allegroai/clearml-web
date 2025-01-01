@@ -1,7 +1,6 @@
 import {ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {
-  DARK_THEME_GRAPH_LINES_COLOR,
-  DARK_THEME_GRAPH_TICK_COLOR, ExtData,
+  Colors, ExtData,
   ExtFrame,
   ExtLayout,
   PlotlyGraphBaseComponent
@@ -24,8 +23,10 @@ import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-
 import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 declare let Plotly;
 
 export interface ExtraTask extends Task {
@@ -61,8 +62,10 @@ interface ParaPlotData {
     TooltipDirective,
     ChooseColorModule,
     MetricVariantToNamePipe,
-    ShowTooltipIfEllipsisDirective
-],
+    ShowTooltipIfEllipsisDirective,
+    MatIconButton,
+    MatIcon
+  ],
   standalone: true
 })
 export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent implements OnInit, OnChanges {
@@ -85,8 +88,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   @HostListener('window:resize')
   redrawChart() {
-    window.clearTimeout(this.timer);
-    this.timer = window.setTimeout(() => this.drawChart(), 75);
+    this.drawGraph$.next({});
   }
 
   @Input() set metricValueType(metricValueType: MetricValueType) {
@@ -141,7 +143,6 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
 
   @Input() reportMode = false;
-  @Input() darkTheme = false;
   @Output() createEmbedCode = new EventEmitter<{ tasks: string[]; valueType: MetricValueType; metrics?: string[]; variants?: string[]; domRect: DOMRect }>();
 
   constructor(
@@ -150,6 +151,12 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     private cdr: ChangeDetectorRef
   ) {
     super();
+
+    this.sub.add(this.drawGraph$
+      .pipe(
+        debounceTime(75),
+        filter(() => !!this.parallelGraph)
+      ).subscribe(() => this.drawChart()))
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -197,7 +204,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   }
 
   getStringColor(experiment: ExtraTask): string {
-    const colorArr = this.colorHash.initColor(this.getExperimentNameForColor(experiment), null, this.darkTheme);
+    const colorArr = this.colorHash.initColor(this.getExperimentNameForColor(experiment), null, this.isDarkTheme());
     return `rgb(${colorArr[0]},${colorArr[1]},${colorArr[2]})`;
   }
 
@@ -222,7 +229,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
           parameter = `${parameter}.value`;
           const allValuesIncludingNull = this.experiments.map(experiment =>  get(experiment.hyperparams, newParameter));
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
-          const textVal = {} as { [key: string]: number };
+          const textVal = {} as Record<string, number>;
           let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
           (allValuesIncludingNull.length > allValues.length) && (ticktext = ['N/A'].concat(ticktext));
           const tickvals = ticktext.map((text, index) => {
@@ -304,11 +311,11 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       if (this.dimensionsOrder) {
         this.data[0].dimensions.sort((a, b) => sortCol(a.label, b.label, this.dimensionsOrder));
       }
-      this.drawChart();
+      this.drawGraph$.next({});
     }
   }
 
-  private getNAValue(values: Array<number>): number {
+  private getNAValue(values: number[]): number {
     if (!(values.length > 0)) {
       return 0;
     }
@@ -324,13 +331,12 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         height: 500,
         width: this.parallelGraph.nativeElement.offsetWidth
       }),
-      ...(this.darkTheme ? {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+      ...(this.isDarkTheme() ? {
         paper_bgcolor: 'transparent',
         height: this.parallelGraph.nativeElement.parentElement.offsetHeight - this.legend.nativeElement.offsetHeight - 40,
         margin: {l: 120, r: 120, b: 20},
         font: {
-          color: DARK_THEME_GRAPH_TICK_COLOR
+          color: Colors.dark.tick
         }
       } : {})
     } as ExtLayout;
@@ -358,7 +364,9 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         .text(d => (d as { key: string }).key);
       graph.selectAll('.axis .tick text').text((d: string) => this.wrap(d)).append('title').text((d: string) => d);
       graph.selectAll('.axis .tick text').style('pointer-events', 'auto');
-      this.darkTheme && graph.selectAll('.dark-theme .axis .domain').style('stroke', DARK_THEME_GRAPH_LINES_COLOR).style('stroke-opacity', 1);
+      if (this.isDarkTheme()) {
+        graph.selectAll('.axis .domain').style('stroke', Colors.dark.lines).style('stroke-opacity', 1);
+      }
       graph.selectAll('.tick').on('mouseover', (event: MouseEvent) => {
         const tick = event.currentTarget as SVGGElement;
         const axis = tick.parentNode as SVGGElement;
@@ -453,14 +461,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
           }
         } as ExtFrame),
         id: `compare params ${this.experiments?.map(e => e.id).join(',')}`,
-        darkTheme: false,
+        hideNavigation: false,
         isCompare: true
       } as GraphViewerData,
-      panelClass: ['image-viewer-dialog', 'light-theme'],
-      height: '100%',
-      maxHeight: 'auto',
-      width: '100%',
-      maxWidth: 'auto'
+      panelClass: ['image-viewer-dialog', 'full-screen'],
     });
   }
 }

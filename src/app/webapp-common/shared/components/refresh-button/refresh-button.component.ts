@@ -1,4 +1,4 @@
-import {Component, input, output, inject, signal, effect} from '@angular/core';
+import {Component, input, output, inject, signal} from '@angular/core';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {Store} from '@ngrx/store';
 import {selectAutoRefresh} from '@common/core/reducers/view.reducer';
@@ -7,6 +7,7 @@ import {FormsModule} from '@angular/forms';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {MatButton, MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-refresh-button',
@@ -18,7 +19,9 @@ import {MatSlideToggle} from '@angular/material/slide-toggle';
     FormsModule,
     HesitateDirective,
     ClickStopPropagationDirective,
-    MatSlideToggle
+    MatSlideToggle,
+    MatIconButton,
+    MatButton
   ]
 })
 export class RefreshButtonComponent {

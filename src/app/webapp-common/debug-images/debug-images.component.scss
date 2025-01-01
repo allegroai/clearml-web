@@ -4,25 +4,26 @@
   display: block;
   height: 100%;
   overflow-y: auto;
+  background-color: var(--color-surface-container-lowest);
 
   .connector-icon-container {
     width: 32px;
     height: 32px;
-    background: $blue-50;
+    background: var(--color-surface-container-low);
 
     &.active {
-      background: #fff;
+      background: var(--color-surface);
     }
 
     border-radius: 32px;
     position: absolute;
     right: -16px;
-    top: 152px;
+    top: 174px;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: $blue-300;
+    color: var(--color-on-surface-variant);
 
     &.hidden {
       display: none;
@@ -31,30 +32,16 @@
 
   .navigator-container {
     height: 60px;
+    padding: 8px 24px;
 
     &.active {
-      background: $blue-50;
+      background: var(--color-surface-container-low);  ;
     }
-
-    border-radius: 0;
-    margin: 0 0 24px -24px;
-    padding: 8px 0 4px 48px;
-
-    &.first {
-      border-radius: 6px 0 0 6px;
-      margin: 0 0 24px 0;
-      padding-left: 24px;
-    }
-
-    &.last {
-      border-radius: 0 6px 6px 0;
-      margin: 0 24px 24px -24px;
-    }
-
   }
 
   header {
-    margin-bottom: 24px;
+    margin: 24px;
+    padding: 0 24px;
 
     .experiment-name {
       font-size: 18px;
@@ -78,11 +65,9 @@
 
 sm-debug-images-view {
   display: block;
+  padding: 12px 12px 0 18px;
 }
 
-.debug-images {
-
-}
 
 .images-container {
   display: flex;
@@ -101,7 +86,7 @@ sm-debug-images-view {
       text-align: center;
 
       i {
-        color: $info-color
+        color: var(--color-primary);
       }
     }
   }
@@ -114,18 +99,17 @@ sm-debug-images-view {
   left: 50%;
   transform: translateY(-50%) translateX(-50%);
   display: block;
-  color: $blue-100;
   line-height: 1.2;
-  h4 {color: $blue-100;}
-
-  &.dark {
-    color: $blue-250;
-    font-size: 12px;
-
-    path {
-      opacity: 1;
-      fill: $dark-grey-blue;
-    }
+  color: var(--color-on-surface-variant);
+  h4 {
+    font-weight: 500;
+    transform: translate(0, -36px);
+  }
+  .al-icon {
+    width: 160px;
+    height: auto;
+    font-size: 160px;
+    color: var(--color-tint-14);
   }
 }
 
@@ -146,26 +130,17 @@ sm-debug-images-view {
   flex: 1;
   min-width: 640px;
   min-height: 100%;
-  color: $blue-500;
-  margin: 0 12px;
+  color: var(--color-on-surface-variant);
 
   &.separator:not(:last-child) {
-    border-right: 1px solid $blue-100;
+    border-right: 1px solid var(--color-outline-variant);
   }
 
 }
 
 .bordered-experiments {
   .single-debug-images-container {
-    border: 1px solid $blue-250;
+    border: 1px solid var(--color-surface-container-highest);
     border-radius: 6px;
-    padding: 24px;
   }
 }
-
-.i-no-debug-samples {
-  width: 300px;
-  height: 250px;
-}
-
-

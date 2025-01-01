@@ -1,0 +1,31 @@
+<div class="sm-card-list-layout">
+  <div #header class="sm-card-list-header">
+    <div class="recent-title">RECENT REPORTS
+      <a mat-button class="view-all"
+         [routerLink]="defaultNestedModeForFeature()?.['reports']? '/reports/*/projects' : '/reports'"
+      >VIEW ALL</a>
+    </div>
+    <button
+      mat-flat-button
+      data-id="New Project"
+      (click)="openCreateDialog()">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+      NEW REPORT
+    </button>
+  </div>
+  @if (recentList()) {
+    @for(report of recentList(); track report.id) {
+      <sm-report-card
+        [report]="report"
+        [hideMenu]="true"
+        (cardClicked)="cardClicked($event)"
+      ></sm-report-card>
+    }
+    @if (recentList().length < cardsInRow) {
+      <sm-plus-card
+        [folder]="true"
+        (plusCardClick)="openCreateDialog()"
+      ></sm-plus-card>
+    }
+  }
+</div>

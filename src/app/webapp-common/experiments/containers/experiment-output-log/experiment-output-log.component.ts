@@ -1,16 +1,13 @@
 import {
-  AfterViewInit,
   ChangeDetectorRef,
-  Component,
+  Component, inject,
   Input,
   OnDestroy,
-  OnInit,
-  QueryList,
-  ViewChildren
+  viewChild,
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter, selectLogLoading} from '../../reducers';
-import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest} from 'rxjs';
 import {debounceTime, filter, map} from 'rxjs/operators';
 import {last} from 'lodash-es';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
@@ -25,97 +22,91 @@ import {
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {activeLoader} from '@common/core/actions/layout.actions';
-import {Log} from '@common/experiments/actions/common-experiment-output.actions';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {selectThemeMode} from '@common/core/reducers/view.reducer';
 
 @Component({
   selector: 'sm-experiment-output-log',
   templateUrl: './experiment-output-log.component.html',
   styleUrls: ['./experiment-output-log.component.scss']
 })
-export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ExperimentOutputLogComponent implements OnDestroy {
+  private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
+  private refresh = inject(RefreshService);
 
   @Input() showHeader = true;
-  @Input() isDarkTheme = false;
   @Input() set experiment(experiment: IExperimentInfo) {
     this.experiment$.next(experiment);
   }
-  private subs = new Subscription();
+
   private currExperiment: IExperimentInfo;
   private loading: boolean;
 
-  public log$: Observable<Log[]>;
-  public filter$: Observable<string>;
-  public fetching$: Observable<boolean>;
-  public logBeginning$: Observable<boolean>;
+  protected log$ = this.store.select(selectExperimentLog);
+  protected logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
+  protected filter$ = this.store.select(selectLogFilter);
+  protected fetching$ = this.store.select(selectLogLoading);
+
+  theme = this.store.selectSignal(selectThemeMode);
+
   public creator: string | Worker;
   public disabled: boolean;
   public hasLog: boolean;
-  private logRef: ExperimentLogInfoComponent;
+  private logRef = viewChild(ExperimentLogInfoComponent);
   private experiment$ = new BehaviorSubject<IExperimentInfo>(null);
-  @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
 
-  constructor(private store: Store, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
-    this.log$ = this.store.select(selectExperimentLog);
-    this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
-    this.filter$ = this.store.select(selectLogFilter);
-    this.fetching$ = this.store.select(selectLogLoading);
-
-    this.subs.add(
-      combineLatest([
-        this.store.select(selectSelectedExperiment),
-        this.experiment$
-      ]).pipe(
+  constructor() {
+    combineLatest([
+      this.store.select(selectSelectedExperiment),
+      this.experiment$
+    ])
+      .pipe(
+        takeUntilDestroyed(),
         debounceTime(0),
         map(([selected, input]) => input ?? selected),
         filter(experiment => !!experiment?.id),
       )
-        .subscribe(experiment => {
-          if (this.currExperiment?.id !== experiment.id || this.currExperiment?.started !== experiment.started) {
-            this.store.dispatch(resetOutput());
-            this.logRef?.reset();
-            this.currExperiment = experiment;
-            this.hasLog = undefined;
-            this.loading = true;
-            this.cdr.detectChanges();
-            this.store.dispatch(activeLoader(getExperimentLog.type));
-            this.store.dispatch(getExperimentLog({ id: this.currExperiment.id, direction: null }));
-          }
-        })
-    );
-  }
+      .subscribe(experiment => {
+        if (this.currExperiment?.id !== experiment.id || this.currExperiment?.started !== experiment.started) {
+          this.store.dispatch(resetOutput());
+          this.logRef()?.reset();
+          this.currExperiment = experiment;
+          this.hasLog = undefined;
+          this.loading = true;
+          this.cdr.detectChanges();
+          this.store.dispatch(activeLoader(getExperimentLog.type));
+          this.store.dispatch(getExperimentLog({ id: this.currExperiment.id, direction: null }));
+        }
+      });
 
-  ngAfterViewInit(): void {
-    this.subs.add(this.logRefs.changes.subscribe(refs => this.logRef = refs.first));
-  }
+    this.log$
+      .pipe(takeUntilDestroyed())
+      .subscribe(log => {
+        this.loading = false;
+        if (log) {
+          this.creator = last(log)?.worker ?? '';
+          this.disabled = false;
+          this.hasLog = log.length > 0;
+          this.cdr.detectChanges();
+        }
+      });
 
-  ngOnInit() {
-    this.subs.add(this.log$.subscribe(log => {
-      this.loading = false;
-      if (log) {
-        this.creator = last(log)?.worker ?? '';
-        this.disabled = false;
-        this.hasLog = log.length > 0;
-        this.cdr.detectChanges();
-      }
-    }));
-
-    this.subs.add(this.refresh.tick
-      .pipe(filter(autoRefresh => autoRefresh !== null && !this.loading && !!this.currExperiment?.id && (!this.logRef || this.logRef.atEnd || autoRefresh === false)))
+    this.refresh.tick
+      .pipe(
+        takeUntilDestroyed(),
+        filter(autoRefresh => autoRefresh !== null && !this.loading && !!this.currExperiment?.id && (!this.logRef() || this.logRef().atEnd || autoRefresh === false)))
       .subscribe(autoRefresh => this.store.dispatch(getExperimentLog({
         id: this.currExperiment.id,
         ...(autoRefresh && {
           direction: autoRefresh ? 'next' : 'prev',
-          from: last(this.logRef?.orgLogs)?.timestamp,
+          from: last(this.logRef()?.orgLogs)?.timestamp,
           autoRefresh: true
         }),
-      })))
-    );
+      })));
   }
 
   ngOnDestroy(): void {
-    this.subs.unsubscribe();
-    this.logRef = null;
-    this.logRefs = null;
     this.store.dispatch(resetLogFilter());
     this.store.dispatch(resetOutput());
   }

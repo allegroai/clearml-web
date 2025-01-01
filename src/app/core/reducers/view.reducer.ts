@@ -1,7 +1,7 @@
-import {createSelector} from '@ngrx/store';
+import {ActionCreator, createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import {
   initViewState as commonInitState,
-  viewReducer as commonViewReducer,
+  viewReducers,
   ViewState as CommonViewState
 } from '@common/core/reducers/view.reducer';
 import {dismissSurvey} from '../actions/layout.actions';
@@ -16,7 +16,7 @@ interface ViewState extends CommonViewState {
 const initViewState: ViewState = {
   ...commonInitState,
   availableUpdates  : null,
-  showSurvey: true
+  showSurvey: true,
 };
 
 export const views = state => state.views as ViewState;
@@ -27,14 +27,11 @@ export const selectActiveWorkspaceReady = createSelector(views, (state) => true)
 export const selectProjectType = createSelector(selectRouterConfig,
   config => (config && routeConfToProjectType(config)) ?? 'datasets');
 
-export function viewReducer(viewState: ViewState = initViewState, action) {
-
-  switch (action.type) {
-    case setServerUpdatesAvailable.type:
-      return {...viewState, availableUpdates: (action as ReturnType<typeof setServerUpdatesAvailable>).availableUpdates};
-    case dismissSurvey.type:
-      return {...viewState, showSurvey: false};
-    default:
-      return commonViewReducer(viewState, action);
-  }
-}
+export const viewReducer = createReducer(
+  initViewState,
+  on(setServerUpdatesAvailable, (state, action): ViewState =>
+    ({...state, availableUpdates: action.availableUpdates})),
+  on(dismissSurvey, (state): ViewState =>
+    ({...state, showSurvey: false})),
+  ...viewReducers as unknown as ReducerTypes<ViewState, ActionCreator[]>[]
+);

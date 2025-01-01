@@ -22,7 +22,7 @@ export const setCompareAutoRefresh = createAction(
 export const setServerError = createAction(
   VIEW_PREFIX + '[set server error]',
   (serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) => ({
-    serverError: omit(serverError, ['headers'] ) as Omit<HttpErrorResponse, 'headers'>,
+    serverError: omit(serverError, ['headers']) as Omit<HttpErrorResponse, 'headers'>,
     contextSubCode,
     customMessage,
     aggregateSimilar
@@ -63,6 +63,26 @@ export const visibilityChanged = createAction(
   props<{ visible: boolean }>()
 );
 
+export const userThemeChanged = createAction(
+  VIEW_PREFIX + '[user theme changed]',
+  props<{ theme: 'light' | 'dark' | 'system' }>()
+);
+
+export const systemThemeChanged = createAction(
+  VIEW_PREFIX + '[system theme changed]',
+  props<{ theme: 'light' | 'dark' }>()
+);
+
+export const setForcedTheme = createAction(
+  VIEW_PREFIX + '[set forced theme]',
+  props<{ theme: 'light' | 'dark'; default: 'light' | 'dark' }>()
+);
+
+export const setThemeColors = createAction(
+  VIEW_PREFIX + '[set theme colors]',
+  props<{ colors: Record<string, string> }>()
+);
+
 export const saveAceCaretPosition = createAction(
   VIEW_PREFIX + '[save ace caret position]',
   props<{ id: string; position: Ace.Point }>()
@@ -73,7 +93,10 @@ export const resetAceCaretsPositions = createAction(VIEW_PREFIX + '[reset ace ca
 
 export const addMessage = createAction(
   VIEW_PREFIX + '[add message]',
-  (severity: MessageSeverityEnum, msg: string, userActions?: { actions: Action[]; name: string }[], suppressNextMessages?: boolean) =>
+  (severity: MessageSeverityEnum, msg: string, userActions?: {
+    actions: Action[];
+    name: string
+  }[], suppressNextMessages?: boolean) =>
     ({severity, msg, userActions, suppressNextMessages})
 );
 
@@ -94,12 +117,23 @@ export const firstLogin = createAction(
   props<{ first: boolean }>()
 );
 
-export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());
-export const neverShowChangesAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_CHANGES_AGAIN', props<{ version: string }>());
-export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARGUMENTS', props<{ redactedArguments: { key: string } [] }>());
-export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{ hide: boolean }>());
+export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{
+  popupId: string;
+  reset?: boolean
+}>());
+export const neverShowChangesAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_CHANGES_AGAIN', props<{
+  version: string
+}>());
+export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARGUMENTS', props<{
+  redactedArguments: { key: string } []
+}>());
+export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{
+  hide: boolean
+}>());
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');
 export const aceReady = createAction(VIEW_PREFIX + '[ace ready]');
-export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]' );
-
-
+export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]');
+export const setHideEnterpriseFeatures = createAction(
+  VIEW_PREFIX + '[setHideEnterpriseFeatures]',
+  props<{hide: boolean}>()
+)

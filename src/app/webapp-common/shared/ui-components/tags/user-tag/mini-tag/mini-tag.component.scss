@@ -1,0 +1,17 @@
+@import "variables";
+
+:host {
+  display: flex;
+  align-items: center;
+
+  .tag-line {
+    height: 14px;
+    width: 8px;
+    border-radius: 8px;
+    &:hover{
+      border: 1px solid var(--color-on-surface-variant);
+    }
+  }
+}
+
+

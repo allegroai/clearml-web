@@ -1,13 +1,30 @@
-@import "variables";
-
 $log-height: 300px;
 $log-header-height: 48px;
 
 :host {
+  .stage-title {
+    position: absolute;
+    z-index: 10;
+    padding: 6px 24px 6px 0;
+    gap: 12px;
+    background: var(--color-primary-container);
+    border-radius: 36px;
+    transform: translateX(-50%);
+    left: 50%;
+    color: var(--color-on-primary-container);
+    max-width: 500px;
+    top: 24px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+
   display: block;
   position: relative;
   height: 100%;
-  background-color: $blue-950;
+  border-top: 1px solid var(--color-surface-container-high);
+  background-color: var(--color-surface-container-lowest);
+
   .results-panel {
     &.maximized {
       height: 100%;
@@ -27,11 +44,18 @@ $log-header-height: 48px;
   }
 
   .console-button {
-    display: block;
+    display: flex;
+    align-items: center;
     position: absolute;
     left: 24px;
     top: 24px;
     z-index: 2;
+    gap: 12px;
+
+    .staged {
+      background-color: var(--color-primary);
+      color: var(--color-on-primary);
+    }
   }
 
   .results-panel {
@@ -39,7 +63,7 @@ $log-header-height: 48px;
     flex-direction: column;
     width: 100%;
     height: $log-height + $log-header-height;
-    background-color: $blue-900;
+    background-color: var(--mat-app-background-color);
 
     position: absolute;
     bottom: -($log-height + $log-header-height);
@@ -61,10 +85,9 @@ $log-header-height: 48px;
       grid-template-columns: 1fr 1fr;
       column-gap: 24px;
       padding: 0 24px;
-      background-color: $blue-700;
-      border-bottom: 1px solid $dark-border;
-      color: $blue-100;
-      box-shadow: 0 -2px 6px rgb(0 0 0 / 40%);
+      background-color: var(--color-surface-container-high);
+      border-bottom: 1px solid var(--color-outline-variant);
+      box-shadow: 0 -2px 4px rgb(0 0 0 / 20%);
 
       &.toggle {
         grid-template-columns: 1fr auto 1fr;
@@ -83,22 +106,16 @@ $log-header-height: 48px;
         transform: translateY(-50%) translateX(-50%);
         display: block;
         text-align: center;
-        h4 {
-          color: $blue-250;
-        }
+
         .no-output-icon {
           height: 100px;
           width: 100px;
-          color: $blue-250;
         }
       }
     }
+
     .ace {
       height: 100%;
-
-      &.ace-monokai {
-        background-color: $blue-900;
-      }
     }
   }
 }
@@ -121,6 +138,7 @@ $log-header-height: 48px;
   overflow: scroll;
   cursor: grab;
   user-select: none;
+
   &:active {
     cursor: grabbing;
   }
@@ -136,20 +154,22 @@ $log-header-height: 48px;
     left: 0;
     top: 0;
     pointer-events: none;
-    stroke: $blue-400;
-    fill: $blue-400;
+    stroke: var(--color-outline);
+    fill: var(--color-outline);
 
     &.selected {
-      stroke: $blue-600;
-      fill: $blue-600;
+      stroke: var(--color-outline-variant);
+      fill: var(--color-outline-variant);
     }
+
     .selected {
-      stroke: $blue-200;
-      fill: $blue-200;
+      stroke: var(--color-tertiary);
+      fill: var(--color-tertiary);
     }
+
     .outgoing {
-      stroke: $blue-300;
-      fill: $blue-300;
+      stroke: var(--color-primary);
+      fill: var(--color-primary);
     }
   }
 }
@@ -165,6 +185,7 @@ sm-pipeline-controller-step {
   display: flex;
   align-items: center;
   overflow: hidden;
+
   > span {
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -176,13 +197,6 @@ sm-pipeline-controller-step {
   display: flex;
   align-items: center;
   margin-left: auto;
-
-  .al-icon {
-    color: $blue-300;
-    &:hover {
-      color: $blue-100;
-    }
-  }
 }
 
 .no-code {
@@ -191,10 +205,12 @@ sm-pipeline-controller-step {
   left: 50%;
   transform: translateY(-50%) translateX(-50%);
   text-align: center;
+
   h3 {
     font-weight: 500;
     font-size: 14px;
   }
+
   .icon {
     width: 100px;
     height: 100px;

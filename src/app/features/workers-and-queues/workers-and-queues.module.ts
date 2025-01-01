@@ -39,20 +39,22 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatMenuModule} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {
-  TableFilterSortTemplateComponent
-} from '@common/shared/ui-components/data/table/table-filter-sort-template/table-filter-sort-template.component';
+  TableFilterSortComponent
+} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
-import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
 import {SimpleTableComponent} from '@common/shared/ui-components/data/simple-table/simple-table.component';
 import {
   VerticalLabeledRowComponent
 } from '@common/shared/ui-components/data/veritical-labeled-row/vertical-labeled-row.component';
 import {TableModule} from 'primeng/table';
 import {MatInputModule} from '@angular/material/input';
-import {OrchestrationComponent} from "~/features/workers-and-queues/orchestration.component";
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
 import {PushPipe} from '@ngrx/component';
+import {OrchestrationComponent} from '~/features/workers-and-queues/orchestration.component';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
 
 @NgModule({
   imports: [
@@ -79,16 +81,20 @@ import {PushPipe} from '@ngrx/component';
     MatExpansionModule,
     MatMenuModule,
     TooltipDirective,
-    TableFilterSortTemplateComponent,
+    TableFilterSortComponent,
     TableComponent,
-    NavbarItemComponent,
     SimpleTableComponent,
     VerticalLabeledRowComponent,
     TableModule,
     MatInputModule,
     ShowTooltipIfEllipsisDirective,
     RefreshButtonComponent,
-    PushPipe
+    PushPipe,
+    MatTabGroup,
+    MatIcon,
+    MatIconButton,
+    MatTab,
+    MatButton
   ],
   declarations: [
     OrchestrationComponent,

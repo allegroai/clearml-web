@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, effect, EventEmitter, input, Output} from '@angular/core';
 
 import {GroupedList} from '@common/tasks/tasks.model';
-import {JsonPipe, KeyValuePipe, NgForOf} from '@angular/common';
+import { JsonPipe, KeyValuePipe } from '@angular/common';
 import {SortPipe} from '@common/shared/pipes/sort.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
@@ -38,7 +38,6 @@ interface ExampleFlatNode {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgForOf,
     KeyValuePipe,
     SortPipe,
     TooltipDirective,
@@ -48,7 +47,7 @@ interface ExampleFlatNode {
     ArrayIncludedInArrayPipe,
     StringIncludedInArrayPipe,
     StringStartsWithInArrayPipe
-  ]
+]
 })
 export class GroupedSelectableListComponent {
 

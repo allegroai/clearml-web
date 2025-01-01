@@ -1,4 +1,4 @@
-@import "../../../shared/ui-components/styles/mixins/common";
+@import "mixins/common";
 
 :host {
   .recent-header {
@@ -9,7 +9,7 @@
   }
 
   .table-container {
-    height: calc(100% - 38px);
+    height: calc(100% - 48px);
     min-height: 180px;
     overflow-y: auto;
   }

@@ -53,7 +53,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   public backdropActive = this.store.selectSignal(selectBackdropActive);
   public redactedArguments$ = this.store.select(selectHideRedactedArguments);
   public formData: IExecutionForm;
-  links = ['details', 'uncommitted changes', 'installed packages', 'container'];
+  links = ['details', 'uncommitted changes', 'python packages', 'container'];
   currentLink = 'details';
   public selectedRequirement = 'pip';
   public editableRequirements = false;
@@ -152,7 +152,8 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         body: 'Uncommitted changes will be discarded',
         yes: 'Discard',
         no: 'Cancel',
-        iconClass: 'al-icon al-ico-trash al-color blue-300',
+        iconClass: 'al-ico-trash',
+        centerText: true,
       }
     }).afterClosed()
       .pipe(
@@ -194,7 +195,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       data: {
         textData: this.formData?.requirements?.pip,
         readOnly: false,
-        title: 'EDIT INSTALLED PACKAGES',
+        title: 'EDIT Python PACKAGES',
       } as EditJsonData
     });
 
@@ -257,11 +258,11 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   resetInstalledPackages() {
     this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: `Reset installed packages`,
-        body: `Are you sure you want to reset Installed Packages?<br>This will set the packages to originally recorded values.`,
+        title: `Reset python packages`,
+        body: `Are you sure you want to reset python packages?<br>This will set the packages to originally recorded values.`,
         yes: 'Reset',
         no: 'Keep',
-        iconClass: 'al-icon al-ico-reset al-color blue-300',
+        iconClass: 'al-ico-reset ',
       }
     }).afterClosed().pipe(take(1)).subscribe((confirmed) => {
       if (confirmed) {
@@ -288,7 +289,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
           container: {
             ...this.formData.container,
 
-            setup_shell_script: ''
+            setup_shell_script: null
           }
         }));
       }
@@ -302,7 +303,8 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         body: `Are you sure you want to clear the entire contents of ${title.charAt(0).toUpperCase() + title.slice(1)}?`,
         yes: 'Clear',
         no: 'Keep',
-        iconClass: 'al-icon al-ico-trash al-color blue-300',
+        iconClass: 'al-ico-trash',
+        centerText: true,
       }
     }).afterClosed();
 

@@ -1,7 +1,7 @@
+<!--  [class.whitebg]="!isDarkTheme"-->
 <div #drawHere
   [style.height.px]="height"
-  [class.whitebg]="!isDarkTheme"
-  [class.dark-theme]="isDarkTheme"
+  [class.dark-theme]="isDarkTheme()"
   [class.loading]="loading"
   [class.whitebg-table]="type?.[0] === 'table'"
   [class.move-title]="type?.[0] !== 'parcoords'"
@@ -10,9 +10,9 @@
   <div class="graph-title" [class.table-title]="type?.[0] === 'table'">
     @if (moveLegendToTitle && chart && title) {
       <span #dot
-        [style.background-color]="chart?.data[0].line?.color"
+        [style.background-color]="isSmooth? chart?.data[1]?.line?.color: chart?.data[0].line?.color"
         [colorButtonRef]="dot"
-        [smChooseColor]="$any(chart?.data[0].line?.color)"
+        [smChooseColor]="$any(isSmooth? chart?.data[1]?.line?.color: chart?.data[0].line?.color)"
         [stringToColor]="singleColorKey"
         class="title-color">
       </span>

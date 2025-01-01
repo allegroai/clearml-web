@@ -1,18 +1,5 @@
-@import "variables";
-
 :host {
   $chart-bar-height: 48px;
-
-  .chart {
-    ::ng-deep text {
-      fill: $blue-100;
-    }
-
-    ::ng-deep .extended-x-line, ::ng-deep .extended-y-line {
-      stroke-width: 1px;
-      stroke: $dark-grey-blue;
-    }
-  }
 
   .overlay {
     display: none;
@@ -21,7 +8,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: $blue-900;
+    background-color: var(--color-surface-container-high);
     .loading {
       display: flex;
       align-items: center;
@@ -31,39 +18,8 @@
       margin-left: 12px;
       &.no-data{
         margin: 0;
-        color: $blue-280;
         opacity: 0.5;
       }
-    }
-  }
-
-
-  color: $blue-600;
-  ::ng-deep .mini-tooltip-title {
-    fill: $blue-200 !important;
-  }
-
-  ::ng-deep .tooltip-background {
-    fill: black !important;
-    stroke: $blue-300 !important;
-  }
-  ::ng-deep .mini-tooltip-value {
-    fill: $blue-200 !important;
-  }
-
-  ::ng-deep .mini-tooltip-name {
-    font-size: 11px !important;
-    fill: $blue-200 !important;
-  }
-
-  ::ng-deep .vertical-grid-line, ::ng-deep .horizontal-grid-line {
-    opacity: 0.2;
-  }
-
-  ::ng-deep .grid {
-    .grid-line {
-      stroke: $dark-grey-blue !important;
-      stroke-dasharray: none !important;
     }
   }
 }

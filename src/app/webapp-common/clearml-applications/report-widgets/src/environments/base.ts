@@ -94,10 +94,10 @@ export const BASE_ENV: Environment = {
   whiteLabelLoginTitle: null,
   whiteLabelLoginSubtitle: null,
   whiteLabelSlogan: null,
-  plotlyURL: 'app/webapp-common/assets/plotly-2.31.1.min.js',
+  plotlyURL: 'app/webapp-common/assets/plotly-2.35.0.min.js',
   docsLink: '/docs',
   useFilesProxy: true,
-  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
+  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/small-logo-white.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.',
   legal: {TOULink: 'https://clear.ml/legal-platform-tou/', pricingLink: 'https://clear.ml/pricing/'},

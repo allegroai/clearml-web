@@ -1,16 +1,20 @@
 @import 'variables';
+@import "mixins/link";
 
 :host {
+  @include link();
+
   display: flex;
   flex-direction: column;
   overflow: auto;
+
 
   .empty-state {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     font-size: 14px;
   }
 
@@ -23,28 +27,34 @@
     }
 
     &.mat-expanded, .mat-expanded:focus {
-      color: $purple;
+      color: var(--color-on-surface);
 
       .mat-expansion-indicator {
         height: 22px;
       }
 
       .item-key {
-        color: $purple;
+        color: var(--color-on-surface);
       }
     }
   }
 
   .mat-expansion-panel {
     box-shadow: none;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
   }
 
   ::ng-deep mat-checkbox {
     width: 100%;
+    height: inherit;
+
+    .mdc-checkbox {
+      transform: scale(0.8);
+    }
 
     .mdc-form-field {
       width: 100%;
+      height: inherit;
 
       label {
         width: 100%;
@@ -58,7 +68,7 @@
 }
 
 .title {
-  color: $blue-400;
+  color: var(--color-on-surface-variant);
   font-size: 16px;
   font-weight: 500;
 }
@@ -78,21 +88,33 @@
   padding-right: 24px;
 
   mat-expansion-panel {
+    --mat-expansion-container-background-color: transparent;
     box-shadow: none;
-    border-radius: 0;
+    margin-bottom: 2px;
 
     mat-expansion-panel-header {
-      padding: 0;
+      padding: 0 12px;
 
       .has-selected {
         margin: 0 24px 0 auto;
-        background-color: $purple;
+        background-color: var(--color-tertiary);
         width: 6px;
         height: 6px;
         border-radius: 6px;
         align-self: center;
       }
+      &.mat-expanded {
+        background-color: var(--color-surface-container-highest);
+      }
     }
+
+    &.mat-expanded {
+      margin-bottom: 24px;
+    }
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 0;
   }
 
   .item-key {
@@ -105,10 +127,10 @@
   }
 
   mat-expansion-panel-header {
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
 
     &:hover .item-key {
-      color: $purple;
+      color: var(--color-on-surface);
     }
   }
 
@@ -116,21 +138,22 @@
     display: flex;
     align-items: center;
     height: 32px;
-    padding: 0 6px;
-    margin-right: 4px;
     border-radius: 4px;
     font-family: $font-family-base, sans-serif;
     font-size: 12px;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     cursor: pointer;
 
     &.disabled {
       opacity: 0.5;
       cursor: default;
+      mat-checkbox {
+        pointer-events: none;
+      }
     }
 
     &:hover {
-      background-color: $blue-50;
+      background-color: color-mix(in srgb, var(--color-surface-container), transparent 40%);
     }
   }
 

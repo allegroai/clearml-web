@@ -14,12 +14,13 @@
     }
   }
 
-  ::ng-deep .list-container {
+  .list-container {
     display: flex;
     flex-direction: column;
-    width: 360px;
     height: 100%;
-    border-right: 1px solid #efefef;
+    width: 360px;
+    border-top: 1px solid var(--color-surface-container-high);
+    border-right: 1px solid var(--color-surface-container-high);
     overflow-y: auto;
     overflow-x: hidden;
 
@@ -55,18 +56,12 @@
   flex: 1;
   overflow: auto;
   padding: 0 !important;
+  border-top: 1px solid var(--color-surface-container-high);
 }
 
 
 .metrics-container {
   padding: 20px 0 0 24px;
-  // dashboard-search icon
-  i.fa {
-    position: absolute;
-    right: 0;
-    top: 10px;
-    color: $blue-480;
-  }
 
   .value-types {
     display: block;
@@ -83,14 +78,14 @@
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 500;
-  color: $blue-400;
+  color: var(--color-on-surface);
   padding: 12px 24px 6px 0;
-  border-bottom: 1px solid $blue-100;
+  border-bottom: 1px solid var(--color-outline-variant);
   margin: 0 24px 12px;
 }
 .label{
   padding-left: 24px;
-  color: $blue-400;
+  color: var(--color-on-surface);;
 }
 
 .metrics-search {
@@ -101,18 +96,20 @@
     width: 100%;
     font-size: 14px;
     border: none;
-    border-bottom: 2px solid $blue-200;
+    border-bottom: 2px solid var(--color-outline);
     border-radius: 0;
     padding-right: 32px;
 
     &:focus {
-      border-bottom-color: $blue-480;
+      border-bottom-color: var(--color-on-surface);;
     }
   }
 }
 
 .separate-margins {
   margin: 12px 0 6px 0;
+  border: none;
+  border-top: 1px solid var(--color-surface-container-high);
 }
 
 .metric-list {
@@ -127,7 +124,7 @@
     border-radius: 0;
 
     & .mat-expanded .metric-list__title {
-      color: $purple;
+      color: var(--color-secondary);
     }
   }
 
@@ -137,7 +134,7 @@
   }
 
   &__title {
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     font-size: 14px;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -145,7 +142,7 @@
     display: inline-block;
 
     &:hover {
-      color: $purple;
+      color: var(--color-secondary);
     }
   }
 
@@ -155,17 +152,17 @@
     font-family: $font-family-base, sans-serif;
     font-size: 12px;
     height: 32px;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     padding: 0 16px;
     border-radius: 4px;
     cursor: pointer;
 
     &.selected {
-      background: $blue-50;
+      background: var(--color-surface-container-lowest);
     }
 
     &:hover {
-      background: $blue-50;
+      background: var(--color-surface-container-lowest);
     }
 
   }
@@ -173,7 +170,7 @@
   // Modify
   &.mat-expanded {
     .metric-list__title {
-      color: $purple;
+      color: var(--color-primary);
     }
   }
 
@@ -189,11 +186,11 @@
 }
 
 .no-data {
-  color: $blue-480;
-  font-weight: 400;
-
-  .no-data-title {
-    color: $blue-100;
+  h4 {
+    font-weight: 500;
+  }
+  .al-icon {
+    color: var(--color-tint-14);
   }
 }
 

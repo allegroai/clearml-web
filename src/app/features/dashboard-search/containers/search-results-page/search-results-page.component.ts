@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, output, input, computed} from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ITask} from '~/business-logic/model/al-task';
@@ -12,26 +12,31 @@ import {IReport} from '@common/reports/reports.consts';
   styleUrls: ['./search-results-page.component.scss']
 })
 export class SearchResultsPageComponent {
-  public searchPages = activeSearchLink;
-  public activeLinksList = activeLinksList;
+  protected readonly searchPages = activeSearchLink;
+  protected readonly activeLinksList = activeLinksList;
 
-  @Input() projectsList: Array<Project> = [];
-  @Input() experimentsList: Array<Task> = [];
-  @Input() modelsList: Array<Model> = [];
-  @Input() pipelinesList: Array<Project> = [];
-  @Input() datasetsList: Array<Project> = [];
-  @Input() reportsList: Array<IReport> = [];
-  @Input() activeLink: ActiveSearchLink;
-  @Input() resultsCount: Map<ActiveSearchLink, number>;
 
-  @Output() projectSelected = new EventEmitter<Project>();
-  @Output() activeLinkChanged = new EventEmitter<string>();
-  @Output() experimentSelected = new EventEmitter<ITask>();
-  @Output() modelSelected = new EventEmitter<Model>();
-  @Output() pipelineSelected = new EventEmitter<Project>();
-  @Output() reportSelected = new EventEmitter<IReport>();
-  @Output() openDatasetSelected = new EventEmitter<Project>();
-  @Output() loadMoreClicked = new EventEmitter();
+  projectsList = input<Project[]>([]);
+  datasetsList = input<Project[]>([]);
+  tasksList = input<Task[]>([]);
+  modelsList = input<Model[]>([]);
+  pipelinesList = input<Project[]>([]);
+  reportsList = input<IReport[]>([]);
+  activeLink = input<ActiveSearchLink>();
+  resultsCount = input<Map<ActiveSearchLink, number>>();
+
+  projectSelected = output<Project>();
+  activeLinkChanged = output<string>();
+  openDatasetSelected = output<Project>();
+  experimentSelected = output<ITask>();
+  modelSelected = output<Model>();
+  reportSelected = output<IReport>();
+  pipelineSelected = output<Project>();
+  loadMoreClicked = output();
+
+  protected loading = computed<boolean>(() => [null, undefined].includes(this.resultsCount()?.[this.activeLink()]));
+  protected getResults = computed(() => this[`${this.activeLink()}List`]());
+  activeIndex = computed<number>(() => activeLinksList.findIndex(item => item.name === this.activeLink()));
 
   public projectClicked(project: Project) {
     this.projectSelected.emit(project);
@@ -57,10 +62,9 @@ export class SearchResultsPageComponent {
     this.reportSelected.emit(report);
   }
 
-  getResults = () => this[`${this.activeLink}List`];
 
   getCardHeight() {
-    switch (this.activeLink) {
+    switch (this.activeLink()) {
       case activeSearchLink.projects:
         return 246;
       case activeSearchLink.experiments:

@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, OnDestroy} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs';
@@ -8,7 +8,12 @@ import {ReportsCreateRequest} from '~/business-logic/model/reports/models';
 import {map} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
-import {NewReportData} from '@common/reports/report-dialog/create-new-report-form/create-new-report-form.component';
+import {
+  CreateNewReportFormComponent,
+  NewReportData
+} from '@common/reports/report-dialog/create-new-report-form/create-new-report-form.component';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {PushPipe} from '@ngrx/component';
 
 export interface IReportsCreateRequest extends ReportsCreateRequest {
   projectName?: string;
@@ -17,9 +22,15 @@ export interface IReportsCreateRequest extends ReportsCreateRequest {
 @Component({
   selector: 'sm-report-dialog',
   templateUrl: './report-dialog.component.html',
-  styleUrls: ['./report-dialog.component.scss']
+  styleUrls: ['./report-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    DialogTemplateComponent,
+    PushPipe,
+    CreateNewReportFormComponent
+  ]
 })
-export class ReportDialogComponent {
+export class ReportDialogComponent implements OnDestroy{
   public projects$: Observable<Project[]>;
   public readOnlyProjectsNames$: Observable<string[]>;
 
@@ -32,8 +43,11 @@ export class ReportDialogComponent {
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
     this.readOnlyProjectsNames$ = this.store.select(selectTablesFilterProjectsOptions)
       .pipe(map(projects => projects?.filter(project => isReadOnly(project)).map(project => project.name)));
-    this.store.dispatch(resetTablesFilterProjectsOptions());
   }
+
+  ngOnDestroy(): void {
+        this.store.dispatch(resetTablesFilterProjectsOptions());
+    }
 
   public createReport(reportForm: NewReportData) {
     const report = this.convertFormToReport(reportForm);
@@ -51,7 +65,6 @@ export class ReportDialogComponent {
   }
 
   filterSearchChanged($event: { value: string; loadMore?: boolean }) {
-    !$event.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getTablesFilterProjectsOptions({
       searchString: $event.value || '',
       loadMore: $event.loadMore,

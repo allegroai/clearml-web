@@ -1,4 +1,4 @@
-import {Component, Input, input, output } from '@angular/core';
+import {Component, computed, Input, input, output} from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
 import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 import {StepStatusEnum} from '@common/experiments/actions/common-experiments-info.actions';
@@ -25,16 +25,10 @@ export interface VersionItem extends DagModelItem {
   styleUrls: ['../../pipelines-controller/pipeline-controller-step/pipeline-controller-step.component.scss', './dataset-version-step.component.scss']
 })
 export class DatasetVersionStepComponent {
-  protected _step: VersionItem;
   protected readonly fileSizeConfigStorage = fileSizeConfigStorage;
 
-  @Input() set step(step: VersionItem) {
-    this._step = {...step, data: {...step.data, status: step.data?.status || StepStatusEnum.pending}};
-  }
-
-  get step() {
-    return this._step;
-  }
+  step = input<VersionItem>();
   selected = input<boolean>();
   openConsole = output();
+  protected stepData = computed(() => (({...this.step(), data: {...this.step().data, status: this.step().data?.status || StepStatusEnum.pending}})));
 }

@@ -6,29 +6,29 @@ import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {
   getRecentExperiments,
-  getRecentProjects,
+  getRecentProjects, getRecentReports,
   setRecentExperiments,
-  setRecentProjects,
+  setRecentProjects, setRecentReports,
 } from './common-dashboard.actions';
 import {CARDS_IN_ROW} from './common-dashboard.const';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {catchError, mergeMap, map, switchMap, debounceTime} from 'rxjs/operators';
-import {ApiLoginService} from '~/business-logic/api-services/login.service';
+import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
-import {ErrorService} from '../shared/services/error.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
 import {excludedKey} from '@common/shared/utils/tableParamEncode';
+import {Report} from '~/business-logic/model/reports/report';
+import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 
 @Injectable()
 export class CommonDashboardEffects {
   constructor(
     private actions: Actions, private projectsApi: ApiProjectsService,
-    private tasksApi: ApiTasksService, private loginApi: ApiLoginService,
-    private errorService: ErrorService, private store: Store,
+    private tasksApi: ApiTasksService, private store: Store,
+    private reportsApiService: ApiReportsService,
   ) {}
-  /* eslint-disable @typescript-eslint/naming-convention */
+
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(getRecentExperiments),
     map(action => activeLoader(action.type))
@@ -87,5 +87,26 @@ export class CommonDashboardEffects {
     )
   ));
 
+  getReports = createEffect(() => {
+    return this.actions.pipe(
+      ofType(getRecentReports),
+      concatLatestFrom(() => [
+        this.store.select(selectCurrentUser),
+        this.store.select(selectShowOnlyUserWork),
+        this.store.select(selectHideExamples),
+      ]),
+      switchMap(([, user, showOnlyUserWork, hideExamples]) =>
+        this.reportsApiService.reportsGetAllEx({
+          only_fields: ['name', 'comment', 'company', 'tags', 'report', 'project.name', 'user.name', 'status', 'last_update', 'system_tags'] as (keyof Report)[],
+          size: 6,
+          scroll_id: null,
+          ...(hideExamples && {allow_public: false}),
+          ...(showOnlyUserWork && {user: [user.id]}),
+          order_by: ['-last_update'],
+          system_tags: [excludedKey, 'archived'],
+        })
+      ),
+      map(res => setRecentReports({reports: res.tasks})),
+    )
+  })
 }
-

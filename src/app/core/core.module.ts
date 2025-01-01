@@ -96,7 +96,7 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] =>
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden', 'hideExamples', 'defaultNestedModeForFeature', 'blockUserScript'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain', 'redactedArguments', 'hideRedactedArguments'], [VIEW_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain', 'redactedArguments', 'hideRedactedArguments', 'theme', 'hideEnterpriseFeatures'], [VIEW_PREFIX], userPreferences, reducer),
   localStorageReducer,
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('projects', projectSyncedKeys, [PROJECTS_PREFIX], userPreferences, reducer),

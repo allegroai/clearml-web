@@ -1,0 +1,326 @@
+@import "variables";
+@import "mixins/icon";
+
+.al-icon, .icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  flex-shrink: 0;
+  &.flashing-icon {
+    transition: opacity 0.3s;
+  }
+
+  &.flashing-icon:hover {
+    opacity: 1 !important;
+  }
+  &.rotate-180{
+    transform: rotate(180deg);
+  }
+
+  &.white {
+    filter: brightness(0) contrast(1) grayscale(1) invert(1);
+  }
+
+  &.xs {
+    width: 10px;
+    height: 10px;
+    font-size: 10px;
+  }
+  &.msm{
+    width: 13px;
+    height: 13px;
+    font-size: 13px;
+  }
+
+  &.sm {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+
+  &.lm {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+  }
+
+  &.sm-md {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &.md {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+
+  &.lg {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+  }
+  &.l-40{
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  &.xl {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+  }
+
+  &.xxl {
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
+  }
+  &.xxxl {
+    width: 88px;
+    height: 88px;
+    font-size: 88px;
+  }
+}
+
+.al-icon {
+  text-align: center;
+  display: inline-block;
+}
+
+// no font icon
+.i-slack-mark-color {
+  @include icon('#{$assets-icons-path}/slack-mark-color.svg');
+}
+
+// no font icon
+.i-expand-collapse-all {
+  @include icon('#{$assets-icons-path}/expand-collapse-all.svg');
+}
+
+// no font icon
+.i-dataview {
+  @include icon('#{$assets-icons-path}/dataview-icon.svg');
+}
+
+.i-in_progress, .i-Uploading {
+  @include icon('#{$assets-icons-path}/running-green.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/running-title.svg');
+  }
+
+  &.dark {
+    @include icon('#{$assets-icons-path}/running-dark.svg');
+  }
+  &.notify {
+    @include icon('#{$assets-icons-path}/running-notify.svg');
+    &.grey{
+      @include icon('#{$assets-icons-path}/running-notify-grey.svg');
+    }
+  }
+}
+
+.i-completed, .i-Final {
+  @include icon('#{$assets-icons-path}/completed.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/completed-white.svg');
+  }
+}
+
+.i-stopped {
+  @include icon('#{$assets-icons-path}/completed.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/completed-white.svg');
+  }
+}
+
+.i-dequeu {
+  @include icon('#{$assets-icons-path}/dequeue.svg');
+}
+
+.i-closed {
+  @include icon('#{$assets-icons-path}/completed.svg');
+}
+
+.i-failed {
+  @include icon('#{$assets-icons-path}/failed.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/failed-white.svg');
+  }
+
+  &.small {
+    @include icon('#{$assets-icons-path}/failed-sm.svg');
+  }
+}
+
+.i-published {
+  @include icon('#{$assets-icons-path}/published-neon.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/published-title.svg');
+  }
+
+}
+
+.i-created {
+  @include icon('#{$assets-icons-path}/draft-light-blue.svg');
+}
+
+
+// no font icon
+.i-v-neon {
+  @include icon('#{$assets-icons-path}/v.svg');
+}
+
+// no font icon
+.i-v-black {
+  @include icon('#{$assets-icons-path}/black-v.svg');
+}
+
+// two colors
+.i-alert {
+  @include icon('#{$assets-icons-path}/alert.svg');
+}
+
+.i-annotation-blue-neon {
+  @include icon('#{$assets-icons-path}/annotation-blue-neon.svg');
+}
+
+// No font icon
+.i-terms {
+  @include icon('#{$assets-icons-path}/terms-icon.svg');
+}
+
+// Icon font is only one color
+.i-model {
+  @include icon('#{$assets-icons-path}/model.svg');
+}
+
+
+// Font icon looks bad
+.i-alert-purple {
+  @include icon('#{$assets-icons-path}/alert-purple.svg');
+}
+
+
+.i-Caffe {
+  @include icon('#{$assets-icons-path}/caffe-icon.svg');
+}
+
+.i-PyTorch {
+  @include icon('#{$assets-icons-path}/pytorch-icon.svg');
+}
+
+// No used in trains
+.i-Custom {
+  @include icon('#{$assets-icons-path}/custom-icon.svg');
+}
+
+//No font icon
+.i-Keras {
+  @include icon('#{$assets-icons-path}/keras-icon.svg');
+}
+
+.i-ScikitLearn {
+  @include icon('#{$assets-icons-path}/scikit_learn_logo.svg');
+}
+
+//No font icon
+.i-Tensor.Flow {
+  @include icon('#{$assets-icons-path}/tensorflow-icon.svg');
+  filter: none;
+}
+
+//No font icon dark-them
+.i-no-plots-dark {
+  @include icon('#{$assets-icons-path}/no-plots-dk.svg');
+}
+
+//No font icon dark-theme
+.i-no-code-dark {
+  @include icon('#{$assets-icons-path}/no-code-dk.svg');
+}
+
+.i-kibana {
+  @include icon('#{$assets-icons-path}/kibana.svg');
+}
+
+
+.i-access-key {
+  @include icon('#{$assets-icons-path}/ico-access-key.svg');
+}
+
+.i-google {
+  @include icon('#{$assets-icons-path}/ico-google.svg');
+}
+
+.i-aws {
+  @include icon('#{$assets-icons-path}/ico-aws.svg');
+}
+
+.i-azure {
+  @include icon('#{$assets-icons-path}/ico-azure.svg');
+}
+
+.i-google-cloud {
+  @include icon('#{$assets-icons-path}/ico-google-cloud-storage.svg');
+}
+
+.i-aws-cloud {
+  @include icon('#{$assets-icons-path}/ico-aws-S3-storage.svg');
+}
+
+.i-azure-cloud {
+  @include icon('#{$assets-icons-path}/ico-azure-blob-storage.svg');
+}
+
+.i-minio {
+  @include icon('#{$assets-icons-path}/logo_minio.svg');
+}
+
+.i-github {
+  @include icon('#{$assets-icons-path}/ico-github.svg');
+}
+
+.i-bitbucket {
+  @include icon('#{$assets-icons-path}/ico-bitbucket.svg');
+}
+
+.i-microsoft {
+  @include icon('#{$assets-icons-path}/ico-microsoft.svg');
+}
+
+.i-project-tags-filter-active {
+  @include icon('#{$assets-icons-path}/project-tags-filter-active.svg');
+}
+
+.i-project-tags-filter {
+  @include icon('#{$assets-icons-path}/project-tags-filter.svg');
+}
+
+.i-markdown {
+  @include icon('#{$assets-icons-path}/ico-markdown.svg');
+}
+
+.i-c-logo {
+  @include icon('#{$assets-icons-path}/c-logomark.svg');
+}
+
+.i-pipeline-empty-state {
+  @include icon('#{$assets-icons-path}/pipeline-empty-state.svg');
+}
+
+.i-datasets-empty-state {
+  @include icon('#{$assets-icons-path}/datasets-empty-state.svg');
+}
+
+.i-welcome-researcher {
+  @include icon('#{$assets-icons-path}/welcome-researcher.svg');
+}

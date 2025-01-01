@@ -11,25 +11,11 @@ import {
 import {Project} from '~/business-logic/model/projects/project';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
-import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
-import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
-import {
-  UniqueNameValidatorDirective
-} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
-import {
-  ShowTooltipIfEllipsisDirective
-} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
-import {
-  PaginatedEntitySelectorComponent
-} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
 import {OutputDestPattern} from '@common/shared/project-dialog/project-dialog.component';
 import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
+import {MatButton} from '@angular/material/button';
 
 
 @Component({
@@ -40,18 +26,10 @@ import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
   standalone: true,
   imports: [
     MatInputModule,
-    StringIncludedInArrayPipe,
-    ClickStopPropagationDirective,
-    TooltipDirective,
-    SearchTextDirective,
     MatProgressSpinnerModule,
-    ScrollEndDirective,
-    UniqueNameValidatorDirective,
     UniqueProjectValidator,
-    ShowTooltipIfEllipsisDirective,
-    LabeledFormFieldDirective,
-    PaginatedEntitySelectorComponent,
     ReactiveFormsModule,
+    MatButton,
   ]
 })
 export class EditProjectFormComponent {

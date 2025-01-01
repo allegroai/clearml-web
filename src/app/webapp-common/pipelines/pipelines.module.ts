@@ -11,6 +11,8 @@ import {PipelineCardComponent} from '@common/pipelines/pipeline-card/pipeline-ca
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {PushPipe} from '@ngrx/component';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 
@@ -55,6 +57,8 @@ const getPipelineConfig = () => ({
     ButtonToggleComponent,
     PushPipe,
     DotsLoadMoreComponent,
+    MatButton,
+    MatIcon,
   ],
   exports: [PipelinesPageComponent],
   providers: [

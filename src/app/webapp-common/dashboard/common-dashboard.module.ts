@@ -21,6 +21,9 @@ import {TableComponent} from '@common/shared/ui-components/data/table/table.comp
 import {OverflowsDirective} from '@common/shared/ui-components/directives/overflows.directive';
 import {TableModule} from 'primeng/table';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {ReportsEffects} from '@common/reports/reports.effects';
 
 
 @NgModule({
@@ -30,7 +33,7 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     CommonModule,
     CommonSearchModule,
     ProjectsSharedModule,
-    EffectsModule.forFeature([CommonDashboardEffects]),
+    EffectsModule.forFeature([CommonDashboardEffects, ReportsEffects]),
     CommonProjectsModule,
     FormsModule,
     ExperimentCompareSharedModule,
@@ -43,6 +46,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     OverflowsDirective,
     TableModule,
     ShowTooltipIfEllipsisDirective,
+    MatButton,
+    MatIcon
   ]
 })
 export class CommonDashboardModule {

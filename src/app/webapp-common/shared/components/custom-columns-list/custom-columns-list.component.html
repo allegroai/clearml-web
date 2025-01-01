@@ -1,20 +1,16 @@
-<div class="sm-menu-header">{{menuTitle}}</div>
 <div class="list-container">
-  @for (col of tableCols; track col.id) {
+  @for (col of tableCols(); track col.id) {
     <sm-menu-item
       [itemLabel]="col.header"
       [checked]="!(col?.hidden)"
-      [selectable]="selectable"
+      [selectable]="selectable()"
       [removable]="!!col.metric_hash || col.isParam || col.type==='metadata'  || col.type==='hdmd'"
       [itemValue]="col.id"
-      [enableIcon]="!selectable"
-      [iconClass]="$any(col).sort ? 'al-icon al-ico-success' : 'al-icon'"
+      [enableIcon]="!selectable()"
+      [iconClass]="$any(col).sort ? 'al-ico-success' : 'al-icon'"
       [enableTooltip]="true"
       (removeItemClicked)="removeColFromList.emit($event)"
       (itemClicked)="selectedTableColsChanged.emit(col)">
     </sm-menu-item>
   }
-</div>
-<div class="p-4 pe-none" [class.d-none]="!isLoading">
-  <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
 </div>

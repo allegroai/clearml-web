@@ -5,7 +5,6 @@ import {MatRadioModule} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {AdvancedFilterPipe} from '@common/shared/pipes/advanced-filter.pipe';
-import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -13,6 +12,8 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {IsEmptyPipe} from '@common/shared/pipes/is-empty.pipe';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 const declarations = [
@@ -26,7 +27,6 @@ const declarations = [
     FormsModule,
     MatProgressSpinnerModule,
     AdvancedFilterPipe,
-    CheckboxControlComponent,
     SearchComponent,
     ClickStopPropagationDirective,
     MatExpansionModule,
@@ -34,6 +34,8 @@ const declarations = [
     ShowTooltipIfEllipsisDirective,
     IsEmptyPipe,
     MatSlideToggle,
+    MatIconButton,
+    MatIcon,
   ],
   declarations   : [declarations],
   exports        : [...declarations]

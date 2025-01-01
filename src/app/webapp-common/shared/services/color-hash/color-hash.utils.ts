@@ -25,6 +25,20 @@ export const normalizeColorToString = (color) => {
   return color;
 };
 
+export const colorToString = (color) => {
+  if (typeof color === 'string') {
+    return new TinyColor(color).toHexString();
+  }
+  if (Array.isArray(color)) {
+    if(color.length === 3) {
+      return rgbList2Hex(color);
+    } else {
+      return `rgba(${color[0]}, ${color[1]},  ${color[2]}, ${color[3]})`;
+    }
+  }
+  return color;
+};
+
 export const hexToRgb = hex => {
   const {r, g, b} = new TinyColor(hex).toRgb();
   return [r, g, b];

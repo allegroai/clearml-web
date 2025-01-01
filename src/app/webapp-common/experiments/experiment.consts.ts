@@ -18,7 +18,6 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     headerStyleClass: 'selected-col-header',
     style: {width: '70px'},
     disableDrag: true,
-    disablePointerEvents: true,
   },
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.ID,
@@ -174,6 +173,7 @@ export const EXPERIMENT_INFO_ONLY_FIELDS_BASE = [
   'output',
   'hyperparams',
   'execution.queue.name',
+  'execution.queue.display_name',
   'script.binary',
   'script.repository',
   'script.tag',

@@ -1,12 +1,10 @@
-@import "variables";
-
 :host {
   display: block;
   max-width: 640px;
 
   p {
     font-size: 14px;
-    color: $blue-450;
+    color: var(--color-on-surface-variant);
     overflow-wrap: break-word;
   }
 
@@ -33,6 +31,6 @@
 
 .new {
   font-weight: normal;
-  color: $purple;
+  color: var(--color-primary);
   margin-left: 6px;
 }

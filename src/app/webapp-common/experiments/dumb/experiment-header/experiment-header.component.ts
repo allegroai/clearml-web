@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, computed, input, OnInit, output, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, TemplateRef} from '@angular/core';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
 import {SelectionEvent, SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
-import {ButtonToggleComponent, Option} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
 import {PushPipe} from '@ngrx/component';
@@ -20,6 +20,10 @@ import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experi
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
 import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/select-hyper-params-for-custom-col/select-hyper-params-for-custom-col.component';
 import {NgTemplateOutlet} from '@angular/common';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
+import {MatMenu} from '@angular/material/menu';
 
 @Component({
   selector: 'sm-experiment-header',
@@ -42,15 +46,18 @@ import {NgTemplateOutlet} from '@angular/common';
     RefreshButtonComponent,
     SelectMetricForCustomColComponent,
     SelectHyperParamsForCustomColComponent,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    MatIconButton,
+    MatIcon,
+    ExperimentGraphsModule,
+    MatMenu
   ],
   standalone: true
 })
-export class ExperimentHeaderComponent extends BaseEntityHeaderComponent implements OnInit {
+export class ExperimentHeaderComponent extends BaseEntityHeaderComponent {
 
   protected readonly customColumnModeEnum = CustomColumnMode;
   customColumnMode: CustomColumnMode;
-  toggleButtons: Option[];
 
   isArchived = input<boolean>();
   metricVariants = input<MetricVariantResult[]>();
@@ -85,11 +92,9 @@ export class ExperimentHeaderComponent extends BaseEntityHeaderComponent impleme
   clearTableFilters = output<Record<string, FilterMetadata>>();
   tableModeChanged = output<'table' | 'info' | 'compare'>();
 
-  ngOnInit(): void {
-    this.toggleButtons = [
-      {label: 'Table view', value: 'table', icon: 'al-ico-table-view'},
-      {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'},
-      ...([EntityTypeEnum.experiment, EntityTypeEnum.controller].includes(this.entityType) ? [{label: 'Compare view', value: 'compare', icon: 'al-ico-charts-view'}] : [])
-    ];
-  }
+  protected toggleButtons = computed(() => [
+    {label: 'Table view', value: 'table', icon: 'al-ico-table-view'},
+    {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'},
+    ...([EntityTypeEnum.experiment, EntityTypeEnum.controller].includes(this.entityType()) ? [{label: 'Compare view', value: 'compare', icon: 'al-ico-charts-view'}] : [])
+  ]);
 }

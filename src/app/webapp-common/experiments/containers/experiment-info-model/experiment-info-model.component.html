@@ -6,37 +6,40 @@
                                experimentName: selectedExperiment$ | ngrxPush,
                                modelLabels: modelLabels$ | ngrxPush}"
   [ngTemplateOutlet]="template" #template>
-<sm-editable-section #modelSection
-                     *ngIf="(model?.id || editable)"
-                     [scrollToSection]="false"
-                     [saving]="saving"
-                     [editable]="editable && !outputMode"
-                     [hideSaveButton]="true"
-                     (cancelClicked)="cancelModelChange()"
-                     (activateEditClicked)="activateEditChanged()">
-  <sm-experiment-models-form-view
-    #experimentModelForm
-    [editable]="editable && modelSection.inEditMode"
-    [model]="model"
-    [experimentName]="experimentName"
-    [projectId]="modelProjectId"
-    [modelLabels]="modelLabels"
-    [source]="source"
-    [showCreatedExperiment]="!outputMode"
-    (modelSelectedId)="onModelSelected($event); modelSection.unsubscribeToEventListener()">
-  </sm-experiment-models-form-view>
-</sm-editable-section>
-<sm-editable-section class="editable-design"
-                     [saving]="saving"
-                     [editable]="false"
-                     [disableInEditMode]="true"
-                     containerClass="h-100"
-                     (cancelClicked)="cancelModelChange()">
-  <sm-section-header *ngIf="model?.id" label="MODEL CONFIGURATION"></sm-section-header>
-  <sm-scroll-textarea
-    class="flex-grow-1"
+  @if ((model?.id || editable)) {
+    <sm-editable-section #modelSection
+      [scrollToSection]="false"
+      [saving]="saving"
+      [editable]="editable && !outputMode"
+      [hideSaveButton]="true"
+      (cancelClicked)="cancelModelChange()"
+      (activateEditClicked)="activateEditChanged()">
+      <sm-experiment-models-form-view
+        #experimentModelForm
+        [editable]="editable && modelSection.inEditMode()"
+        [model]="model"
+        [experimentName]="experimentName"
+        [projectId]="modelProjectId"
+        [modelLabels]="modelLabels"
+        [source]="source"
+        [showCreatedExperiment]="!outputMode"
+        (modelSelectedId)="onModelSelected($event); modelSection.unsubscribeToEventListener()">
+      </sm-experiment-models-form-view>
+    </sm-editable-section>
+  }
+  <sm-editable-section class="editable-design"
+    [saving]="saving"
     [editable]="false"
-    [formData]="inputDesign"
-  ></sm-scroll-textarea>
-</sm-editable-section>
+    [disableInEditMode]="true"
+    containerClass="h-100"
+    (cancelClicked)="cancelModelChange()">
+    @if (model?.id) {
+      <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
+    }
+    <sm-scroll-textarea
+      class="flex-grow-1"
+      [editable]="false"
+      [formData]="inputDesign"
+    ></sm-scroll-textarea>
+  </sm-editable-section>
 </ng-template>

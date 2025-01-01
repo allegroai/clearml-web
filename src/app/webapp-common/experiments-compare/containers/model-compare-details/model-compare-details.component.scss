@@ -13,7 +13,7 @@
       white-space: nowrap;
 
       .link {
-        color: $purple;
+        color: var(--color-primary);
       }
 
       &.with-ellipsis {

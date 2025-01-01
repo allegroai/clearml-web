@@ -3,7 +3,6 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @Component({
   selector: 'sm-edit-credential-label-dialog',
@@ -14,8 +13,7 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
   imports: [
     ConfirmDialogComponent,
     MatInputModule,
-    FormsModule,
-    LabeledFormFieldDirective
+    FormsModule
   ]
 })
 export class EditCredentialLabelDialogComponent implements AfterViewInit {

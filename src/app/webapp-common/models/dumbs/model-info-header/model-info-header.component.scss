@@ -1,7 +1,6 @@
-@import "variables";
-
 :host {
   padding: 0 24px;
+
   .model-icon {
     margin-right: 9px;
   }
@@ -26,21 +25,10 @@
     }
   }
 
-  .experiment-type {
-    font-size: 11px;
-    color: $blue-300;
+  .line-item {
+    display: flex;
+    align-items: center;
   }
-  .line-item{
-    margin-right: 21px;
-    height: 24px;
-    &:last-child{
-      margin-right: 6px;
-      margin-left: 10px;
-    }
-  }
-
-
-
 
   .tags-list {
     height: 28px;

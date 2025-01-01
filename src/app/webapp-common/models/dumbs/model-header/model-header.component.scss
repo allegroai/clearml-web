@@ -1,7 +1,4 @@
-@import '../../../shared/ui-components/styles/variables';
-
 :host {
-
   .header-container {
     padding-left: 24px;
     height: 66px;
@@ -11,32 +8,16 @@
       visibility: hidden;
     }
 
-    ::ng-deep button {
-      border-color: $blue-600;
-      box-shadow: none;
-    }
-
     &.archive-mode {
       transition: background-color 0.5s;
-      background-color: #333746;
-
-      ::ng-deep button {
-        border-color: #636e97;
-        box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-      }
+      background-color: var(--color-surface-variant);
     }
+
     .right-buttons {
-      margin-right: 28px;
-      sm-custom-cols-menu {
-        margin-right: 25px;
-      }
-      sm-clear-filters-button {
-        margin-right: 24px;
-      }
-      .download-btn {
-        margin-right: 24px;
-        color: $blue-300;
-      }
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-right: 24px;
     }
   }
 }

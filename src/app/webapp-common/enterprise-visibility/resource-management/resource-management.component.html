@@ -1,0 +1,68 @@
+<h1>Your Complete AI Infrastructure Management Solution</h1>
+<p class="sub-title">
+  The ClearML AI Infrastructure Control Plane gives you ultimate visibility and control over your entire compute infrastructure, maximizing compute utilization with dynamic fractional GPUs enabling cloud spend and resource allocation optimization.
+</p>
+
+<div class="section">
+  <div class="details">
+    <h2>Cluster Dashboard</h2>
+    Gain complete visibility into your AI cluster with a detailed dashboard and activity log. Identify infrastructure utilization by resource group, compute type, and worker.
+  </div>
+  <img
+    [ngSrc]="'app/webapp-common/assets/marketing/resource-dashboard-fhd-' + theme() + '.png'"
+    #image1
+    (click)="imageClicked(image1)"
+    width="640"
+    height="360"
+    alt="resource dashboard"
+  >
+</div>
+
+<div class="section">
+  <img
+    [ngSrc]="'app/webapp-common/assets/marketing/resource-configuration-fhd-' + theme() + '.png'"
+    #image2
+    (click)="imageClicked(image2)"
+    width="640"
+    height="360"
+    alt="resource configuration"
+  >
+  <div class="details">
+    <h2>Resource Allocation & Policy Management</h2>
+    Easily create, manage, and monitor multiple resource pools with granular configurations up to GPU fractions for prioritizing compute utilization across your different teams and users.
+  </div>
+</div>
+
+<div class="section">
+  <div class="details">
+    <h2>Quota management</h2>
+    Exert granular control over your compute resource allocation by user, team, or project using quotas, priorities, hierarchies, and logic for over-quota situations.
+  </div>
+  <img
+    [ngSrc]="'app/webapp-common/assets/marketing/resource-policies-fhd-' + theme() + '.png'"
+    #image3
+    (click)="imageClicked(image3)"
+    width="640"
+    height="360"
+    alt="resource policies"
+  >
+</div>
+
+<div class="section">
+  <img
+    [ngSrc]="'app/webapp-common/assets/marketing/apps-autoscaler-' + theme() + '.png'"
+    #image4
+    (click)="imageClicked(image4)"
+    width="640"
+    height="360"
+    alt="autoscalers"
+  >
+  <div class="details">
+    <h2>Cloud Autoscalers</h2>
+    Autoscalers for AWS, Azure, and GCP dynamically adjust compute resources based on real-time workload demands, within defined cost limits, optimizing resource utilization and minimizing cloud costs.
+  </div>
+</div>
+<div class="cta">
+  <a href="https://clear.ml/contact-us" target="_blank" class="cta-button">
+    <mat-icon fontSet="al" fontIcon="al-ico-bullhorn"></mat-icon>CONTACT CLEARML</a>
+</div>

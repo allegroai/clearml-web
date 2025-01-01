@@ -1,0 +1,181 @@
+@use '@angular/material' as mat;
+
+
+.mat-mdc-form-field {
+
+  --mat-menu-item-label-text-size: 14px;
+  --mat-menu-item-label-text-line-height: 16px;
+
+  &.no-bottom {
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+
+  .mdc-text-field--outlined {
+    padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
+    padding-right: max(12px, var(--mdc-outlined-text-field-container-shape));
+  }
+
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    padding: 0;
+    --mdc-typography-caption-letter-spacing: 0;
+  }
+
+}
+
+.mat-mdc-text-field-wrapper {
+  height: auto;
+
+  .mat-mdc-form-field-flex {
+    height: 100%;
+
+    .mat-mdc-form-field-infix {
+      height: 36px;
+    }
+  }
+}
+.mat-mdc-form-field-type-mat-chip-grid .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix,
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-infix:has(.mat-mdc-form-field-textarea-control) {
+  height: auto;
+  min-height: 36px;
+  padding: 5px 0;
+}
+.mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix {
+  padding-top: 2px;
+}
+.select-panel-width {
+  min-width: fit-content;
+  max-width: 50vw !important;
+}
+.mat-mdc-form-field:has(.mat-mdc-floating-label) {
+
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    margin-top: 20px;
+    padding-left: max(12px, var(--mdc-outlined-text-field-container-shape));
+    padding-right: max(12px, var(--mdc-outlined-text-field-container-shape));
+
+    .mdc-notched-outline--upgraded {
+      .mdc-floating-label--float-above {
+        --mat-mdc-form-field-label-transform: translate(0, -38px) scale(1);
+        left: -12px;
+      }
+    }
+
+    .mdc-notched-outline__notch {
+      clip-path: inset(-9em -999em -9em -14px);
+      border-top-style: solid;
+      border-width: 1px;
+      border-left: none !important;
+    }
+
+    //mat-form-field background color
+    .mdc-notched-outline {
+      z-index: 0;
+      border-radius: 4px;
+    }
+  }
+}
+
+
+.mat-mdc-form-field {
+  .mat-mdc-form-field-flex {
+    .mdc-notched-outline {
+      z-index: 0;
+      border-radius: 4px;
+    }
+    .mat-mdc-notch-piece {
+      background-color: var(--color-surface);
+    }
+  }
+}
+
+
+.mat-mdc-select,
+.cdk-overlay-pane .mat-mdc-select {
+  padding: 4px 0;
+}
+
+.cdk-overlay-pane .mat-mdc-select-panel,
+.cdk-overlay-pane .mat-mdc-autocomplete-panel {
+  --mat-menu-item-label-text-size: 14px;
+  padding: 4px;
+
+  .mat-mdc-option {
+    min-height: 40px;
+    line-height: 40px;
+    margin-bottom: 2px;
+    border-radius:4px;
+    .mat-pseudo-checkbox-minimal{
+      margin-left: unset;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .mat-mdc-menu-item-text {
+      display: inline-block;
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &.wider-options {
+    min-width: 250px;
+  }
+}
+
+.mat-mdc-form-field-error {font-size: 12px;}
+
+sm-table {
+  --mdc-checkbox-state-layer-size: 18px;
+
+  .mdc-checkbox__background {
+    background-color: var(--color-on-primary);
+  }
+}
+// hide arrows for number inputs
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+// hide arrows for number inputs (FireFox)
+input[type=number] {
+  -moz-appearance: textfield !important;
+}
+
+
+@mixin form-fields($theme) {
+
+  --mat-form-field-outlined-label-text-populated-size: 12px;
+  --mat-form-field-subscript-text-tracking: 0;
+  --mat-form-field-container-height: 36px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mdc-outlined-text-field-focus-outline-width: 1px;
+  --mat-form-field-subscript-text-size: 12px;
+
+  --mdc-outlined-text-field-hover-outline-color: var(--color-outline);
+  --mdc-outlined-text-field-outline-color: var(--color-outline-variant);
+  --mdc-outlined-text-field-label-text-color: var(--color-on-surface-variant);
+  --mdc-outlined-text-field-hover-label-text-color: var(--color-on-surface);
+
+  --mat-form-field-state-layer-color: transparent;
+  --mdc-filled-text-field-container-color: transparent;
+  --mdc-outlined-text-field-input-text-placeholder-color: var(--color-outline);
+
+  --mdc-checkbox-unselected-icon-color: var(--color-primary);
+  --mdc-checkbox-selected-icon-color: var(--color-primary);
+  --mat-checkbox-label-text-size: 14px;
+  --mat-radio-label-text-size: 14px;
+
+  --mat-select-panel-background-color: var(--color-surface-container-lowest);
+  --mat-autocomplete-background-color: var(--color-surface-container-lowest);
+  --mat-menu-container-color: var(--color-surface-container-low);
+
+}

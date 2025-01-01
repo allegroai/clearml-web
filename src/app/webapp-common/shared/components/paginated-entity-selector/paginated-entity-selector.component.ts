@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy,
-  Component,
+  Component, computed,
   effect,
   forwardRef,
   input,
@@ -16,9 +16,7 @@ import {
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {rootProjectsPageSize} from '@common/constants';
@@ -51,9 +49,7 @@ export interface baseEntity {
     MatInputModule,
     MatAutocompleteModule,
     ReactiveFormsModule,
-    LabeledFormFieldDirective,
     ClickStopPropagationDirective,
-    TooltipDirective,
     SearchTextDirective,
     MatProgressSpinner,
     DotsLoadMoreComponent,
@@ -64,9 +60,9 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   protected noMoreOptions: boolean;
   protected disabled: boolean;
   protected error: string = null;
-  protected loading = signal<boolean>(false);
   private previousLength: number;
   data = input<baseEntity[]>([]);
+  displayField = input('name');
   label = input();
   placeHolder = input('');
   createNewSuffix = input<boolean>(false);
@@ -78,6 +74,10 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   protected onTouched: () => void;
   private onChange: (value) => void;
   private onValidation: (value) => void;
+  protected state = computed(() => ({
+    data: this.data(),
+    loading: signal(false),
+  }))
 
   constructor() {
     this.control.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
@@ -88,29 +88,35 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
     effect(() => {
       if (this.data()) {
         const length = this.data().length;
-        this.loading.set(false);
         this.noMoreOptions = length === this.previousLength || length < rootProjectsPageSize;
         this.previousLength = length;
       }
-    }, {allowSignalWrites: true});
+    });
 
     effect(() => {
-      this.isRequired() ? this.control.addValidators([Validators.required]) : this.control.removeValidators([Validators.required]);
+      if(this.isRequired()) {
+        this.control.addValidators([Validators.required]);
+      } else {
+        this.control.removeValidators([Validators.required]);
+      }
       this.control.updateValueAndValidity();
     });
   }
 
   displayFn(item: string | baseEntity): string {
+    if (this.displayField() !== 'name') {
+      return this.data()?.find(i => i.name === item)?.[this.displayField()] ?? item;
+    }
     return typeof item === 'string' ? item : item?.name;
   }
 
   getEntitiesFn(value: string) {
-    this.loading.set(true);
+    this.state().loading.set(true);
     this.getEntities.emit(value);
   }
 
   loadMoreEntities(value: string) {
-    this.loading.set(true);
+    this.state().loading.set(true);
     this.loadMore.emit(value);
   }
 
@@ -127,7 +133,11 @@ export class PaginatedEntitySelectorComponent implements ControlValueAccessor, V
   }
 
   setDisabledState?(isDisabled: boolean) {
-    isDisabled ? this.control.disable() : this.control.enable();
+    if (isDisabled) {
+      this.control.disable()
+    } else {
+      this.control.enable();
+    }
   }
 
   validate(/*control: AbstractControl*/): ValidationErrors | null {

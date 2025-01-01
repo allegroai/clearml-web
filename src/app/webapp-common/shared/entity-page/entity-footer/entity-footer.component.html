@@ -1,36 +1,49 @@
-<sm-compare-footer *ngIf="footerState">
-  <ng-container *ngFor="let footerItem of footerItems; trackBy: trackBy">
-    <ng-template
-      #templateRef
-      [ngTemplateOutletContext]="{ $implicit: footerItem.getItemState(footerState)}"
-      [ngTemplateOutlet]="templateRef"
-      let-footerItemState
-    >
-      <ng-container *ngIf="!footerItem.isTag; else tags">
-        <span
-          *ngIf="!footerItemState?.preventCurrentItem"
-          [class]="footerItemState?.wrapperClass"
-
-          [smTooltip]="footerItem.disable || footerItemState.disable
+@if (footerState()) {
+  <div class="footer-container" data-id="footerActionMenuBar">
+    @for (footerItem of footerItems(); track $index) {
+      @let footerItemState = footerItem.getItemState(footerState());
+      @if (!footerItem.isTag) {
+        @if (!footerItemState?.preventCurrentItem) {
+          <span
+            [class]="footerItemState?.wrapperClass"
+            [smTooltip]="footerItem.disable || footerItemState.disable
                                   ? footerItem.disableDescription || footerItemState.disableDescription
                                   : footerItemState.description   || footerItem.description"
-        >
-          <button
-            class="compare-button-container"
-            [class]="footerItem.class || footerItemState?.class"
-            (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
-            [class.disabled]="footerItemState?.disable ? footerItemState?.disable : null"
           >
-            <i *ngIf="footerItem.icon" data-id="FooterOptions" class="sm al-icon sm-md al-color blue-100"
-               [class]="footerItem.icon"></i>
-            <i *ngIf="footerItemState?.icon" data-id="archiveOption" class="sm al-icon sm-md al-color blue-100"
-               [class]="footerItemState?.icon"></i>
-            <div *ngIf="footerItem.title" class="title" data-id="compareOption">{{footerItem.title}}</div>
-            <div *ngIf="footerItemState?.title" class="title ms-1">{{footerItemState?.title}}</div>
-          </button>
-        </span>
-      </ng-container>
-      <ng-template #tags>
+            @if (footerItem.divider) {
+              <div class="divider"></div>
+            } @else if (!footerItem.title && !footerItemState.title) {
+              <button
+                mat-icon-button
+                (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
+                [disabled]="footerItemState?.disable"
+                [attr.data-id]="footerItem.icon ? 'FooterOptions' : 'archiveOption'"
+              ><mat-icon fontSet="al" [fontIcon]="footerItem.icon ?? footerItemState.icon"></mat-icon></button>
+            } @else {
+              @if (footerItem.icon) {
+              <button
+                mat-stroked-button
+                (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
+                [disabled]="footerItemState?.disable"
+                [attr.data-id]="'compareOption'"
+              >
+                <mat-icon fontSet="al" [fontIcon]="footerItem.icon"></mat-icon>
+                <span>{{footerItem.title ?? footerItemState.title}}</span>
+              </button>
+              } @else {
+                <button
+                  mat-button
+                  (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
+                  [disabled]="footerItemState?.disable"
+                  [attr.data-id]="footerItem.title"
+                >
+                <span>{{footerItem.title ?? footerItemState.title}}</span>
+              </button>
+              }
+            }
+          </span>
+        }
+      } @else {
         <span
           class="tags-container"
           [smTooltip]="footerItem.disable || footerItemState.disable ?
@@ -38,23 +51,24 @@
              footerItemState.description   || footerItem.description"
         >
           <button
+            mat-icon-button
             [matMenuTriggerFor]="tagsMenu.matMenu"
             [disabled]="footerItemState.disable"
             (menuOpened)="tagMenuOpened(tagMenu())"
             (menuClosed)="tagMenuClosed(tagMenu())"
-          ><i data-id="AddTagOption" class="al-icon sm-md pt-1" [class]="icons.TAG"></i></button>
+          >
+            <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>
+          </button>
         </span>
-
         <sm-tags-menu
           #tagsMenu
-          class="light-theme"
           [tags]="footerItemState.tags"
           [tagsFilterByProject]="footerItemState.tagsFilterByProject"
           [projectTags]="footerItemState.projectTags"
           [companyTags]="footerItemState.companyTags"
-          (tagSelected)="tagSelected.emit({tags: $event, emitValue: footerItemState.emitValue})">
+          (tagSelected)="tagSelected.emit({tag: $event, emitValue: footerItemState.emitValue})">
         </sm-tags-menu>
-      </ng-template>
-    </ng-template>
-  </ng-container>
-</sm-compare-footer>
+      }
+    }
+  </div>
+}

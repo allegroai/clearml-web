@@ -5,6 +5,7 @@ import {ColorPickerWrapperComponent} from '../../inputs/color-picker/color-picke
 import {ColorPickerModule} from 'ngx-color-picker';
 import {StoreModule} from '@ngrx/store';
 import {colorPreferenceReducer} from './choose-color.reducer';
+import {MatButton} from '@angular/material/button';
 
 
 
@@ -22,11 +23,12 @@ const _declarations = [
     ChooseColorDirective,
   ],
   declarations   : _declarations,
-  imports        : [
+  imports: [
     CommonModule,
     ColorPickerModule,
     StoreModule.forFeature('colorsPreference', colorPreferenceReducer),
-      ],
+    MatButton,
+  ],
   exports        : _declarations
 })
 export class ChooseColorModule {

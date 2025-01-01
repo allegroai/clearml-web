@@ -8,6 +8,7 @@ import {SelectModelEffects} from './select-model.effects';
 import {ModelSharedModule} from '../models/shared/model-shared.module';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {PushPipe} from '@ngrx/component';
+import {MatButton} from '@angular/material/button';
 
 @NgModule({
   imports: [
@@ -16,7 +17,8 @@ import {PushPipe} from '@ngrx/component';
     EffectsModule.forFeature([SelectModelEffects]),
     StoreModule.forFeature('selectModel', selectModelReducer),
     DialogTemplateComponent,
-        PushPipe,
+    PushPipe,
+    MatButton,
   ],
   providers: [],
   declarations: [SelectModelComponent],

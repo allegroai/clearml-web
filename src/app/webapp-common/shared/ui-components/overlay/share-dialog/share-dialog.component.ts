@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogRef} from '@angular/material/dialog';
 import {IShareDialogConfig} from './share-dialog.model';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
@@ -9,7 +9,9 @@ import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dial
 import {ClipboardModule} from 'ngx-clipboard';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
-import {NgIf} from '@angular/common';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton} from '@angular/material/button';
+
 
 @Component({
   selector: 'sm-share-dialog',
@@ -21,18 +23,20 @@ import {NgIf} from '@angular/common';
     ClipboardModule,
     ClickStopPropagationDirective,
     SaferPipe,
-    NgIf
+    MatIcon,
+    MatButton,
+    MatDialogActions
   ]
 })
 export class ShareDialogComponent {
 
-  displayX: boolean = true;
+  displayX = true;
 
   title: string;
 
   public subTitle: string;
   public link: string;
-  shared: boolean = false;
+  shared = false;
   public sharedSubtitle: string;
   public privateSubtitle: string;
   private readonly task: string;

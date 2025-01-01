@@ -3,7 +3,7 @@
 :host {
   .diff-container {
     position: relative;
-    background-color: $blue-900;
+    background-color: var(--color-surface-container-low);
     padding: 16px 0 0 16px;
     border-radius: 4px;
 
@@ -11,17 +11,14 @@
     flex-direction: row-reverse;
     position: absolute;
     z-index: 100;
-    top: 16px;
-    right: 22px;
+    top: 0;
+    right: 6px;
     display: none;
-    background-color: $blue-900;
     gap: 12px;
+    padding: 12px;
+    background-color: var(--color-surface-container-low);
+    border-radius: 4px;
 
-    sm-search {
-      border-radius: 4px;
-      color: $blue-280 !important;
-      background-color: $blue-600 !important;
-    }
   }
 
     &:hover {
@@ -33,32 +30,34 @@
     .viewport {
       height: 100%;
       min-height: 250px;
-      color: $white;
-      &.disabled{
-        color: $blue-400;
+      color: var(--color-on-surface);
+      &.disabled {
+        color: var(--color-on-surface-variant);
       }
       overflow-x: scroll;
       font-family: $font-family-monospace;
 
       .line {
-        height: 22px;
+        height: 20px;
+        font-size: 12px;
         white-space: pre;
         ::selection {
-          background-color: darken($neon-yellow, 20%);
+          background-color: var(--color-tertiary-container);
+          color: var(--color-on-tertiary-container);
         }
         .found {
           &::selection {
-            background-color: $white;
-            color: darken($neon-yellow, 20%);
+            color: var(--color-tertiary-container);
+            background-color: var(--color-on-tertiary-container);
           }
-          background-color: darken($neon-yellow, 20%);
+          background-color: var(--color-tertiary-container);
           border-radius: 4px;
           padding: 0 2px;
           &.current {
-            background-color: darken($orangada, 10%);
+            background-color: var(--color-warning);
             &::selection {
-              background-color: $white;
-              color: darken($orangada, 10%);
+              background-color: var(--color-surface-container-lowest);
+              color: var(--color-warning)
             }
           }
         }

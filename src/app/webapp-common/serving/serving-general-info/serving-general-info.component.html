@@ -1,4 +1,4 @@
-@for (kpi of kpis(); track kpi) {
+@for (kpi of kpis(); track kpi.label) {
   <div>
     <sm-labeled-row label="{{kpi.label}}">
       @if (!kpi.href) {
@@ -8,10 +8,8 @@
       }
       @if (kpi.href && kpi.value) {
         <div class="info-value">
-          <a [href]="kpi.href" class="link">
-            {{ kpi.value }}
-          </a>
-          <sm-copy-clipboard [clipboardText]="kpi.href" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
+          <a [href]="kpi.href" class="link">{{ kpi.value }}</a>
+          <sm-copy-clipboard [clipboardText]="kpi.href" label=""></sm-copy-clipboard>
         </div>
       }
       @if (kpi.href && (!kpi.value)) {
@@ -43,10 +41,10 @@
             {{ instancesLinks()?.[i]?.name }}
           </a>
         } @else {
-        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.id">
-          {{ row?.id }}
-        </span>
-      }
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.id">
+            {{ row?.id }}
+          </span>
+        }
       }
       @case ('uptime_sec') {
         <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row?.uptime_sec">

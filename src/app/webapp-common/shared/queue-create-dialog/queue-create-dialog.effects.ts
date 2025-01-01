@@ -1,3 +1,4 @@
+import {calculateQueuesCaption} from '@common/workers-and-queues/workers-and-queues.utils';
 import * as createNewQueueActions from './queue-create-dialog.actions';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Injectable} from '@angular/core';
@@ -20,7 +21,7 @@ export class QueueCreateDialogEffects {
 
   createQueue = createEffect(() => this.actions.pipe(
     ofType(createNewQueueActions.createNewQueue),
-    mergeMap((action) => this.queuesApiService.queuesCreate({name: action.name})
+    mergeMap((action) => this.queuesApiService.queuesCreate({name: action.name, display_name: action.display_name})
       .pipe(
         mergeMap(() => [
           deactivateLoader(action.type),
@@ -59,7 +60,7 @@ export class QueueCreateDialogEffects {
     ofType(createNewQueueActions.getQueues),
     switchMap(() => this.queuesApiService.queuesGetAllEx({})
       .pipe(
-        mergeMap(res => [createNewQueueActions.setQueues({queues: res.queues})]),
+        mergeMap(res => [createNewQueueActions.setQueues({queues: calculateQueuesCaption(res.queues)})]),
         catchError(error => [requestFailed(error)])
       )
     )

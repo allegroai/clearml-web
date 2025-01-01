@@ -10,9 +10,10 @@
 
   .chart-container {
     padding: 20px 20px 0;
-    background-color: $black;
-    border: 1px solid $dark-grey-blue;
+    background-color: var(--color-surface-container-lowest);
+    border: 1px solid var(--color-outline-variant);
     width: 50%;
+    border-radius: 4px;
 
     &.right {
       margin-left: 20px;
@@ -47,9 +48,9 @@
       }
     }
 
-    .warnning {
+    .warning {
       margin-left: 10px;
-      color: $neon-yellow;
+      --mat-icon-color: var(--color-warning)
     }
   }
 }

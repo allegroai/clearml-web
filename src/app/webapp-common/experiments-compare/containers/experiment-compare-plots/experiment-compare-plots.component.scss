@@ -15,7 +15,8 @@
     flex: 0 0 360px;
     padding: 0px 8px;
     overflow-y: hidden;
-    border-right: 1px solid #efefef;
+    border-top: 1px solid var(--color-surface-container-high);
+    border-right: 1px solid var(--color-surface-container-high);
   }
 
   .graphs-container {

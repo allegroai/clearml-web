@@ -1,15 +1,18 @@
 import {
-  AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef,
-  Component, effect,
-  ElementRef, HostListener, inject,
-  NgZone,
+  ChangeDetectionStrategy,
+  Component, computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
   OnDestroy,
-  OnInit,
+  signal,
   viewChild,
   viewChildren,
 } from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
-import {fromEvent, Observable, Subscription} from 'rxjs';
+import {combineLatest, fromEvent, Observable} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, mergeMap, takeUntil, tap, throttleTime} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
@@ -17,15 +20,20 @@ import {selectRouterParams} from '../../core/reducers/router-reducer';
 import * as commonInfoActions from '../../experiments/actions/common-experiments-info.actions';
 import {
   getSelectedPipelineStep,
-  setSelectedPipelineStep, StepStatusEnum, TreeStep
+  setSelectedPipelineStep,
+  StepStatusEnum,
+  TreeStep
 } from '../../experiments/actions/common-experiments-info.actions';
 import {selectPipelineSelectedStepWithFallback} from '../../experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {getBoxToBoxArrow} from 'curved-arrows';
-import {Ace, edit} from 'ace-builds';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
+import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {uniq} from 'lodash-es';
+// import {pipelineDummyConfiguration} from '@common/pipelines-controller/pipeline-controller-info/pipeline-dummydata';
+import {animate, state, style, transition, trigger} from '@angular/animations';
 
 export interface PipelineItem extends DagModelItem {
   name: string;
@@ -56,55 +64,92 @@ export enum StatusOption {
   templateUrl: './pipeline-controller-info.component.html',
   styleUrls: ['./pipeline-controller-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [DagManagerUnsortedService]
+  providers: [DagManagerUnsortedService],
+  animations: [
+    trigger('shrinkRegular', [
+      state(
+        'shrink',
+        style({
+          opacity: '0',
+        }),
+      ),
+      state(
+        'regular',
+        style({
+          opacity: '1',
+        }),
+      ),
+      transition('shrink => regular', [animate('1s')]),
+    ]),
+  ],
 })
 
-export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PipelineControllerInfoComponent implements OnDestroy {
+  private readonly _dagManager = inject(DagManagerUnsortedService<PipelineItem>);
+  protected readonly store = inject(Store);
+  protected readonly destroyRef = inject(DestroyRef);
+
   tasksElements = viewChildren('taskEl', {read: ElementRef});
   diagramContainer = viewChild<ElementRef<HTMLDivElement>>('diagramContainer');
-  private aceEditorElement = viewChild<ElementRef<HTMLDivElement>>('aceEditor');
-  private aceEditor: Ace.Editor;
-  private sub = new Subscription();
+
+
+  protected readonly statusOption = StatusOption;
   private dragging: boolean;
   public chartWidth = 0;
   public arrows: Arrow[];
   public diagramRect: DOMRect;
 
-  public dagModel$: Observable<PipelineItem[][]>;
-  public selected$: Observable<IExperimentInfo>;
-  public selectedEntity: PipelineItem;
-  public projectId$: Observable<string>;
+  public selectedEntity = signal<PipelineItem>(null);
+  protected enableStaging = signal<boolean>(false);
   protected pipelineController: PipelineItem[];
   private skipAutoCenter: boolean;
-  private scale: number;
-  showLog: boolean;
+  private scale = toSignal(this.store.select(selectScaleFactor)
+    .pipe(map(factor => 100 / factor)));
+  showLog = signal(false);
   public infoData: IExperimentInfo;
-  public stepDiff: string;
-  statusOption = StatusOption;
-  detailsPanelMode = StatusOption.log;
+  protected stepDiff = signal<string>(null);
+  detailsPanelMode = signal(StatusOption.log);
   defaultDetailsMode = StatusOption.log;
 
   public maximizeResults: boolean;
-  protected _dagManager: DagManagerUnsortedService<PipelineItem>;
-  protected store: Store;
-  protected cdr: ChangeDetectorRef;
-  protected zone: NgZone;
+  protected selected$ = this.store.select(selectPipelineSelectedStepWithFallback);
+  protected projectId$ = this.store.select(selectRouterParams)
+    .pipe(map(params => params?.projectId));
+
+  protected dagModel$ = this._dagManager.dagModel$
+    .pipe(filter(model => model?.length > 0), tap(model =>
+      model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
+
+  protected arrows$: Observable<Arrow[]> = this.dagModel$
+    .pipe(
+      debounceTime(50),
+      map(() => this.drawLines())
+    );
+
+  protected highlightedArrows$: Observable<Arrow[]> = combineLatest([
+    this.arrows$,
+    toObservable(this.selectedEntity)
+  ])
+    .pipe(map(([arrows, selected]) => this.highlightArrows(arrows, selected)));
+  focusOnStage = signal(null);
+  focusOnStageId = computed(() => {
+    return this.focusOnStage()?.id;
+  });
+  protected hasStages = signal(false);
+  protected shrink = false;
+
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
     if ((e.key == 'Escape')) {
-      this.showLog = false;
+      this.showLog = signal(false);
     }
   }
 
   constructor() {
-    this._dagManager = inject(DagManagerUnsortedService<PipelineItem>);
-    this.store = inject(Store);
-    this.cdr = inject(ChangeDetectorRef);
-    this.zone = inject(NgZone);
-
-    this.sub.add(this.store.select(selectRouterParams)
+    this.store.select(selectRouterParams)
       .pipe(
+        takeUntilDestroyed(),
         debounceTime(150),
         map(params => this.getEntityId(params)),
         filter(id => !!id),
@@ -115,40 +160,23 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         this.store.dispatch(commonInfoActions.resetExperimentInfo());
         this.store.dispatch(commonInfoActions.getExperimentInfo({id}));
         this.store.dispatch(setSelectedPipelineStep({step: null}));
-      })
-    );
+      });
 
-    this.sub.add(this.store.select(selectScaleFactor).subscribe(factor => this.scale = 100 / factor));
-
-    this.selected$ = this.store.select(selectPipelineSelectedStepWithFallback);
-
-    this.projectId$ = this.store.select(selectRouterParams)
-      .pipe(map(params => params?.projectId));
-
-
-    effect(() => {
-      if(this.aceEditorElement()) {
-        this.initAceEditor();
-      }
-    });
-  }
-
-  ngOnInit(): void {
-    this.sub.add(this.store.select(selectSelectedExperiment)
-      .subscribe(task => {
+    combineLatest([this.store.select(selectSelectedExperiment), toObservable(this.enableStaging)])
+      .pipe(takeUntilDestroyed())
+      .subscribe(([task,]) => {
         if (task?.id !== this.infoData?.id) {
-          this.selectedEntity = null;
-          this.stepDiff = null;
-          this.detailsPanelMode = this.getPanelMode();
+          this.enableStaging.set(false);
+          this.selectedEntity.set(null);
+          this.stepDiff.set(null);
+          this.detailsPanelMode.set(this.getPanelMode());
         }
         this.infoData = task;
         const width = this.diagramContainer()?.nativeElement.getBoundingClientRect().width;
         this.chartWidth = Math.max(Number.isNaN(width) ? 0 : width, 4000);
-        this.dagModel$ = this._dagManager.dagModel$
-          .pipe(filter(model => model?.length > 0), tap(model =>
-            model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
         const pipelineObject = this.getTreeObject(task);
         this.pipelineController = this.convertPipelineToDagModel(pipelineObject);
+
         this.resetUninitializedRunningFields();
         this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
         window.setTimeout(() => {
@@ -156,16 +184,54 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
             const element = this.diagramContainer().nativeElement;
             element.scroll({left: (element.scrollWidth - element.getBoundingClientRect().width) / 2});
           }
-          this.removeLines();
-          this.drawLines();
-          this.cdr.markForCheck();
         }, 0);
 
-        if(this.selectedEntity) {
-          this.selectStep(this.selectedEntity);
+        if (this.selectedEntity()) {
+          this.selectStep(this.selectedEntity());
         }
-      })
-    );
+      });
+
+    effect(() => {
+      if (this.diagramContainer()) {
+        fromEvent(this.diagramContainer().nativeElement, 'wheel')
+          .pipe(
+            takeUntilDestroyed(this.destroyRef),
+            throttleTime(1000)
+          )
+          .subscribe(() => {
+            this.skipAutoCenter = true;
+          });
+
+        const mousedown$ = fromEvent(this.diagramContainer().nativeElement, 'mousedown');
+        const mouseup$ = fromEvent(document, 'mouseup');
+        const mousemove$ = fromEvent(this.diagramContainer().nativeElement, 'mousemove');
+
+        mousedown$
+          .pipe(
+            takeUntilDestroyed(this.destroyRef),
+            mergeMap(() => mousemove$.pipe(
+              tap(() => {
+                this.dragging = true;
+                this.skipAutoCenter = true;
+              }),
+              map((e: MouseEvent) => {
+                e.preventDefault(); // prevent selecting text while dragging
+                return {
+                  x: e.movementX,
+                  y: e.movementY
+                };
+              }),
+              takeUntil(mouseup$)
+            ))
+          )
+          .subscribe(({x, y}: { x: number; y: number }) => {
+            this.diagramContainer().nativeElement.scrollTo({
+              top: this.diagramContainer().nativeElement.scrollTop - y,
+              left: this.diagramContainer().nativeElement.scrollLeft - x,
+            });
+          });
+      }
+    });
   }
 
   protected resetUninitializedRunningFields() {
@@ -182,14 +248,70 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     return params?.controllerId;
   }
 
+  getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  convertToStages(pipelineObj) {
+    const mergedStages = {};
+    Object.keys(pipelineObj).forEach((key) => {
+      if (pipelineObj[key].stage) {
+        const stageKey = pipelineObj[key].stage;
+        mergedStages[stageKey] = {
+          parents: [...mergedStages[stageKey]?.parents ?? [], ...pipelineObj[key].parents],
+          isStage: true,
+        };
+      } else {
+        mergedStages[key] = pipelineObj[key];
+      }
+    });
+
+
+    Object.keys(mergedStages).forEach((key) => {
+      const pipelineStepsInStage = Object.entries(pipelineObj).filter(([pipelineKey]) => pipelineObj[pipelineKey].stage === key);
+      mergedStages[key] = {
+        ...mergedStages[key],
+        parents: uniq(mergedStages[key].parents?.map(parent => pipelineObj[parent]?.stage ?? parent).filter(stage => stage !== key)),
+        ...(mergedStages[key].isStage && {
+          numberOfStepsInStage: pipelineStepsInStage.length,
+          statusCount: {
+            queued: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.queued).length,
+            pending: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.pending).length,
+            skipped: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.skipped).length,
+            executed: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.executed).length,
+            running: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.running).length,
+            failed: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.failed).length,
+            aborted: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.aborted).length,
+            completed: pipelineStepsInStage.filter(([, step]: [string, TreeStep]) => step.status === StepStatusEnum.completed).length,
+          },
+          computingTime: pipelineStepsInStage.map(([, step]: [string, TreeStep]) => step.job_ended - step.job_started).reduce((a, b) => a + b, 0)
+        }),
+      };
+    });
+    return mergedStages;
+  }
+
   convertPipelineToDagModel(pipeline): PipelineItem[] {
     let pipelineObj;
     try {
       pipelineObj = JSON.parse(pipeline);
+      // pipelineObj = pipelineDummyConfiguration;
+      this.hasStages.set(Object.values(pipelineObj).some((value: TreeStep) => !!value?.stage));
       pipelineObj = Object.entries(pipelineObj).reduce((acc, [key, val]: [string, TreeStep]) => {
-        acc[key] = {...val, parents: val.parents.map(parent => `${parent}`)};
+        if (!this.focusOnStageId() || val.stage === this.focusOnStageId()) {
+          acc[key] = {
+            ...val,
+            parents: val.parents.map(parent => `${parent}`)
+              .filter(parent => !this.focusOnStageId() || pipelineObj[parent].stage === this.focusOnStageId()),
+            isStage: false
+          };
+        }
         return acc;
       }, {});
+      if (this.enableStaging()) {
+        pipelineObj = this.convertToStages(pipelineObj);
+      }
+
     } catch {
       return [];
     }
@@ -218,51 +340,9 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     } as PipelineItem));
   }
 
-  ngAfterViewInit(): void {
-
-    fromEvent(this.diagramContainer().nativeElement, 'wheel')
-      .pipe(throttleTime(1000))
-      .subscribe(() => {
-      this.skipAutoCenter = true;
-    });
-
-    const mousedown$ = fromEvent(this.diagramContainer().nativeElement, 'mousedown');
-    const mouseup$ = fromEvent(document, 'mouseup');
-    const mousemove$ = fromEvent(this.diagramContainer().nativeElement, 'mousemove');
-
-    this.sub.add(mousedown$
-      .pipe(
-        mergeMap(() => mousemove$.pipe(
-          tap(() => {
-            this.dragging = true;
-            this.skipAutoCenter = true;
-          }),
-          map((e: MouseEvent) => {
-            e.preventDefault(); // prevent selecting text while dragging
-            return {
-              x: e.movementX,
-              y: e.movementY
-            };
-          }),
-          takeUntil(mouseup$)
-        ))
-      )
-      .subscribe(({x, y}: { x: number; y: number }) => {
-        this.diagramContainer().nativeElement.scrollTo({
-          top: this.diagramContainer().nativeElement.scrollTop - y,
-          left: this.diagramContainer().nativeElement.scrollLeft - x,
-        });
-      })
-    );
-  }
-
-  removeLines() {
-    this.arrows = [];
-  }
-
   drawLines() {
+    const arrows = [] as Arrow[];
     const pipeLineItems = this._dagManager.getSingleDimensionalArrayFromModel();
-    this.arrows = [];
     this.diagramRect = this.diagramContainer().nativeElement.getBoundingClientRect();
     pipeLineItems.forEach((pipeLineItem) => {
       pipeLineItem.parentIds.forEach((parentId: number) => {
@@ -277,11 +357,11 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
             const fromRect = parent.nativeElement.getBoundingClientRect();
             const toRect = self.nativeElement.getBoundingClientRect();
             const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae] = getBoxToBoxArrow(
-              parent.nativeElement.offsetLeft, parent.nativeElement.offsetTop, fromRect.width / this.scale, fromRect.height / this.scale,
-              self.nativeElement.offsetLeft, self.nativeElement.offsetTop, toRect.width / this.scale, toRect.height / this.scale,
+              parent.nativeElement.offsetLeft, parent.nativeElement.offsetTop, fromRect.width / this.scale(), fromRect.height / this.scale(),
+              self.nativeElement.offsetLeft, self.nativeElement.offsetTop, toRect.width / this.scale(), toRect.height / this.scale(),
               {padStart: 0, padEnd: 7}
             );
-            this.arrows.push({
+            arrows.push({
               path: `M${sx} ${sy} C${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`,
               headTransform: `translate(${ex},${ey}) rotate(${ae})`,
               selected: false,
@@ -293,114 +373,110 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         }
       });
     });
+    return arrows;
+  }
+
+  protected highlightArrows(arrows: Arrow[], selected: PipelineItem) {
+    return arrows?.map(arrow => {
+      const isTarget = arrow.targetId === `${selected?.stepId}`;
+      const isSource = arrow.sourceId === `${selected?.stepId}`;
+      return {...arrow, selected: isTarget || isSource, outgoing: isSource};
+    }).sort((a, b) => (a.selected === b.selected) ? 0 : a.selected ? 1 : -1);
   }
 
   ngOnDestroy(): void {
     this.store.dispatch(commonInfoActions.setExperiment({experiment: null}));
     this.store.dispatch(setSelectedPipelineStep({step: null}));
-    this.removeLines();
-    this.sub.unsubscribe();
   }
 
   selectStep(step?: PipelineItem) {
     if (step) {
       try {
-        this.stepDiff = JSON.parse(this.infoData.configuration[step.data?.job_code_section || step.id]?.value)?.script?.diff;
-        this.aceEditor?.getSession().setValue(this.stepDiff);
+        this.stepDiff.set(JSON.parse(this.infoData.configuration[step.data?.job_code_section || step.id]?.value)?.script?.diff);
       } catch {
-        this.stepDiff = null;
+        this.stepDiff.set(null);
         if (this.defaultDetailsMode === StatusOption.code) {
-          this.detailsPanelMode = this.defaultDetailsMode;
+          this.detailsPanelMode.set(this.defaultDetailsMode);
         }
       }
       const id = this.infoData.runtime._pipeline_hash ? (step?.data?.job_id) : null;
       if (id) {
         this.store.dispatch(getSelectedPipelineStep({id}));
       } else {
-        this.store.dispatch(setSelectedPipelineStep({step: {
+        this.store.dispatch(setSelectedPipelineStep({
+          step: {
             id,
             type: step.data.job_type,
             status: step.data.status as unknown as TaskStatusEnum,
             name: step.name
-          }}));
-        this.showLog = false;
+          }
+        }));
+        this.showLog = signal(false);
       }
-      this.selectedEntity = step;
-      this.highlightArrows();
+      this.selectedEntity.set(step);
     } else if (!this.dragging) {
-      this.stepDiff = null;
-      this.detailsPanelMode = this.defaultDetailsMode;
-      this.store.dispatch(setSelectedPipelineStep({step: null}));
-      this.selectedEntity = null;
-      this.highlightArrows();
+      this.stepDiff.set(null);
+      this.detailsPanelMode.set(this.defaultDetailsMode);
+      this.store.dispatch(setSelectedPipelineStep({step: this.focusOnStage()?.id ? this.focusOnStage() : null}));
+      this.selectedEntity.set(this.focusOnStage()?.id ? this.focusOnStage() : null);
     } else {
       this.dragging = false;
     }
   }
 
   openLog(show = true) {
-    this.showLog = show;
-    this.initAceEditor();
+    this.showLog = signal(show);
   }
 
-  private initAceEditor() {
-    const aceEditorElement = this.aceEditorElement()?.nativeElement;
-    if (!aceEditorElement) {
-      this.aceEditor = null;
-      return;
-    }
-    this.zone.runOutsideAngular(() => {
-      const aceEditor = edit(aceEditorElement) as Ace.Editor;
-      this.aceEditor = aceEditor;
-      aceEditor.setOptions({
-        readOnly: true,
-        showLineNumbers: false,
-        showGutter: false,
-        fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
-        fontSize: 13,
-        highlightActiveLine: false,
-        highlightSelectedWord: false,
-        showPrintMargin: false,
-      });
-
-      aceEditor.renderer.setScrollMargin(12, 12, 12, 12);
-      aceEditor.renderer.setPadding(16);
-      (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
-
-      aceEditor.container.style.lineHeight = '1.6';
-      aceEditor.renderer.updateFontSize();
-
-      aceEditor.session.setMode('ace/mode/python');
-      aceEditor.setTheme('ace/theme/monokai');
-      aceEditor.getSession().setValue(this.stepDiff);
-
-      this.aceEditor = aceEditor;
-    });
-  }
   toggleResultSize() {
-    this.maximizeResults = ! this.maximizeResults;
-    if (this.detailsPanelMode === StatusOption.content) {
-      this.detailsPanelMode = null;
+    this.maximizeResults = !this.maximizeResults;
+    if (this.detailsPanelMode() === StatusOption.content) {
+      this.detailsPanelMode.set(null);
       window.setTimeout(() => {
-        this.detailsPanelMode = StatusOption.content;
-        this.cdr.markForCheck();
+        this.detailsPanelMode.set(StatusOption.content);
       }, 450);
     }
-  }
-
-  protected highlightArrows() {
-    this.arrows = this.arrows?.map(arrow => {
-      const isTarget = arrow.targetId === `${this.selectedEntity?.stepId}`;
-      const isSource = arrow.sourceId === `${this.selectedEntity?.stepId}`;
-      return {...arrow, selected: isTarget || isSource, outgoing: isSource};
-    }).sort((a, b) => (a.selected === b.selected) ? 0 : a.selected ? 1 : -1);
   }
 
   protected getTreeObject(task) {
     return task?.configuration?.Pipeline?.value;
   }
 
+
   protected getPanelMode() {
     return this.defaultDetailsMode;
+  }
+
+  expandStage(step) {
+    this.shrink = true;
+    this.focusOnStage.set(step);
+    this.skipAutoCenter = false;
+    this.enableStaging.set(false);
+  }
+
+  goBackToStagesMode() {
+    this.shrink = false;
+    this.focusOnStage.set(undefined);
+    this.skipAutoCenter = false;
+    this.enableStaging.set(true);
+    this.selectStep();
+  }
+
+  toggleEnableStaging() {
+    this.skipAutoCenter = false;
+    this.enableStaging.set(!this.enableStaging());
+    if (!this.enableStaging()) {
+      this.selectStep();
+    }
+  }
+
+  expandStageAnimationStarted() {
+    this.chartWidth = 0;
+  }
+
+  shrinkDone(event) {
+    if (event.fromState === 'regular') {
+      this.shrink = false;
+    }
   }
 }

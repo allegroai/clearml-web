@@ -3,17 +3,15 @@ import {PlotData} from 'plotly.js';
 
 export interface ExperimentGraph {
   data?: unknown;
-  layout?: {[key: string]: unknown};
+  layout?: Record<string, unknown>;
   iter?: number;
   metric?: string;
   task?: Task['id'];
   timestamp?: number;
-  type?: string;  // TODO: write options in constant
+  type?: string;
   variant?: string;
   worker?: string;
-  config?: {[key: string]: unknown};
+  config?: Record<string, unknown>;
 }
 
-export interface GroupedList {
-  [metric: string]: { [variant: string]: { [experimentId: string]: PlotData } };
-}
+export type GroupedList = Record<string, Record<string, PlotData>>;

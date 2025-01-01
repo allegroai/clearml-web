@@ -124,7 +124,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
           }
           else if (showRunningWarningDialog) {
             this.showConfirmArchiveExperiments(selectedExperiments, entityType, 'ARCHIVE A RUNNING TASK',
-              'Some of the experiments you are about to archive are running or queued.<br>Archiving running experiments will also <b>RESET</b> them.<br>Archive experiments?',
+              'Some of the tasks you are about to archive are running or queued.<br>Archiving running tasks will also <b>RESET</b> them.<br>Archive tasks?',
               false);
           } else {
             this.store.dispatch(commonMenuActions.archiveSelectedExperiments({
@@ -138,14 +138,14 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
 
   toggleFullScreen(showFullScreen: boolean) {
     if (showFullScreen) {
-      this.store.dispatch(headerActions.setTabs({contextMenu: null}));
-      this.router.navigateByUrl(`projects/${this.projectId()}/experiments/${this.experiment().id}/output/execution`);
+      this.store.dispatch(headerActions.reset());
+      this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/output/execution`);
     } else {
       const part = this.route.firstChild.routeConfig.path;
       if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
-        this.router.navigateByUrl(`projects/${this.projectId()}/experiments/${this.experiment().id}/info-output/${part}`);
+        this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/info-output/${part}`);
       } else {
-        this.router.navigateByUrl(`projects/${this.projectId()}/experiments/${this.experiment().id}/${part}`);
+        this.router.navigateByUrl(`projects/${this.projectId()}/tasks/${this.experiment().id}/${part}`);
       }
     }
   }
@@ -188,12 +188,13 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
     this.store.dispatch(getQueuesForEnqueue());
     const confirmDialogRef = this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig<{$implicit: ISelectedExperiment[]; queueName?: string}>, boolean>(ConfirmDialogComponent, {
       data: {
-        title: 'Dequeue Experiment',
+        title: 'Dequeue Task',
         template: this.dequeueTemplate(),
         templateContext: {$implicit: selectedExperiments},
         yes: 'Dequeue',
         no: 'Cancel',
-        iconClass: 'i-alert',
+        iconClass: 'al-ico-alert',
+        iconColor: 'var(--color-warning)'
       }
     });
 
@@ -203,13 +204,12 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
 
     this.store.select(selectQueuesList)
       .pipe(filter(qs => !!qs), take(2))
-      .subscribe((queues: Queue[]) => {
+      .subscribe(queues => {
         const queue = queues.find(q => q.entries.some(entry => (entry.task as Task).id === this.experiment().id));
         if (confirmDialogRef.componentInstance && queue) {
-          confirmDialogRef.componentInstance.templateContext = {$implicit: selectedExperiments, queueName: queue.name};
+          confirmDialogRef.componentInstance.templateContext = {$implicit: selectedExperiments, queueName: queue.caption};
         }
       });
-
   }
 
   private enqueueExperiment(queue, selectedExperiments) {
@@ -264,7 +264,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         templateContext: {$implicit: selectedExperiments},
         yes: 'Abort',
         no: 'Cancel',
-        iconClass: 'al-icon al-ico-abort al-color',
+        iconClass: 'al-ico-abort',
       }
     }).afterClosed()
       .subscribe((confirmed) => {
@@ -279,12 +279,12 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
 
     this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig<{$implicit: ISelectedExperiment[]}>, boolean>(ConfirmDialogComponent, {
       data: {
-        title: 'PUBLISH EXPERIMENTS',
+        title: 'PUBLISH TASKS',
         template: this.publishTemplate(),
         templateContext: {$implicit: selectedExperiments},
         yes: 'Publish',
         no: 'Cancel',
-        iconClass: 'd-block fas fa-cloud-upload-alt fa-7x w-auto',
+        iconClass: 'al-ico-publish',
       }
     }).afterClosed().subscribe((confirmed) => {
       if (confirmed) {
@@ -300,7 +300,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
   shareExperimentPopup() {
     this.dialog.open(ShareDialogComponent, {
       data: {
-        title: 'SHARE EXPERIMENT PUBLICLY',
+        title: 'SHARE TASK PUBLICLY',
         link: `${window.location.origin}/projects/${this.experiment().project.id}/experiments/${this.experiment().id}/output/execution`,
         alreadyShared: this.experiment()?.system_tags.includes('shared'),
         task: this.experiment()?.id
@@ -316,7 +316,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
         currentProjects: currentProjects.length > 0 ? currentProjects : [this.projectId()],
         defaultProject: this.experiment()?.project,
         reference: selectedExperiments.length > 1 ? selectedExperiments : selectedExperiments[0]?.name,
-        type: 'experiment'
+        type: EntityTypeEnum.experiment
       }
     });
     dialog.afterClosed().pipe(filter(project => !!project)).subscribe(project => {
@@ -342,7 +342,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
   clonePopup() {
     this.dialog.open<CloneDialogComponent, CloneDialogData, CloneExperimentPayload>(CloneDialogComponent, {
       data: {
-        type: 'Experiment',
+        type: 'Task',
         defaultProject: this.isExample() ? '' : this.experiment()?.project?.id,
         defaultName: this.experiment().name
       }
@@ -392,7 +392,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
             [EntityTypeEnum.dataset]: 'datasets/simple',
             [EntityTypeEnum.controller]: 'pipelines'
           };
-          window.setTimeout(() => this.router.navigate([entityBaseRoute[entityType] || 'projects', this.projectId(), 'experiments'], {queryParamsHandling: 'preserve'}));
+          window.setTimeout(() => this.router.navigate([entityBaseRoute[entityType] || 'projects', this.projectId(), 'tasks'], {queryParamsHandling: 'preserve'}));
         }
         if (this.isCompare()) {
           window.setTimeout(() => this.router.navigate([{ids: []}], {queryParamsHandling: 'preserve', relativeTo: this.route.firstChild}));
@@ -409,7 +409,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent {
             Archiving will disable public access`,
         yes: 'OK',
         no: 'Cancel',
-        iconClass: 'al-icon al-ico-archive al-color',
+        iconClass: 'al-ico-archive',
         showNeverShowAgain
       }
     }).afterClosed()

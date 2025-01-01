@@ -6,33 +6,11 @@
     padding: 0;
     box-sizing: border-box;
 }
-:root {
-    --blue-25: #f9fafb;
-    --blue-50: #f2f4fc;
-    --blue-100: #dce0ee;
-    --blue-200: #c3cdf0;
-    --blue-250: #A4ADCD;
-    --blue-280: #a7b2d8;
-    --blue-300: #8492c2;
-    --blue-400: #5a658e;
-    --blue-450: #657099;
-    --blue-480: #707ba3;
-    --blue-500: #384161;
-    --blue-550: #47527A;
-    --blue-600: #2c3246;
-    --blue-650: #24293c;
-    --blue-700: #202432;
-    --blue-800: #1a1e2c;
-    --blue-900: #141722;
-    --blue-950: #0d0e15;
-    --purple: #4d66ff;
-    --dark-border: #303443;
-}
+
 
 /* LAYOUT */
 .modal-content {
-    font-family: "Heebo", sans-serif;
-    color: var(--blue-500);
+    color: var(--color-on-surface-variant);
     font-size: 14px;
     max-width: 640px;
     margin: 0 auto;
@@ -41,7 +19,7 @@
     margin-bottom: 32px;
 }
 .modal-content .link {
-    color: var(--purple);
+    color: var(--color-primary);
     text-decoration: none;
 }
 .modal-content .link:hover {
@@ -54,12 +32,12 @@
 }
 .modal-content .graph {
     max-width: 100%;
-    border: 1px solid var(--dark-border);
+    border: 1px solid var(--color-outline-variant);
     border-radius: 4px;
     overflow: hidden;
 }
 .modal-content figcaption {
-    color: var(--blue-400);
+    color: var(--color-on-surface);
 }
 
 
@@ -70,7 +48,7 @@
     display: block;
     padding: 24px 0;
     font-size: 11px;
-    color: var(--blue-300);
+    color: var(--color-surface-container-highest);
 }
 
 .modal-content p > small {
@@ -80,17 +58,16 @@
 
 /* HEADING */
 .modal-content h1 {font-size: 28px; font-weight: 500;}
-.modal-content h2 {font-size: 22px; font-weight: 500; color: #70a798;}
-.modal-content h3 {font-size: 16px; font-weight: 500; color: #7dafdb;}
+.modal-content h2 {font-size: 22px; font-weight: 500; color: var(--color-tertiary);}
+.modal-content h3 {font-size: 16px; font-weight: 500; color: var(--color-secondary);}
 
 /* BLOCKQUOTE */
 .modal-content blockquote {
     padding: 4px 16px;
-    border-left: 3px solid var(--purple);
+    border-left: 3px solid var(--color-tertiary);
 }
 .modal-content blockquote p {
     margin: 0;
-    color: var(--blue-500);
 }
 
 /* LIST */
@@ -102,26 +79,24 @@
 
 /* TABLES */
 .modal-content .table {
-    background-color: var(--blue-900);
-    border: 1px solid var(--dark-border);
+    border: 1px solid var(--color-outline-variant);
     border-collapse: collapse;
     margin-bottom: 12px;
 }
 .modal-content .table thead {
-    color: var(--blue-300);
-    background-color: var(--blue-800);
+    background-color: var(--row-header-color);
 }
 .modal-content .table th {
     font-weight: 500;
 }
 .modal-content .table th,
 .modal-content .table td {
-    border: 1px solid var(--dark-border);
+    border: 1px solid var(--color-outline-variant);
     padding: 8px 16px;
 }
 
 .modal-content .table td {
-    color: var(--blue-100);
+    color: var(--row-default-text-color);
 }
 
 
@@ -129,15 +104,15 @@
 .modal-content details {
     margin-bottom: 2px;
     padding: 6px 28px;
-    color: var(--blue-250);
-    background-color: var(--blue-900);
-    border: 1px solid var(--dark-border);
+    color: var(--on-surface-variant);
+    background-color: var(--color-surface-container-low);
+    border: 1px solid var(--color-outline-variant);
     border-radius: 4px;
     transition: margin 0.35s;
 }
 .modal-content details summary {
     cursor: pointer;
-    color: #90bce3;
+    color: var(--color-primary);
     margin-left: -24px;
 }
 .modal-content summary::marker {
@@ -145,7 +120,7 @@
 }
 .modal-content summary::before {
     content: "\e9af";
-    color: var(--blue-300);
+    color: var(--color-primary);
     display: inline-block;
     vertical-align: middle;
     font-family: "trains";
@@ -155,10 +130,10 @@
     transition: transform 0.35s;
 }
 .modal-content summary:hover {
-    color: var(--blue-100);
+    color: var(--color-primary);
 }
 .modal-content details[open] summary {
-    color: #e1edf8;
+    color: var(--color-on-surface);
     margin-bottom: 12px;
 }
 .modal-content details[open] summary::before {
@@ -173,17 +148,18 @@
     font-size: 12px;
     line-height: 18px;
     border-radius: 4px;
-    color: var(--blue-100);
-    background-color: var(--blue-600);
-    border: 1px solid var(--blue-500);
+    color: var(--color-on-surface);
+    background-color: var(--color-surface-container);
+    border: 1px solid var(--color-outline-variant);
 }
 .modal-content .md-code {
     display: block;
     position: relative;
-    margin-bottom: 12px;
+    margin: 12px 0;
     padding: 16px;
-    font-size: 13px;
-    background-color: var(--blue-900);
+    font-size: 12px;
+    line-height: 1.8em;
+    background-color: var(--color-surface-container-low);
     white-space: pre;
     overflow-x: auto;
 }
@@ -197,9 +173,45 @@
 .modal-content hr {
     margin: 24px 0;
     border: none;
-    border-bottom: 1px solid #0000001a;
+    border-bottom: 1px solid var(--color-outline);
 }
 
+/* Code block colors */
+/* light */
+.light-mode .modal-content .hljs-tag {
+    color: #22863A;
+}
+.light-mode .modal-content .hljs-string,
+.light-mode .modal-content .hljs-bullet {
+    color: #032F62;
+}
+
+.light-mode .modal-content .hljs-attr {
+    color: #6F42C1;
+}
+
+.light-mode .modal-content .hljs-regexp,
+.light-mode .modal-content .hljs-link {
+    color: #032F62;
+}
+
+/* dark */
+.dark-mode .modal-content .hljs-tag {
+    color: #FF9DA4;
+}
+.dark-mode .modal-content .hljs-string,
+.dark-mode .modal-content .hljs-bullet {
+    color: #9fcef6;
+}
+
+.dark-mode .modal-content .hljs-attr {
+    color: #baa1e9;
+}
+
+.dark-mode .modal-content .hljs-regexp,
+.dark-mode .modal-content .hljs-link {
+    color: #7baade;
+}
 
 </style>
 
@@ -211,7 +223,7 @@
     <!-- EMBEDDED VISUALIZATIONS -->
     <section>
         <h2>Embedded Visualizations</h2>
-        <p>You can embed most ClearML plots and images appearing in experiments (or experiment comparison). Each such asset will show a "<b>Copy embed code</b>" button on hover, which will copy specific HTML embed code that, pasted in a report, will embed that asset.</p>
+        <p>You can embed most ClearML plots and images appearing in tasks (or task comparison). Each such asset will show a "<b>Copy embed code</b>" button on hover, which will copy specific HTML embed code that, pasted in a report, will embed that asset.</p>
 <code class="md-code hljs html word-break"><span class="hljs-tag">&lt;<span class="hljs-name">iframe</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/widgets?type=scalar&amp;tasks=e-f6b6632fdd3648d1948fb311baaa3d03&amp;metrics=train&amp;company=aec6c91852c548158a76778aa40c1772"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"c66c0fda-5196-4d5f-ab0d-50ead9cb8738"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"100%"</span> <span class="hljs-attr">height</span>=<span class="hljs-string">"400"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">iframe</span>&gt;</span></code>
         <p><small>The rendered output looks like this:</small></p>
         <figure>

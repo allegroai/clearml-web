@@ -1,17 +1,20 @@
 <sm-update-notifier #update
-                    [availableUpdates]="!hideUpdate && (updatesAvailable$ | async)"
-                    [currentUser]="currentUser"
-                    [dismissedVersion]="serverUpdatesService.lastDismissedVersion"
-                    (versionDismissed)="versionDismissed($event)"
-                    (notifierActive)="notifierActive($event)">
-</sm-update-notifier>
+  [availableUpdates]="(updatesAvailable$ | async)"
+  [currentUser]="$any(currentUser())"
+  [dismissedVersion]="serverUpdatesService.lastDismissedVersion"
+  (versionDismissed)="versionDismissed($event)"
+></sm-update-notifier>
 <sm-color-picker-wrapper id="color-picker-outlet"></sm-color-picker-wrapper>
 <sm-server-notification-dialog-container></sm-server-notification-dialog-container>
 <sm-spinner></sm-spinner>
 <div class="root-container">
-  <sm-side-nav *ngIf="currentUser"></sm-side-nav>
-  <div class="app-container" [class.login-page]="!currentUser" [class.notifier-open]="update?.active">
-    <sm-header *ngIf="currentUser" [isLogin]="isLoginContext" [isShareMode]="isSharedAndNotOwner$ | async"></sm-header>
+  @if (currentUser()) {
+    <sm-side-nav></sm-side-nav>
+  }
+  <div class="app-container" [class.login-page]="!currentUser()" [class.notifier-open]="update?.active()">
+    @if (currentUser()) {
+      <sm-header [isLogin]="loginContext | ngrxPush" [isShareMode]="isSharedAndNotOwner()"></sm-header>
+    }
     <router-outlet class="main-router"></router-outlet>
   </div>
 </div>

@@ -6,6 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {CREATION_STATUS} from './queue-create-dialog.reducer';
 import {Observable, Subscription} from 'rxjs';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 @Component({
   selector   : 'sm-queue-create-dialog',
@@ -16,7 +17,7 @@ export class QueueCreateDialogComponent implements OnInit, OnDestroy {
   public queues$: Observable<any>;
   private creationStatusSubscription: Subscription;
   private editMode = false;
-  public queue     = {name: null, id: null};
+  public queue     = {name: null, id: null, display_name: null} as Queue;
 
   constructor(private store: Store, private matDialogRef: MatDialogRef<QueueCreateDialogComponent>, @Inject(MAT_DIALOG_DATA) public data) {
     if (data) {
@@ -42,7 +43,7 @@ export class QueueCreateDialogComponent implements OnInit, OnDestroy {
 
   public createQueue(queue) {
     if (queue.id) {
-      this.store.dispatch(createNewQueueActions.updateQueue({queue: {queue: queue.id, name: queue.name}}));
+      this.store.dispatch(createNewQueueActions.updateQueue({queue: {queue: queue.id, name: queue.name, display_name: queue.display_name}}));
     } else {
       this.store.dispatch(createNewQueueActions.createNewQueue(queue));
     }

@@ -5,7 +5,7 @@ import {Store} from '@ngrx/store';
 import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {selectReadOnlyProjects, selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {getTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {filter, tap} from 'rxjs/operators';
 import {CloneExperimentPayload} from '../../common-experiment-model.model';
 import {isEqual} from 'lodash-es';
@@ -91,7 +91,6 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   searchChanged(searchString: {value: string; loadMore?: boolean}) {
     this.projects = null;
     // this.rootFiltered = !this.projectRoot.includes(searchString);
-    !searchString.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getTablesFilterProjectsOptions({
       searchString: searchString.value, loadMore: searchString.loadMore, allowPublic: false
     }));

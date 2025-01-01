@@ -45,15 +45,15 @@ export class WorkersTableComponent extends BaseTableView {
       {
         id: WORKERS_TABLE_COL_FIELDS.TASK,
         headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'CURRENTLY RUNNING EXPERIMENT',
+        header: 'CURRENTLY RUNNING TASK',
         style: {width: '30%', maxWidth: '700px'},
         sortable: true,
       },
       {
         id: WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME,
         headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'EXPERIMENT RUNNING TIME',
-        style: {width: '100px', maxWidth: '200px'},
+        header: 'TASK RUNNING TIME',
+        style: {width: '160px', maxWidth: '200px'},
         sortable: true,
       },
       {

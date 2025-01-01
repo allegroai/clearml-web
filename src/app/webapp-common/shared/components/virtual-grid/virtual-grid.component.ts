@@ -3,11 +3,9 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
-  OnChanges,
-  Output,
+  Output, signal,
   TemplateRef,
-  ViewChild
+  ViewChild, inject, input, effect, computed
 } from '@angular/core';
 import {BehaviorSubject, combineLatest, fromEvent, Observable} from 'rxjs';
 import {debounceTime, filter, map, startWith} from 'rxjs/operators';
@@ -18,6 +16,9 @@ import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 import {PushPipe} from '@ngrx/component';
+import {MatButton} from '@angular/material/button';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {toObservable} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -32,55 +33,51 @@ import {PushPipe} from '@ngrx/component';
     CdkVirtualScrollViewport,
     NgTemplateOutlet,
     ScrollEndDirective,
-    AsyncPipe,
-    PushPipe
+    PushPipe,
+    MatButton,
+    MatProgressSpinner
   ]
 })
-export class VirtualGridComponent implements OnChanges{
-  private items$ = new BehaviorSubject<any[]>(null);
+export class VirtualGridComponent {
+      private store = inject(Store);
+      private ref = inject(ElementRef);
   public itemRows$: Observable<any[][]>;
   public rowWidth = 300;
   public min = Math.min;
   public gridGap: number;
   public cardsInRow: number;
-  private _cardTemplate: TemplateRef<any>;
   private width$: Observable<number>;
   private resize$ = new BehaviorSubject<number>(null);
-  public loading: boolean;
-  private _items: any[];
 
   // snippetMode means the items has no fixed width so we can stretch them to fill the row (consider scroll in calcs and add 1fr to card-width)
-  @Input() snippetsMode = false;
-  @Input() set cardTemplate(cardTemplate: TemplateRef<any>) {
-    this.viewPort?.scrollToIndex(0);
-    this._cardTemplate = cardTemplate;
-  }
+  snippetsMode = input(false);
+  items = input<any[]>()
+  cardTemplate = input<TemplateRef<unknown>>();
+  cardHeight = input(246);
+  cardWidth = input(352);
+  padding = input(64 + 24 + 24);
+  showLoadMoreButton = input(false);
+  autoLoadMore = input(false);
+  trackFn = input(item => item.id);
 
-  get cardTemplate() {
-    return this._cardTemplate;
-  }
-
-  @Input() set items(items: any[]) {
-    this._items = items;
-    this.loading = false;
-  }
-
-  get items() {
-    return this._items;
-  }
-
-  @Input() cardHeight = 246;
-  @Input() cardWidth = 352;
-  @Input() padding = 64 + 24 + 24;
-  @Input() showLoadMoreButton = false;
-  @Input() autoLoadMore = false;
-  @Input() trackFn = item => item.id;
   @Output() itemClicked = new EventEmitter<any>();
   @Output() loadMoreClicked = new EventEmitter();
   @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
 
+  private items$ = toObservable(this.items);
+  protected itemsState = computed(() => ({
+    items: this.items(),
+    loading: signal(false)
+  }));
 
-  constructor(private store: Store, private ref: ElementRef) {
+
+  constructor() {
+    effect(() => {
+      if (this.cardTemplate()) {
+        this.viewPort?.scrollToIndex(0);
+      }
+    });
+
     this.width$ = combineLatest([
       fromEvent(window, 'resize').pipe(startWith(null)),
       this.resize$
@@ -97,16 +94,12 @@ export class VirtualGridComponent implements OnChanges{
       .pipe(
         debounceTime(10),
         map(([width, results, factor]) => {
-        this.rowWidth = width * factor - this.padding - (this.snippetsMode ? 12 : 0); // 12 because when scroll blinks
-        this.gridGap = Math.min(this.cardWidth * 0.075, 24);
-        this.cardsInRow = Math.floor(this.rowWidth / (this.cardWidth + this.gridGap)) || 1;
-        this.rowWidth = this.cardsInRow * this.cardWidth + (this.cardsInRow - 1) * this.gridGap;
+        this.rowWidth = width * factor - this.padding() - (this.snippetsMode() ? 12 : 0); // 12 because when scroll blinks
+        this.gridGap = Math.min(this.cardWidth() * 0.075, 24);
+        this.cardsInRow = Math.floor(this.rowWidth / (this.cardWidth() + this.gridGap)) || 1;
+        this.rowWidth = this.cardsInRow * this.cardWidth() + (this.cardsInRow - 1) * this.gridGap;
         return chunk(results, this.cardsInRow );
       }));
-  }
-
-  ngOnChanges() {
-    this.items$.next(this.items);
   }
 
   resize(size: number) {
@@ -114,7 +107,7 @@ export class VirtualGridComponent implements OnChanges{
   }
 
   autoLoad() {
-    this.loading = true;
+    this.itemsState().loading.set(true);
     this.loadMoreClicked.emit();
   }
 }

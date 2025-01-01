@@ -12,6 +12,8 @@ import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-l
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {PushPipe} from '@ngrx/component';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 
 
@@ -31,6 +33,8 @@ import {PushPipe} from '@ngrx/component';
     ChooseColorModule,
     ShowTooltipIfEllipsisDirective,
     PushPipe,
+    MatIconButton,
+    MatIcon
   ]
 })
 export class SingleGraphModule { }

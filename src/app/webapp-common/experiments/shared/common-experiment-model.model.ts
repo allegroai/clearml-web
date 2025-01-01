@@ -9,11 +9,13 @@ import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
-export interface IModelInfo extends  Omit<Model, 'project' | 'task' | 'user'> {
+export interface IModelInfo extends  Omit<Model, 'project' | 'task' | 'user' | 'company'> {
   project?: Project;
   task?: ITask;
   taskName?: string;
   user?: User;
+  company?: {id: string; name: string};
+  design?: any;
 }
 
 export interface CompareIModelInfo extends  Omit<IModelInfo,  'id'> {

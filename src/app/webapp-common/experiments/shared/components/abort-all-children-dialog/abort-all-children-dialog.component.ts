@@ -1,6 +1,5 @@
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Component, Inject} from '@angular/core';
-import {Store} from '@ngrx/store';
+import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {Component, inject} from '@angular/core';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
@@ -9,28 +8,15 @@ import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info
   styleUrls: ['./abort-all-children-dialog.component.scss']
 })
 export class AbortAllChildrenDialogComponent {
+  protected data = inject<{
+    tasks: ISelectedExperiment[];
+    shouldBeAbortedTasks: ISelectedExperiment[];
+  }>(MAT_DIALOG_DATA);
   public experiments: ISelectedExperiment[];
   shouldBeAbortedTasks: ISelectedExperiment[] = null;
 
-
-  constructor(
-    private store: Store,
-    public dialogRef: MatDialogRef<AbortAllChildrenDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: {
-      tasks: ISelectedExperiment[];
-      shouldBeAbortedTasks: ISelectedExperiment[];
-    }
-  ) {
-    this.experiments = data.tasks;
-    this.shouldBeAbortedTasks = data.shouldBeAbortedTasks;
-
-  }
-
-  closeDialog(isConfirmed) {
-    if (isConfirmed) {
-      this.dialogRef.close({shouldBeAbortedTasks: this.shouldBeAbortedTasks});
-    } else {
-      this.dialogRef.close(null);
-    }
+  constructor() {
+    this.experiments = this.data.tasks;
+    this.shouldBeAbortedTasks = this.data.shouldBeAbortedTasks;
   }
 }

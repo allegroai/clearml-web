@@ -1,23 +1,19 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
-  Output,
-  Renderer2,
-  ViewChild
-} from '@angular/core';
+  Renderer2, input, output, viewChild, effect, model, inject } from '@angular/core';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {MatListModule} from '@angular/material/list';
-import {NgIf} from '@angular/common';
+
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-menu',
@@ -31,68 +27,65 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     MatInputModule,
     FormsModule,
     MatListModule,
-    NgIf,
     ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    MatIcon,
+    MatIconButton,
+    MatButton
   ]
 })
-export class MenuComponent implements AfterViewInit {
-  public isMenuOpen: boolean = false;
+export class MenuComponent {
+  private renderer = inject(Renderer2);
+  private elRef = inject(ElementRef);
+  protected eRef = inject(ElementRef);
+  private isMenuOpen = false;
 
-  @Input() searchPlaceholder: string = '';
-  @Input() header: string;
-  @Input() buttonClass: string;
-  @Input() hasButtonClass = true;
-  @Input() smMenuClass: string;
-  @Input() panelClasses: string;
-  @Input() iconClass: string = 'al-icon al-ico-dropdown-arrow';
-  @Input() showCart: boolean = true;
-  @Input() openOnInit: boolean = false;
-  @Input() showOverlay: boolean = true;
-  @Input() enableSearch: boolean = false;
-  @Input() searchValue: string;
-  @Input() fixedOptionsSubheader: string;
-  @Input() buttonTooltip: string;
-  @Input() prefixIconClass: string;
-  @Input() disabled: boolean;
-  @Input() set position(position: { x: number; y: number }) {
-    this.movePosition(position);
-    this._position = position;
-  }
-
-  get position() {
-    return this._position;
-  }
-  public _position;
-  @Output() menuClosed = new EventEmitter();
-  @Output() menuOpened = new EventEmitter();
-  @Output() searchValueChanged = new EventEmitter<string>();
-  @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
-  @ViewChild('menu', {static: true}) menu;
+  searchPlaceholder = input<string>('');
+  header = input<string>();
+  buttonClass = input<string>();
+  smMenuClass = input<string>();
+  panelClasses = input<string>();
+  iconClass = input<string>('al-ico-dropdown-arrow');
+  showCart = input<boolean>(true);
+  openOnInit = input<boolean>(false);
+  showOverlay = input<boolean>(true);
+  enableSearch = input<boolean>(false);
+  searchValue = model<string>();
+  fixedOptionsSubheader = input<string>();
+  buttonTooltip = input<string>();
+  prefixIconClass = input<string>();
+  disabled = input<boolean>();
+  position = input<{ x: number; y: number }>();
+  menuClosed = output();
+  menuOpened = output();
+  searchValueChanged = output<string>();
+  trigger = viewChild(MatMenuTrigger);
 
   @HostListener('document:click', ['$event'])
-  clickOut(event) {
-    if (this.isMenuOpen && !this.showOverlay && !this.eRef.nativeElement.contains(event.target)) {
+  clickOut(event: MouseEvent) {
+    if (this.isMenuOpen && !this.showOverlay() && !this.eRef.nativeElement.contains(event.target)) {
       this.isMenuOpen = false;
-      this.trigger.closeMenu();
+      this.trigger().closeMenu();
     }
   }
 
-  constructor(private renderer: Renderer2, private elRef: ElementRef, protected eRef: ElementRef) {
-  }
+  constructor() {
+    effect(() => {
+      if (this.position()) {
+        this.movePosition(this.position());
+      }
+    });
 
-  ngAfterViewInit(): void {
-    if (this.position) {
-      this.movePosition(this.position);
-    }
-    if (this.openOnInit) {
-      this.openMenu();
-    }
+    effect(() => {
+      if (this.openOnInit() && this.trigger()) {
+        this.openMenu();
+      }
+    });
   }
 
   public openMenu() {
     this.isMenuOpen = true;
-    this.trigger.openMenu();
+    this.trigger().openMenu();
   }
 
   movePosition(position) {
@@ -105,7 +98,7 @@ export class MenuComponent implements AfterViewInit {
   }
 
   clearSearch() {
-    this.searchValue = '';
+    this.searchValue.set('');
     this.searchValueChanged.emit('');
   }
 }

@@ -14,8 +14,7 @@ $dot-size: 8px;
 
 .load-more {
   &__dot {
-    --dot-color: #{$blue-300};
-
+    --dot-color: var(--color-outline);
     position: relative;
     width: $dot-size;
     height: $dot-size;

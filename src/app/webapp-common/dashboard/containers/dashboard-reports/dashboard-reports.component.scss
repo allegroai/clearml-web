@@ -1,0 +1,22 @@
+@import "mixins/common";
+
+.view-all {
+  margin-left: 12px;
+}
+
+.sm-card-list-layout {
+  height: 300px;
+  overflow: hidden;
+  grid-gap: 16px 24px;
+  padding-top: 18px;
+  padding-bottom: 0;
+}
+
+.sm-card-list-header {
+  grid-column: 1 / -1;
+  padding: 0;
+  height: unset;
+}
+.recent-title {
+  @include recent-title();
+}

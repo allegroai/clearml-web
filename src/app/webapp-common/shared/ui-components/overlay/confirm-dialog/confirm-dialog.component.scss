@@ -1,10 +1,8 @@
-@import '../../styles/variables';
-
 :host {
   display: block;
 
   .reference {
-    background: $faint-gray;
+    background-color: var(--color-surface-bright);
     padding: 6px;
     border-radius: 4px;
     margin-bottom: 12px;
@@ -41,20 +39,5 @@
     position: relative;
     top: 1px;
     left: -2px;
-  }
-
-  .btn-delete {
-    background-color: $strong-red;
-    color: #fff;
-
-    &:hover {
-      background-color: darken($strong-red, 10%);
-      color: #fff;
-    }
-
-    &.disabled-button {
-      pointer-events: none;
-      opacity: 0.4;
-    }
   }
 }

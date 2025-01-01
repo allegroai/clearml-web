@@ -1,48 +1,48 @@
 <sm-table [tableData]="tasks"
-          [columns]="cols"
-          [rowHeight]="52"
-          selectionMode="single"
-          [scrollable]="true"
-          (rowClicked)="onExperimentSelected($event)"
->
+  [columns]="cols"
+  [rowHeight]="52"
+  selectionMode="single"
+  [scrollable]="true"
+  (rowClicked)="onExperimentSelected($event)"
+  >
   <ng-template let-col
-               let-experiment="rowData"
-               pTemplate="body">
-    <ng-container [ngSwitch]="col.id">
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.TYPE">
+    let-experiment="rowData"
+    pTemplate="body">
+    @switch (col.id) {
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.TYPE) {
         <sm-experiment-type-icon-label [type]="experiment?.type"></sm-experiment-type-icon-label>
-      </ng-container>
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.NAME">
+      }
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.NAME) {
         <div
           class="experiment-name"
           smShowTooltipIfEllipsis
           [smTooltip]="experiment.name">
-        {{experiment.name}}
+          {{experiment.name}}
         </div>
-      </ng-container>
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.PROJECT">
+      }
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.PROJECT) {
         <div
           class="experiment-name"
           smShowTooltipIfEllipsis
           [smTooltip]="experiment.project?.name">
           {{experiment.project?.name}}
         </div>
-      </ng-container>
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STARTED">
+      }
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.STARTED) {
         {{experiment.started | date : TIME_FORMAT_STRING}}
-      </ng-container>
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.LAST_UPDATE">
+      }
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.LAST_UPDATE) {
         {{experiment.last_update | date : TIME_FORMAT_STRING}}
-      </ng-container>
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.USER">
+      }
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.USER) {
         {{experiment.user?.name}}
-      </ng-container>
-      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STATUS">
+      }
+      @case (RECENT_TASKS_TABLE_COL_FIELDS.STATUS) {
         <sm-status-icon-label [status]="experiment?.status"></sm-status-icon-label>
-      </ng-container>
-      <ng-container *ngSwitchDefault>
+      }
+      @default {
         {{experiment[col.id]}}
-      </ng-container>
-    </ng-container>
+      }
+    }
   </ng-template>
 </sm-table>

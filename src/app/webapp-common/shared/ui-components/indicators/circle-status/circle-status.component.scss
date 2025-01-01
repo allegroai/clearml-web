@@ -1,22 +1,22 @@
-@import "../../styles/mixins/common";
+@import "mixins/common";
 @import "variables";
 
 $reqWidth: 56px;
 $font-size: 18px;
 .completed {
-  background-color: $completed-blue;
+  background-color: var(--color-completed);
 }
 
 .pending {
-  background-color: $pending-gray;
+  background-color: var(--color-pending-container);
 }
 
 .empty {
-  background-color: $empty-grey;
+  background-color: var(--color-outline-variant);
 }
 
 .running {
-  background-color: $running-green;
+  background-color: var(--color-running-container);
 }
 
 .counter-container {
@@ -29,38 +29,38 @@ $font-size: 18px;
     height: $reqWidth;
     border-radius: 50%;
     margin-bottom: 8px;
-    background-color: $blue-300;
+    background-color: var(--color-surface-container-highest);
 
     &.published {
-      background-color: $neon-yellow;
+      background-color: var(--color-published-container);
     }
     &.in_progress {
-      background-color: #50e3c2;
+      background-color: var(--color-running-container);
     }
     &.queued {
-      background-color: #c4f0e4;
+      background-color: var(--color-running-container);
     }
     &.created {
-      background-color: $blue-300;
+      background-color: var(--color-draft-container);
     }
     &.failed {
-      background-color: $failed-red;
+      background-color: var(--color-failed-container);
     }
     &.stopped {
-      background-color: $completed-blue;
+      background-color: var(--color-completed);
     }
     &.completed {
-      background-color: $completed-blue;
+      background-color: var(--color-completed);
     }
     &.in_progress {
-      background-color: $running-green;
+      background-color: var(--color-running-container);
     }
     &.closed {
-      background-color: $pending-gray;
+      background-color: var(--color-outline-variant);
     }
 
-    &.Caffe, &.PyTorch, &.Keras, &.Tensor.Flow, &.Custom {
-      background-color: $blue-300;
+    &.Caffe, &.PyTorch, &.Keras, &.Tensor.Flow, &.Custom, &.model {
+      background-color: var(--color-outline);
     }
   }
   .counter-label {

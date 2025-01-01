@@ -4,12 +4,12 @@ import {
   Component,
   HostListener,
   inject,
-  OnInit,
+  OnInit, Renderer2,
   ViewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
-import {filter, map, switchMap, take} from 'rxjs/operators';
+import {debounceTime, filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
 import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
 import {appFeature} from './app.reducer';
@@ -40,6 +40,9 @@ import {
 } from '@common/shared/single-value-summary-table/single-value-summary-table.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {BreakpointObserver, BreakpointState} from '@angular/cdk/layout';
+import {DOCUMENT} from '@angular/common';
 
 
 type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
@@ -59,7 +62,7 @@ export interface SelectedMetricVariant extends MetricVariantResult {
     SingleGraphModule,
     DebugSampleModule,
     ParallelCoordinatesGraphComponent,
-    SingleValueSummaryTableComponent,
+    SingleValueSummaryTableComponent
   ]
 })
 export class AppComponent implements OnInit {
@@ -67,6 +70,10 @@ export class AppComponent implements OnInit {
   private configService = inject(ConfigurationService);
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
+  private breakpointObserver = inject(BreakpointObserver);
+  private renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
+
   protected title = 'report-widgets';
   public plotData: ExtFrame;
   public frame: DebugSample;
@@ -102,12 +109,13 @@ export class AppComponent implements OnInit {
     this.webappLink = this.buildSourceLink(this.searchParams, '*', null);
     this.singleGraphHeight = window.innerHeight;
     this.otherSearchParams = this.getOtherSearchParams();
-    this.isDarkTheme = !this.searchParams.get('light');
     this.xaxis = this.searchParams.get('xaxis') as ScalarKeyEnum;
 
     try {
       const data = JSON.parse(localStorage.getItem('_saved_state_'));
-      data.auth && this.store.dispatch(setS3Credentials(data.auth.s3BucketCredentials));
+      if (data.auth) {
+        this.store.dispatch(setS3Credentials(data.auth.s3BucketCredentials));
+      }
     } catch (e) {
       console.log(e);
     }
@@ -159,16 +167,32 @@ export class AppComponent implements OnInit {
         this.singleGraph?.redrawPlot();
       } else if (e.data == 'disableMaximize' && this.hideMaximize !== 'hide') {
         this.hideMaximize = 'disabled';
+      } else if (e.data === 'themeChanged') {
+        this.changeTheme();
       }
     });
+    this.changeTheme()
+  }
+
+  changeTheme = () => {
+    this.renderer.removeClass(this.document.documentElement, `${this.isDarkTheme ? 'dark' : 'light'}-mode`);
+    try {
+      if (window.top.document.body.parentElement.className) {
+        this.isDarkTheme = window.top.document.body.parentElement.classList.contains('dark-mode');
+      }
+    } catch (e) {
+      this.isDarkTheme = this.searchParams.get('light') ? this.searchParams.get('light') === 'false' : !this.isDarkTheme;
+    }
+    this.renderer.addClass(this.document.documentElement, `${this.isDarkTheme ? 'dark' : 'light'}-mode`);
+    this.cdr.markForCheck();
   }
 
   /// Merging all variants of same metric to same graph. (single experiment)
-  mergeVariants = (plots: ReportsApiMultiplotsResponse): { [metric: string]: any } => {
+  mergeVariants = (plots: ReportsApiMultiplotsResponse): Record<string, any> => {
     let previousPlotIsMergable = true;
     return (Object.values(plots) as any).reduce((groupedPlots, pplot) => {
       Object.values(pplot).forEach((exp) => {
-        (Object.values(Object.values(exp)[0])[0] as { name: string; plots: Array<MetricsPlotEvent> }).plots.forEach((plot, index) => {
+        (Object.values(Object.values(exp)[0])[0] as { name: string; plots: MetricsPlotEvent[] }).plots.forEach((plot, index) => {
           const metric = plot.metric;
           groupedPlots[metric] = cloneDeep(groupedPlots[metric]) || null;
           const plotParsed = tryParseJson(plot.plot_str);
@@ -195,7 +219,7 @@ export class AppComponent implements OnInit {
       take(1))
       .subscribe((metricsPlots) => {
         this.plotLoaded = true;
-        if (this.isSingleExperiment(metricsPlots)) {
+        if (this.searchParams.getAll('objects').length < 2) {
           const merged = this.mergeVariants(metricsPlots as ReportsApiMultiplotsResponse);
           this.plotData = {...Object.values(merged)[0], ...Object.values(merged)[0].plotParsed};
         } else {
@@ -223,26 +247,26 @@ export class AppComponent implements OnInit {
                 ).subscribe(url => {
                 image.source = url;
                 this.plotLoaded = true;
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
               });
             }
           );
         } else {
           this.plotLoaded = true;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
 
 
       });
   }
 
-  private isSingleExperiment(metricsPlots: any) {
-    try {
-      return Object.keys(Object.values(Object.values(metricsPlots)[0])[0]).length === 1;
-    } catch (e) {
-      return false;
-    }
-  }
+  // private isSingleExperiment(metricsPlots: any) {
+  //   try {
+  //     return Object.keys(Object.values(Object.values(metricsPlots)[0])[0]).length === 1;
+  //   } catch (e) {
+  //     return false;
+  //   }
+  // }
 
   private getScalars() {
     this.store.select(appFeature.selectPlotlyReady).pipe(
@@ -253,10 +277,10 @@ export class AppComponent implements OnInit {
       .subscribe(metrics => {
         this.plotLoaded = true;
 
-        const lala = [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(this.xaxis) ? this.calcXaxis(metrics) : metrics;
+        const metrics2 = [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(this.xaxis) ? this.calcXaxis(metrics) : metrics;
 
-        this.plotData = Object.values(mergeMultiMetricsGroupedVariant(lala))?.[0]?.[0];
-        this.cdr.detectChanges();
+        this.plotData = Object.values(mergeMultiMetricsGroupedVariant(metrics2))?.[0]?.[0];
+        this.cdr.markForCheck();
       });
   }
 
@@ -281,7 +305,7 @@ export class AppComponent implements OnInit {
           }),
           params: this.searchParams.getAll('variants')
         };
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
   }
 
@@ -304,7 +328,7 @@ export class AppComponent implements OnInit {
           ).subscribe((signedUrl) => {
           this.frame = {...sample, url: signedUrl};
           this.activated = true;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
 
       });
@@ -324,7 +348,7 @@ export class AppComponent implements OnInit {
       } else {
         this.singleValueData = singleValueData[0].values;
       }
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
@@ -402,11 +426,7 @@ export class AppComponent implements OnInit {
         url: src,
         withoutNavigation: true
       },
-      panelClass: ['image-viewer-dialog'],
-      height: '100%',
-      maxHeight: 'auto',
-      width: '100%',
-      maxWidth: 'auto'
+      panelClass: ['image-viewer-dialog', 'full-screen'],
     }).beforeClosed().subscribe(() => this.maximize());
   }
 
@@ -428,10 +448,10 @@ export class AppComponent implements OnInit {
     const isCompare = entityIds.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
     if (isCompare) {
-      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.filter(id => !!id).join(',')}/${
+      url += `${isModels ? 'compare-models;ids=' : 'compare-tasks;ids='}${entityIds.filter(id => !!id).join(',')}/${
         this.getComparePath(this.type)}?metricVariants=${encodeURIComponent(metricsPath.join(','))}&metricName=${variants.map(par => `&params=${encodeURIComponent(par)}`).join('')}`;
     } else {
-      url += `${isModels ? 'models/' : 'experiments/'}${entityIds}/${this.getOutputPath(isModels, this.type)}`;
+      url += `${isModels ? 'models/' : 'tasks/'}${entityIds}/${this.getOutputPath(isModels, this.type)}`;
     }
     return url;
   }

@@ -1,4 +1,4 @@
-import {Component, Inject, OnDestroy} from '@angular/core';
+import {Component, Inject, OnDestroy, signal, viewChild} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectProjectTags} from '@common/core/reducers/projects.reducer';
@@ -16,12 +16,14 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatMenuModule} from '@angular/material/menu';
-import {ColorPickerModule} from 'ngx-color-picker';
+import {ColorPickerDirective, ColorPickerModule} from 'ngx-color-picker';
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
-import {AsyncPipe, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {PushPipe} from '@ngrx/component';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-tag-color-menu',
@@ -36,21 +38,23 @@ import {PushPipe} from '@ngrx/component';
     ColorPickerModule,
     CdkVirtualScrollViewport,
     CdkVirtualForOf,
-    NgIf,
     AsyncPipe,
     FilterPipe,
     ClickStopPropagationDirective,
     CdkFixedSizeVirtualScroll,
-    PushPipe
+    PushPipe,
+    MatButton,
+    MatIcon,
+    MatIconButton
   ]
 })
 export class TagColorMenuComponent implements OnDestroy {
   filterText: string;
   public tags$: Observable<Tag[]>;
-  defaultColor: string;
-  toggle: boolean;
   presetColors = TagColorService.predefined.map(color => color.background) as string[];
   currTag: string;
+  currColor = signal<string>(null);
+  protected picker = viewChild(ColorPickerDirective);
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {tags?: string[]},
@@ -74,14 +78,15 @@ export class TagColorMenuComponent implements OnDestroy {
     this.colorService.setColor(tag, {foreground: color});
   }
 
-  setBackground(tag: string, color: string) {
-    this.colorService.setColor(tag, {background: color});
+  setBackground() {
+    this.colorService.setColor(this.currTag, {background: this.currColor()});
+    this.picker().closeDialog();
   }
 
   openColorPicker(tag: string, color: string) {
     this.currTag = tag;
-    this.defaultColor = color;
-    this.toggle = true;
+    this.currColor.set(color);
+    this.picker().openDialog();
   }
 
   clearSearch() {

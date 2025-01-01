@@ -1,4 +1,8 @@
 @import "variables";
+:host {
+  --dialog-icon-color: var(--color-warning);
+}
+
 
 .more-info {
   height: 0;
@@ -14,7 +18,7 @@
   &.info-open {
     height: 100px;
     padding: 6px;
-    border: 1px solid $cloudy-blue;
+    border: 1px solid var(--color-outline-variant);
     border-radius: 4px;
     overflow: auto;
     transition: height 0.3s;
@@ -28,6 +32,7 @@
 .more-info-icon {
   width: 20px;
   text-align: center;
+  vertical-align: middle;
   transform: rotate(0);
   transition: transform 0.3s ease-in-out;
 

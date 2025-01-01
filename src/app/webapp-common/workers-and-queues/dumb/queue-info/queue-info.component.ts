@@ -1,10 +1,10 @@
-import {ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, HostListener, OnInit, input, output, inject } from '@angular/core';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {SelectQueueComponent} from '@common/experiments/shared/components/select-queue/select-queue.component';
-import {cloneDeep} from 'lodash-es';
+import {Task} from '~/business-logic/model/tasks/task';
 
 @Component({
   selector   : 'sm-queue-info',
@@ -12,26 +12,24 @@ import {cloneDeep} from 'lodash-es';
   styleUrls  : ['./queue-info.component.scss']
 })
 export class QueueInfoComponent implements OnInit {
-  private _selectedQueue: Queue;
+  private changeDetector = inject(ChangeDetectorRef);
+  private blTaskService = inject(BlTasksService);
+  private dialog = inject(MatDialog);
 
-  @Input() set selectedQueue(selectedQueue: Queue) {
-    this._selectedQueue = cloneDeep(selectedQueue);
-  }
-
-  get selectedQueue() {
-    return this._selectedQueue;
-  }
-
-  @Input() queues: Queue[];
-  @Output() deselectQueue                 = new EventEmitter();
-  @Output() moveExperimentToTopOfQueue    = new EventEmitter();
-  @Output() moveExperimentToBottomOfQueue = new EventEmitter();
-  @Output() moveExperimentToOtherQueue    = new EventEmitter();
-  @Output() removeExperimentFromQueue     = new EventEmitter();
-  @Output() moveExperimentInQueue         = new EventEmitter<{task: string; count: number}>();
+  selectedQueue = input<Queue>();
+  queues = input<Queue[]>();
+  deselectQueue = output();
+  moveExperimentToTopOfQueue = output<Task>();
+  moveExperimentToBottomOfQueue = output<Task>();
+  moveExperimentToOtherQueue = output<{queue: Queue, task: Task}>();
+  removeExperimentFromQueue = output<Task>();
+  moveExperimentInQueue = output<{
+    task: string;
+    count: number;
+  }>();
 
   public activeTab: string;
-  public menuSelectedExperiment: any;
+  public menuSelectedExperiment: Task;
   public menuOpen: boolean;
   public menuPosition: { x: number; y: number };
   public readonly experimentsCols = [
@@ -43,7 +41,6 @@ export class QueueInfoComponent implements OnInit {
     {header: 'IP', class: ''},
     {header: 'CURRENTLY EXECUTING', class: ''},
   ];
-  public menuClosed: any;
 
   @HostListener('document:click', ['$event'])
   clickHandler(event) {
@@ -52,36 +49,30 @@ export class QueueInfoComponent implements OnInit {
     }
   }
 
-  constructor(private changeDetector: ChangeDetectorRef,
-              private blTaskService: BlTasksService,
-              private dialog: MatDialog) {
-  }
-
-
   get routerTab() {
     const url = new URL(window.location.href);
     return url.searchParams.get('tab');
   }
 
   ngOnInit() {
-    this.activeTab = this.routerTab === 'workers' ? 'workers' : 'experiments';
+    this.activeTab = this.routerTab === 'workers' ? 'workers' : 'tasks';
   }
 
-
   findQueueById(id) {
-    return this.queues.find(queue => queue.id === id);
+    return this.queues().find(queue => queue.id === id);
   }
 
   deselectQueueClicked() {
     this.deselectQueue.emit();
   }
 
-
-  experimentDropped($event: CdkDragDrop<any>) {
-    this.moveExperimentInQueue.emit({task: (this.selectedQueue.entries[$event.previousIndex].task as any).id, count: ($event.currentIndex - $event.previousIndex)});
-    moveItemInArray(this.selectedQueue.entries, $event.previousIndex, $event.currentIndex);
+  experimentDropped($event: CdkDragDrop<unknown>) {
+    this.moveExperimentInQueue.emit({
+      task: (this.selectedQueue().entries[$event.previousIndex].task as Task).id,
+      count: ($event.currentIndex - $event.previousIndex)
+    });
+    moveItemInArray(this.selectedQueue().entries, $event.previousIndex, $event.currentIndex);
   }
-
 
   openContextMenu(e, task) {
     this.menuSelectedExperiment = task;
@@ -92,7 +83,6 @@ export class QueueInfoComponent implements OnInit {
       this.menuOpen     = true;
       this.changeDetector.detectChanges();
     }, 0);
-
   }
 
   moveToTop() {
@@ -113,14 +103,12 @@ export class QueueInfoComponent implements OnInit {
   }
 
   enqueuePopup() {
-    const selectQueueDialog: MatDialogRef<SelectQueueComponent, { confirmed: boolean; queue: Queue }> =
-            this.dialog.open(SelectQueueComponent, {data: {}});
-
-    selectQueueDialog.afterClosed().subscribe((res) => {
-      if (res && res.confirmed) {
-        this.moveExperimentToOtherQueue.emit({queue: res.queue, task: this.menuSelectedExperiment});
-        this.blTaskService.setPreviouslyUsedQueue(res.queue);
-      }
-    });
+    this.dialog.open<SelectQueueComponent, unknown, {confirmed?: boolean; queue: Queue}>(SelectQueueComponent, {data: {}}).afterClosed()
+      .subscribe((res) => {
+        if (res?.confirmed) {
+          this.moveExperimentToOtherQueue.emit({queue: res.queue, task: this.menuSelectedExperiment});
+          this.blTaskService.setPreviouslyUsedQueue(res.queue);
+        }
+      });
   }
 }

@@ -1,30 +1,28 @@
-<div class="search-container">
-  <div class="d-flex-center tabs">
-    <div class="ps-3 py-3">
-      @for (searchTab of activeLinksList; track searchTab.name) {
-        <span
-          class="pointer category-link"
-          [class.active]="activeLink === searchTab.name"
-          [tabindex]="$count"
-          (click)="activeLinkChanged.emit(searchTab.name)"
-          (keyup)="activeLinkChanged.emit(searchTab.name)"
-        >{{searchTab.label}} ({{resultsCount?.[searchTab.name]}})</span>
-      }
-    </div>
-  </div>
+<div class="h-100">
+  <mat-tab-group
+    [selectedIndex]="activeIndex()"
+    (selectedTabChange)="activeLinkChanged.emit(activeLinksList[$event.index].name)"
+    [mat-stretch-tabs]="false" mat-align-tabs="center">
+    @for (searchTab of activeLinksList; track searchTab.name) {
+      <mat-tab
+        [label]="searchTab.label + (resultsCount()?.[searchTab.name] !== null ? ' (' + resultsCount()?.[searchTab.name] + ')' : '')"
+        class="tab-link"
+      ></mat-tab>
+    }
+  </mat-tab-group>
   <div class="page-container">
     <sm-virtual-grid
       [cardTemplate]="
-        activeLink === searchPages.projects ? ProjectTemplate :
-        activeLink === searchPages.experiments ? ExperimentTemplate :
-        activeLink === searchPages.models ? ModelsTemplate :
-        activeLink === searchPages.openDatasets ? openDatasetTemplate :
-        activeLink === searchPages.pipelines ? PipelineTemplate :
-        activeLink === searchPages.reports ? ReportsTemplate :
+        activeLink() === searchPages.projects ? ProjectTemplate :
+        activeLink() === searchPages.experiments ? ExperimentTemplate :
+        activeLink() === searchPages.models ? ModelsTemplate :
+        activeLink() === searchPages.openDatasets ? openDatasetTemplate :
+        activeLink() === searchPages.pipelines ? PipelineTemplate :
+        activeLink() === searchPages.reports ? ReportsTemplate :
        ProjectTemplate"
       [items]="getResults()"
       [cardHeight]="getCardHeight()"
-      [showLoadMoreButton]="getResults().length < resultsCount?.[activeLink]"
+      [showLoadMoreButton]="getResults().length < resultsCount()?.[activeLink()] && !loading()"
       (itemClicked)="projectClicked($event)"
       (loadMoreClicked)="loadMoreClicked.emit()"
     >
@@ -62,11 +60,11 @@
   </ng-template>
 
   <ng-template #openDatasetTemplate let-dataset>
-    <sm-simple-dataset-card
+    <sm-open-dataset-card
       [hideMenu]="true"
       [project]="dataset"
       (projectCardClicked)="openDatasetClicked($event)"
-    ></sm-simple-dataset-card>
+    ></sm-open-dataset-card>
   </ng-template>
   <ng-template #ReportsTemplate let-report>
     <sm-report-card
@@ -75,5 +73,4 @@
       (cardClicked)="reportClicked($event)"
     ></sm-report-card>
   </ng-template>
-
 </div>

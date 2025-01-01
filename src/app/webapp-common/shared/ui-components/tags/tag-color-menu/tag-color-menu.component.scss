@@ -11,20 +11,27 @@
   ::ng-deep .color-picker {
     border-radius: 4px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-    border-color: $blue-200;
+    border-color: var(--color-outline-variant);
+    background-color: var(--color-surface-container);
+
     .saturation-lightness {
       border-radius: 3px 3px 0 0;
+      border: 1px solid var(--color-outline-variant);
     }
     .preset-area {
       hr {
         margin-top: 0;
+        border-color: var(--color-outline);
+      }
+      .preset-label{
+        color: var(--color-on-surface-variant);
       }
       .preset-color {
         margin: 4px;
-        border-color: white;
-        box-shadow: 0 0 0 1px $blue-200;
+        border-color: var(--color-surface-container-lowest);
+        box-shadow: 0 0 0 1px var(--color-outline-variant);
         &:hover {
-          box-shadow: 0 0 0 1px $blue-400;
+          box-shadow: 0 0 0 1px var(--color-outline);
         }
       }
     }
@@ -38,32 +45,44 @@
   height: 300px;
 }
 
+.filter-form {
+  ::ng-deep .mdc-text-field {
+    padding: 0;
+  }
+}
+
 .tag-line {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr 40px 1px;
+  grid-template-columns: 1fr auto;
   gap: 12px;
   height: 32px;
-
   .caption {
-    color: $blue-800;
+    color: var(--color-on-primary-container);
   }
-
   .tag {
     margin-right: 1px;
     text-align: center;
+    width: 40px;
     height: 18px;
     line-height: 17px;
     border-radius: 4px;
-    border: 1px solid #fff;
-  }
-  &:hover {
-    .tag {
-      box-shadow: 0 0 0 1px $blue-300;
+    border: 1px solid var(--color-surface);
+    &.menu-opened {
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-outline), white 20%);
     }
+  }
+  &:hover .tag {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-outline), white 20%);
   }
 }
 
 .btn-row {
   padding-top: 24px;
+  text-align: center;
+}
+.buttons {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
 }

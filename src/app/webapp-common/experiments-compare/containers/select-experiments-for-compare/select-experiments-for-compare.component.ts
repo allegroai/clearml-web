@@ -221,7 +221,6 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.previousExperimentsLength = null;
     this.store.dispatch(setTableCols({cols: this.initTableCols}));
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
-    this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getProjectUsers({projectId: '*'}));
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.select(selectRouterParams)
@@ -261,6 +260,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.reachedCompareLimit = experiments.length >= compareLimitations;
     if (experiments.length === 0) {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.WARN, 'Compare module should include at least one experiment'));
+      this.selectedExperimentsIds = experiments.map(ex => ex.id);
       return;
     }
     if (experiments.length <= compareLimitations) {

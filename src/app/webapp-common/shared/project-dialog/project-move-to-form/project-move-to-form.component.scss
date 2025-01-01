@@ -39,10 +39,10 @@
     padding: 12px;
     margin-bottom: 12px;
     border-radius: 4px;
-    background-color: $blue-50;
+    background-color: var(--color-surface-container-low);
 
     .p-name {
-      color: $blue-600;
+      color: var(--color-on-surface-variant);
       font-weight: 500;
       word-break: break-word; /* prevent long strings from breaking the layout */
     }

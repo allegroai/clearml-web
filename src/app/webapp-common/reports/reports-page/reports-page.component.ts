@@ -26,7 +26,6 @@ import {
   selectReportsTags
 } from '../reports.reducer';
 import {combineLatest, Observable, Subscription, take} from 'rxjs';
-import {Report} from '~/business-logic/model/reports/report';
 import {IReport} from '../reports.consts';
 import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../constants';
@@ -122,7 +121,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
     this.store.dispatch(getReports());
   }
 
-  reportSelected(report: Report) {
+  reportSelected(report: IReport) {
     this.router.navigate(['reports',(report.project as Project)?.id ?? '*', report.id]);
   }
 

@@ -1,17 +1,19 @@
 @import "variables";
 
 :host {
+  display: block;
+
   .reload {
-    color: $neon-yellow;
+    color: var(--color-primary);
     &:hover {
-      color: $neon-yellow;
+      color: var(--color-primary);;
     }
   }
 
   .al-icon {
-    color: $blue-300;
+    color: var(--color-outline);
     &:hover {
-      color: $blue-200;
+      color: var(--color-on-surface-variant);
     }
   }
 
@@ -23,5 +25,9 @@
     mat-slide-toggle {
       margin-bottom: 12px;
     }
+  }
+
+  .info {
+    height: 18px;
   }
 }

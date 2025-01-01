@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {NA} from '~/app.constants';
 import {fileSizeConfigCount, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
-import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
+
 
 
 @Component({
@@ -11,16 +11,11 @@ import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/c
   styleUrls: ['./circle-counter.component.scss'],
   standalone: true,
   imports: [
-    NgSwitch,
-    NgSwitchCase,
-    NgForOf,
-    NgSwitchDefault,
-    NgIf,
     FileSizePipe
-  ]
+]
 })
 export class CircleCounterComponent {
-  public valType: 'array' | 'number' | 'string';
+  public valType: 'array' | 'number' | 'tags' | 'string';
   private _counter;
   public  NA = NA;
   @Input() set counter(val) { // number | string | {value: number | string; label: string}[];

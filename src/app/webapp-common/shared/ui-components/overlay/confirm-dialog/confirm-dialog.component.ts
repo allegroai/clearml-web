@@ -1,11 +1,12 @@
-import {Component, ElementRef, Inject, Input, Renderer2, TemplateRef} from '@angular/core';
+import {Component, ElementRef, Renderer2, TemplateRef, input, inject } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogConfig} from './confirm-dialog.model';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
-import {NgIf, NgTemplateOutlet} from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-confirm-dialog',
@@ -16,49 +17,49 @@ import {NgIf, NgTemplateOutlet} from '@angular/common';
     DialogTemplateComponent,
     MatCheckboxModule,
     FormsModule,
-    NgIf,
     NgTemplateOutlet,
-    SaferPipe
+    SaferPipe,
+    MatButton
   ]
 })
 export class ConfirmDialogComponent {
+  protected data = inject<ConfirmDialogConfig>(MAT_DIALOG_DATA);
+  protected dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef<ConfirmDialogComponent>);
+  private renderer = inject(Renderer2);
+  private ref = inject(ElementRef);
 
-  @Input() displayX = true;
   showNeverShowAgain: boolean;
   title: string;
   body?: string;
-  template?: TemplateRef<any>;
-  templateContext: any;
+  template?: TemplateRef<unknown>;
+  templateContext: unknown;
   yes = 'OK';
   no = 'Cancel';
   iconClass = '';
   iconData = '';
   codeSnippet = '';
-  externalData: string = null;
   public reference: string;
   neverShowAgain: boolean;
   centerText: boolean;
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogConfig,
-    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    private ref: ElementRef, private renderer: Renderer2
-  ) {
-    this.title = data.title || '';
-    this.reference = data.reference || '';
-    this.body = data.body || '';
-    this.template = data.template;
-    this.templateContext = data.templateContext;
-    this.yes = data.yes || '';
-    this.no = typeof data.no === 'string' && data?.no ? data.no : '';
-    this.iconClass = data.iconClass || '';
-    this.iconData = data.iconData || '';
-    this.codeSnippet = data.codeSnippet || '';
-    this.showNeverShowAgain = data.showNeverShowAgain || false;
-    this.centerText = data.centerText ?? false;
-    const width = data.width || 640;
+  displayX = input(true);
 
-    renderer.setStyle(ref.nativeElement, 'width', `${width}px`);
+  constructor() {
+    this.title = this.data.title || '';
+    this.reference = this.data.reference || '';
+    this.body = this.data.body || '';
+    this.template = this.data.template;
+    this.templateContext = this.data.templateContext;
+    this.yes = this.data.yes || '';
+    this.no = typeof this.data.no === 'string' && this.data?.no ? this.data.no : '';
+    this.iconClass = this.data.iconClass || '';
+    this.iconData = this.data.iconData || '';
+    this.codeSnippet = this.data.codeSnippet || '';
+    this.showNeverShowAgain = this.data.showNeverShowAgain || false;
+    this.centerText = this.data.centerText ?? false;
+    const width = this.data.width || 640;
+
+    this.renderer.setStyle(this.ref.nativeElement, 'width', `${width}px`);
   }
 
   closeDialog(isConfirmed) {

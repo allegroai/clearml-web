@@ -1,9 +1,8 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, computed, input, output, signal} from '@angular/core';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {pageSize} from '../../common-projects.consts';
-import {trackById} from '@common/shared/utils/forms-track-by';
 
 @Component({
   selector: 'sm-projects-list',
@@ -13,35 +12,30 @@ import {trackById} from '@common/shared/utils/forms-track-by';
 export class ProjectsListComponent {
   isExample = isExample;
   pageSize = pageSize;
-  trackById = trackById;
-  private _projects: Project[];
-  public projectsNames: string[];
-  totalVirtualCards = 1;
-  public loading: boolean;
 
-  @Input() set projects(projects: Array<Project>) {
-    this._projects = projects;
-    this.projectsNames = projects?.map(p => p.basename);
-    this.totalVirtualCards = projects?.[1]?.['isRoot'] ? 2 : 1;
-    this.loading = false;
-  }
+  projects = input<Project[]>();
+  noMoreProjects = input<boolean>();
+  showLast = input<boolean>();
+  projectCardClicked = output<ProjectsGetAllResponseSingle>();
+  projectNameChanged = output<{
+        id: string;
+        name: string;
+    }>();
+  deleteProjectClicked = output<Project>();
+  loadMore = output();
+  moveToClicked = output<Project>();
+  createNewProjectClicked = output<Project>();
+  projectEditClicked = output<Project>();
 
-  get projects() {
-    return this._projects;
-  }
-
-  @Input() noMoreProjects: boolean;
-  @Input() showLast: boolean;
-  @Output() projectCardClicked = new EventEmitter<ProjectsGetAllResponseSingle>();
-  @Output() projectNameChanged = new EventEmitter<{ id: string; name: string }>();
-  @Output() deleteProjectClicked = new EventEmitter<Project>();
-  @Output() loadMore = new EventEmitter();
-  @Output() moveToClicked = new EventEmitter<Project>();
-  @Output() createNewProjectClicked = new EventEmitter<Project>();
-  @Output() projectEditClicked = new EventEmitter<Project>();
+  protected projectsNames = computed(() => this.projects()?.map(p => p.basename));
+  protected totalVirtualCards = computed(() => this.projects()?.[1]?.['isRoot'] ? 2 : 1);
+  protected projectsState = computed(() => ({
+    projects: this.projects(),
+    loading: signal(false)
+  }))
 
   loadMoreAction() {
-    this.loading = true;
+    this.projectsState().loading.set(true);
     this.loadMore.emit();
   }
 }

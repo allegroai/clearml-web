@@ -9,6 +9,22 @@
 
   .experiment-header {
     font-size: 12px;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
+  }
+
+  .no-output {
+    text-align: center;
+    color: var(--color-on-surface-variant);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    display: block;
+    h4 {
+      font-weight: 500;
+    }
+    .al-icon {
+      color: var(--color-tint-14);
+    }
   }
 }

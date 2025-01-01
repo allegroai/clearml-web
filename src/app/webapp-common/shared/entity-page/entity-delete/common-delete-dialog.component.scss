@@ -19,7 +19,7 @@
     margin-top: 12px;
 
     &.success {
-      color: $success-color;
+      color: var(--color-published);
     }
   }
 
@@ -71,7 +71,7 @@
     &.info-open {
       max-height: 180px;
       padding: 12px;
-      border: 1px solid $blue-100;
+      border: 1px solid var(--color-outline-variant);
       border-radius: 4px;
       overflow: auto;
       transition: max-height 0.3s, padding 0.3s;
@@ -90,6 +90,7 @@
   .more-info-icon {
     width: 20px;
     text-align: center;
+    vertical-align: middle;
     transform: rotate(0);
     transition: transform 0.3s ease-in-out;
 

@@ -5,6 +5,8 @@
   padding: 0 24px;
   margin: 0;
   overflow: scroll;
+  --mat-tree-container-background-color: transparent;
+  --mat-tree-node-min-height: 36px;
 }
 
 .gray {
@@ -44,9 +46,9 @@ mat-tree-node:hover .al-ico-hide {
 }
 
 .expanded {
-  span {
-    color: $purple;
-  }
+  //span {
+  //  color: var(--color-primary-container);
+  //}
 
   .toggle-icon {
     transform: rotate(90deg);
@@ -70,7 +72,7 @@ mat-tree-node:hover .al-ico-hide {
   padding: 0 4px 0 12px;
 
   &:hover {
-    background-color: $blue-50;
+    background-color: var(--color-surface-container-high);
     transition: background-color 0.2s;
   }
 

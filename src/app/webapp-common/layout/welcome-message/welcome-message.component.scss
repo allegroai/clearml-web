@@ -8,7 +8,17 @@ $credentialBaseHeight: 238px;
     padding: 0 32px;
   }
 
-  @include link();
+  ::ng-deep .lg.i-welcome-researcher {
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
+  }
+}
+
+:host-context(.dark-mode) {
+  ::ng-deep .i-welcome-researcher {
+    filter: brightness(0) contrast(1) invert(1);
+  }
 }
 
 .welcome-content {
@@ -22,7 +32,7 @@ $credentialBaseHeight: 238px;
       width: 152px;
       margin-right: 42px;
       text-align: center;
-      color: $blue-400;
+      color: var(--color-on-surface-variant);
       font-size: 12px;
 
       &:last-child {
@@ -41,9 +51,9 @@ $credentialBaseHeight: 238px;
         width: 48px;
         height: 32px;
         left: 0;
-        bottom: 9px;
+        bottom: 12px;
         border-radius: 4px;
-        background-color: $neon-yellow;
+        background-color: var(--color-tertiary-container);
         z-index: 1;
       }
 
@@ -56,7 +66,7 @@ $credentialBaseHeight: 238px;
   .separator {
     width: 100%;
     margin: 46px 0 24px;
-    border-bottom: $separator-line solid 2px;
+    border-bottom: var(--color-outline-varriant) solid 2px;
   }
 
 }
@@ -71,30 +81,31 @@ $credentialBaseHeight: 238px;
 
 
   .text {
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     margin-bottom: 12px;
     width: 530px;
   }
 
   .step-header {
-    color: $blue-500;
+    color: var(--color-tertiary);
     margin-bottom: 4px;
-    width: 530px;
   }
 
   .step {
     margin-bottom: 2px;
-    color: $blue-500;
+    color: var(--color-primary);
     font-size: 14px;
     display: flex;
     align-items: center;
   }
 
   .sub-note {
+    display: flex;
+    align-items: center;
     margin: 2px 0 2px;
     font-size: 12px;
     line-height: 1.5;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
   }
 
   .bolder {
@@ -107,8 +118,8 @@ $credentialBaseHeight: 238px;
 
     margin: 1px 0 2px;
     width: 100%;
-    color: $blue-100;
-    background-color: $blue-900;
+    color: var(--color-on-surface-variant);
+    background-color: var(--color-surface);
     border-radius: 4px;
 
 
@@ -129,26 +140,26 @@ $credentialBaseHeight: 238px;
     }
 
     .operation {
-      color: #b087e5;
+      color: var(--color-warning);
     }
 
     .string {
-      color: #e6db74;
+      color: var(--color-primary);
     }
 
     .variable {
-      color: #9ed66b;
+      color: var(--color-tertiary);
     }
 
     .comment {
-      color: $blue-500;
+      color: var(--color-on-surface-variant);
     }
 
     sm-copy-clipboard {
       visibility: hidden;
       position: absolute;
       right: 10px;
-      top: 8px;
+      top: 4px;
     }
   }
 
@@ -205,19 +216,15 @@ nav {
   align-items: center;
   height: 36px;
   margin: 12px 0 16px;
-  border-bottom: 1px solid $separator-line;
+  border-bottom: 1px solid var(--color-outline-variant);
 
-  sm-navbar-item {
-    height: 100%;
-  }
-
-  &.config-nav{
+  &.config-nav {
     margin: 0;
   }
 
   .nav-item {
     padding: 0 12px;
-    color: $blue-300;
+    color: var(--color-on-surface-variant);
     border-bottom: 4px solid transparent;
     margin: 0 1px;
 
@@ -225,14 +232,14 @@ nav {
       margin-bottom: 6px;
     }
     &:hover {
-      border-bottom-color: $purple;
-      color: $purple;
+      border-bottom-color: var(--color-primary);
+      color: var(--color-primary);
     }
   }
 
   .selected {
-    border-bottom-color: $purple;
-    color: $purple;
+    border-bottom-color: var(--color-primary);
+    color: var(--color-primary);
   }
 }
 

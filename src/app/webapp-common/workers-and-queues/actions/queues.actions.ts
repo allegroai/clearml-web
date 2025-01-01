@@ -5,12 +5,13 @@ import {SortMeta} from 'primeng/api';
 
 export interface Queue extends Omit<BLQueue, 'id'> {
   id: string;
+  caption: string;
 }
 
 export const queueActions = createActionGroup({
   source: 'Queues',
   events: {
-    'get queues': emptyProps(),
+    'get queues': props<{autoRefresh?: boolean}>(),
     'set queues': props<{ queues: Array<Queue> }>(),
     'queues table sort changed': props<{ colId: string; isShift: boolean }>(),
     'queues table set sort': props<{ orders: SortMeta[] }>(),
@@ -27,6 +28,7 @@ export const queueActions = createActionGroup({
     'add experiment to queue': props<{ task: string; queueId: string; queueName: string }>(),
     'get stats': props<{ maxPoints?: number }>(),
     'set stats': props<{ data: { wait: Topic[]; length: Topic[] } }>(),
+    'reset queues': emptyProps(),
     'reset stats': emptyProps(),
     'set stats params': props<{ timeFrame: string; maxPoints?: number }>(),
   }

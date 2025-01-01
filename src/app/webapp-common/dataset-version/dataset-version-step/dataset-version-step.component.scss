@@ -1,25 +1,19 @@
-@import "variables";
-
 :host {
   flex: 0 0 220px;
+  .console-button{
+    visibility: hidden;
+  }
 
   .title {
     max-width: 162px; // use for ellipsis
   }
-
-}
-
-.step-title {
-  &.in_progress {
-    background-color: mix($running-green, $blue-950, 20%);
+  &:hover{
+    .console-button{
+      visibility: visible;
+    }
   }
 }
-
 .step-footer {
   font-size: 12px;
-
-  &.in_progress {
-    background-color: darken($running-green, 20%);
-  }
 }
 

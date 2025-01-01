@@ -1,8 +1,10 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, signal} from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ClipboardModule} from 'ngx-clipboard';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-copy-clipboard',
@@ -12,34 +14,28 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   imports: [
     TooltipDirective,
     ClipboardModule,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    MatIcon,
+    MatButton
   ],
   standalone: true
 })
 export class CopyClipboardComponent {
 
-  @Input() clipboardText: string;
-  @Input() disabled = false;
-  @Input() label: string = 'Copy to clipboard';
-  @Input() tooltipText = 'Copy to clipboard';
-  @Input() hideBackground = false;
-  @Input() inline = false;
-  @Input() theme: string;
-  @Input() copyIcon: string;
-  @Input() tooltipPosition: TooltipPosition = 'above';
+  clipboardText = input<string>();
+  disabled = input(false);
+  label = input<string>('Copy to clipboard');
+  tooltipText = input('Copy to clipboard');
+  copyIcon = input<string>();
+  tooltipPosition = input<TooltipPosition>('above');
+  smallIcon = input(false);
 
-  public copied = false;
-
-  constructor(private cdr: ChangeDetectorRef) {
-  }
+  public copied = signal(false);
 
   copyToClipboard() {
-    this.copied = true;
-    this.cdr.detectChanges();
+    this.copied.set(true);
     setTimeout(() => {
-      this.copied = false;
-      this.cdr.detectChanges();
+      this.copied.set(false);
     }, 5000);
   }
-
 }

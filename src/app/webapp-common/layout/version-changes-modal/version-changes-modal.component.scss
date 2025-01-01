@@ -1,0 +1,35 @@
+:host {
+  .tip-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .tip-image {
+    width: 376px;
+    flex: 0 0 376px;
+    height: 235px;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 0 1px white, 0 0 0 2px var(--color-surface-container);
+    background-size: cover;
+
+    &.full-width {
+      flex: 1 1 376px;
+    }
+  }
+
+  .tip-page {
+    flex: 3px;
+    text-align: right;
+  }
+
+  .content-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-tertiary);
+  }
+
+  .tip-content {
+    width: 100%;
+  }
+}

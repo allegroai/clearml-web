@@ -1,23 +1,23 @@
-@if (!darkTheme && !reportMode) {
+@if (!reportMode) {
   <div class="actions">
     <button
-      (click)="maximize()"
-      class="btn btn-icon"
+      mat-icon-button
       smTooltip="Maximize"
-      ><i class="al-icon al-ico-fit sm-md"></i></button>
+      (click)="maximize()"
+      ><mat-icon fontSet="al" fontIcon="al-ico-fit"></mat-icon></button>
       <button
-        (click)="creatingEmbedCode($any($event.target).getBoundingClientRect())"
-        class="btn btn-icon"
+        mat-icon-button
         smTooltip="Copy embed code"
-        ><i class="al-icon al-ico-code sm-md"></i></button>
+        (click)="creatingEmbedCode($any($event.target).getBoundingClientRect())"
+        ><mat-icon fontSet="al" fontIcon="al-ico-code"></mat-icon></button>
         <button
-          (click)="downloadImage()"
-          class="btn btn-icon"
+          mat-icon-button
           smTooltip="Download as PNG"
-          ><i class="al-icon al-ico-download sm-md"></i></button>
+          (click)="downloadImage()"
+          ><mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon></button>
         </div>
       }
-      <div #container class="graph-container" [class.dark-theme]="darkTheme">
+      <div #container class="graph-container" [class.dark-theme]="isDarkTheme()">
         <div #parallelGraph>
         </div>
         <div #legend class="legend-container">

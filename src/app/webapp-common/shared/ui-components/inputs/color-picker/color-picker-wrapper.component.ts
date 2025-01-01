@@ -1,12 +1,17 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component, computed,
+  effect,
+  inject,
+  signal,
+  viewChild
+} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Subscription} from 'rxjs';
-import {distinctUntilChanged} from 'rxjs/operators';
-import {isEqual} from 'lodash-es';
 import {selectColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
-import {ColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import { TinyColor } from '@ctrl/tinycolor';
+import {TinyColor} from '@ctrl/tinycolor';
+import {ColorPickerDirective} from 'ngx-color-picker';
+import {closeColorPicker} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 
 export const presetColors = [
   '#1f77b4',  // muted blue
@@ -44,39 +49,37 @@ export const presetColorsDark = [
   styleUrls: ['./color-picker-wrapper.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
+export class ColorPickerWrapperComponent {
+  private store = inject(Store);
+  private colorHashService = inject(ColorHashService);
 
-  public defaultColor: string;
-  public presetColors = presetColors;
-  public alphaPresetColors = [...presetColors,
-    'rgba(0,0,0,0)'
-  ];
+  protected readonly presetColors = presetColors;
+  protected readonly alphaPresetColors = [...presetColors, 'rgba(0,0,0,0)'];
 
-  private propsSub: Subscription;
-  public props: ColorPickerProps;
-  public toggle = false;
+  protected picker = viewChild(ColorPickerDirective);
+  public props = this.store.selectSignal(selectColorPickerProps);
+  protected state = computed(() => ({
+    props: this.props(),
+    picker: this.picker(),
+    color: signal(this.props()?.defaultColor)
+  }));
 
-  constructor(private store: Store, private colorHashService: ColorHashService, private cdr: ChangeDetectorRef) {
+  constructor() {
+    effect(() => {
+      if (this.props() && this.picker()) {
+        this.picker().openDialog();
+      }
+    });
   }
 
-  ngOnInit() {
-    this.propsSub = this.store.select(selectColorPickerProps)
-      .pipe(distinctUntilChanged(isEqual))
-      .subscribe((props) => {
-        this.props = props;
-        this.defaultColor = props?.defaultColor;
-        this.toggle = !!props;
-        this.cdr.detectChanges();
-      });
+  closeColorPicker() {
+    this.store.dispatch(closeColorPicker());
+    this.picker().closeDialog();
   }
-
-  selectColor(event: string) {
-    const {r, g, b, a} = new TinyColor(event).toRgb();
-    const color = [r, g, b, a];
-    this.colorHashService.setColorForString(this.props.cacheKey, color);
-  }
-
-  ngOnDestroy(): void {
-    this.propsSub.unsubscribe();
+  selectColor() {
+    const {r, g, b, a} = new TinyColor(this.state().color()).toRgb();
+    const color = [r, g, b, (this.state().props.alpha && a === 1) ? 0.99999: a];
+    this.colorHashService.setColorForString(this.props().cacheKey, color, true, this.state().props.alpha);
+    this.closeColorPicker();
   }
 }

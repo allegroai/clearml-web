@@ -1,0 +1,18 @@
+@use '@angular/material' as mat;
+@import "variables";
+
+@mixin cards($theme) {
+  @if mat.get-theme-type($theme) == light {
+    --card-tab1-bg: var(--color-primary-container);
+    --card-tab1-hover-bg: var(--color-secondary-container-lower);
+    --card-footer-bg: var(--color-inverse-primary);
+    --card-tab2-bg: var(--color-inverse-primary);
+    --card-tab2-bg-hover: color-mix(in srgb, var(--color-inverse-primary), var(--color-on-surface) 5%);
+  } @else {
+    --card-tab1-bg: #{$blue-500};
+    --card-tab1-hover-bg: #{$blue-400};
+    --card-footer-bg: #{$blue-600};
+    --card-tab2-bg: #{$blue-600};
+    --card-tab2-bg-hover: #{$blue-700};
+  }
+}

@@ -1,5 +1,5 @@
 import {NAVIGATION_PREFIX} from '~/app.constants';
-import {createAction, createActionGroup, props} from '@ngrx/store';
+import {createAction, createActionGroup, emptyProps, props} from '@ngrx/store';
 import {Params} from '@angular/router';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
@@ -27,12 +27,12 @@ export const setURLParams = createAction(
   props<{
     columns?: string[];
     orders?: SortMeta[];
-    filters?: { [key: string]: FilterMetadata };
+    filters?: Record<string, FilterMetadata>;
     isArchived?: boolean;
     isDeep?: boolean;
     update?: boolean;
     version?: string;
-    others?: {[key: string]: string};
+    others?: Record<string, string>;
   }>()
 );
 
@@ -54,7 +54,8 @@ export const setWorkspaceNeutral = createAction(
 export const headerActions = createActionGroup({
   source: 'header tabs',
   events: {
-    setTabs: props<{ contextMenu: HeaderNavbarTabConfig[]}>(),
+    reset: emptyProps(),
+    setTabs: props<{ contextMenu: HeaderNavbarTabConfig[], active: string}>(),
     setActiveTab: props<{ activeFeature: string}>()
   }
 });

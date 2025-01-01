@@ -4,23 +4,23 @@
   .description-tooltip {
     margin: -4px 0;
     max-width: 300px;
-    background: $purple;
-    padding: 8px;
+    background-color: var(--mdc-plain-tooltip-container-color);
+    padding: 0 12px 8px 12px;
+    &.add-description {
+      padding-top: 8px;
+    }
     border-radius: 4px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     font-size: 11px;
     overflow: hidden;
     div, p {
-      color: $white;
+      color: var(--color-surface);
     }
     div.copy-button {
-      color: $light-periwinkle-two;
+      color: var(--color-surface);
     }
-    .add-description, .copy-button {
-      &:hover {
-        color: $white;
-        text-decoration: underline;
-      }
+    a {
+      color: var(--color-primary-container);
     }
   }
 }

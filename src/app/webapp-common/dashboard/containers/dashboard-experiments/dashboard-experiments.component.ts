@@ -15,7 +15,7 @@ export class DashboardExperimentsComponent {
 
   public taskSelected(task: IRecentTask | ITask) {
     const projectId = task.project ? task.project.id : '*';
-    return this.router.navigate(['projects', projectId, 'experiments', task.id]);
+    return this.router.navigate(['projects', projectId, 'tasks', task.id]);
   }
 
 }

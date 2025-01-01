@@ -1,75 +1,59 @@
 @import "variables";
-@import "mixins/lines";
 
-:host {
+.card {
   border: solid 0;
   width: 352px;
   background: unset;
-
-  .card-container .first-tab-container {
-    background-color: $blue-400;
-
-    &:hover {
-      background-color: $blue-400;
-      .line {
-        border-top-color: $blue-550;
-      }
-    }
-
-    &.first-tab-hovered {
-      background-color: $blue-400;
-    }
-  }
+  overflow: hidden;
 
   .folder-tab {
     height: 20px;
     line-height: 20px;
     display: flex;
 
-    .first-tab {
+    .first-tab-parts {
       flex: 0 0 64px;
       width: 60px;
       height: 20px;
       line-height: 0;
-    }
 
-    .middle-tab {
-      font: normal normal 500 12px/20px 'Heebo', sans-serif;
-
-      white-space: nowrap;
-      color: $blue-300;
-
-      &.second-tab-active {
-        color: $blue-200
+      .tab {
+        fill: var(--card-tab1-bg);
       }
-
-      background-color: $blue-600;
-
-      &.tab-hovered:not(.show-second-tab) {
-        background-color: $blue-400;
-        color: $blue-200;
-      }
-
-      padding-right: 6px;
     }
 
     .second-tab {
-      flex: 0 0 28px;
-      width: 28px;
-      line-height: 0;
+      &:not(.text) {
+        flex: 0 0 28px;
+        width: 28px;
+        line-height: 0;
+      }
+
+      .tab {
+        fill: var(--card-tab2-bg);
+      }
+
+      &:not(.active):hover {
+        .tab {
+          fill: var(--card-tab2-bg);
+        }
+      }
+
+      &.text {
+        font: normal normal 500 12px/20px 'Heebo', sans-serif;
+        padding-right: 6px;
+        white-space: nowrap;
+        color: var(--color-on-primary-container);
+        background-color: var(--card-tab2-bg);
+      }
     }
-
   }
-
-  overflow: hidden;
-
 
   .card-container {
     position: relative;
     transition: $transition-fast;
     height: 226px;
     width: 100%;
-    background-color: $blue-500;
     border-radius: 6px;
     overflow: hidden;
 
@@ -77,12 +61,16 @@
       border-top-left-radius: 0;
     }
 
+    .line {
+      border-top: solid 1px color-mix(in srgb, var(--color-outline), transparent 80%);
+      margin: 0 16px;
+      width: auto;
+    }
 
     .tab-container {
       width: 100%;
       height: 100%;
       position: absolute;
-      border-radius: 6px;
 
       &.is-folder {
         border-top-left-radius: 0;
@@ -91,28 +79,46 @@
 
     .first-tab-container {
       padding-top: 10px;
-      background-color: $card-bg;
       display: flex;
       flex-direction: column;
+      background-color: var(--card-tab1-bg);
+
+      &.first-tab-hovered {
+        background-color: var(--card-tab1-bg);
+      }
 
       footer {
         margin-top: auto;
         position: relative;
-        background-color: $card-footer-bg;
+        background-color: var(--card-footer-bg);
+
+        .ribbon {
+          transform: rotate(-45deg);
+          border: 25px solid transparent;
+          border-top-color: var(--color-tertiary-fixed-dim);
+          color: var(--color-on-tertiary-fixed);
+          position: absolute;
+          bottom: -4px;
+          right: -34px;
+          padding: 0 10px;
+          width: 110px;
+          font-size: 10px;
+
+          .txt {
+            position: absolute;
+            top: -20px;
+            left: -3px;
+          }
+        }
       }
 
       header {
         padding: 0 16px;
+        color: var(--color-on-primary-container);
       }
 
       header.empty {
         padding: 0;
-      }
-
-      .line {
-        border-top: solid 1px $blue-600;
-        margin: 0 16px;
-        width: auto;
       }
 
       .card-body {
@@ -120,32 +126,39 @@
         display: flex;
         align-items: center;
       }
-
-      .ribbon {
-        transform: rotate(-45deg);
-        border: 25px solid transparent;
-        border-top: 25px solid;
-        border-top-color: $neon-yellow;
-        position: absolute;
-        bottom: -4px;
-        right: -34px;
-        padding: 0 10px;
-        width: 110px;
-        color: #68777C;
-        font-size: 10px;
-      }
-
-      .ribbon .txt {
-        position: absolute;
-        top: -20px;
-        left: -3px;
-      }
     }
 
     .second-tab-container {
-      background: $blue-600;
+      background-color: var(--card-tab2-bg);
     }
   }
 
+  &:has(.first-tab.active .tab:not(.second):hover), &:has(.first-tab-container:hover) {
+    .first-tab .tab:not(.second) {
+      fill: var(--card-tab1-hover-bg);
+    }
+    .card-container, .first-tab-container {
+      background-color: var(--card-tab1-hover-bg);
+    }
+  }
 
+  &:has(.second-tab:not(.active):hover) {
+    .folder-tab .second-tab {
+      .tab {
+        fill: var(--card-tab2-bg-hover);
+      }
+      &.text {
+        background-color: var(--card-tab2-bg-hover);
+      }
+    }
+  }
+}
+
+::ng-deep .card .card-container .title {
+  color: var(--color-on-primary-container);
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

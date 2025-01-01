@@ -51,12 +51,11 @@
     }
   }
 </form>
-<div class="buttons d-flex justify-content-center">
-  <button [disabled]="projectName === project?.parent || moveToForm.invalid" (click)="send()" cdkFocusInitial data-id="MoveButton" class="btn btn-neon yes-button" #moveButton>
-    MOVE
-  </button>
-  <button (click)="closeDialog()" data-id="CancelButton" class="btn btn-outline-neon">
-    CANCEL
-  </button>
-
+<div class="mt-5 d-flex justify-content-center gap-3">
+  <button mat-stroked-button (click)="closeDialog()" data-id="CancelButton">CANCEL</button>
+  <button mat-flat-button
+          [disabled]="projectName === project?.parent || moveToForm.invalid"
+          (click)="send()"
+          cdkFocusInitial data-id="MoveButton"
+  >MOVE</button>
 </div>

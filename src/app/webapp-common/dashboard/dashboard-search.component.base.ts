@@ -4,8 +4,8 @@ import {Model} from '~/business-logic/model/models/model';
 import {clearSearchResults, getCurrentPageResults, searchClear, searchDeactivate, searchSetTerm, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ITask} from '~/business-logic/model/al-task';
-import {combineLatest, Observable, Subscription} from 'rxjs';
-import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
+import {combineLatest, Subscription} from 'rxjs';
+import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
   selectDatasetsResults,
@@ -26,7 +26,6 @@ import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/
 import {ActivatedRoute, Router} from '@angular/router';
 import {IReport} from '@common/reports/reports.consts';
 import {isEqual} from 'lodash-es';
-import { Task } from '~/business-logic/model/tasks/task';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 
 @Component({
@@ -34,34 +33,26 @@ import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
   template: '',
 })
 export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
+  protected store = inject(Store);
+  protected router = inject(Router);
+  protected route = inject(ActivatedRoute);
+  protected cdr = inject(ChangeDetectorRef);
+
+  protected searchQuery$        = this.store.select(selectSearchQuery);
+  protected modelsResults$      = this.store.select(selectModelsResults);
+  protected reportsResults$      = this.store.select(selectReportsResults);
+  protected pipelinesResults$   = this.store.select(selectPipelinesResults);
+  protected datasetsResults$   = this.store.select(selectDatasetsResults);
+  protected projectsResults$    = this.store.select(selectProjectsResults);
+  protected experimentsResults$ = this.store.select(selectExperimentsResults);
+  protected searchTerm$         = this.store.select(selectSearchTerm);
+  protected resultsCount$ = this.store.select(selectResultsCount);
   public activeLink = 'projects' as ActiveSearchLink;
   private searchSubs;
-  public searchQuery$: Observable<SearchState['searchQuery']>;
-  public modelsResults$: Observable<Array<Model>>;
-  public projectsResults$: Observable<Array<Project>>;
-  public experimentsResults$: Observable<Task[]>;
-  public searchTerm$: Observable<SearchState['searchQuery']>;
-  public pipelinesResults$: Observable<Project[]>;
-  public datasetsResults$: Observable<Project[]>;
   private scrollIds: Map<ActiveSearchLink, string>;
-  public resultsCount$: Observable<Map<ActiveSearchLink, number>>;
-  public reportsResults$: Observable<Array<IReport>>;
-  public store = inject(Store);
-  public router = inject(Router);
-  public route = inject(ActivatedRoute);
   private subs = new Subscription();
-  private cdr: ChangeDetectorRef;
+
   constructor() {
-    this.cdr = inject(ChangeDetectorRef);
-    this.searchQuery$        = this.store.select(selectSearchQuery);
-    this.modelsResults$      = this.store.select(selectModelsResults);
-    this.reportsResults$      = this.store.select(selectReportsResults);
-    this.pipelinesResults$   = this.store.select(selectPipelinesResults);
-    this.datasetsResults$   = this.store.select(selectDatasetsResults);
-    this.projectsResults$    = this.store.select(selectProjectsResults);
-    this.experimentsResults$ = this.store.select(selectExperimentsResults);
-    this.searchTerm$         = this.store.select(selectSearchTerm);
-    this.resultsCount$ = this.store.select(selectResultsCount);
     this.syncAppSearch();
   }
 
@@ -133,7 +124,7 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   }
 
   pipelineSelected(project: Project) {
-    this.router.navigateByUrl(`pipelines/${project.id}/experiments`);
+    this.router.navigateByUrl(`pipelines/${project.id}/tasks`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
@@ -142,14 +133,14 @@ export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   }
 
   public openDatasetCardClicked(project: Project) {
-    this.router.navigateByUrl(`datasets/simple/${project.id}/experiments`);
+    this.router.navigateByUrl(`datasets/simple/${project.id}/tasks`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
   public taskSelected(task: IRecentTask | ITask) {
     // TODO ADD task.id to route
     const projectId = task.project ? task.project.id : '*';
-    return this.router.navigateByUrl('projects/' + projectId + '/experiments/' + task.id);
+    return this.router.navigateByUrl('projects/' + projectId + '/tasks/' + task.id);
   }
 
 

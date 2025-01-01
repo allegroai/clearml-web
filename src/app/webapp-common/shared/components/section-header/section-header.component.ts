@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'sm-section-header',
@@ -9,9 +9,8 @@ import {NgIf} from '@angular/common';
   styleUrls: ['./section-header.component.scss'],
   standalone: true,
   imports: [
-    TooltipDirective,
-    NgIf
-  ]
+    TooltipDirective
+]
 })
 export class SectionHeaderComponent {
 

@@ -1,57 +1,79 @@
-<div #tableContainer class="queues-container">
+<div #tableContainer class="queues-container" [class.short]="!short()">
   <sm-queues-menu-extended
     [menuOpen]="menuOpen"
-    [menuPosition]="menuPosition"
+    [menuPosition]="menuPosition()"
     [selectedQueue]="contextQueue"
     (deleteQueue)="deleteQueue.emit($event)"
     (renameQueue)="renameQueue.emit($event)"
     (clearQueue)="clearQueue.emit($event)"
   ></sm-queues-menu-extended>
   <sm-table #table
-            [tableData]="queues"
+            [tableData]="queues()"
             [columns]="cols"
             [rowsNumber]="100"
             [rowHeight]="40"
             [reorderableColumns]="false"
             [resizableColumns]="false"
             [scrollable]="true"
-            [selection]="selectedQueue"
+            [selection]="selectedQueue()"
             (rowSelectionChanged)="onRowClicked($event)"
             (rowRightClick)="openContextMenu($event)"
   >
     <ng-template let-col pTemplate="sort-filter">
-      <sm-table-filter-sort-template
+      <sm-table-filter-sort
         [class.first]="col.id === QUEUES_TABLE_COL_FIELDS.NAME"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         [column]="col"
         [sortOrder]="tableSortFieldsObject[col.id]">
-      </sm-table-filter-sort-template>
+      </sm-table-filter-sort>
     </ng-template>
     <ng-template let-col let-queue="rowData" pTemplate="body">
-      <ng-container [ngSwitch]="col.id" class="table-cell">
-        <div class="w-100 d-flex align-items-center first id-cell" *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.NAME">
-          <div class="queue-name" [smTooltip]="queue?.name" smShowTooltipIfEllipsis>{{queue?.name}}</div>
-          <sm-copy-clipboard [clipboardText]="queue?.id"
-                             [hideBackground]="true"
-                             [label]="''"
-                             [tooltipText]="'Copy Queue ID'" class="copy-btn"></sm-copy-clipboard>
-        </div>
-        <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.TASK">
+      @switch (col.id) {
+        @case (QUEUES_TABLE_COL_FIELDS.NAME) {
+          <div class="w-100 d-flex align-items-center first id-cell">
+            <div class="queue-name" [smTooltip]="queue?.caption" smShowTooltipIfEllipsis>{{queue?.caption}}</div>
+            <div class="copy-btn">
+              <sm-menu iconClass="al-ico-copy-to-clipboard" [class.selected]="queue.id === selectedQueue()?.id">
+                <div class="d-flex flex-column m-1">
+                  <sm-copy-clipboard
+                    [clipboardText]="queue?.id"
+                    [smallIcon]="true"
+                    label="ID"
+                    tooltipText="Copy Queue ID"
+                  ></sm-copy-clipboard>
+                  <sm-copy-clipboard
+                    [clipboardText]="queue?.name"
+                    [smallIcon]="true"
+                    label="Name"
+                    tooltipText="Copy Queue Resource Name"
+                  ></sm-copy-clipboard>
+                </div>
+              </sm-menu>
+            </div>
+          </div>
+        }
+        @case (QUEUES_TABLE_COL_FIELDS.TASK) {
           <span class="ellipsis"  [smTooltip]="queue?.entries[0]?.task?.name" smShowTooltipIfEllipsis>{{queue?.entries[0]?.task?.name}}</span>
-          <span *ngIf="!queue?.entries[0]?.task?.name">&mdash;</span>
-        </ng-container>
-        <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.LAST_UPDATED">
+          @if (!queue?.entries[0]?.task?.name) {
+            <span>&mdash;</span>
+          }
+        }
+        @case (QUEUES_TABLE_COL_FIELDS.LAST_UPDATED) {
           <span class="ellipsis">{{queue?.last_update | timeAgo}}</span>
-          <span *ngIf="!queue?.last_update">&mdash;</span>
-        </ng-container>
-        <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.IN_QUEUE">
+          @if (!queue?.last_update) {
+            <span>&mdash;</span>
+          }
+        }
+        @case (QUEUES_TABLE_COL_FIELDS.IN_QUEUE) {
           <span class="ellipsis">{{queue?.entries?.length === 0 ? '' : queue?.entries?.length}}</span>
-          <span *ngIf="queue?.entries?.length === 0">&mdash;</span>
-        </ng-container>
-        <ng-container *ngSwitchDefault>
+          @if (queue?.entries?.length === 0) {
+            <span>&mdash;</span>
+          }
+        }
+        @default {
           <span class="ellipsis">{{getBodyData(queue, col)}}</span>
-        </ng-container>
-      </ng-container>
+        }
+      }
     </ng-template>
   </sm-table>
 </div>

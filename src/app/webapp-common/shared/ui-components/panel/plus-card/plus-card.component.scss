@@ -8,7 +8,7 @@
   align-items: center;
   &:hover {
     .plus-icon {
-     color: $blue-700;
+     color: var(--color-on-surface);
     }
   }
 }

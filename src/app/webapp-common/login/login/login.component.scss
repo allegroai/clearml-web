@@ -14,31 +14,16 @@
       align-items: center;
       gap: 6px;
       text-decoration: none;
-      color: #dce0ee;
       font-size: 12px;
-
-      &:hover {
-        text-decoration: underline;
-        cursor: pointer;
-        color: #fff;
-      }
     }
 
     .community-links {
       .link {
         margin: 0 12px;
-        text-decoration: none;
-
-        &:hover {
-          cursor: pointer;
-
-          .text {
-            text-decoration: underline;
-          }
-        }
+        cursor: pointer;
 
         i {
-          color: $blue-300 !important;
+          color: #8492c2 !important;
         }
       }
     }
@@ -46,10 +31,8 @@
     ntkme-github-button {
       ::ng-deep a.gh-btn, ::ng-deep a.social-count {
         text-decoration: none;
-        color: $blue-800;
 
         &:hover {
-          color: #000;
           font-weight: bold;
         }
       }
@@ -57,7 +40,7 @@
   }
 
   .login-form {
-    color: $blue-200;
+    color: rgba(0, 0, 0, 0.87);
     flex-direction: column;
     overflow: auto;
 
@@ -70,6 +53,7 @@
     height: 100%;
 
     &.dark-theme {
+      color: rgba(255, 255, 255, 0.87);
       background-image: url(../../assets/infinity_anim--on_light.svg), linear-gradient(100deg, #22408a 6%, #09173c 82%);
       background-size: contain;
       background-position: center;
@@ -124,72 +108,24 @@
       }
     }
 
-    .username-input {
-      margin-bottom: 12px;
-
-      input {
-        background-color: #ffffff;
-        color: $blue-500;
-        width: 100%;
-        padding-left: 12px;
-        height: 36px;
-      }
-
-      //input:-webkit-autofill,
-      //input:-internal-autofill-previewed,
-      //input:-internal-autofill-selected {
-      //  -webkit-box-shadow: 0 0 0 30px $blue-800 inset !important;
-      //  -webkit-text-fill-color: white !important;
-      //}
-    }
-
-    label {
-      display: block;
-      text-align: left;
-      font-size: 12px;
-      margin-bottom: 0;
-      margin-top: 2px;
-    }
-
-    .btn {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    mat-form-field {
       width: 100%;
-      height: 36px;
-      margin: 32px 0;
-      font-size: 14px;
-      font-weight: 500;
-      border: 0; /* this was 1px earlier */
-      opacity: unset;
+    }
 
-      &:hover {
-        border: 0 solid transparent; /* this was 1px earlier */
-      }
+    button {
+      width: 100%;
+      margin: 16px 0 32px 0;
 
       .spinner {
         position: absolute;
         left: 75px;
-      }
-
-      i {
-        font-size: 20px;
-        position: relative;
-        top: -1px;
-      }
-
-      .btn-text {
-        display: inline-flex;
-        width: 130px;
-        white-space: nowrap;
       }
     }
 
     .separator {
       display: flex;
       justify-content: center;
-      color: $blue-250;
+      color: var(--color-secondary-fixed-dim);
       font-size: 11px;
 
       .line {
@@ -200,19 +136,18 @@
 
     .terms-of-use {
       display: inline-block;
-      width: 210px;
-      font-size: 12px;
-      color: $blue-500;
-      @include link();
+      color: rgba(0, 0, 0, 0.87);
+      font-size: 11px;
+      margin-left: -2px;
     }
   }
 
   &.dark-theme {
     .login-form .terms-of-use {
-      color: $blue-200;
+      color: rgba(255, 255, 255, 0.87);
 
       a[href] {
-        color: $neon-yellow;
+        color: #A1C9FF;
       }
     }
   }
@@ -233,17 +168,13 @@
     }
   }
 
-  mat-spinner {
-    --mdc-circular-progress-active-indicator-color: #FFFFFF;
-  }
 }
 
 .errors {
   width: 250px;
   max-height: 100px;
   overflow: auto;
-  margin-top: 16px;
-  color: #ff6f81;
+  color: var(--color-error);
   text-align: left;
 }
 
@@ -252,17 +183,14 @@
   text-align: left;
 }
 
-
-.banner {
-  color: $blue-400;
-  padding: 24px;
-  text-align: left;
-  font-size: 12px;
-}
-
 :host-context(.mobile) {
   .login-form {
     padding-top: 64px;
   }
 }
 
+input:-webkit-autofill {
+  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 50px var(--color-surface-container) inset;
+  -webkit-text-fill-color: var(--color-on-surface);
+}

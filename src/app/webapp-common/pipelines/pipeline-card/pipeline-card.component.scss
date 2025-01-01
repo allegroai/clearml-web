@@ -1,4 +1,3 @@
-@import "variables";
 
 :host {
   cursor: pointer;
@@ -7,19 +6,23 @@
     height: 32px;
   }
 
+  .al-ico-project-path {
+    color: var(--color-primary);
+  }
+
   .project-name {
     max-width: 240px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    color: $blue-200;
   }
 
   .last-run {
     margin-bottom: 6px;
     font-size: 12px;
-    color: $blue-300;
+    color: color-mix(in srgb, var(--color-on-primary-container), transparent 40%);
   }
+
   .title {
     font-weight: 500;
   }
@@ -27,7 +30,6 @@
   .footer-tags {
     display: flex;
     min-height: 38px;
-    background-color: $blue-600;
     padding: 0 16px;
     align-items: center;
     flex-wrap: wrap;
@@ -43,25 +45,42 @@
     padding: 6px 0;
 
     a {
-      color: $blue-200;
-      padding: 0 24px;
+      color: var(--color-on-primary-container);
+      display: flex;
+      align-items: center;
+      margin: 0 12px;
+      padding: 0 12px;
+      border-radius: 3px;
       line-height: 30px;
       text-decoration: none;
-      display: flex;
 
       ::ng-deep .sub-path {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         max-width: 120px;
-        &.double-width{
-          max-width:260px;
+
+        &.double-width {
+          max-width: 260px;
         }
       }
 
       &:hover {
-        background-color: $blue-400;
+        background-color: var(--color-primary-container);
       }
     }
   }
+}
+
+::ng-deep .project-card {
+  cursor: pointer;
+  height: 228px;
+  overflow: hidden;
+}
+
+.project-name {
+  max-width: 280px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }

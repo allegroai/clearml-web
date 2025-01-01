@@ -1,0 +1,23 @@
+@import "variables";
+
+@mixin common-leaf() {
+  border-radius: 0 0 6px 6px;
+  height: 100%;
+  transition: border-bottom $transition-slow;
+}
+
+@mixin choose-leaf() {
+  @include common-leaf;
+  border-bottom: 8px solid var(--mdc-dialog-container-color);
+  &:hover {
+    border-bottom: 8px solid var(--color-primary);
+    ::ng-deep .step-number {
+      color: var(--color-secondary);
+    }
+  }
+  &.open-code {
+    transition-delay: $transition-slow;
+    height: 75%;
+  }
+}
+

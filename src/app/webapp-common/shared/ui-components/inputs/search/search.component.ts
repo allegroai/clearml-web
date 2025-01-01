@@ -1,14 +1,16 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
   OnChanges, OnDestroy,
   OnInit, SimpleChanges,
-  ViewChild, input, output, effect,
-  inject
+  ViewChild, input, output, effect, signal
 } from '@angular/core';
 import {Subject, Subscription, timer} from 'rxjs';
 import {debounce, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {NgTemplateOutlet} from '@angular/common';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
+import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 
 
 
@@ -19,14 +21,16 @@ import {NgTemplateOutlet} from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    MatIcon,
+    MatIconButton,
+    HesitateDirective
   ]
 })
 export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
-  private cdr = inject(ChangeDetectorRef);
   public value$ = new Subject();
-  public empty = true;
+  public empty = signal(true);
   public active = true;
   public focused: boolean;
   private subs = new Subscription();
@@ -37,7 +41,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   hideIcons = input<boolean>(false);
   expandOnHover = input(false);
   enableNavigation = input(false);
-  searchResultsCount = input(null);
+  searchResultsCount = input<number>(null);
   searchCounterIndex = input(-1);
   value = input<string>('');
 
@@ -52,7 +56,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     this.subs.add(this.value$.pipe(
-      tap((val: string) => this.empty = val?.length === 0),
+      tap((val: string) => this.empty.set(val?.length === 0)),
       distinctUntilChanged(),
       debounce((val: string) => val.length > 0 ? timer(this.debounceTime()) : timer(0)),
       filter(val => val.length >= this.minimumChars() || val.length === 0)
@@ -65,7 +69,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
           this.valueChanged.emit('');
           this.clear(true);
         }
-        this.cdr.detectChanges();
+        // this.cdr.markForCheck();
       }));
   }
 
@@ -98,7 +102,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
   updateActive(active: boolean) {
     if (this.expandOnHover()) {
-      if (this.empty) {
+      if (this.empty()) {
         this.active = active;
         this.searchBarInput.nativeElement.focus();
       } else {

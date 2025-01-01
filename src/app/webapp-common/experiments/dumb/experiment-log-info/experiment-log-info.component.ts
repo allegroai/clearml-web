@@ -2,12 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
-  ViewChild,
   OnDestroy,
-  Output,
-  EventEmitter,
-  ChangeDetectorRef, AfterViewInit, ElementRef
-} from '@angular/core';
+  ChangeDetectorRef, AfterViewInit, ElementRef, viewChild, input, output } from '@angular/core';
 import {Subscription} from 'rxjs';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {last, findIndex} from 'lodash-es';
@@ -39,17 +35,16 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
   private scrollSubscription: Subscription;
   private indexSubscription: Subscription;
   private shouldFocusLog = false;
-  private scrolling: boolean = false;
+  private scrolling = false;
   private prevLocation = 0;
   public canRefresh = true;
   private prevLine: LogRow;
   private fetchPrev: boolean;
   private prevLineOffset: number | null = null;
 
-  @ViewChild(CdkVirtualScrollViewport) private logContainer: CdkVirtualScrollViewport;
-  @Input() fetching = false;
-  @Input() beginningOfLog: boolean;
-  @Input() isDarkTheme: boolean;
+  private logContainer = viewChild(CdkVirtualScrollViewport);
+  fetching = input(false);
+  beginningOfLog = input<boolean>();
   private readonly hasAnsi = hasAnsi;
   private observer: IntersectionObserver;
   private logInView: boolean;
@@ -65,7 +60,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
       this.locationBeforeFilter = findIndex(this.lines, this.prevLine) + this.prevLineOffset;
     } else if (this.locationBeforeFilter !== null) {
       window.setTimeout(() => {
-        this.logContainer?.scrollToIndex(this.locationBeforeFilter);
+        this.logContainer()?.scrollToIndex(this.locationBeforeFilter);
         this.locationBeforeFilter = null;
       })
     }
@@ -96,16 +91,16 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     if (!this.initial && prevLocation) {
       this.scrolling = true;
       window.setTimeout(() => {
-        this.logContainer?.scrollToIndex(prevLocation);
+        this.logContainer()?.scrollToIndex(prevLocation);
         window.setTimeout(() => this.scrolling = false, 50);
       });
     } else {
-      const elm = this.logContainer?.elementRef.nativeElement;
+      const elm = this.logContainer()?.elementRef.nativeElement;
       if (!elm || log?.length && (elm.scrollTop + elm.offsetHeight > elm.scrollHeight - 100 || this.initial)) {
         this.initial = false;
         this.scrolling = true;
         window.setTimeout(() => {
-          this.logContainer?.scrollToIndex(this.lines.length);
+          this.logContainer()?.scrollToIndex(this.lines.length);
           this.canRefresh = true;
           window.setTimeout(() => this.scrolling = false, 80);
         }, 10);
@@ -113,23 +108,26 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  @Output() fetchMore = new EventEmitter<{ direction: string; from?: number }>();
+  fetchMore = output<{
+        direction: string;
+        from?: number;
+    }>();
 
   constructor(private cdr: ChangeDetectorRef, private element: ElementRef) {}
 
   ngAfterViewInit() {
-    this.scrollSubscription = this.logContainer?.elementScrolled().subscribe((event: Event) => {
+    this.scrollSubscription = this.logContainer()?.elementScrolled().subscribe((event: Event) => {
       if (this.shouldFocusLog) {
         setTimeout(() => (event.target as HTMLElement).focus(), 50);
       }
     });
 
     window.setTimeout(() => {
-      this.indexSubscription = this.logContainer?.scrolledIndexChange.subscribe((location: number) => {
-        const itemsInView = Math.ceil(this.logContainer?.getViewportSize() / 25);
+      this.indexSubscription = this.logContainer()?.scrolledIndexChange.subscribe((location: number) => {
+        const itemsInView = Math.ceil(this.logContainer()?.getViewportSize() / 25);
         this.atEnd = location >= this.lines.length - itemsInView - 1;
-        if (!this.fetching && !this.scrolling) {
-          if (location < 10 && location < this.prevLocation && !this.beginningOfLog) {
+        if (!this.fetching() && !this.scrolling) {
+          if (location < 10 && location < this.prevLocation && !this.beginningOfLog()) {
             this.fetchPrev = true;
             this.fetchMore.emit({direction: 'prev', from: this.orgLogs?.[0]?.timestamp});
           } else if (this.atEnd && location > this.prevLocation) {
@@ -140,7 +138,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
         this.prevLocation = location;
         this.prevLine = {} as LogRow;
         let i = 0;
-        while (!this.prevLine.timestamp) {
+        while (this.prevLine && !this.prevLine.timestamp) {
           this.prevLine = this.lines[location - i];
           i += 1;
         }
@@ -162,7 +160,6 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this.scrollSubscription?.unsubscribe();
     this.indexSubscription?.unsubscribe();
-    this.logContainer = null;
   }
 
   private static getRegexFromString(filter: string) {

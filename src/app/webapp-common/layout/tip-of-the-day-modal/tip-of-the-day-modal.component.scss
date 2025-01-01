@@ -1,4 +1,3 @@
-@import "variables";
 
 :host {
   .tip-container {
@@ -8,12 +7,12 @@
   }
 
   .tip-image {
-    width: 376px;
-    flex: 0 0 376px;
-    height: 235px;
+    width: 372px;
+    flex: 0 0 372px;
+    height: 233px;
     background-repeat: no-repeat;
-    box-shadow: 0 0 0 1px white, 0 0 0 2px $blue-400;
-    background-size: cover;
+    box-shadow: 0 0 0 1px var(--color-on-surface), 0 0 0 2px var(--color-surface-container-highest);
+    background-size: contain;
 
     &.full-width {
       flex: 1 1 376px;
@@ -35,10 +34,11 @@
     width: 32px;
     height: 32px;
     margin: 0 6px;
-    padding-top: 4px;
+    padding-top: 6px;
     vertical-align: middle;
     border-radius: 32px;
-    background-color: $neon-yellow;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
     cursor: pointer;
   }
 
@@ -56,12 +56,6 @@
     position: relative;
     top: 1px;
     left: -2px;
-  }
-
-  .content-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: $purple;
   }
 
   mat-checkbox {

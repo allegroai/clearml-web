@@ -1,15 +1,13 @@
-@import '../../styles/variables';
-
 :host {
 
   .labeled-row {
     padding: 8px 0;
-    border-bottom: 1px solid $dark-border;
+    border-bottom: 1px solid var(--color-outline-variant);
   }
 
   .label {
     font-size: 12px;
-    color: $blue-480;
+    color: color-mix(in srgb, var(--color-on-surface-variant), transparent 20%);
   }
 
   .value {

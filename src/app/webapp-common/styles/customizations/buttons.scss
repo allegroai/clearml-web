@@ -1,0 +1,165 @@
+@use '@angular/material' as mat;
+
+
+:root {
+
+  .mat-mdc-unelevated-button {
+    .mat-icon.al-icon {
+      height: 16px;
+      width: 16px;
+      font-size: 16px;
+      &:before {
+        line-height: 16px;
+      }
+    }
+
+    &.icon-only {
+      --mat-filled-button-horizontal-padding: 0;
+      min-width: 36px;
+
+      & > .mat-icon {
+        --mat-filled-button-icon-offset: 0;
+        --mat-filled-button-icon-spacing: 0;
+      }
+    }
+  }
+
+  .mat-mdc-outlined-button {
+    .mat-icon.al-icon {
+      height: 16px;
+      width: 16px;
+      font-size: 16px;
+      &:before {
+        line-height: 16px;
+      }
+    }
+
+    &.icon-only {
+      --mat-outlined-button-horizontal-padding: 0;
+      min-width: 36px;
+
+      & > .mat-icon {
+        --mat-outlined-button-icon-offset: 0;
+        --mat-outlined-button-icon-spacing: 0;
+      }
+    }
+  }
+
+  .mat-button-toggle-button {
+    .mat-icon.al-icon {
+      color: var(--color-primary);
+      height: 20px;
+      width: 20px;
+      &:before {
+        line-height: 20px;
+      }
+    }
+  }
+
+  // icon + text
+  .mat-mdc-button {
+    .mat-icon.al-icon {
+      height: 16px;
+      width: 16px;
+      font-size: 16px;
+      line-height: 16px;
+      &:before {
+        line-height: inherit;
+      }
+    }
+    // icon
+    &.icon-only {
+      --mat-text-button-with-icon-horizontal-padding: 0;
+      min-width: 36px;
+
+      & > .mat-icon {
+        --mat-text-button-icon-offset: 0;
+        --mat-text-button-icon-spacing: 0;
+        height: 20px;
+        width: 20px;
+        line-height: 20px;
+        font-size: 20px;
+      }
+      &.sm {
+        --mdc-text-button-container-height: 24px;
+        min-width: 24px;
+        & > .mat-icon {
+          height: 16px;
+          width: 16px;
+          line-height: 16px;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .mdc-icon-button {
+    --mdc-icon-button-icon-size: 20px;
+    .mat-mdc-button-touch-target {
+      height: var(--mdc-icon-button-state-layer-size);
+      width: var(--mdc-icon-button-state-layer-size);
+    }
+    // add class for small buttons size
+    &.sm {
+      --mdc-icon-button-icon-size: 16px;
+      --mdc-icon-button-state-layer-size: 24px;
+      .mat-icon {
+        height: 16px;
+        width: 16px;
+        line-height: 16px;
+        font-size: 16px;
+        &:before {
+          line-height: inherit;
+        }
+      }
+    }
+    &.xs {
+      --mdc-icon-button-icon-size: 14px;
+      --mdc-icon-button-state-layer-size: 16px;
+      .mat-icon {
+        height: 14px;
+        width: 14px;
+        line-height: 14px;
+        font-size: 14px;
+        &:before {
+          line-height: inherit;
+        }
+      }
+    }
+
+    .outline {
+      min-width: 36px;
+      height: 36px;
+      border: 1px solid var(--color-outline);
+      border-radius: 18px;
+      --mdc-icon-button-state-layer-size: 34px;
+    }
+  }
+}
+
+
+@mixin buttons($theme) {
+  --mdc-icon-button-icon-color: #{mat.get-theme-color($theme, primary)};
+
+  --mdc-filled-button-container-height: 36px;
+  --mdc-outlined-button-container-height: 36px;
+  --mdc-text-button-container-height: 36px;
+  --mdc-icon-button-state-layer-size: 36px;
+
+
+
+  .secondary-button {
+    @include mat.button-color($theme, $color-variant: secondary);
+  }
+
+  .tertiary-button {
+    @include mat.button-color($theme, $color-variant: tertiary);
+  }
+
+  .delete-button {
+    @include mat.button-color($theme, $color-variant: error);
+  }
+
+
+  --mat-list-active-indicator-shape: none;
+}

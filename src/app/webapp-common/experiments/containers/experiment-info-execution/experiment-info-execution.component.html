@@ -36,7 +36,7 @@
           <sm-experiment-execution-source-code
             #sourceCode
             class="form-section"
-            [editable]="(editable() && !isInDev()) && sourceSection.inEditMode"
+            [editable]="(editable() && !isInDev()) && sourceSection.inEditMode()"
             [ngModel]="formData.source"
           ></sm-experiment-execution-source-code>
         </sm-editable-section>
@@ -60,44 +60,45 @@
             [showSpinner]="showExtraDataSpinner()"
           >
             @if (formData.diff && editable() && !showExtraDataSpinner()) {
-              <button extra-buttons
-                      class="btn btn-dark-fill terminal flex-1"
-                      (click)="diffSection.editModeChanged(true)" data-id="edit uncommitted changes">EDIT
-              </button>
+              <button
+                extra-buttons mat-stroked-button class="flex-1"
+                (click)="diffSection.editModeChanged(true)"
+                data-id="edit uncommitted changes"
+              >EDIT</button>
             }
             @if (formData.diff && editable() && !showExtraDataSpinner()) {
-              <button extra-buttons
-                      class="btn btn-dark-fill terminal flex-1"
-                      (click)="discardDiff()" data-id="Discard Diffs">
-                DISCARD DIFFS
-              </button>
+              <button
+                extra-buttons mat-stroked-button
+                (click)="discardDiff()"
+                data-id="Discard Diffs"
+              >DISCARD DIFFS</button>
             }
           </sm-scroll-textarea>
         </sm-editable-section>
       }
-      @if (minimized || currentLink === 'installed packages') {
+      @if (minimized || currentLink === 'python packages') {
         <sm-editable-section #requirementsSection
                              class="grow"
                              [saving]="saving()"
                              [editable]="editable()"
                              [disableInEditMode]="true"
                              [disableSave]="false"
-                             [hideEditButton]="!!formData?.requirements?.pip"
+                             [hideEditButton]="formData?.requirements?.pip?.trim()?.length>0"
                              (cancelClicked)="cancelFormChange()"
                              (activateEditClicked)="activateEditChanged('source'); editInstallPackages()">
           @if (editable() && !showExtraDataSpinner()) {
             <button
-              extra-buttons
-              class="clear-all btn btn-dark-fill"
-              (click)="clearInstalledPackages()" data-id="Reset Installed Packages"
-              smTooltip="Reset installed packages"
+              mat-flat-button extra-buttons class="ms-auto"
+              (click)="clearInstalledPackages()"
+              smTooltip="Reset python packages"
+              data-id="Reset Python Packages"
             >
               RESET {{ requirementsOptions?.length > 1 ? ' ALL' : '' }}
             </button>
           }
           <div class="requirements-header">
             @if (minimized) {
-              <sm-section-header label="INSTALLED PACKAGES"></sm-section-header>
+              <sm-section-header label="PYTHON PACKAGES"></sm-section-header>
             }
             @if (requirementsOptions?.length > 1) {
               <mat-form-field
@@ -116,7 +117,6 @@
                 </mat-select>
               </mat-form-field>
             }
-
           </div>
           <sm-scroll-textarea
             class="form-section"
@@ -124,10 +124,11 @@
             [isInDev]="isInDev()"
             [formData]="formData.requirements?.[selectedRequirement]">
             @if (editableRequirements && formData?.requirements?.pip && editable() && !showExtraDataSpinner()) {
-              <button extra-buttons
-                      class="btn btn-dark-fill terminal flex-1"
-                      (click)="requirementsSection.editModeChanged(true)" data-id="Edit Installed Packages">EDIT
-              </button>
+              <button extra-buttons mat-stroked-button
+                      class="flex-1"
+                      (click)="requirementsSection.editModeChanged(true)"
+                      data-id="Edit Installed Packages"
+              >EDIT</button>
             }
           </sm-scroll-textarea>
         </sm-editable-section>
@@ -135,28 +136,28 @@
       @if (minimized || currentLink === 'container') {
         <sm-editable-section #containerSection
                              class="limit-width edit-in-section"
-                             [style.margin-bottom.px]="containerSection.inEditMode ? 30 : null"
+                             [style.margin-bottom.px]="containerSection.inEditMode() ? 30 : null"
                              [saving]="saving()"
                              [editable]="editable()"
                              (cancelClicked)="cancelFormChange()"
                              (saveClicked)="saveContainerData({image: containerImage.nativeElement.value, arguments: containerArguments.nativeElement.value})"
                              (activateEditClicked)="activateEditChanged('orchestration', containerSection)">
           <sm-section-header label="CONTAINER"></sm-section-header>
-          <sm-labeled-row label="IMAGE" [class.mb-3]="editable()">
-            @if (!((editable() && !isInDev()) && containerSection.inEditMode)) {
+          <sm-labeled-row label="IMAGE">
+            @if (!((editable() && !isInDev()) && containerSection.inEditMode())) {
               <div>{{ formData.container?.image }}</div>
             }
-            @if ((editable() && !isInDev()) && containerSection.inEditMode) {
+            @if ((editable() && !isInDev()) && containerSection.inEditMode()) {
               <mat-form-field appearance="outline" class="w-100 no-bottom">
                 <input #containerImage matInput [ngModel]="formData.container?.image" name="image" data-id="imageFieldId">
               </mat-form-field>
             }
           </sm-labeled-row>
-          <sm-labeled-row label="ARGUMENTS" [class.mb-3]="editable()" [labelClass]="'this-is-myclass'">
-            @if (!((editable() && !isInDev()) && containerSection.inEditMode)) {
+          <sm-labeled-row label="ARGUMENTS"  [labelClass]="'this-is-myclass'">
+            @if (!((editable() && !isInDev()) && containerSection.inEditMode())) {
               <div>{{ formData.container?.arguments | hideRedactedArguments: (redactedArguments$| ngrxPush) }}</div>
             }
-            @if ((editable() && !isInDev()) && containerSection.inEditMode) {
+            @if ((editable() && !isInDev()) && containerSection.inEditMode()) {
               <mat-form-field appearance="outline" class="w-100 no-bottom">
                 <input #containerArguments matInput [ngModel]="formData.container?.arguments" name="image" data-id="argumentsFieldId">
               </mat-form-field>
@@ -168,9 +169,8 @@
         <sm-editable-section #containerSetupShellSection
                              class="grow setup-shell-script"
                              [class.maximised]="!minimized"
-                             [class.mb-3]="editable()"
                              [saving]="saving()"
-                             [editable]="editable() && (!(formData?.container?.setup_shell_script) || containerSetupShellSection.inEditMode)"
+                             [editable]="editable() && (!(formData?.container?.setup_shell_script) || containerSetupShellSection.inEditMode())"
                              [disableInEditMode]="true"
                              [disableSave]="false"
                              (cancelClicked)="cancelFormChange()"
@@ -178,18 +178,18 @@
           <sm-section-header label="SETUP SHELL SCRIPT"></sm-section-header>
           <sm-scroll-textarea
             class="form-section"
-            [editable]="editable() && containerSetupShellSection.inEditMode"
+            [editable]="editable() && containerSetupShellSection.inEditMode()"
             [isInDev]="isInDev()"
             [formData]="formData?.container?.setup_shell_script">
             @if (formData?.container?.setup_shell_script && editable() && !showExtraDataSpinner()) {
               <button extra-buttons
-                      class="btn btn-dark-fill terminal flex-1"
+                      mat-stroked-button
                       (click)="containerSetupShellSection.editModeChanged(true)">EDIT
               </button>
             }
             @if (formData.container?.setup_shell_script && editable() && !showExtraDataSpinner()) {
               <button extra-buttons
-                      class="btn btn-dark-fill terminal flex-1"
+                      mat-stroked-button
                       (click)="clearSetupShellScript()">
                 CLEAR
               </button>
@@ -207,21 +207,21 @@
                              (activateEditClicked)="activateEditChanged('output', outputSection)">
           <sm-section-header label="OUTPUT"></sm-section-header>
           <sm-labeled-row label="DESTINATION">
-            @if (!((editable() && !isInDev()) && outputSection.inEditMode)) {
+            @if (!((editable() && !isInDev()) && outputSection.inEditMode())) {
               <div>{{ formData.output?.destination }}</div>
             }
-            @if (editable() && outputSection.inEditMode) {
+            @if (editable() && outputSection.inEditMode()) {
               <mat-form-field appearance="outline" class="w-100 no-bottom">
                 <input #outputDestination matInput [ngModel]="formData.output?.destination" name="output_destination" data-id="destinationFieldId">
               </mat-form-field>
             }
           </sm-labeled-row>
           <!--      Can we remove this non existing input?-->
-          <sm-labeled-row label="LOG LEVEL" [class.mb-3]="editable()">
-            @if (!((editable() && !isInDev()) && outputSection.inEditMode)) {
+          <sm-labeled-row label="LOG LEVEL" >
+            @if (!((editable() && !isInDev()) && outputSection.inEditMode())) {
               <div>{{ formData.output?.logLevel }}</div>
             }
-            @if (editable() && outputSection.inEditMode) {
+            @if (editable() && outputSection.inEditMode()) {
               <mat-form-field appearance="outline" class="w-100 no-bottom">
                 <input #outputLogLevel matInput [disabled]="true" [ngModel]="formData.output?.logLevel" name="output_destination" data-id="logLevelFieldId">
               </mat-form-field>

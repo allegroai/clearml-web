@@ -1,3 +1,5 @@
+<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
+<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
 <sm-compare-card-list
   [experiments]="experiments"
   [tasksLimitExceeded] = "experiments?.length && (taskIds$ | ngrxPush)?.length > experiments?.length"
@@ -36,8 +38,9 @@
                       [class.selected-diff]="checkIfSelectedPath(node.data)"
                       [class.hovered]="checkIfHoveredPath(node.data)"
                       [class.identical-row]="!allPaths[node.data.path]">
-                      <i class="fas" [style.margin-left.px]="2 + node.level * 20"
-                      [class]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                      <mat-icon fontSet="al" [style.margin-left.px]="2 + node.level * 20"
+                      class="sm" [class.rotate-right]="!treeControl.isExpanded(node)" fontIcon="al-ico-ico-chevron-down" data-id="expandDetailTab"
+                    ></mat-icon>
                       <span
                         class="title-key"
                         [smTooltip]="(renameMap[node.data.key] || node.data.key) | hideHashTitle"
@@ -79,7 +82,7 @@
                           (click)="linkClicked(node.data.value.link)">{{node.data.value.dataValue}}</span>
                         } @else {
                           {{node.data.key | hideHash}}{{node.data.value}}
-                          }<i class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
+                          }<i class="al-icon sm al-ico-line-expand extend-toggle" [class.rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                         </pre>
                       }
                     </div>
@@ -96,7 +99,8 @@
 
 
 <sm-portal outletId="searchDiff">
-  <sm-search class="light-theme"
+  <sm-search
+    class="outline"
     [value]="searchText"
     [minimumChars]="1"
     [debounceTime]="300"
@@ -108,11 +112,20 @@
 </sm-portal>
 
 <sm-portal outletId="nextDiff">
-  <button class="btn btn-secondary btn-arrow" smTooltip="Previous diff" (click)="goToNextDiff('up')">
-    <i class="al-icon al-ico-arrow-up sm"></i>
+  <button
+    mat-icon-button
+    class="dark-button"
+    smTooltip="Previous diff"
+    (click)="goToNextDiff('up')"
+    data-id="previousDiffButton">
+    <mat-icon fontSet="al" fontIcon="al-ico-arrow-up"></mat-icon>
   </button>
-
-  <button class="btn btn-secondary btn-arrow" smTooltip="Next diff" (click)="goToNextDiff('down')">
-    <i class="al-icon al-ico-arrow-down sm"></i>
+  <button
+    mat-icon-button
+    class="dark-button"
+    smTooltip="Next diff"
+    (click)="goToNextDiff('down')"
+    data-id="nextDiffButton">
+    <mat-icon fontSet="al" fontIcon="al-ico-arrow-down"></mat-icon>
   </button>
 </sm-portal>

@@ -11,60 +11,64 @@
     [columns]="tableCols"
     [lazyLoading]="true"
     [minimizedView]="minimizedView"
-    minimizedTableHeader="{{entityType.replace('ripeline ', '')}}S LIST"
+    minimizedTableHeader="{{entityType.replace('pipeline ', '')}}S LIST"
     [noMoreData]="noMoreExperiments"
     [autoLoadMore]="true"
     [selection]="selectedExperiment"
     [activeContextRow]="contextExperiment"
     [contextMenuOpen]="contextMenuActive"
-    [checkedItems]="selectedExperiments"
+    [checkedItems]="checkedExperiments"
     [keyboardControl]="true"
     [sortFields]="tableSortFields"
     [hasExperimentUpdate]="hasExperimentUpdate"
     [cardHeight]="cardHeight"
     [cardsCollapsed]="cardsCollapsed"
-    (rowSelectionChanged)="experimentSelectionChanged.emit({experiment: $any($event).data})"
+    (rowSelectionChanged)="experimentSelectionChanged.emit({experiment: $any($event).data, origin: 'table'})"
     (rowClicked)="tableRowClicked($event)"
-    (rowDoubleClicked)="experimentSelectionChanged.emit({experiment: $event.data, openInfo: true})"
+    (rowDoubleClicked)="experimentSelectionChanged.emit({experiment: $event.data, openInfo: true, origin: 'table'})"
     (loadMoreClicked)="onLoadMoreClicked()"
     (rowRightClick)="openContextMenu($event)"
     (colReordered)="columnsReordered.emit($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
     (columnResized)="columnResized.emit($event)"
     (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
-  >
+    >
     <!--HEADER TEMPLATE-->
     <ng-template let-col pTemplate="cardFilter">
-      <sm-table-card-filter-template [options]="filtersOptions"
-                                     [filterMatch]="filtersMatch"
-                                     [value]="filtersValues"
-                                     [subValue]="filtersSubValues[experimentsTableColFields.TAGS]"
-                                     [columns]="initialColumns"
-                                     fixedOptionsSubheader="System tags"
-                                     (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
-                                     (filterChanged)="tableAllFiltersChanged($event)"
-                                     (menuOpened)="columnFilterOpened($event)"
-                                     (menuClosed)="columnFilterClosed($event)"
-                                     (clearAll)="clearAllFilters.emit(tableFilters)"
-      ></sm-table-card-filter-template>
+      <sm-table-card-filter [options]="filtersOptions"
+        [filterMatch]="filtersMatch"
+        [value]="filtersValues"
+        [subValue]="filtersSubValues[experimentsTableColFields.TAGS]"
+        [columns]="initialColumns"
+        fixedOptionsSubheader="System tags"
+        (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
+        (filterChanged)="tableAllFiltersChanged($event)"
+        (menuOpened)="columnFilterOpened($event)"
+        (menuClosed)="columnFilterClosed($event)"
+        (clearAll)="clearAllFilters.emit(tableFilters)"
+      ></sm-table-card-filter>
     </ng-template>
 
     <ng-template let-col pTemplate="checkbox">
       <div class="d-flex align-items-center">
-        <sm-checkbox-control
-          *ngIf="col?.headerType === colHeaderTypeEnum.checkBox"
-          class="checkbox-col header"
-          [class.minimised]="minimizedView"
-          fieldName="selected"
-          [formData]="selectionState"
-          (formDataChanged)="headerCheckboxClicked()"
-          inputClassName="table-check-box select-col-checkbox"
-        ></sm-checkbox-control>
-        <div class="al-icon al-ico-dropdown-arrow drop-down" data-id="Checkbox Dropdown"
-             [matMenuTriggerFor]="selectionMenu"></div>
+        @if (col?.headerType === colHeaderTypeEnum.checkBox) {
+          <mat-checkbox
+            class="header-checkbox"
+            [disabled]="experiments?.length === 0"
+            [formControl]="selectionChecked"
+            [indeterminate]="selectionIndeterminate"
+            [disableRipple]="true"
+            smClickStopPropagation
+            (change)="headerCheckboxClicked()">
+          </mat-checkbox>
+        }
+        <div class="al-icon al-ico-dropdown-arrow drop-down" data-id="Checkbox Dropdown" [class.pointer-events-none]="experiments?.length === 0"
+        [matMenuTriggerFor]="selectionMenu"></div>
       </div>
-      <mat-menu class="light-theme" #selectionMenu="matMenu">
-        <div *ngIf="entityType === entityTypes.experiment" class="menu-title">Select from project</div>
+      <mat-menu #selectionMenu="matMenu">
+        @if (entityType === entityTypes.experiment) {
+          <div class="menu-title">Select from project</div>
+        }
         <button mat-menu-item data-id="All Option" (click)="selectAll()">All</button>
         <button mat-menu-item data-id="None Option" (click)="emitSelection([])">None</button>
         <button mat-menu-item data-id="All Matching Filter Option" (click)="selectAll(true)">All matching filter
@@ -74,7 +78,7 @@
     <!--FILTER TEMPLATE-->
 
     <ng-template let-col pTemplate="sort-filter">
-      <sm-table-filter-sort-template
+      <sm-table-filter-sort
         [column]="col"
         [value]="filtersValues[col.id]"
         [searchValue]="searchValues[col.id]"
@@ -88,112 +92,120 @@
         (searchValueChanged)="searchValueChanged($event, col.id, col.asyncFilter)"
         (menuOpened)="columnFilterOpened(col)"
         (menuClosed)="columnFilterClosed(col)"
-      >
-      </sm-table-filter-sort-template>
+        >
+      </sm-table-filter-sort>
     </ng-template>
 
     <!--BODY TEMPLATE-->
 
     <ng-template let-col
-                 let-experiment="rowData"
-                 pTemplate="body"
-                 let-expanded="expanded">
-      <ng-container [ngSwitch]="col.id">
-        <ng-container *ngSwitchCase="experimentsTableColFields.ID">
+      let-experiment="rowData"
+      pTemplate="body"
+      let-expanded="expanded">
+      @switch (col.id) {
+        @case (experimentsTableColFields.ID) {
           <div class="ellipsis"
-               smShowTooltipIfEllipsis
-               [smTooltip]="experiment.id">{{experiment.id}}</div>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.TYPE">
+            smShowTooltipIfEllipsis
+            [smTooltip]="experiment.id">{{ experiment.id }}
+          </div>
+        }
+        @case (experimentsTableColFields.TYPE) {
           <sm-experiment-type-icon-label class="w-100" [type]="experiment?.type"></sm-experiment-type-icon-label>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.NAME">
+        }
+        @case (experimentsTableColFields.NAME) {
           <div class="d-flex align-items-center ellipsis">
             <div
               class="experiment-name"
               [class.italic]="isDevelopment(experiment)"
               smShowTooltipIfEllipsis
               [smTooltip]="experiment.name">
-              {{experiment.name}}
+              {{ experiment.name }}
             </div>
-            <i *ngIf="experiment?.system_tags?.includes('shared')" class="al-icon al-ico-link sm ms-2"></i>
+            @if (experiment?.system_tags?.includes('shared')) {
+              <i class="al-icon al-ico-link sm ms-2"></i>
+            }
           </div>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.VERSION">
-          {{entityType === 'version' ? experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value : experiment?.hyperparams?.properties?.version?.value}}
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.TAGS">
+        }
+        @case (experimentsTableColFields.VERSION) {
+          {{ entityType === 'version' ? experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value : experiment?.hyperparams?.properties?.version?.value }}
+        }
+        @case (experimentsTableColFields.TAGS) {
           <sm-tag-list [tags]="experiment.tags" [sysTags]="getSystemTags(experiment)"></sm-tag-list>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.USER">
+        }
+        @case (experimentsTableColFields.USER) {
           <span class="ellipsis"
-                smShowTooltipIfEllipsis
-                [smTooltip]="experiment.user?.name ? experiment.user?.name : 'Unknown User'">{{experiment.user?.name ? experiment.user?.name : 'Unknown User'}}</span>
-        </ng-container>
-        <span *ngSwitchCase="experimentsTableColFields.PROJECT"
-              class="ellipsis"
-              smShowTooltipIfEllipsis
-              [smTooltip]="experiment.project?.name">
-          {{experiment.project?.name}}
-        </span>
-        <ng-container *ngSwitchCase="experimentsTableColFields.STARTED">
+            smShowTooltipIfEllipsis
+          [smTooltip]="experiment.user?.name ? experiment.user?.name : 'Unknown User'">{{ experiment.user?.name ? experiment.user?.name : 'Unknown User' }}</span>
+        }
+        @case (experimentsTableColFields.PROJECT) {
+          <span
+            class="ellipsis"
+            smShowTooltipIfEllipsis
+            [smTooltip]="experiment.project?.name">
+            {{ experiment.project?.name }}
+          </span>
+        }
+        @case (experimentsTableColFields.STARTED) {
           <span class="ellipsis"
-                [smTooltip]="experiment.started | date : timeFormatString">{{experiment.started | timeAgo}}</span>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.LAST_UPDATE">
+          [smTooltip]="experiment.started | date : timeFormatString">{{ experiment.started | timeAgo }}</span>
+        }
+        @case (experimentsTableColFields.LAST_UPDATE) {
           <span class="ellipsis"
-                [smTooltip]="experiment.last_update | date : timeFormatString">{{experiment.last_update | timeAgo}}</span>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.ACTIVE_DURATION">
-          <span class="ellipsis">{{experiment.active_duration | duration}}</span>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.COMMENT">
-          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="experiment.comment">{{experiment.comment}}</span>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.SELECTED">
-          <sm-checkbox-control
-            class="checkbox-col"
-            fieldName="selected"
-            [smTooltip]="selectionReachedLimit && !isRowSelected(experiment)? 'Reached selection limit': null"
-            [disabled]="selectionReachedLimit && !isRowSelected(experiment)"
-            [formData]="isRowSelected(experiment)"
-            (formDataChanged)="rowSelectedChanged($event, experiment)"
-            inputClassName="table-check-box table-body">
-          </sm-checkbox-control>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.STATUS">
+          [smTooltip]="experiment.last_update | date : timeFormatString">{{ experiment.last_update | timeAgo }}</span>
+        }
+        @case (experimentsTableColFields.ACTIVE_DURATION) {
+          <span class="ellipsis">{{ experiment.active_duration | duration }}</span>
+        }
+        @case (experimentsTableColFields.COMMENT) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="experiment.comment">{{ experiment.comment }}</span>
+        }
+        @case (experimentsTableColFields.SELECTED) {
+          <mat-checkbox #cb
+                        smClickStopPropagation
+                        [smTooltip]="selectionReachedLimit && !(checkedExperiments | isRowSelected:experiment)? 'Reached selection limit': null"
+                        [disabled]="selectionReachedLimit && !(checkedExperiments | isRowSelected:experiment)"
+                        [checked]="checkedExperiments | isRowSelected:experiment"
+                        (click)="rowSelectedChanged({ value: cb.checked, event: $event}, experiment)">
+          </mat-checkbox>
+        }
+        @case (experimentsTableColFields.STATUS) {
           <sm-status-icon-label
             [enableSpinner]="true"
             [status]="experiment?.status | replaceViaMapPipe:convertStatusMap"
             [progress]="experiment?.runtime?.progress"
           ></sm-status-icon-label>
-        </ng-container>
-        <ng-container *ngSwitchCase="experimentsTableColFields.PARENT">
-          <span
-            class="parent-name"
-            *ngIf="experiment?.parent?.id"
-            smShowTooltipIfEllipsis
-            [smTooltip]="experiment.parent.project?.name? experiment.parent.project.name + ' / ' + experiment.parent.name : experiment.parent.name"
-          >{{experiment.parent.name}}</span>
-        </ng-container>
+        }
+        @case (experimentsTableColFields.PARENT) {
+          @if (experiment?.parent?.id) {
+            <span
+              class="parent-name"
+              smShowTooltipIfEllipsis
+              [smTooltip]="experiment.parent.project?.name? experiment.parent.project.name + ' / ' + experiment.parent.name : experiment.parent.name"
+            >{{ experiment.parent.name }}</span>
+          }
+        }
         <!--  Case for hyper params and custom metrics/variants  -->
-        <ng-container *ngSwitchDefault>
+        @default {
           <sm-hyper-param-metric-column [roundedMetricValue]="roundedMetricValues[col.id]"
-                                        [col]="col"
-                                        [experiment]="experiment"
-                                        (expandClicked)="columnsWidthChanged($event)">
+            [col]="col"
+            [experiment]="experiment"
+            (expandClicked)="columnsWidthChanged($event)">
           </sm-hyper-param-metric-column>
-        </ng-container>
-      </ng-container>
+        }
+      }
     </ng-template>
 
     <ng-template pTemplate="rowexpansion" let-experiment>
-      <tr *ngFor="let exp of [experiment]">
-        <td></td>
-        <td *ngFor="let col of tableCols">
-          {{exp[col.id]}}
-        </td>
-      </tr>
+      @for (exp of [experiment]; track exp) {
+        <tr>
+          <td></td>
+          @for (col of tableCols; track col) {
+            <td>
+              {{ exp[col.id] }}
+            </td>
+          }
+        </tr>
+      }
     </ng-template>
 
     <ng-template let-experiment="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
@@ -202,7 +214,7 @@
         [cardName]="experiment.name"
         [columns]="tableCols"
         [rowData]="experiment"
-        [checked]="isRowSelected(experiment)"
+        [checked]="experiments | isRowSelected:experiment"
         [activeContextRow]="contextExperiment"
         [contextMenuOpen]="contextMenuActive"
         [entityType]="entityType"
@@ -210,48 +222,71 @@
         [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSystemTags(experiment).length === 0 && experiment?.tags.length === 0"
         (click)="selected && cardClicked($event, experiment)"
-      >
-        <div sm-name-icon *ngIf="experiment?.system_tags?.includes('shared')"><i
+        >
+        @if (experiment?.system_tags?.includes('shared')) {
+          <div sm-name-icon><i
           class="al-icon al-ico-link sm-md ms-2"></i></div>
-        <div sm-name-version *ngIf="experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value"
-             class="me-5">
-          <span class="dot">●</span>
-          v {{entityType === 'version' ? experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value : experiment?.hyperparams?.properties?.version?.value}}
-        </div>
-        <sm-experiment-type-icon-label *ngIf="entityType === entityTypes.experiment" [type]="experiment?.type"
-                                       [showLabel]="false"></sm-experiment-type-icon-label>
+        }
+        @if (experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value) {
+          <div sm-name-version
+            class="me-5">
+            <span class="dot">●</span>
+            v {{ entityType === 'version' ? experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value : experiment?.hyperparams?.properties?.version?.value }}
+          </div>
+        }
+        @if (entityType === entityTypes.experiment) {
+          <sm-experiment-type-icon-label [type]="experiment?.type"
+          [showLabel]="false"></sm-experiment-type-icon-label>
+        }
+        @if (cardsCollapsed && experiment?.tags?.length > 0) {
+          <div sm-mini-tags class="d-flex align-items-center mini-tags-container">
+            <sm-mini-tags-list class="d-flex align-items-center" [tags]="experiment.tags?.slice(0,10)">
+            </sm-mini-tags-list>
+            @if (experiment?.tags?.length > 10) {
+              <span>+{{ experiment.tags?.length - 10 }}</span>
+            }
+          </div>
+        }
         <sm-status-icon-label
           [enableSpinner]="true"
           [status]="experiment?.status | replaceViaMapPipe:convertStatusMap"
           [progress]="experiment?.runtime?.progress"
+          [showLabel]="!cardsCollapsed"
         ></sm-status-icon-label>
-        <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(experiment)" class="checkbox-align-top"
-                             (formDataChanged)="rowSelectedChanged($event, experiment)"
-                             inputClassName="table-check-box table-body"
-        ></sm-checkbox-control>
+        <mat-checkbox #cb
+                      smClickStopPropagation
+                      [checked]="checkedExperiments | isRowSelected:experiment"
+                      [disableRipple]="true"
+                      (click)="rowSelectedChanged({value: cb.checked, event: $event}, experiment)">
+        </mat-checkbox>
       </sm-table-card>
       <ng-template #tagList>
-        <span tags-list-container [@inOutAnimation] *ngIf="!cardsCollapsed">
-          <sm-tag-list *ngIf="!removeTag.observed; else tagsWithRemove" [sysTags]="getSystemTags(experiment)"
-                       [tags]="experiment?.tags"></sm-tag-list>
-          <ng-template #tagsWithRemove>
-            <sm-tag-list [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"
-                         (remove)="removeTag.emit({experiment, tag: $event})"></sm-tag-list>
-          </ng-template>
-        </span>
+        @if (!cardsCollapsed) {
+          <span tags-list-container [@inOutAnimation]>
+            @if (!removeTag.observed) {
+              <sm-tag-list [sysTags]="getSystemTags(experiment)"
+              [tags]="experiment?.tags"></sm-tag-list>
+            } @else {
+              <sm-tag-list [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"
+              (remove)="removeTag.emit({experiment, tag: $event})"></sm-tag-list>
+            }
+          </span>
+        }
       </ng-template>
       <ng-template #compactCol>
-          <span [@inOutAnimation] *ngIf="!cardsCollapsed">
-          <div class="d-flex justify-content-between compact-columns-data">
-          <span class="ellipsis">Updated {{experiment.last_update | timeAgo}}<span
-            class="dot">●</span>Created by {{experiment.user?.name || 'Unknown User'}}
-          </span>
-            <ng-container *ngIf="experiment.last_iteration">
-              <span>{{experiment.last_iteration}} Iterations</span>
-            </ng-container>
+        @if (!cardsCollapsed) {
+          <span [@inOutAnimation]>
+            <div class="d-flex justify-content-between compact-columns-data" [class.selected]="selected">
+              <span class="ellipsis">Updated {{ experiment.last_update | timeAgo }}<span
+              class="dot">●</span>Created by {{ experiment.user?.name || 'Unknown User' }}
+            </span>
+            @if (experiment.last_iteration) {
+              <span>{{ experiment.last_iteration }} Iterations</span>
+            }
           </div>
         </span>
-      </ng-template>
+      }
     </ng-template>
-  </sm-table>
+  </ng-template>
+</sm-table>
 </div>

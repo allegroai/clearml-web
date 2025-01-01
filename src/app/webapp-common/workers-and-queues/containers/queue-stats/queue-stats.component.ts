@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy,
-  Component, computed, effect, ElementRef, inject, input,
+  Component, computed, effect, ElementRef, inject, input, untracked,
   viewChild,
 } from '@angular/core';
 import {Store} from '@ngrx/store';
@@ -45,16 +45,22 @@ export class QueueStatsComponent {
 
   constructor() {
     effect(() => {
-      this.store.dispatch(queueActions.getStats({maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));
-    }, {allowSignalWrites: true});
+      const maxPoints = this.waitChartRef().nativeElement.clientWidth | 1000;
+      untracked(() =>
+        this.store.dispatch(queueActions.getStats({maxPoints}))
+      );
+    });
 
     effect(() => {
-      if(this.queue()?.id !== this.selectedQueueId) {
-        this.store.dispatch(queueActions.resetStats());
-        this.store.dispatch(queueActions.getStats({maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));
+      if (this.queue()?.id !== this.selectedQueueId) {
+        const maxPoints = this.waitChartRef().nativeElement.clientWidth | 1000;
+        untracked(() => {
+          this.store.dispatch(queueActions.resetStats());
+          this.store.dispatch(queueActions.getStats({maxPoints}));
+        });
         this.selectedQueueId = this.queue()?.id;
       }
-    }, {allowSignalWrites: true});
+    });
 
     combineLatest([
       toObservable(this.waitChartRef),
@@ -70,7 +76,8 @@ export class QueueStatsComponent {
           width = Math.min(0.8 * width, 1000);
           return Math.max(Math.floor(range / width), 40);
         }),
-        switchMap(granularity => interval(granularity * 1000))
+        switchMap(granularity => interval(granularity * 1000)),
+        takeUntilDestroyed(),
       )
       .subscribe(() => {
         this.store.dispatch(queueActions.getStats({maxPoints: this.waitChartRef().nativeElement.clientWidth | 1000}));

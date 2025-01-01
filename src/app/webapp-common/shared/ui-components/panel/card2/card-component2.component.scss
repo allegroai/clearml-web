@@ -1,26 +1,38 @@
-@import "../../styles/mixins/card.mixin";
 @import "variables";
 
-@include generate-card();
 .al-card {
+    .card-container {
+      //background-color: var(--color-surface-container-low);
+      //border: 1px solid rgba(var(--color-primary-container), 0);
+      border: 1px solid transparent;
+      //transition: border 0.3s;
+      &.bordered {
+        border: 1px solid var(--color-outline-variant);
+      }
+
+      .line {
+        border: solid var(--color-surface)  0.5px;
+      }
+    }
+
+    footer {
+      background-color: var(--color-on-primary);
+    }
   //margin-top: 15px;
   //margin-bottom: 15px;
   border: solid 0;
 
   .extra-header {
-    background: #ededed;
+    background: var(--color-surface-bright);
     padding: 0 15px;
     margin-bottom: 15px;
     display: flex;
   }
 
   .card-container {
-    transition: border 0.3s;
-    border-radius: 6px 6px;
-    //&.bordered {
-    //  border: 1px solid;
-    //  //box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, 0.1);
-    //}
+    //transition: border 0.3s;
+    border-radius: 6px;
+
   }
 
   header {
@@ -39,8 +51,6 @@
   }
 
   footer {
-    //min-height: 20px;
-    //padding: 10px 15px;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
   }

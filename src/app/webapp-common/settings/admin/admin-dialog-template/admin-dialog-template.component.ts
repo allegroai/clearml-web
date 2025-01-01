@@ -1,12 +1,13 @@
 import {LocationStrategy} from '@angular/common';
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, Input, Output, signal} from '@angular/core';
 import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
 import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
+import {MatButton} from '@angular/material/button';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
 
 
 @Component({
@@ -16,11 +17,13 @@ import {FormsModule} from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NavbarItemComponent,
     CopyClipboardComponent,
     MatFormFieldModule,
     MatInputModule,
-    FormsModule
+    FormsModule,
+    MatButton,
+    MatTabGroup,
+    MatTab
   ]
 })
 export class AdminDialogTemplateComponent {
@@ -39,18 +42,19 @@ export class AdminDialogTemplateComponent {
   @Input() serviceUserMode: boolean;
 
   @Output() updateLabel = new EventEmitter<{ credential: CredentialKeyExt; label: string }>();
-  isJupyter: boolean;
+  selectedIndex = signal(0);
+  isJupyter = computed(() => {
+    return this.selectedIndex() === 1;
+  });
+
 
   onUpdateLabel() {
     this.updateLabel.emit({credential: this.newCredential, label: this.label});
   }
 
-  setIsJupyter(jupyter: boolean) {
-    this.isJupyter = jupyter;
-  }
 
   getCopyContent() {
-    let res =  'api {\n';
+    let res = 'api {\n';
     if (this.credentialsComment) {
       res += `  # ${this.credentialsComment}\n`;
     }
@@ -78,7 +82,7 @@ export class AdminDialogTemplateComponent {
     if (filesServer) {
       res += `%env CLEARML_FILES_HOST=${filesServer}\n`;
     }
-    if(this.newCredential.label) {
+    if (this.newCredential.label) {
       res += `# ${this.newCredential.label}\n`;
     }
     res += `%env CLEARML_API_ACCESS_KEY=${this.newCredential?.access_key || '<You\'re API access key>'}

@@ -1,72 +1,29 @@
-@import "../../../layout/layout.scss";
-
 :host {
+  display: block;
+  height: calc(100% - 34px);
 
-  sm-serving-info-header {
-    display: block;
-  }
+  .header {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    background-color: var(--row-header-color);
 
-  sm-router-tab-nav-bar {
-    overflow: hidden;
-    flex-grow: 1;
-  }
-
-  .serving-info-container {
-    height: calc(100% - 34px);
+    sm-router-tab-nav-bar {
+      overflow: hidden;
+      flex-grow: 1;
     }
 
+    .close-button {
+      position: absolute;
+      right: 24px;
+      top: 6px;
+      z-index: 1;
+    }
   }
 
   .serving-info-body {
     height: calc(100% - 14px);
     overflow: auto;
-    background-color: $blue-950;
-  }
-
-  .tab-nav {
-    display: grid;
-    grid-template-columns: 200px 1fr 200px;
-    align-items: center;
-    background-color: $blue-700;
-    //border-bottom: 1px solid $dark-border;
-    padding-right: 30px;
-
-    ::ng-deep .mat-mdc-tab-link.mdc-tab {
-      height: 48px !important;
-
-    @media(max-width: 1200px) {
-      grid-template-columns: 0 1fr 200px;
-    }
-  }
-
-  sm-router-tab-nav-bar {
-    overflow: hidden;
-    flex-grow: 1;
-  }
-
-  .setting-icon {
-    margin-right: 30px;
-    margin-left: auto;
-  }
-
-  sm-experiment-settings.maximized {
-    display: block;
-    padding-top: 6px;
-  }
-
-  .refresh-position {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-  }
-
-  .refreshIcon {
-    margin-right: 10px;
-  }
-
-  sm-experiment-settings.maximized {
-    display: block;
-    padding-top: 6px;
+    background-color: var(--color-surface-container-lowest);
   }
 }
-

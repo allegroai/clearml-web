@@ -2,7 +2,9 @@ import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 import {isAnnotationTask} from '../../../utils/shared-utils';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
-import {NgForOf, NgIf} from '@angular/common';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+
 
 @Component({
   selector: 'sm-alert-dialog',
@@ -11,9 +13,9 @@ import {NgForOf, NgIf} from '@angular/common';
   standalone: true,
   imports: [
     DialogTemplateComponent,
-    NgIf,
-    NgForOf,
-    MatDialogModule
+    MatDialogModule,
+    MatButton,
+    MatIcon
   ]
 })
 export class AlertDialogComponent {

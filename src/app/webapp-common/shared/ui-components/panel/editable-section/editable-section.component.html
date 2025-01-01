@@ -1,27 +1,36 @@
 <div
-  class="editable-container h-100"
-  [class.dark-theme]="isDarkTheme"
-  [class]="containerClass"
-  [class.edit-mode]="inEditMode && !disableInEditMode"
-  [class.disable-edit]="disableEditable"
-  [class.force]="forceButtons"
-  (dblclick)="editable && !disableEditable && (!inEditMode) && editModeChanged(true)"
->
+  class="editable-container"
+  [class.dark-theme]="isDarkTheme()"
+  [class]="containerClass()"
+  [class.edit-mode]="inEditMode() && !disableInEditMode()"
+  [class.disable-edit]="disableEditable()"
+  [class.force]="forceButtons()"
+  (dblclick)="editable() && !disableEditable() && (!inEditMode()) && editModeChanged(true)"
+  >
   <div class="edit-wrapper d-flex flex-row-reverse">
-    <button *ngIf="!disableEditable && !inEditMode && editable && !hideEditButton" id="editSection" class="edit-pen btn btn-dark-fill pointer" (click)="editModeChanged(true)">EDIT</button>
-    <ng-container *ngIf="!disableEditable && !inEditMode && editable">
+    @if (!disableEditable() && !inEditMode() && editable() && !hideEditButton()) {
+      <button mat-flat-button id="editSection" class="edit-pen"
+              (click)="editModeChanged(true)"
+      >EDIT</button>
+    }
+    @if (!disableEditable() && !inEditMode() && editable()) {
       <ng-content select="[extra-buttons]"></ng-content>
-    </ng-container>
+    }
     <ng-content select="[search-button]"></ng-content>
   </div>
-  <ng-content formData></ng-content>
-  <div class="cancel-save action-button edit-mode" *ngIf="inEditMode && !disableInEditMode" >
-    <button class="btn btn-dark-fill cancel" (click)="cancelClickedEvent()" data-id="CancelButton">CANCEL</button>
-    <sm-loading-button
-      *ngIf="!hideSaveButton"
-      [disabled]="disableSave" label="SAVE" data-id="SaveButton"
-      [loading]="saving"
-      (click)="!disableSave && !saving && saveSection()"
-      class="action-button"></sm-loading-button>
-  </div>
+  <ng-content></ng-content>
+  @if (inEditMode() && !disableInEditMode()) {
+    <div class="cancel-save action-button edit-mode" >
+      <button mat-stroked-button class="me-2" (click)="cancelClickedEvent()" data-id="CancelButton">
+        CANCEL
+      </button>
+      @if (!hideSaveButton()) {
+        <sm-loading-button
+          [disabled]="disableSave()" label="SAVE" data-id="SaveButton"
+          [loading]="saving()"
+          (click)="!disableSave() && !saving() && saveSection()"
+        class="action-button"></sm-loading-button>
+      }
+    </div>
+  }
 </div>

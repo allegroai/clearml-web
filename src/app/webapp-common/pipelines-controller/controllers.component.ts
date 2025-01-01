@@ -25,6 +25,7 @@ import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
+import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 
 @Component({
   selector: 'sm-controllers',
@@ -37,7 +38,8 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
 
   constructor() {
     super();
-    this.tableCols = INITIAL_CONTROLLER_TABLE_COLS;
+    this.tableCols = INITIAL_CONTROLLER_TABLE_COLS.map((col) =>
+        col.id === EXPERIMENTS_TABLE_COL_FIELDS.SELECTED ? {...col, disablePointerEvents: false} : col);
     this.entityType = EntityTypeEnum.controller;
   }
 

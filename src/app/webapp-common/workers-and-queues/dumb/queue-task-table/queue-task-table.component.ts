@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 
@@ -12,7 +12,7 @@ import {ITableExperiment} from '@common/experiments/shared/common-experiment-mod
 })
 export class QueueTaskTableComponent {
 
-  public cols: Array<ISmCol>;
+  public cols: ISmCol[];
   public readonly QUEUES_TABLE_COL_FIELDS = QUEUES_TABLE_COL_FIELDS;
 
   @Input() queue: Queue;
@@ -24,7 +24,7 @@ export class QueueTaskTableComponent {
     this.cols = [
       {
         id         : QUEUES_TABLE_COL_FIELDS.NAME,
-        header     : 'Experiment Name',
+        header     : 'Task Name',
         style      : {width: '680px'},
         headerType : ColHeaderTypeEnum.title,
         disableDrag: true,
@@ -32,7 +32,7 @@ export class QueueTaskTableComponent {
       },
       {
         id         : QUEUES_TABLE_COL_FIELDS.ID,
-        header     : 'Experiment ID',
+        header     : 'Task ID',
         style      : {width: '300px'},
         headerType : ColHeaderTypeEnum.title,
         disableDrag: true,

@@ -1,7 +1,7 @@
 @if (activateFromMenuButton()) {
   <div
     [matMenuTriggerFor]="experimentMenu"
-    class="p-0 cell menu-button al-icon sm-md al-color blue-300 al-ico-bars-menu"
+    class="p-0 cell menu-button al-icon sm-md  al-ico-bars-menu"
   ></div>
 } @else {
   <div #contextTrigger
@@ -15,25 +15,26 @@
   @if (selectedDisableAvailable()[menuItems.queue]) {
     @if (tableMode()) {
       <button mat-menu-item (click)="toggleDetails()">
-        <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
+        <mat-icon fontSet="al" [fontIcon]="icons.DETAILS"></mat-icon>
+        Details
       </button>
       <hr>
     }
     @if (!selectedDisableAvailable()[menuItems.run]?.disable) {
       <button mat-menu-item (click)="runPipelineController()">
-        <i [class]="'al-icon ' + icons.RUN + ' sm-md'"></i>
+        <mat-icon fontSet="al" [fontIcon]="icons.RUN"></mat-icon>
         {{selectedDisableAvailable()[menuItems.run]?.available | menuItemText : 'Run' : selectedDisableAvailableIsMultiple() }}
       </button>
     }
     <button mat-menu-item (click)="abortControllerPopup()"
             [disabled]="selectedDisableAvailable()[menuItems.abort].disable">
-      <i [class]="'al-icon ' + icons.STOPPED + ' sm-md'"></i>
+      <mat-icon fontSet="al" [fontIcon]="icons.STOPPED"></mat-icon>
       {{selectedDisableAvailable()[menuItems.abort]?.available | menuItemText : 'Abort' : selectedDisableAvailableIsMultiple()}}
     </button>
     @if (!isArchive()) {
       <button mat-menu-item (click)="continueController()"
               [disabled]="selectedDisableAvailable()[menuItems.continue].disable">
-        <i [class]="'al-icon al-ico-refresh sm-md'"></i>
+        <mat-icon fontSet="al" fontIcon="al-ico-refresh"></mat-icon>
         {{selectedDisableAvailable()[menuItems.continue]?.available | menuItemText : 'Continue' : selectedDisableAvailableIsMultiple()}}
       </button>
     }
@@ -42,8 +43,8 @@
             [disabled]="selectedDisableAvailable()[menuItems.tags]?.disable"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()">
-      <i [class]="'al-icon ' + icons.TAG + ' sm-md'">
-      </i><span>{{selectedDisableAvailable()[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple() }}</span>
+      <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>
+      <span>{{selectedDisableAvailable()[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple() }}</span>
     </button>
     <sm-tags-menu
       #tagsMenu
@@ -56,13 +57,13 @@
     </sm-tags-menu>
     <button mat-menu-item (click)="restoreArchive(entityTypeEnum.controller)"
             [disabled]="selectedDisableAvailable()[menuItems.archive].disable">
-      <i class="al-icon sm-md" [class]="isArchive() ? icons.RESTORE : icons.ARCHIVE"></i>
+      <mat-icon fontSet="al" [fontIcon]="isArchive() ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
       {{selectedDisableAvailable()[menuItems.archive].available | menuItemText : isArchive() ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple()}}
     </button>
     @if (isArchive()) {
       <button mat-menu-item (click)="deleteExperimentPopup(entityTypeEnum.controller, true)"
               [disabled]="selectedDisableAvailable()[menuItems.delete].disable">
-        <i [class]="'al-icon ' + icons.REMOVE + ' sm-md'"></i>
+        <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>
         {{selectedDisableAvailable()[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple()}}
       </button>
     }

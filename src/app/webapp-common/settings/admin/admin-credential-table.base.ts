@@ -26,7 +26,8 @@ export class AdminCredentialTableBaseDirective {
               Once revoked, these credentials cannot be recovered.`,
         yes: 'Revoke',
         no: 'Cancel',
-        iconClass: 'i-alert',
+        iconClass: 'al-ico-alert',
+        iconColor: 'var(--color-warning)'
       }
     });
 
@@ -44,7 +45,7 @@ export class AdminCredentialTableBaseDirective {
         title: 'EDIT LABEL',
         yes: ' SAVE ',
         no: 'CANCEL',
-        iconClass: 'al-icon al-ico-access-key',
+        iconClass: 'al-ico-access-key',
         width: '200px',
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'max-width': '200px'

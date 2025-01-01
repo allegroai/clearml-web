@@ -1,19 +1,24 @@
 <span
   class=content
-  [style.backgroundColor]="colors?.background"
-  [style.color]="colors?.foreground"
+  [style.backgroundColor]="colors()?.background"
+  [style.color]="colors()?.foreground"
   [class.add-button]="add.observers.length > 0"
   (click)="add.emit($event)"
-  [smTooltip]="tooltip ? caption : undefined"
->
-  <i class="al-icon al-ico-add xs" *ngIf="add.observers.length > 0"></i>
-  {{caption}}
+  [smTooltip]="tooltip() ? caption() : undefined"
+  >
+  @if (add.observed) {
+    <i class="al-icon al-ico-add xs"></i>
+  }
+  {{caption()}}
 </span>
-<i class="al-icon al-ico-dialog-x sm remove"
-   *ngIf="remove.observers.length > 0 && !disabledRemove"
-   data-id="TagCrossButton"
-   [style.color]="colors?.foreground"
-   (click)="$event.stopPropagation(); onRemoveClicked(caption)">
-</i>
-<mat-spinner *ngIf="disabledRemove === caption" class="al-icon sm white" [diameter]="12" [strokeWidth]="1" color="accent"></mat-spinner>
-<div class="arrow" [class.add-button]="add.observers.length > 0" [style.backgroundColor]="colors?.background"></div>
+@if (remove.observed && !disabledRemove()) {
+  <i class="al-icon al-ico-dialog-x sm remove"
+    data-id="TagCrossButton"
+    [style.color]="colors()?.foreground"
+    (click)="$event.stopPropagation(); onRemoveClicked(caption())">
+  </i>
+}
+@if (disabledRemove() === caption()) {
+  <mat-spinner class="al-icon sm white" [diameter]="12" [strokeWidth]="1" color="accent"></mat-spinner>
+}
+<div class="arrow" [class.add-button]="add.observers.length > 0" [style.backgroundColor]="colors()?.background"></div>

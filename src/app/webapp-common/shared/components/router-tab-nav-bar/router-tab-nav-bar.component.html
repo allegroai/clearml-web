@@ -1,12 +1,13 @@
 <nav #nav [tabPanel]="panel" mat-tab-nav-bar mat-stretch-tabs="false" mat-align-tabs="center">
-  <a mat-tab-link
-     *ngFor="let link of links; trackBy: trackByLink"
-     [routerLink]="link.url"
-     queryParamsHandling="merge"
-     routerLinkActive="active"
-     #rla="routerLinkActive"
-     [active]="rla.isActive || link.activeBy && (routerConfig$| ngrxPush)?.includes(link.activeBy)"
-     [attr.data-id]="link.name"
-  >{{link.name | uppercase}}</a>
+  @for (link of links(); track link.url.join(',')) {
+    <a mat-tab-link
+      [routerLink]="link.url"
+      queryParamsHandling="merge"
+      routerLinkActive="active"
+      #rla="routerLinkActive"
+      [active]="rla.isActive || link.activeBy && routerConfig()?.includes(link.activeBy)"
+      [attr.data-id]="link.name"
+    >{{link.name | uppercase}}</a>
+  }
 </nav>
 <span #panel></span>

@@ -1,5 +1,4 @@
 @import "variables";
-
 :host {
   display: block;
   z-index: 1000;
@@ -42,8 +41,9 @@
       width: 100%;
       flex-wrap: wrap;
       gap: 12px;
-      border-top: 1px solid #efefef;
+      border-top: 1px solid var(--color-surface-container-high);
       padding-top: 12px;
+      margin-top: 8px;
 
       mat-slider {
         min-width: 100px;
@@ -63,6 +63,11 @@
     .smooth-input {
       margin-left: 0;
     }
+  }
+
+  &.graph-settings-menu {
+    padding: 12px;
+    width: 350px;
   }
 }
 
@@ -106,7 +111,7 @@
 mat-form-field {
   width: 150px;
   border-radius: 4px;
-  background-color: white;
+
 }
 
 .axis-type-field {

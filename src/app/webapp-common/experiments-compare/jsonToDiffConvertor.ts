@@ -1,12 +1,12 @@
 import {get, has, isArray, isEqual, mergeWith, isUndefined} from 'lodash-es';
-import {IExperimentDetail} from '../../features/experiments-compare/experiments-compare-models';
+import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {treeBuilderService} from './services/tree-builder.service';
 import {ModelDetail, TreeNode} from './shared/experiments-compare-details.model';
 import {
   getAlternativeConvertedExperiment,
   getDisplayTextForTitles
-} from '../../features/experiments-compare/experiment-compare-utils';
-import {ConfigurationItem} from '../../business-logic/model/tasks/configurationItem';
+} from '~/features/experiments-compare/experiment-compare-utils';
+import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import * as Diff from 'diff';
 import {MAX_ROWS_FOR_SMART_COMPARE_ARRAYS} from './experiments-compare.constants';
 
@@ -49,7 +49,7 @@ function convertToHashItem(item, originItem, path) {
   return convertedItemHash;
 }
 
-function convertInstalledPackages(installedPackages: string[]): { [dependecy: string]: string } {
+function convertInstalledPackages(installedPackages: string[]): Record<string, string> {
   if (!installedPackages) {
     return {};
   }
@@ -63,7 +63,7 @@ function convertInstalledPackages(installedPackages: string[]): { [dependecy: st
 
 export const mutedArray = (
   array: string[],
-  changes: { [index: number]: number }
+  changes: Record<number, number>
 ) => {
   Object.keys(changes)
     .sort((a, b) => (a > b ? -1 : 1))
@@ -82,8 +82,8 @@ interface DiffArraysReturnInterface {
   base: string[];
   compared: string[];
   changes: {
-    base: { [index: string]: number };
-    compare: { [index: string]: number };
+    base: Record<string, number>;
+    compare: Record<string, number>;
   };
 }
 
@@ -158,7 +158,7 @@ function convertnetworkDesign(networkDesign: string): any {
   // }
 }
 
-function convertUncommittedChanges(diff: string[]): { [files: string]: string[] } {
+function convertUncommittedChanges(diff: string[]): Record<string, string[]> {
   if (!diff) {
     return {};
   }
@@ -184,9 +184,7 @@ function convertUncommittedChanges(diff: string[]): { [files: string]: string[] 
   }, {}) : diff;
 }
 
-function convertHyperParams(hyperParams: { [section: string]: { [name: string]: any } }, originHyperParams): {
-  [section: string]: { [name: string]: any }
-} {
+function convertHyperParams(hyperParams: Record<string, Record<string, any>>, originHyperParams): Record<string, Record<string, any>> {
   if (!hyperParams) {
     return {};
   }
@@ -205,9 +203,7 @@ function convertHyperParams(hyperParams: { [section: string]: { [name: string]: 
   }, {});
 }
 
-function convertConfiguration(confParams: { [name: string]: ConfigurationItem }, originConfParams): {
-  [name: string]: string | string[]
-} {
+function convertConfiguration(confParams: Record<string, ConfigurationItem>, originConfParams): Record<string, string | string[]> {
   if (!confParams) {
     return {};
   }
@@ -286,7 +282,7 @@ export function removeDuplicated<T extends DiffArraysReturnInterface>(compareVal
   return compareValues;
 }
 
-export function compareArrayOfStrings<T extends Array<string[]>>(values: T): T {
+export function compareArrayOfStrings<T extends string[][]>(values: T): T {
   const _values = values.map(v => v.filter(v => !isUndefined(v)));
 
   let mutedValues = [] as T;
@@ -344,7 +340,7 @@ export function compareArrayOfStrings<T extends Array<string[]>>(values: T): T {
   return removeUndefinedFromBackwardUtilValue(mutedValues) as T;
 }
 
-export function convertConfigurationFromExperiments<T extends Array<IExperimentDetail>>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
+export function convertConfigurationFromExperiments<T extends IExperimentDetail[]>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
   const allKeys = new Set(experiments.map(experiment => Object.keys(experiment.configuration)).flat(1));
   allKeys.forEach(key => {
     const keyData = experiments.map(experiment => originalExperiments[experiment.id]?.configuration?.[key.trim()]?.value.split('\n') || []) || [];
@@ -364,7 +360,7 @@ export function convertConfigurationFromExperiments<T extends Array<IExperimentD
   return experiments;
 }
 
-export function convertContainerScriptFromExperiments<T extends Array<IExperimentDetail>>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
+export function convertContainerScriptFromExperiments<T extends IExperimentDetail[]>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
   const data = experiments.map(experiment => originalExperiments[experiment.id]?.execution?.container?.setup_shell_script);
   if (data.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
     return experiments;
@@ -379,7 +375,7 @@ export function convertNetworkDesignFromExperiments<T extends IExperimentDetail>
     const modelNetworkDesignData = experiments.map(experiment => {
       const values = originalExperiments?.[experiment.id]?.artifacts?.[model]?.[key]?.network_design ?? [];
       return Array.isArray(values) ? values : [];
-    }) as Array<string[]>;
+    }) as string[][];
 
     if (modelNetworkDesignData.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
       return experiments;
@@ -420,9 +416,7 @@ export function convertExperimentsArrays(experiment, origin, experiments, path =
           convertedExperiment[key] = experiment[key];
           break;
         case 'configuration':
-          convertedExperiment[key] = convertConfiguration(experiment[key], origin) as {
-            [key: string]: ConfigurationItem
-          };
+          convertedExperiment[key] = convertConfiguration(experiment[key], origin) as Record<string, ConfigurationItem>;
           break;
         case 'setup_shell_script':
           convertedExperiment[key] = experiment[key];
@@ -504,11 +498,10 @@ export function isParamsConverted(hyperparams) {
 export function getAllKeysEmptyObject(jsons) {
   let obj = {};
   jsons.forEach(json => obj = mergeWith(obj, json, customMergeStrategyForArrays));
-  const sortedObject = sortObject(obj, jsons[0], '');
-  return sortedObject;
+  return sortObject(obj, jsons[0], '');
 }
 
-export function createDiffObjectScalars(AllKeysObject, originObject?, comparedObject?, metaTransformerFunction?, originPath?): Array<TreeNode<TreeNodeJsonData>> {
+export function createDiffObjectScalars(AllKeysObject, originObject?, comparedObject?, metaTransformerFunction?, originPath?): TreeNode<TreeNodeJsonData>[] {
   return treeBuilderService.buildTreeFromJson<TreeNodeJsonData>(AllKeysObject, (data, key, path) => {
 
     const originData = path.length === 0 ? originObject : get(originObject, path);

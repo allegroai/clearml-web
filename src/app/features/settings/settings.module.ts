@@ -18,14 +18,12 @@ import {UserDataComponent} from '~/features/settings/containers/admin/user-data/
 import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-arguments-dialog/redacted-arguments-dialog.component';
 import {LayoutModule} from '~/layout/layout.module';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {UuidPipe} from '@common/shared/pipes/uuid.pipe';
 import {MatInputModule} from '@angular/material/input';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
 import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
-import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatListModule} from '@angular/material/list';
@@ -40,6 +38,13 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {ProfilePreferencesComponent} from '@common/settings/admin/profile-preferences/profile-preferences.component';
 import {PushPipe} from '@ngrx/component';
 import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {MatDialogActions} from '@angular/material/dialog';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {StoreModule} from '@ngrx/store';
+import {EffectsModule} from '@ngrx/effects';
+import {SettingsEffects} from '~/features/settings/settings.effects';
+import {settingsFeatureKey, settingsReducers} from '~/features/settings/settings.reducer';
 
 
 
@@ -61,16 +66,16 @@ import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.comp
     ReactiveFormsModule,
     SharedModule,
     MatExpansionModule,
+    StoreModule.forFeature(settingsFeatureKey, settingsReducers),
+    EffectsModule.forFeature([SettingsEffects]),
     FormsModule,
     LayoutModule,
-    LabeledFormFieldDirective,
     UuidPipe,
     MatInputModule,
     DialogTemplateComponent,
     MatSlideToggleModule,
     InlineEditComponent,
     CopyClipboardComponent,
-    NavbarItemComponent,
     TooltipDirective,
     MatSidenavModule,
     MatListModule,
@@ -89,6 +94,10 @@ import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.comp
     ProfileKeyStorageComponent,
     PushPipe,
     IdBadgeComponent,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    MatIconButton,
   ],
   exports: [
     UserCredentialsComponent,

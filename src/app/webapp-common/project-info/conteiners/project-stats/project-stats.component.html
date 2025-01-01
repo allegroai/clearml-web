@@ -1,26 +1,33 @@
-<div *ngIf="selectedVariants" class="header">
-  <button
-    class="btn btn-cml-primary d-flex justify-content-between align-items-center"
-    [hidden]="!selectedVariants"
-    (click)="selectVariant()"
-    [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
-  ><i class="al-icon al-ico-plus me-2"></i><span class="ellipsis">{{variantDisplay}}</span></button>
-  <i class="al-icon al-ico-info-circle al-color blue-300 sm-md" smTooltip="Use the mouse wheel to zoom.
-Shift + Click and drag the graph to pan."></i>
-</div>
-<div class="line-chart-container" *ngIf="selectedVariants; else noData">
-  <sm-scatter-plot
-    theme="dark"
-    [colors]="colors"
-    [data]="graphData"
-    [showLoadingOverlay]="loading"
-    xAxisType="time"
-    (clicked)="experimentClicked($event)"
-  ></sm-scatter-plot>
-</div>
-<ng-template #noData>
-  <div class="flex-middle overview-placeholder">
-    <i class="al-icon al-ico-no-scatter-graph xxl"></i>
-    <a href="" class="no-data-title" (click)="$event.preventDefault(); selectVariant()">Select Metric & Variant</a>
-  </div>
-</ng-template>
+@if (selectedVariants) {
+  <div class="header">
+    <button
+      mat-flat-button
+      [hidden]="!selectedVariants"
+      (click)="selectVariant()"
+      [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
+    >
+      <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+      <span class="ellipsis">{{variantDisplay}}</span>
+    </button>
+    <mat-icon
+      fontSet="al" fontIcon="al-ico-info-circle" class="info"
+      smTooltip="Use the mouse wheel to zoom. Shift + Click and drag the graph to pan."
+    ></mat-icon>
+    </div>
+  }
+  @if (selectedVariants) {
+    <div class="line-chart-container">
+      <sm-scatter-plot
+        [colors]="colors"
+        [data]="graphData"
+        [showLoadingOverlay]="loading"
+        xAxisType="time"
+        (clicked)="experimentClicked($event)"
+      ></sm-scatter-plot>
+    </div>
+  } @else {
+    <div class="flex-middle overview-placeholder">
+      <i class="al-icon al-ico-no-scatter-graph xxl"></i>
+      <a href="" class="no-data-title" (click)="$event.preventDefault(); selectVariant()">Select Metric & Variant</a>
+    </div>
+  }

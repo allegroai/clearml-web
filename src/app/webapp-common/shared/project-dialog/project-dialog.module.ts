@@ -8,7 +8,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectDialogComponent} from './project-dialog.component';
 import {ProjectMoveToFormComponent} from './project-move-to-form/project-move-to-form.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
 import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
@@ -43,7 +42,6 @@ import {EditProjectFormComponent} from '@common/shared/project-dialog/edit-proje
     ReactiveFormsModule,
     ShortProjectNamePipe,
     MatProgressSpinnerModule,
-    LabeledFormFieldDirective,
     SearchTextDirective,
     StringIncludedInArrayPipe,
     ProjectLocationPipe,

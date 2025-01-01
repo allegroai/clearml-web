@@ -1,22 +1,6 @@
-@import "variables";
-
 :host {
   display: flex;
   &.settings {
     display: inline-block;
   }
-
-}
-
-.btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  font-size: 15px;
-  color: $blue-300;
-
-}
-
-.btn:last-child {
-
 }

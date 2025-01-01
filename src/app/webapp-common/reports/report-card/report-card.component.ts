@@ -42,7 +42,7 @@ export class ReportCardComponent {
 
   @Input() set report(data: IReport) {
     this._report = data;
-    this.isExample = !['All Experiments'].includes(data.name) && (!data.company || ! data.company['id']);
+    this.isExample = !['All Tasks'].includes(data.name) && (!data.company || ! data.company['id']);
   }
   get report() {
     return this._report;

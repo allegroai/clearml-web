@@ -1,22 +1,27 @@
-<sm-dialog-template [header]="alertMessage" [subHeader]="alertSubMessage" iconClass="i-alert">
-  <div *ngIf="moreInfo || resultMessage" (click)="openToggle()" class="pointer">
-    <i class="more-info-icon fa fa-angle-right" [class.info-open]="isOpen"></i>More info
-  </div>
-  <div *ngIf="moreInfo || resultMessage" class="more-info" [class.info-open]="isOpen">
-    <a></a>
-    <div>{{resultMessage}}</div>
-    <div *ngFor="let entityName of moreInfoEntities">
-      <br>
-      <div>Relevant {{entityName}}:</div>
-      <div *ngFor="let entity of moreInfo[entityName]" class="entities">
-        <a [href]="buildUrl(entity, entityName)" target="_blank"> {{entity.name}}</a>
-      </div>
+<sm-dialog-template [header]="alertMessage" [subHeader]="alertSubMessage" iconClass="al-ico-alert">
+  @if (moreInfo || resultMessage) {
+    <div (click)="openToggle()" class="pointer">
+      <mat-icon fontSet="al" fontIcon="al-ico-caret-right" class="more-info-icon" [class.info-open]="isOpen"></mat-icon>More info
     </div>
-  </div>
-  <div class="d-flex justify-content-center" style="margin-top: 40px">
-    <button class="btn btn-neon" mat-dialog-close>
-      {{okMessage}}
-    </button>
-  </div>
-
+  }
+  @if (moreInfo || resultMessage) {
+    <div class="more-info" [class.info-open]="isOpen">
+      <a></a>
+      <div>{{resultMessage}}</div>
+      @for (entityName of moreInfoEntities; track entityName) {
+        <div>
+          <br>
+          <div>Relevant {{entityName}}:</div>
+          @for (entity of moreInfo[entityName]; track entity) {
+            <div class="entities">
+              <a [href]="buildUrl(entity, entityName)" target="_blank"> {{entity.name}}</a>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
 </sm-dialog-template>
+<div mat-dialog-actions>
+  <button mat-flat-button mat-dialog-close>{{okMessage}}</button>
+</div>

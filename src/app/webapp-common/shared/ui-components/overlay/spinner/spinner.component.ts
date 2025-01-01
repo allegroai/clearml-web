@@ -7,22 +7,23 @@ import {resetLoader} from '@common/core/actions/layout.actions';
 import {Observable, Subscription} from 'rxjs';
 import {isEqual} from 'lodash-es';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'sm-spinner',
   template: `
-    <div *ngIf="showSpinner" class="loader-container">
-      <mat-spinner [diameter]="64" [strokeWidth]="6" color="accent"></mat-spinner>
-    </div>
-  `,
+    @if (showSpinner) {
+      <div class="loader-container">
+        <mat-spinner [diameter]="64" [strokeWidth]="6" color="accent"></mat-spinner>
+      </div>
+    }
+    `,
   styleUrls: ['./spinner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    MatProgressSpinnerModule,
-    NgIf
-  ]
+    MatProgressSpinnerModule
+]
 })
 export class SpinnerComponent implements OnInit, OnDestroy {
   public showSpinner: boolean;

@@ -1,16 +1,30 @@
-<div class="navbar-header-container">
-  @for (route of contextNavbar(); track route.header) {
-    <sm-navbar-item
-      *smCheckPermission="route.permissionCheck"
-      direction="bottom"
-      [attr.data-id]="route?.id ?? route.header"
-      [header]="route.header"
-      [active]="route.isActive"
-      [routerLink] = "route.link"
-      [subHeader]="archivedMode() && route.subHeader"
-      [badge]="route.badge"
-      [badgeTooltip]="route.badgeTooltip"
-      (click)="setFeature(route.featureName ?? route.header)"
-    ></sm-navbar-item>
-  }
-</div>
+@if (contextNavbar() !== null) {
+  <mat-tab-group mat-stretch-tabs="false"
+                 mat-align-tabs="center"
+                 disablePagination
+                 disableRipple
+                 [selectedIndex]="index()"
+                 (selectedTabChange)="setFeature($event)">
+    @for (route of contextNavbar(); track route.header) {
+      <mat-tab
+        *smCheckPermission="route.permissionCheck"
+        [attr.data-id]="route?.id ?? route.header">
+        <ng-template mat-tab-label>
+          <div class="label-container">
+            <div>
+              <span>{{ route.header | uppercase }}</span>
+              @if (route.badge) {
+                <span class="trial-badge" [smTooltip]="route.badgeTooltip" [matTooltipShowDelay]="300">
+                {{ route.badge }}
+              </span>
+              }
+            </div>
+            @if (archivedMode()) {
+              <div>{{ route.subHeader }}</div>
+            }
+          </div>
+        </ng-template>
+      </mat-tab>
+    }
+  </mat-tab-group>
+}

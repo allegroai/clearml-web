@@ -1,16 +1,21 @@
-<div class="height-container" [class.show]="active">
+<div class="height-container" [class.show]="active()">
 </div>
-<div class="absolute-container" [class.show]="active">
-  <div class="header-container" [class.show]="active">
-    <div class="notifier-container" [class.show]="active">
+<div class="absolute-container" [class.show]="active()">
+  <div class="header-container" [class.show]="active()">
+    <div class="notifier-container" [class.show]="active()">
       <div></div>
       <div class="update-container">A newer version of ClearML server ( {{newVersionName}}) is available. <a
-        [href]="newVersionUrl" class="link" target="_blank"> See details.</a></div>
-      <i class="fas fa-times pointer p-2" (click)="dismiss()"></i>
+      [href]="newVersionUrl" class="link" target="_blank"> See details.</a></div>
+      <button mat-icon-button (click)="dismiss()">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
     </div>
   </div>
 </div>
-<div class="circle-container" [class.show]="!active">
-  <div *ngIf="areAvailableUpdates"><i class="fas fa-circle pointer notification-bell" (click)="show()"></i>
-  </div>
+<div class="circle-container" [class.show]="!active()">
+  @if (areAvailableUpdates) {
+    <button mat-icon-button (click)="show()">
+      <mat-icon fontSet="al" fontIcon="al-ico-alert-purple" class="notification-bell"></mat-icon>
+  </button>
+}
 </div>

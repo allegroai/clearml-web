@@ -6,30 +6,35 @@
     "trains-webapp": {
       "root": "",
       "sourceRoot": "src",
-      "prefix": "sm",
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser-esbuild",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "preserveSymlinks": true,
-            "outputPath": "build",
+            "outputPath": {
+              "base": "build"
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.app.json",
             "polyfills": [
               "zone.js"
             ],
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
               "includePaths": [
-                "src/app/webapp-common/shared/ui-components/styles/"
+                "",
+                "src/app/webapp-common/shared/ui-components/styles/",
+                "src/app/webapp-common/styles/",
+                "."
               ]
             },
             "assets": [
               "src/assets",
               "src/favicon.ico",
               "src/env.js",
-              "src/version.json",
+              "src/404.html",
+              "src/manifest.webmanifest",
               "src/app/webapp-common/assets",
               {
                 "glob": "**/*",
@@ -38,11 +43,12 @@
               }
             ],
             "styles": [
-              "node_modules/primeng/resources/components/table/table.css",
-              "node_modules/primeicons/primeicons.css",
               "node_modules/ngx-markdown-editor/assets/highlight.js/agate.min.css",
-              "src/styles.scss",
-              "src/fonts.scss"
+              {
+                "bundleName": "global-styles",
+                "inject": true,
+                "input": "src/app/webapp-common/styles/style.scss"
+              }
             ],
             "scripts": [
               "node_modules/ngx-markdown-editor/assets/highlight.js/highlight.min.js"
@@ -56,27 +62,29 @@
               "fast-xml-parser",
               "url",
               "@aws-crypto/sha256-browser",
-              "@aws-crypto/crc32",
               "@aws-crypto/sha1-browser",
+              "@aws-crypto/crc32",
               "@aws-crypto/crc32c",
               "bowser",
+              "@smithy/util-defaults-mode-browser",
               "filesize/lib/filesize.es6",
               "hex-rgb",
+              "ace-builds",
               "localforage",
               "dom-to-image",
-              "ace-builds",
               "hocon-parser",
               "taira",
+              "base64",
               "base-64",
               "export-to-csv",
               "dompurify",
               "hammerjs"
             ],
             "extractLicenses": false,
-            "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
-            "namedChunks": true
+            "namedChunks": true,
+            "browser": "src/main.ts"
           },
           "configurations": {
             "appdev": {
@@ -91,7 +99,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -111,7 +118,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -121,7 +127,8 @@
                   "replace": "src/app/build-specifics/index.ts",
                   "with": "src/app/build-specifics/index.prod.ts"
                 }
-              ]
+              ],
+              "serviceWorker": false
             }
           },
           "defaultConfiguration": ""
@@ -158,22 +165,23 @@
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
             "polyfills": [
-              "zone.js",
-              "zone.js/testing"
+              "zone.js"
             ],
-            "stylePreprocessorOptions": {
-              "includePaths": [
-                "src/app/webapp-common/shared/ui-components/styles/"
-              ]
-            },
-            "tsConfig": "src/tsconfig.spec.json",
+            "tsConfig": "./tsconfig.spec.json",
             "styles": [
               "src/styles.scss"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "",
+                "src/app/webapp-common/shared/ui-components/styles/"
+              ]
+            },
             "assets": [
               "src/assets",
               "src/favicon.ico",
               "src/version.json",
+              "src/manifest.webmanifest",
               "src/app/webapp-common/assets"
             ]
           }
@@ -201,30 +209,34 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser-esbuild",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "preserveSymlinks": true,
-            "outputPath": "dist/report-widgets",
-            "baseHref": "widgets",
-            "index": "src/app/webapp-common/clearml-applications/report-widgets/src/index.html",
-            "main": "src/app/webapp-common/clearml-applications/report-widgets/src/main.ts",
+            "outputPath": {
+              "base": "dist/report-widgets"
+            },
             "polyfills": [
               "zone.js"
             ],
+            "baseHref": "",
+            "index": "src/app/webapp-common/clearml-applications/report-widgets/src/index.html",
             "tsConfig": "src/app/webapp-common/clearml-applications/report-widgets/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/app/webapp-common/clearml-applications/report-widgets/src/favicon.ico",
               "src/app/webapp-common/clearml-applications/report-widgets/src/assets",
-              "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets"
+              "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets",
+              "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets/fonts/trains.ttf"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
+                "",
+                "src/app/webapp-common/styles/",
                 "src/app/webapp-common/shared/ui-components/styles/"
               ]
             },
             "styles": [
-              "src/app/webapp-common/clearml-applications/report-widgets/src/styles.scss",
+              "src/app/webapp-common/clearml-applications/report-widgets/src/app/styles/styles.scss",
               {
                 "input": "src/app/webapp-common/assets/fonts/trains-icons.scss",
                 "bundleName": "trains-icons",
@@ -233,18 +245,20 @@
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "string-to-color",
-              "dom-to-image",
-              "dompurify",
-              "url",
-              "taira",
-              "@aws-crypto/crc32",
-              "@aws-crypto/crc32c",
+              "fast-xml-parser",
               "@aws-crypto/sha1-browser",
               "@aws-crypto/sha256-browser",
-              "fast-xml-parser",
-              "bowser"
-            ]
+              "@aws-crypto/crc32",
+              "@aws-crypto/crc32c",
+              "bowser",
+              "hammerjs",
+              "dom-to-image",
+              "dompurify",
+              "string-to-color",
+              "taira",
+              "url"
+            ],
+            "browser": "src/app/webapp-common/clearml-applications/report-widgets/src/main.ts"
           },
           "configurations": {
             "production": {
@@ -257,7 +271,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumError": "5kb"
                 }
               ],
               "fileReplacements": [
@@ -269,7 +283,6 @@
               "outputHashing": "all"
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
@@ -313,16 +326,10 @@
             "assets": [
               "src/app/webapp-common/clearml-applications/report-widgets/src/favicon.ico",
               "src/app/webapp-common/clearml-applications/report-widgets/src/assets",
-              "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets",
-              "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets/fonts/trains.ttf"
+              "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets"
             ],
             "styles": [
-              "src/app/webapp-common/clearml-applications/report-widgets/src/styles.scss",
-              {
-                "input": "src/app/webapp-common/assets/fonts/trains-icons.scss",
-                "bundleName": "trains-icons",
-                "inject": false
-              }
+              "src/app/webapp-common/clearml-applications/report-widgets/src/styles.scss"
             ],
             "scripts": []
           }
@@ -335,14 +342,20 @@
       "prefix": "sm",
       "style": "scss"
     },
-    "@angular-eslint/schematics:application": {
-      "setParserOptionsProject": true
+    "al-schematics:component": {
+      "prefix": "sm",
+      "styleext": "scss"
     },
-    "@angular-eslint/schematics:library": {
-      "setParserOptionsProject": true
+    "al-schematics:directive": {
+      "prefix": "sm"
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": [
+      "@angular-eslint/schematics",
+      "@ngrx/schematics",
+      "ngxtension"
+    ]
   }
 }

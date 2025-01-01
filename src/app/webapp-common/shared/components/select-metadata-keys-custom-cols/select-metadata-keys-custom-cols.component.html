@@ -21,7 +21,7 @@
           [selectable]="!singleSelect()"
           [itemValue]="key"
           [enableTooltip]="true"
-          (itemClicked)="singleSelect() ? addMetadataKey.emit(key) : addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked})"
+          (itemClicked)="singleSelect() ? addMetadataKey.emit(key) : addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked()})"
         ></sm-menu-item>
       }
     </div>

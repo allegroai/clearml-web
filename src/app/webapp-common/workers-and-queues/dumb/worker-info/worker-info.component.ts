@@ -1,4 +1,5 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output} from '@angular/core';
+import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
 
 @Component({
   selector   : 'sm-worker-info',
@@ -6,20 +7,12 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
   styleUrls  : ['./worker-info.component.scss']
 })
 export class WorkerInfoComponent {
+  selectedWorker = input<WorkerExt>();
+  deselectWorker = output();
 
-  @Input() selectedWorker;
-  @Output() deselectWorker = new EventEmitter();
-  activeTab: string        = 'info';
   public readonly cols     = [
     {header: 'QUEUE', class: ''},
-    {header: 'NEXT EXPERIMENT', class: ''},
+    {header: 'NEXT TASK', class: ''},
     {header: 'IN QUEUE', class: ''},
   ];
-
-  constructor() {
-  }
-
-  deselectWorkerClicked() {
-    this.deselectWorker.emit();
-  }
 }

@@ -14,7 +14,7 @@ import {FormsModule, NgForm} from '@angular/forms';
 import {Credentials} from '@common/core/reducers/common-auth-reducer';
 import {MatInputModule} from '@angular/material/input';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-s3-access-dialog',
@@ -26,8 +26,8 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
     FormsModule,
     MatInputModule,
     TooltipDirective,
-    LabeledFormFieldDirective,
-    SaferPipe
+    SaferPipe,
+    MatButton
   ]
 })
 export class S3AccessDialogComponent implements OnChanges {

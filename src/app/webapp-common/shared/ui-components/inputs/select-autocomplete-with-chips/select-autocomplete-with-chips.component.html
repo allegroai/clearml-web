@@ -1,5 +1,5 @@
 <form>
-  <mat-form-field [appearance]="appearance()" [class]="formFieldClass()" smNochedFormField>
+  <mat-form-field [appearance]="appearance()" [class]="formFieldClass()">
     <mat-chip-grid #chipList aria-label="Fruit selection" [disabled]="disabled()" [class.single]="!multiple()">
       @for (item of selected(); track item.value) {
         <sm-chips

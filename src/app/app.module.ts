@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {APP_INITIALIZER, inject, NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {PreloadAllModules, RouteReuseStrategy, RouterModule} from '@angular/router';
@@ -27,7 +27,9 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
 import {UpdateNotifierComponent} from '@common/shared/ui-components/overlay/update-notifier/update-notifier.component';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spinner.component';
+import {MatIconRegistry} from '@angular/material/icon';
 import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
+import {PushPipe} from '@ngrx/component';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -62,6 +64,7 @@ import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
     UpdateNotifierComponent,
     ChooseColorModule,
     SpinnerComponent,
+    PushPipe,
   ],
   providers: [
     UserPreferences,
@@ -84,4 +87,10 @@ import {provideCharts, withDefaultRegisterables} from 'ng2-charts';
   bootstrap      : [AppComponent],
   exports        : []
 })
-export class AppModule {}
+export class AppModule {
+  public matIconRegistry = inject(MatIconRegistry);
+
+  constructor() {
+    this.matIconRegistry.registerFontClassAlias('al', 'al-icon');
+  }
+}

@@ -5,7 +5,6 @@ import { ExperimentMenuComponent } from '@common/experiments/shared/components/e
 import {ExperimentMenuExtendedComponent} from '../containers/experiment-menu-extended/experiment-menu-extended.component';
 import {ExperimentExecutionParametersComponent} from '@common/experiments/dumb/experiment-execution-parameters/experiment-execution-parameters.component';
 import {CloneDialogComponent} from '@common/experiments/shared/components/clone-dialog/clone-dialog.component';
-import {ExperimentSystemTagsComponent} from '@common/experiments/shared/components/experiments-system-tags/experiment-system-tags.component';
 import {AbortAllChildrenDialogComponent} from '@common/experiments/shared/components/abort-all-children-dialog/abort-all-children-dialog.component';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
@@ -16,8 +15,7 @@ import {CommonExperimentOutputEffects} from '@common/experiments/effects/common-
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ExperimentsMenuEffects} from '~/features/experiments/effects/experiments-menu.effects';
 import {ActionReducer, StoreConfig, StoreModule} from '@ngrx/store';
-import {CommonLayoutModule} from '@common/layout/layout.module';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {ExperimentOutputEffects} from '~/features/experiments/effects/experiment-output.effects';
 import {EXPERIMENTS_PREFIX, EXPERIMENTS_STORE_KEY} from '@common/experiments/experiment.consts';
@@ -34,7 +32,6 @@ import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experi
 import {experimentsReducers} from '~/features/experiments/reducers';
 import {CommonExperimentConverterService} from '@common/experiments/shared/services/common-experiment-converter.service';
 import {HyperParamMetricColumnComponent} from '@common/experiments/shared/components/hyper-param-metric-column/hyper-param-metric-column.component';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 import {ReplaceViaMapPipe} from '@common/shared/pipes/replaceViaMap';
@@ -44,7 +41,6 @@ import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/me
 import {UniqueNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {CustomColumnsListComponent} from '@common/shared/components/custom-columns-list/custom-columns-list.component';
-import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {StatusIconLabelComponent} from '@common/shared/experiment-status-icon-label/status-icon-label.component';
 import {ExperimentTypeIconLabelComponent} from '@common/shared/experiment-type-icon-label/experiment-type-icon-label.component';
@@ -57,9 +53,8 @@ import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-l
 import {TagComponent} from '@common/shared/ui-components/indicators/tag/tag.component';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSidenavModule} from '@angular/material/sidenav';
-import {TableFilterSortTemplateComponent} from '@common/shared/ui-components/data/table/table-filter-sort-template/table-filter-sort-template.component';
+import {TableFilterSortComponent} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
-import {TableCardFilterTemplateComponent} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter-template.component';
 import {MatSelectModule} from '@angular/material/select';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {GroupedCheckedFilterListComponent} from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
@@ -79,6 +74,12 @@ import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experi
 import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/select-hyper-params-for-custom-col/select-hyper-params-for-custom-col.component';
 import {PushPipe} from '@ngrx/component';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
+import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
+import {MiniTagsListComponent} from '@common/shared/ui-components/tags/user-tag/mini-tags-list/mini-tags-list.component';
+import {TableCardFilterComponent} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter.component';
 
 export const experimentSyncedKeys = [
   'view.projectColumnsSortOrder',
@@ -126,7 +127,6 @@ export const getExperimentsConfig = (userPreferences: UserPreferences) => ({
 const DECLARATIONS = [
   ExperimentMenuComponent,
   ExperimentMenuExtendedComponent,
-  ExperimentSystemTagsComponent,
   ChangeProjectDialogComponent,
   CloneDialogComponent,
   AbortAllChildrenDialogComponent,
@@ -151,9 +151,7 @@ const DECLARATIONS = [
     ExperimentGraphsModule,
     MatProgressSpinnerModule,
     ScrollingModule,
-    CommonLayoutModule,
     HyperParamMetricColumnComponent,
-    LabeledFormFieldDirective,
     StringIncludedInArrayPipe,
     TimeAgoPipe,
     ReplaceViaMapPipe,
@@ -163,7 +161,6 @@ const DECLARATIONS = [
     UniqueNameValidatorDirective,
     TagsMenuComponent,
     CustomColumnsListComponent,
-    CheckboxControlComponent,
     MenuComponent,
     StatusIconLabelComponent,
     ExperimentTypeIconLabelComponent,
@@ -176,9 +173,8 @@ const DECLARATIONS = [
     TagComponent,
     MatMenuModule,
     MatSidenavModule,
-    TableFilterSortTemplateComponent,
+    TableFilterSortComponent,
     TableComponent,
-    TableCardFilterTemplateComponent,
     MatSelectModule,
     ButtonToggleComponent,
     GroupedCheckedFilterListComponent,
@@ -198,6 +194,15 @@ const DECLARATIONS = [
     SelectMetricForCustomColComponent,
     SelectHyperParamsForCustomColComponent,
     PushPipe,
+    MatIcon,
+    MatIconButton,
+    MatDialogActions,
+    MatDialogClose,
+    MatButton,
+    IsRowSelectedPipe,
+    MiniTagsListComponent,
+    TableCardFilterComponent,
+    ReactiveFormsModule,
   ],
   declarations   : [...DECLARATIONS],
   providers      : [

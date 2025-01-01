@@ -1,8 +1,6 @@
-@import "variables";
-
 .chips {
   cursor: default;
-  margin: 1px 6px 1px 0;
+  margin: 1px 0;
   display: inline-block;
   line-height: normal;
   vertical-align: middle;
@@ -11,7 +9,7 @@
     display: flex;
     align-items: center;
     position: relative;
-    padding: 0 0.5rem;
+    padding: 0 4px;
     border-radius: 16px;
     opacity: 1;
     font-size: 12px;
@@ -21,15 +19,7 @@
         transform: scale(1.6);
       }
     }
-
-    &.with-border {
-      // draft
-      border: 1px dashed $blue-100;
-      padding: 0 0.2em;
-    }
-
   }
-
   .dot-container {
     position: relative;
     width: 9px;
@@ -48,9 +38,9 @@
     transform: scale(1);
     transform-origin: center;
   }
-
   .label-text {
     margin: 0 7px;
     max-width: 150px;
+    line-height: 18px;
   }
 }

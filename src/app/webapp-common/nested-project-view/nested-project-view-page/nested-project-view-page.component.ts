@@ -1,7 +1,5 @@
-import {Component, effect, EventEmitter, input, Input, Output, TemplateRef} from '@angular/core';
+import {Component, input, TemplateRef, output, signal, computed} from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
-import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
-import {trackById} from '@common/shared/utils/forms-track-by';
 import {isExample} from '@common/shared/utils/shared-utils';
 
 export enum ProjectTypeEnum {
@@ -17,42 +15,45 @@ export enum ProjectTypeEnum {
   styleUrls: ['./nested-project-view-page.component.scss']
 })
 export class NestedProjectViewPageComponent {
-  trackById = trackById;
   isExample = isExample;
-  hideMenu = false;
-  circleTypeEnum = CircleTypeEnum;
-  entityTypeEnum = ProjectTypeEnum;
-
-  constructor() {
-    effect(() => {
-      if (this.projectsList()) {
-        this.loading = false;
-      }
-    });
-  }
-  @Input() totalVirtualCards = 0;
-  @Input() entityType: ProjectTypeEnum;
+  totalVirtualCards = input(0);
+  entityType = input<ProjectTypeEnum>();
   projectsList = input<Project[]>();
-  @Input() allExamples: boolean;
-  @Input() showExamples: boolean;
-  @Input() searching: boolean;
-  @Input() projectsOrderBy: any;
-  @Input() projectsSortOrder: any;
-  @Input() projectsTags: string[];
-  @Input() noMoreProjects: boolean;
-  @Input() cardContentTemplateRef: TemplateRef<any>;
-  @Input() cardContentFooterTemplateRef: TemplateRef<{$implicit: Project}>;
-  @Output() cardClicked = new EventEmitter<{ hasSubProjects: boolean; id: string; name: string }>();
-  @Output() toggleNestedView = new EventEmitter<boolean>();
-  @Output() orderByChanged = new EventEmitter();
-  @Output() projectNameChanged = new EventEmitter<{ id: string; name: string }>();
-  @Output() deleteProjectClicked = new EventEmitter<Project>();
-  @Output() removeTag = new EventEmitter<{ project: Project; tag: string }>();
-  @Output() loadMore = new EventEmitter();
-  loading: boolean;
+  allExamples = input<boolean>();
+  showExamples = input<boolean>();
+  searching = input<boolean>();
+  projectsOrderBy = input<any>();
+  projectsSortOrder = input<any>();
+  projectsTags = input<string[]>();
+  noMoreProjects = input<boolean>();
+  cardContentTemplateRef = input<TemplateRef<unknown>>();
+  cardContentFooterTemplateRef = input<TemplateRef<{
+        $implicit: Project;
+    }>>();
+  cardClicked = output<{
+        hasSubProjects: boolean;
+        id: string;
+        name: string;
+    }>();
+  toggleNestedView = output<boolean>();
+  orderByChanged = output<string>();
+  projectNameChanged = output<{
+        id: string;
+        name: string;
+    }>();
+  deleteProjectClicked = output<Project>();
+  removeTag = output<{
+        project: Project;
+        tag: string;
+    }>();
+  loadMore = output();
+  protected projectsState = computed(() => ({
+    projects: this.projectsList(),
+    loading: signal(false)
+  }))
 
   loadMoreAction() {
-    this.loading = true;
+    this.projectsState().loading.set(true);
     this.loadMore.emit();
   }
 }

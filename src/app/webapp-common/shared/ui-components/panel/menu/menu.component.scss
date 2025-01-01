@@ -1,18 +1,4 @@
-@import "variables";
-
 :host {
-  .al-ico-bars-menu {
-    font-size: 24px;
-  }
-
-  .menu-button.btn.icon {
-    font-weight: initial;
-    min-width: 16px;
-    min-height: 16px;
-    font-size: 16px;
-    color: $blue-400;
-  }
-
   .menu-button,
   .menu-button &:hover,
   .menu-button &:focus {
@@ -32,10 +18,12 @@
   .disabled-menu-btn {
     pointer-events: none;
     cursor: initial;
-    color:$blue-500;
   }
 
-  .menu-button:hover .al-icon{
-    color: $blue-100;
+  &.selected {
+    mat-icon {
+      --mat-icon-color: var(--row-selected-text-color);
+    }
   }
+
 }

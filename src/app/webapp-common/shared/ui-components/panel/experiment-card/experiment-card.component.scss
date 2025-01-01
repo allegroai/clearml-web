@@ -1,9 +1,4 @@
-@import "variables";
-@import "../../styles/mixins/common";
-
-.title {
-  @include card-title();
-}
+@import "mixins/common";
 
 .top-labels {
   @include counter-label();
@@ -18,7 +13,7 @@
 
 .experiment-tag {
   @include card-header-tag();
-  color: $blue-300;
+  color: var(--color-surface-container-low);
 }
 
 .experiment-footer {
@@ -34,12 +29,6 @@
     margin-top: 4px;
     margin-bottom: 20px;
     padding-top: 8px;
-  }
-}
-
-::ng-deep .experiment-card {
-  .card-container:hover {
-    background-color: $blue-400 !important;
   }
 }
 

@@ -1,10 +1,10 @@
-<div [hidden]="!loading" [class.d-flex]="loading" class="overlay justify-content-center align-items-center">
+<div [hidden]="!loading()" [class.d-flex]="loading()" class="overlay justify-content-center align-items-center">
   <div class="loading">
     <mat-spinner strokeWidth="2" diameter="24" color="accent"></mat-spinner>
     <div class="text">Loading</div>
   </div>
 </div>
-<div [class.d-flex]="!(loading || chartData)"
+<div [class.d-flex]="!(loading() || chartData())"
      class="overlay justify-content-center align-items-center">
   <div class="loading">
     <div class="text no-data">No data to show</div>
@@ -14,8 +14,8 @@
   <canvas
     #chart
     baseChart
-    [data]="chartData"
-    [options]="scatterChartOptions"
+    [data]="chartData()"
+    [options]="scatterChartOptions()"
     [type]="scatterChartType"
     (chartClick)="chartClicked($event.active)"
   ></canvas>

@@ -17,35 +17,38 @@
   (loadMore)="loadMore()"
   (toggleNestedView)="toggleNestedView($event)"
   class="nested-project-view"
->
-  <button create-button
-          class="btn btn-cml-primary d-flex align-items-center"
-          (click)="createPipeline()"
-  ><i class="al-icon al-ico-add sm me-2"></i>NEW PIPELINE
+  >
+  <button create-button mat-flat-button (click)="createPipeline()">
+    <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+    NEW PIPELINE
   </button>
 
   <div empty-state class="empty-state">
-    <div class="title-icon"><i class="al-icon al-ico-pipelines xxl"></i></div>
+    <div class="title-icon">
+      <mat-icon fontSet="al" fontIcon="al-ico-pipelines" class="xl"></mat-icon>
+    </div>
     <div class="title">NO PIPELINES TO SHOW</div>
     <div class="sub-title">Run your first pipeline to see it displayed here
-      <ng-container *ngIf="allExamples"> or <a href=""
-                                               (click)="$event.preventDefault(); createPipelineExamples()"
-                                               class="link">generate example
-      </a></ng-container>
-    </div>
-    <sm-pipelines-empty-state [initPipelineCode]="initPipelineCode" [createButton]="true"></sm-pipelines-empty-state>
+      @if (allExamples) {
+        or <a href=""
+        (click)="$event.preventDefault(); createPipelineExamples()"
+        class="link">generate example
+      </a>
+    }
   </div>
+  <sm-pipelines-empty-state [initPipelineCode]="initPipelineCode" [createButton]="true"></sm-pipelines-empty-state>
+</div>
 </sm-nested-project-view-page>
 
 <ng-template #cardContent let-project>
   <sm-circle-counter
     [counter]="project.id === '*' ? '∞' : project.stats?.active?.status_count?.in_progress ?? '0'"
     label="RUNNING"
-    [type]="project.stats?.active?.status_count?.in_progress ===0 ? circleTypeEnum.empty : circleTypeEnum.running"></sm-circle-counter>
+  [type]="project.stats?.active?.status_count?.in_progress ===0 ? circleTypeEnum.empty : circleTypeEnum.running"></sm-circle-counter>
   <sm-circle-counter [counter]="project.id === '*' ? '∞' : project.stats?.active?.completed_tasks_24h ?? '0'"
-                     label="COMPLETED"
-                     [type]="project.stats?.active?.completed_tasks_24h ===0 ? circleTypeEnum.empty : circleTypeEnum.completed"
-                     underLabel="(24 hrs)"></sm-circle-counter>
+    label="COMPLETED"
+    [type]="project.stats?.active?.completed_tasks_24h ===0 ? circleTypeEnum.empty : circleTypeEnum.completed"
+  underLabel="(24 hrs)"></sm-circle-counter>
   <sm-circle-counter
     [counter]="project.stats?.active?.status_count.failed"
     label="FAILED"
@@ -55,16 +58,16 @@
 
 <ng-template #cardFooterContent let-project>
   <div class="footer-tags">
-    <sm-tag-list
-      *ngIf="!hideMenu; else: ReadOnlyTags"
-      class="w-100"
-      [tags]="project.tags"
-      (remove)="removeTag(project, $event)"
-      smClickStopPropagation
-    ></sm-tag-list>
+    @if (!hideMenu) {
+      <sm-tag-list
+        class="w-100"
+        [tags]="project.tags"
+        (remove)="removeTag(project, $event)"
+        smClickStopPropagation
+      ></sm-tag-list>
+    } @else {
+      <sm-tag-list [tags]="project.tags"></sm-tag-list>
+    }
   </div>
-  <ng-template #ReadOnlyTags>
-    <sm-tag-list [tags]="project.tags"></sm-tag-list>
-  </ng-template>
 </ng-template>
 

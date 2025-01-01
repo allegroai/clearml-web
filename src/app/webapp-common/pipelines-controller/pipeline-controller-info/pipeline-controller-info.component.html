@@ -1,18 +1,40 @@
-<sm-pipeline-info [entity]="selected$ | ngrxPush" [project]="projectId$ | ngrxPush" [step]="selectedEntity" data-id="pipelineInfo"></sm-pipeline-info>
+@if (focusOnStageId()) {
+  <div class="stage-title">
+    <button (click)="goBackToStagesMode()" mat-icon-button>
+      <mat-icon fontSet="al" fontIcon="al-ico-arrow-left"></mat-icon>
+    </button>
+    Stage details: {{ focusOnStageId() }}
+  </div>
+}
+<sm-pipeline-info [entity]="selected$ | ngrxPush" [project]="projectId$ | ngrxPush" [step]="selectedEntity()" data-id="pipelineInfo"></sm-pipeline-info>
+
 <div class="console-button">
-  <button class="btn btn-cml-primary d-flex align-items-center" (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
-    <i class="al-icon al-ico-console sm me-3"></i>DETAILS
+  <button mat-flat-button (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
+    <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
+    DETAILS
   </button>
+  @if (!focusOnStageId() && hasStages()) {
+    <button
+      mat-stroked-button
+      [class.staged]="enableStaging()"
+      (click)="toggleEnableStaging()"
+    >
+      <mat-icon fontSet="al" fontIcon="al-ico-grid-view"></mat-icon>
+      {{ enableStaging() ? 'EXPAND STAGES' : 'COLLAPSE STAGES' }}
+    </button>
+  }
 </div>
 <div
   #diagramContainer
   class="pipeline-container"
+  [@shrinkRegular]="shrink? 'shrink': 'regular'"
+  (@shrinkRegular.done)="shrinkDone($event)"
   tabindex="1"
-  [class.extend]="showLog"
+  [class.extend]="showLog()"
   (click)="selectStep()"
   (keyup)="selectStep()"
   data-id="pipelineContainer"
-  >
+>
   @if (dagModel$ | ngrxPush; as dagModel) {
     @for (row of dagModel; track $index) {
       <div class="level" [style.width.px]="chartWidth">
@@ -20,74 +42,80 @@
           <sm-pipeline-controller-step
             #taskEl
             [step]="step"
-            [selected]="selectedEntity && selectedEntity.id === step?.id"
+            [selected]="selectedEntity()?.id === step?.id"
             (click)="$event.stopPropagation(); !taskEl.selected() && selectStep(step)"
             (openConsole)="openLog()"
+            (expandStage)="expandStage(step)"
+            (expandStageAnimationStarted)="expandStageAnimationStarted()"
+
           ></sm-pipeline-controller-step>
         }
       </div>
     }
     @if (chartWidth) {
       <svg class="arrows"
-        [class.selected]="selectedEntity?.id"
-        [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
-        [style.width.px]="chartWidth"
-        [style.height.px]="50 + 132 * dagModel?.length"
-        >
-        @for (arrow of arrows; track arrow.path) {
+           [class.selected]="selectedEntity()?.id"
+           [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
+           [style.width.px]="chartWidth"
+           [style.height.px]="50 + 132 * dagModel?.length"
+      >
+        @for (arrow of highlightedArrows$ | ngrxPush; track arrow.path) {
           <g
             [class.selected]="arrow.selected"
             [class.outgoing]="arrow.outgoing"
-            >
+          >
             <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
             <polygon
               points="0,-6 12,0, 0,6"
               [attr.transform]="arrow.headTransform"
-              />
+            />
           </g>
         }
       </svg>
     }
   }
 </div>
-<div class="results-panel" [class.extend]="showLog" [class.maximized]="maximizeResults" data-id="resultsPanel">
-  @if (showLog) {
-    <div class="header toggle" >
+<div class="results-panel" [class.extend]="showLog()" [class.maximized]="maximizeResults" data-id="resultsPanel">
+  @if (showLog()) {
+    <div class="header toggle">
       <div class="log-name">
-        <i class="al-icon al-ico-console me-2"></i>
-        <span>{{(selected$ | ngrxPush)?.name}}</span>
+        <mat-icon fontSet="al" fontIcon="al-ico-console" class="me-2"></mat-icon>
+        <span>{{ (selected$ | ngrxPush)?.name }}</span>
       </div>
       <sm-button-toggle
-        [value]="detailsPanelMode"
+        [value]="detailsPanelMode()"
         [options]="[
         {label: 'PREVIEW', value: statusOption.preview},
         {label: 'CONSOLE', value: statusOption.log},
         {label: 'CODE', value: statusOption.code}
         ]"
-        (valueChanged)="detailsPanelMode = $event"
+        (valueChanged)="detailsPanelMode.set($event)"
       ></sm-button-toggle>
-      <div class="close">
-        <i tabindex="1002" class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()" (keyup)="toggleResultSize()" data-id="maxResultPanel"></i>
-        <i tabindex="1003" class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)" (keyup)="openLog(false)" data-id="closeResultPanel"></i>
+      <div class="close gap-3">
+        <button mat-icon-button (click)="toggleResultSize()" data-id="maxResultPanel">
+          <mat-icon fontSet="al" [fontIcon]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'"></mat-icon>
+        </button>
+        <button mat-icon-button (click)="openLog(false)" data-id="closeResultPanel">
+          <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+        </button>
       </div>
     </div>
     <div class="content">
-      @switch (detailsPanelMode) {
+      @switch (detailsPanelMode()) {
         @case (statusOption.preview) {
-          <sm-simple-dataset-version-preview
+          <sm-open-dataset-version-preview
             [selected]="(selected$ | ngrxPush)"
-          ></sm-simple-dataset-version-preview>
+          ></sm-open-dataset-version-preview>
         }
         @case (statusOption.log) {
           <sm-experiment-output-log
             [experiment]="selected$ | ngrxPush"
-            [isDarkTheme]="true"
             [showHeader]="false"
           ></sm-experiment-output-log>
         }
         @case (statusOption.code) {
-          @if (stepDiff) {
-            <div class="ace" #aceEditor></div>
+          @if (stepDiff()) {
+            <sm-code-editor [code]="stepDiff()" [readonly]="true"></sm-code-editor>
           } @else {
             <div class="no-code" data-id="noCode">
               <i class="icon no-output-icon i-no-code-dark"></i>

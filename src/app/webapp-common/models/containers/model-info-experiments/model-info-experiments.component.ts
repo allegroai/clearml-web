@@ -26,7 +26,7 @@ export class ModelInfoExperimentsComponent {
   constructor(private store: Store,
   ) {
     this.selectedModel$ = this.store.select(selectSelectedModel);
-    this.selectedModelCreatingTaskLink$ = this.selectedModel$.pipe(map(model=>`/projects/${get( model, 'task.project.id', '*')}/experiments/${get(model, 'task.id','' )}` ));
+    this.selectedModelCreatingTaskLink$ = this.selectedModel$.pipe(map(model=>`/projects/${get( model, 'task.project.id', '*')}/tasks/${get(model, 'task.id','' )}` ));
   }
 
 

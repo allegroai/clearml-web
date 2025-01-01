@@ -23,20 +23,34 @@
       <span class="refresh-position" refresh>
       <div class="scalar-buttons">
         @if (routerConfig.includes('scalar')) {
-          <div class="table-graph-toggle" [class.maximized]="!minimized">
-            <i class="al-icon pointer al-color blue-400"
-               [smTooltip]="(metricValuesView$ | async)===false? 'Metric values': 'Graphs'"
-               [class]="(metricValuesView$ | async)===false? 'al-ico-table-view': 'al-ico-charts-view'"
-               (click)="toggleTableView()"
-            ></i>
-          </div>
+          <button mat-icon-button class="table-graph-toggle"
+                  [smTooltip]="(metricValuesView$ | async)===false? 'Metric values': 'Graphs'"
+                  [class.maximized]="!minimized"
+                  (click)="toggleTableView()">
+            <mat-icon fontSet="al" [fontIcon]="(metricValuesView$ | async)===false? 'al-ico-table-view': 'al-ico-charts-view'"></mat-icon>
+          </button>
         }
         @if ((metricValuesView$ | async) === false && routerConfig.includes('scalar') && minimized) {
-          <sm-experiment-settings
-            [class.maximized]="!minimized"
-            [showSettings]="routerConfig.includes('scalar') && minimized"
-            (toggleSettings)="toggleSettingsBar()"
-          ></sm-experiment-settings>
+          <button mat-icon-button [matMenuTriggerFor]="graphSettingsMenu" smTooltip="Settings">
+            <mat-icon fontSet="al" fontIcon="al-ico-settings"></mat-icon>
+          </button>
+          <mat-menu #graphSettingsMenu="matMenu">
+            <sm-graph-settings-bar
+              class="graph-settings-menu"
+              (click)="$event.stopPropagation()"
+              [verticalLayout]="true"
+              [smoothWeight]="smoothWeight$ | ngrxPush"
+              [smoothType]="smoothType$ | ngrxPush"
+              [xAxisType]="xAxisType$ | ngrxPush"
+              [groupBy]="groupBy$ | ngrxPush"
+              [groupByOptions]="groupByOptions"
+              (changeWeight)="changeSmoothness($event)"
+              (changeXAxisType)="changeXAxisType($event)"
+              (changeGroupBy)="changeGroupBy($event)"
+              (changeSmoothType)="changeSmoothType($event)"
+            ></sm-graph-settings-bar>
+          </mat-menu>
+
         }
       </div>
         @if (!minimized){

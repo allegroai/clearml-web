@@ -6,11 +6,11 @@
     justify-content: space-between;
     padding: 18px 24px;
     height: 64px;
-    border-top: $blue-500 solid 1px;
+    border-top: var(--color-surface-container-high) solid 1px;
     line-height: 26px;
 
     .version {
-      color: $blue-400;
+      color: color-mix(in srgb, var(--color-on-surface-variant), transparent 40%);
       font-weight: 300;
     }
   }

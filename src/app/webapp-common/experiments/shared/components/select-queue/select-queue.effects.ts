@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {calculateQueuesCaption} from '@common/workers-and-queues/workers-and-queues.utils';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {mergeMap, map, switchMap} from 'rxjs/operators';
@@ -21,7 +22,7 @@ export class SelectQueueEffects {
   getQueuesForEnqueue$ = createEffect(() => this.actions$.pipe(
       ofType(getQueuesForEnqueue),
       switchMap(() => this.apiQueues.queuesGetAllEx({}).pipe(
-        mergeMap((res) => [setQueuesForEnqueue({queues: res.queues})])
+        mergeMap((res) => [setQueuesForEnqueue({queues: calculateQueuesCaption(res.queues)})])
         )
       )));
 

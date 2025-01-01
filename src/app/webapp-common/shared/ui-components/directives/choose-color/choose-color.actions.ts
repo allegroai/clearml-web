@@ -24,3 +24,7 @@ export const showColorPicker = createAction(
   CHOOSE_COLOR_PREFIX + 'SHOW_PICKER',
   props<ColorPickerProps>()
 );
+
+export const closeColorPicker = createAction(
+  CHOOSE_COLOR_PREFIX + 'ClOSE_PICKER'
+);

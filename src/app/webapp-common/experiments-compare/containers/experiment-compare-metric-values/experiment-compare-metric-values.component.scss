@@ -1,10 +1,9 @@
-@import "variables";
 
 ////// Default prime theme ///////
-$primaryColor: #fff;
+$primaryColor: var(--color-surface-container-lowest);
 
-$emphasis-high: rgba(0, 0, 0, .87) !default;
-$emphasis-medium: rgba(0, 0, 0, .60) !default;
+$emphasis-high: var(--color-on-surface-variant) !default;
+$emphasis-medium: var(--color-outline) !default;
 
 //global
 $fontWeight: normal !default;
@@ -23,24 +22,24 @@ $focusOutlineColor: transparent !default;
 $focusOutline: 0 none !default;
 
 //table
-$tableHeaderBorder: 1px solid #e4e4e4 !default;
+$tableHeaderBorder: 1px solid var(--color-surface-container-low) !default;
 $tableHeaderBorderWidth: 0 0 1px 0 !default;
-$tableHeaderBg: #ffffff !default;
+$tableHeaderBg: var(--color-surface-container-lowest) !default;
 $tableHeaderTextColor: $textColor !default;
 $tableHeaderFontWeight: 500 !default;
 $tableHeaderPadding: 5px 16px !default;
 
 $tableHeaderCellPadding: 5px 16px !default;
-$tableHeaderCellBg: $blue-25 !default;
+$tableHeaderCellBg: var(--color-surface-container-low) !default;
 $tableHeaderCellTextColor: $textColor !default;
 $tableHeaderCellFontWeight: 500 !default;
-$tableHeaderCellBorder: 1px solid #e4e4e4 !default;
+$tableHeaderCellBorder: 1px solid var(--color-surface-container-low) !default;
 $tableHeaderCellBorderWidth: 0 1px 1px 0 !default;
 
-$tableBodyRowBg: #ffffff !default;
+$tableBodyRowBg: var(--color-surface-container-lowest) !default;
 $tableBodyRowTextColor: $textColor !default;
-$tableBodyRowHoverBg: $blue-50 !default;
-$tableBodyCellBorder: 1px solid $cloudy-blue !default;
+$tableBodyRowHoverBg: var(--color-surface-container-low) !default;
+$tableBodyCellBorder: 1px solid var(--color-surface-container-high) !default;
 $tableBodyCellPadding: 14px 1rem !default;
 
 $tableResizerHelperBg: $primaryColor !default;
@@ -82,7 +81,7 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 
 .mat-drawer {
   width: 434px;
-  background-color: #fff;
+  background-color: var(--color-surface-container-lowest);
 }
 
 .filter-header-cell {
@@ -90,10 +89,10 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
   overflow: unset;
 
   i {
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
 
     &:hover {
-      color: $blue-300;
+      color: var(--color-outline);
     }
   }
 }
@@ -111,14 +110,14 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
     padding: 5px;
 
     &:hover {
-      border-color: $blue-250;
-      background-color: white;
+      border-color: var(--color-surface-container-high);
+      background-color: var(--color-surface-container-lowest);
     }
   }
 
   .is-filtered {
-    border-color: $cloudy-blue;
-    background-color: white;
+    border-color: var(--color-surface-container-high);
+    background-color: var(--color-surface-container-lowest);
   }
 
   mat-form-field {
@@ -128,11 +127,11 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
   .al-ico-filter-on,
   .al-ico-filter-off {
     .path2:before {
-      color: $blue-400;
+      color: var(--color-on-surface-variant);
     }
 
     .path1:before {
-      color: $purple;
+      color: var(--color-primary);
     }
   }
 }
@@ -153,8 +152,8 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
   overflow: hidden;
   border-top: 1px solid transparent !important;
   border-right: $tableBodyCellBorder;
-  border-left-width: 0px;
-  color: $blue-600;
+  border-left-width: 0;
+  color: var(--color-primary);
   font-weight: 500;
   padding-left: 24px !important;
   left: 0 !important;
@@ -163,9 +162,8 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 .variants-column {
   width: 200px;
   max-width: 200px;
-  border-right: 1px solid $cloudy-blue !important;
-  border-left-width: 0px;
-  color: $blue-400;
+  border-right: 1px solid var(--color-surface-container-high) !important;
+  border-left-width: 0;
   font-weight: 500;
   left: 217px !important;
 }
@@ -180,16 +178,16 @@ $tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
 }
 
 .row-info-icon {
-  color: $blue-300;
+  color: var(--color-primary);
 }
 
 tr:hover {
-  background-color: $blue-50;
+  background-color: var(--color-surface-container-low);
 }
 
 tr.first-row {
   td {
-    border-top-color: $blue-300 !important;
+    border-top-color: var(--color-outline-variant) !important;
   }
 
   &:first-child td {
@@ -221,14 +219,14 @@ tr.first-row {
   padding: 2px 4px;
 
   &.tag-max {
-    color: white;
-    background-color: $blue-400;
+    color: var(--color-surface-container-lowest);
+    background-color: var(--color-outline);
   }
 
   &.tag-min {
-    color: $blue-400;
-    border: 1px solid $blue-400;
-    background-color: white;
+    color: var(--color-outline);
+    border: 1px solid var(--color-outline);
+    background-color: var(--color-surface-container-lowest);;
   }
 }
 
@@ -240,7 +238,6 @@ tr.first-row {
 }
 
 .close {
-  cursor: pointer;
   z-index: 1;
 }
 
@@ -252,10 +249,6 @@ tr.first-row {
     }
   }
   .p-datatable {
-    table {
-      border-collapse: separate !important;
-    }
-
     .p-paginator-bottom {
       border-width: $tableBottomPaginatorBorderWidth;
       border-radius: 0;
@@ -284,7 +277,7 @@ tr.first-row {
 
     .p-datatable-tbody {
       > tr {
-        background: $tableBodyRowBg;
+         background: $tableBodyRowBg;
         color: $tableBodyRowTextColor;
         transition: $listItemTransition;
 
@@ -303,7 +296,7 @@ tr.first-row {
         }
 
         &:hover .metrics-column {
-          background: #fff;
+          background: var(--color-surface-container-lowest);
         }
 
         &:focus {
@@ -312,7 +305,7 @@ tr.first-row {
         }
 
         &:last-child td {
-          border-bottom: 1px solid $blue-300;
+          border-bottom: 1px solid var(--color-outline-variant);
         }
       }
     }
@@ -323,7 +316,7 @@ tr.first-row {
 
     .p-datatable-scrollable-header,
     .p-datatable-scrollable-footer {
-      background: #fff;
+      background: var(--color-surface-container-lowest);
     }
 
     &.p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table,
@@ -424,13 +417,17 @@ tr.first-row {
 }
 
 .no-output {
-  color: $blue-100;
+  color: var(--color-on-surface);
   z-index: 1;
 
+  mat-icon {
+    color: var(--color-tint-14);
+  }
+
   &.all-filtered-message {
-    color: $blue-400;
+    color: var(--color-outline);
     .link {
-      color: $purple;
+      color: var(--color-primary);
     }
   }
 }

@@ -1,109 +1,33 @@
-@import "variables";
-
 :host {
   display: block;
   height: 100%;
   overflow: auto;
-  .add-section{
-    color: $purple;
-  }
-
-  ::ng-deep .mat-expansion-panel {
-    box-shadow: none;
-    color: $blue-400;
-    border-radius: 0;
-
-    .mat-expansion-panel-header {
-      font-family: $font-family-base, sans-serif !important;
-      font-size: 13px;
-      font-weight: bold;
-      padding: 0 12px;
-      background: #fafafa;
-
-      &.active {
-        background-color: #e2e8ff !important;
-      }
-
-      .mat-expansion-indicator {
-        height: 25px;
-      }
-
-      &.mat-expanded, mat-expanded:focus {
-
-
-        .mat-expansion-indicator {
-          height: 22px;
-        }
-      }
-
-      .mat-content {
-        padding-right: 10px;
-
-        .mat-expansion-panel-header-title {
-          margin: unset;
-          color: $blue-400;
-        }
-
-      }
-    }
-
-    .mat-expansion-panel-content {
-      font-family: $font-family-base, sans-serif !important;
-
-      .mat-expansion-panel-body {
-        padding: 0;
-
-        li {
-          &.list-item {
-            padding: 0 30px 0 24px;
-            line-height: 40px;
-            list-style: none;
-
-            &.even {
-              background-color: #f9fafb;
-            }
-
-            &:hover {
-              background-color: $blue-50;
-              transition: background-color 0.2s;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  ::ng-deep .mat-expansion-panel-header-description {
-    flex-grow: 0;
-    color: $blue-400;
-  }
-
-
-  .selected {
-    background-color: $purple;
-    color: #ffffff;
-
-    .icon {
-      filter: brightness(0) invert(1);
-    }
-  }
+  padding: 12px;
 
   .hyper-container {
     padding: 10px 12px;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
     display: flex;
     align-items: center;
-
+    border-radius: 4px;
+    margin-bottom: 2px;
 
     .icon, .al-icon {
       margin-right: 10px;
+      color: color-mix(in srgb, var(--color-primary), var(--color-surface) 50%);
     }
-  }
 
-  .hide-output-model {
-    visibility: hidden;
-    height: 0;
-    padding: 0;
+    &:hover {
+      background-color: var(--color-surface-container-low);
+    }
+
+    &.selected {
+      background-color: var(--color-surface-container-high);
+      color: var(--color-on-surface);
+
+      &:hover {
+        background-color: var(--color-surface-container-highest);
+      }
+    }
   }
 }

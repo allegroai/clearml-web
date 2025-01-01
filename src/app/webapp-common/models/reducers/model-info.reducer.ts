@@ -8,7 +8,7 @@ import {
   setSavingModel,
   setModelInfo, setPlots, saveMetaData
 } from '../actions/models-info.actions';
-import {TableModel} from '../shared/models.model';
+import {SelectedModel, TableModel} from '../shared/models.model';
 import {cloneDeep} from 'lodash-es';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -18,12 +18,12 @@ import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {modelSelectionChanged} from '@common/models/actions/models-view.actions';
 
 export interface ModelInfoState {
-  selectedModel: TableModel;
+  selectedModel: SelectedModel;
   activeSectionEdit: boolean;
-  infoDataFreeze: TableModel;
+  infoDataFreeze: SelectedModel;
   saving: boolean;
   modelExperiments: ITableExperiment[];
-  modelExperimentsTableFilter: { [columnId: string]: FilterMetadata };
+  modelExperimentsTableFilter: Record<string, FilterMetadata>;
   xAxisType: ScalarKeyEnum;
   cachedAxisType: ScalarKeyEnum;
   plots: MetricsPlotEvent[];
@@ -50,7 +50,7 @@ export const modelsInfoReducer = createReducer(
   })),
   on(modelDetailsUpdated, (state, action): ModelInfoState => ({
     ...state,
-    selectedModel: {...state.selectedModel, ...action.changes},
+    selectedModel: {...state.selectedModel, ...action.changes as unknown as SelectedModel},
     infoDataFreeze: initialState.infoDataFreeze
   })),
   on(activateModelEdit, (state): ModelInfoState =>

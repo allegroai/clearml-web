@@ -1,9 +1,10 @@
-import {Component, computed, ElementRef, inject, signal, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal, viewChild} from '@angular/core';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
-import {SelectableFilterListComponent} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
+import {
+  SelectableFilterListComponent
+} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
 import {Store} from '@ngrx/store';
 import {AngularSplitModule} from 'angular-split';
-import {PushPipe} from '@ngrx/component';
 import {ServingStatsComponent} from '@common/serving/serving-stats/serving-stats.component';
 import {timeFrameOptions} from '@common/constants';
 import {MatFormField} from '@angular/material/form-field';
@@ -12,14 +13,20 @@ import {MatSelect} from '@angular/material/select';
 import {servingFeature} from '@common/serving/serving.reducer';
 import {FormsModule} from '@angular/forms';
 import {ServingActions} from '@common/serving/serving.actions';
-import {ServingGetEndpointMetricsHistoryRequest} from '~/business-logic/model/serving/servingGetEndpointMetricsHistoryRequest';
-import MetricTypeEnum = ServingGetEndpointMetricsHistoryRequest.MetricTypeEnum;
-import {NgTemplateOutlet} from '@angular/common';
+import {
+  ServingGetEndpointMetricsHistoryRequest
+} from '~/business-logic/model/serving/servingGetEndpointMetricsHistoryRequest';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import MetricTypeEnum = ServingGetEndpointMetricsHistoryRequest.MetricTypeEnum;
 
 @Component({
   selector: 'sm-serving-monitor',
+  templateUrl: './serving-monitor.component.html',
+  styleUrl: './serving-monitor.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     MatDrawerContent,
@@ -27,21 +34,19 @@ import {SelectableListItem} from '@common/shared/ui-components/data/selectable-l
     MatDrawerContainer,
     MatDrawer,
     AngularSplitModule,
-    PushPipe,
     ServingStatsComponent,
     MatFormField,
     MatOption,
     MatSelect,
     FormsModule,
-    NgTemplateOutlet,
-    TooltipDirective
+    TooltipDirective,
+    MatButton,
+    MatIcon,
+    MatIconButton
   ],
-  templateUrl: './serving-monitor.component.html',
-  styleUrl: './serving-monitor.component.scss'
 })
 export class ServingMonitorComponent {
   private store = inject(Store);
-  private elmRef = inject(ElementRef);
 
   private charts = viewChild<ElementRef<HTMLDivElement>>('charts');
   public searchTerm = signal('');

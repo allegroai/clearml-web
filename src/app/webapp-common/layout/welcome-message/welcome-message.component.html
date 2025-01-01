@@ -1,6 +1,6 @@
 <sm-dialog-template [displayX]="true"
-  [header]="queue? 'NO WORKERS ASSIGNED TO QUEUE': (step === 1 ? 'Welcome to ClearML' : (showTabs? 'CREATE NEW EXPERIMENT' : 'GETTING STARTED'))"
-  [subHeader]="showTabs ? 'To create a new experiment you can either run your ML code instrumented with the ClearML SDK, or relaunch a previously run experiment by cloning it.' : ''"
+  [header]="queue? 'NO WORKERS ASSIGNED TO QUEUE': (step() === 1 ? 'Welcome to ClearML' : (showTabs? 'CREATE NEW TASK' : 'GETTING STARTED'))"
+  [subHeader]="showTabs ? 'To create a new task you can either run your ML code instrumented with the ClearML SDK, or relaunch a previously run task by cloning it.' : ''"
   (xClicked)="closeDialog()" [closeOnX]="false"
   [iconClass]="queue?'al-ico-queues': 'i-welcome-researcher'" xmlns="http://www.w3.org/1999/html">
 
@@ -27,64 +27,61 @@
     </nav>
   }
 
-  @if (step === 1) {
+  @if (step() === 1) {
     <div class="welcome-content">
       <div class="body">
         <div class="info">
           <span class="position-relative">
-            <i class="al-ico-card-example foreground"></i>
+            <mat-icon fontSet="al" fontIcon="al-ico-card-example" class="xl foreground"></mat-icon>
             <span class="background"></span>
           </span>
           <div class="mt-2">See the pre-loaded examples to quickly get familiar with ClearML’s various capabilities.</div>
         </div>
         <div class="info">
-          <i class="al-ico-help-outlined"></i>
+          <mat-icon fontSet="al" fontIcon="al-ico-help-outlined" class="xl"></mat-icon>
           <div class="mt-2">Browse "Pro Tips" in the Help menu to jump start your work flow.</div>
         </div>
         <div class="info">
-          <i class="al-ico-documentation"></i>
-          <div class="mt-2">Check out the <a target="_blank" [href]="docsLink">ClearML docs</a> for advanced information and in depth how-to’s.
+          <mat-icon fontSet="al" fontIcon="al-ico-documentation" class="xl"></mat-icon>
+          <div class="mt-2">Check out the <a target="_blank" [href]="docsLink()">ClearML docs</a> for advanced information and in depth how-to’s.
         </div>
       </div>
     </div>
     <div class="separator"></div>
     <div class="d-flex justify-content-center">
-      <button class="btn btn-neon" (click)="nextSteps($event)">GET STARTED</button>
+      <button mat-flat-button (click)="nextSteps($event)">GET STARTED</button>
     </div>
   </div>
 } @else {
   <div class="steps-content">
     @if (queue) {
       <div class="text">
-        {{entityName}} have been enqueued on the <b>{{queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
+        {{entityName}} have been enqueued on the <b>{{queue?.display_name ?? queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
       </div>
     }
     @if (!currentLink || currentLink === links[0]) {
-      @for (step of steps; track step.id) {
+      @for (step of steps(); track step.id) {
         <div class="step-container">
           <div class="step-header">{{step.header}}</div>
           <div class="step">{{step.title}}</div>
           @if (step.title==='2. Configure') {
-            <nav class="config-nav">
-              <sm-navbar-item header="LOCAL PYTHON" [active]="!isJupyter" data-id="LocalPythonTab" class="small-nav" (click)="setIsJupyter(false)"></sm-navbar-item>
-              <sm-navbar-item header="JUPYTER NOTEBOOK" [active]="isJupyter" data-id="JupyterNotebookTab" class="small-nav" (click)="setIsJupyter(true)"></sm-navbar-item>
-            </nav>
+            <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center" [(selectedIndex)]="target">
+              <mat-tab label="LOCAL PYTHON" data-id="LocalPythonTab"></mat-tab>
+              <mat-tab label="JUPYTER NOTEBOOK" data-id="JupyterNotebookTab"></mat-tab>
+            </mat-tab-group>
           }
-          <div class="step sub-note mt-2 mb-2">{{isJupyter? 'Set the ClearML environment for your notebook':'Run the ClearML setup script'}}</div>
+          <div class="sub-note mt-2 mb-2">{{isJupyter() ? 'Set the ClearML environment for your notebook':'Run the ClearML setup script'}}</div>
           <div class="code">
             <div class="content" #stepCode>{{step.code}}</div>
             <sm-copy-clipboard
-              [hideBackground]="false"
               [label]="''"
-              [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
               data-id="copyButton"
-              theme="text-area"
               [clipboardText]="stepCode.innerText"
             ></sm-copy-clipboard>
           </div>
-          @if (step.subNote || (isJupyter && ((queue && $index === 2) || (!queue && $index === 1)))) {
-            <div class="sub-note"><i class="me-1 fas fa-info-circle info"></i>
-            @if ((isJupyter && ((queue && $index === 2) || (!queue && $index === 1)))) {
+          @if (step.subNote || (isJupyter() && ((queue && $index === 2) || (!queue && $index === 1)))) {
+            <div class="sub-note"><mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="me-1 sm"></mat-icon>
+            @if ((isJupyter() && ((queue && $index === 2) || (!queue && $index === 1)))) {
               @if (accessKey) {
                 Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a>
               } @else {
@@ -100,25 +97,23 @@
         }
       </div>
     }
-    <div class="step-container cred-step" [class.jupyter]="isJupyter" [class.first-step]="!credentialsCreated" [class.has-ws]="community && workspace.name" [class.has-label]="credentialsLabel">
-      @if (!isJupyter) {
-        <div class="step sub-note" >Complete the clearml configuration information as prompted.</div>
+    <div class="step-container cred-step" [class.jupyter]="isJupyter()" [class.first-step]="!credentialsCreated" [class.has-ws]="community() && workspace.name" [class.has-label]="credentialsLabel">
+      @if (!isJupyter()) {
+        <div class="sub-note" >Complete the clearml configuration information as prompted.</div>
       }
       @if (!credentialsCreated) {
-        <div class="d-flex align-items-end">
-          <button class="mb-2 btn btn-neon create-cred-button" data-id="New Credentials" (click)="createCredentials()">CREATE NEW
-            CREDENTIALS
-          </button>
-        </div>
+        <button mat-flat-button class="my-2" data-id="New Credentials" (click)="createCredentials()">
+          CREATE NEW CREDENTIALS
+        </button>
       }
-      <div class="cred-visible" [class.invisible]="!accessKey || isJupyter">
+      <div class="cred-visible" [class.invisible]="!accessKey || isJupyter()">
         <div class="code">
           <div class="mt-2 w-100 code">
             <div class="content">
               <span class="variable">api</span> &#123;
-              @if (credentialsComment) {
+              @if (credentialsComment()) {
                 <div class="ms-2">
-                  <span class="comment"># {{credentialsComment}}</span>
+                  <span class="comment"># {{credentialsComment()}}</span>
                 </div>
               }
               <div class="ms-2">
@@ -148,15 +143,12 @@
             </div>
           </div>
           <sm-copy-clipboard
-            [hideBackground]="false"
             data-id="copyButton"
             [label]="''"
-            [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
-            theme="text-area"
             [clipboardText]="getCopyConfig()"></sm-copy-clipboard>
         </div>
     @if (!showTabs) {
-      <div class="sub-note"><i class="me-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
+      <div class="sub-note"><mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="me-1 info"></mat-icon>Manage your app credentials in the<a class="ms-1" target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
     }
   </div>
 </div>
@@ -167,12 +159,12 @@
       @if (!showTabs) {
         <div class="step">3. Integrate</div>
       }
-      <div class="step sub-note">Add ClearML to your code. For example:</div>
+      <div class="sub-note">Add ClearML to your code. For example:</div>
       <div class="code">
         @if (!showTabs) {
           <div class="content">
             <div>
-              <span class="variable">from</span> {{gettingStartedContext?.packageName || 'clearml'}} <span class="variable">import</span> Task
+              <span class="variable">from</span> {{configGettingStarted()?.packageName || 'clearml'}} <span class="variable">import</span> Task
             </div>
             <div>task <span class="operation">=</span> Task.<span class="variable">init</span>(project_name<span class="operation">=</span><span class="string">"my project"</span>, task_name<span class="operation">=</span><span class="string">"my task"</span>)
             </div>
@@ -185,11 +177,11 @@
             <div>
               <span class="variable">import</span> matplotlib.pyplot <span class="variable">as</span> plt
             </div>
-            <div># Add the following two lines to your code, to have ClearML automatically log your experiment</div>
+            <div># Add the following two lines to your code, to have ClearML automatically log your task</div>
             <div>
               <span class="variable">from</span> clearml <span class="variable">import</span> Task
             </div>
-            <div>task = Task.init(project_name=<span class="string">'My Project'</span>, task_name=<span class="string">'My Experiment'</span>)</div>
+            <div>task = Task.init(project_name=<span class="string">'My Project'</span>, task_name=<span class="string">'My Task'</span>)</div>
             <div># Create a plot using matplotlib, or you can also use plotly</div>
             <div><code>plt.scatter(np.random.rand(50), np.random.rand(50), c=np.random.rand(50), alpha=0.5)</code></div>
             <div># Plot will be reported automatically to clearml</div>
@@ -202,11 +194,8 @@
           </div>
         }
         <sm-copy-clipboard
-          [hideBackground]="false"
           [label]="''"
-          [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
           data-id="copyButton"
-          theme="text-area"
           [clipboardText]="getCopyPython()"
         ></sm-copy-clipboard>
       </div>
@@ -215,23 +204,20 @@
 }
 @if (!queue && (currentLink === links[2])) {
   <div class="step-container">
-    <div class="step">1. Clone a previously run experiment</div>
-    <div class="step sub-note mt-2">Use the <span class="bolder">“Clone”</span> action to create a new draft copy.</div>
-    <div class="step sub-note">You can change any of the new experiments’ configurations.</div>
-    <div class="step sub-note mt-3">Experiments table</div>
+    <div class="step">1. Clone a previously run task</div>
+    <div class="sub-note mt-2">Use the <span class="bolder">“Clone”</span> action to create a new draft copy.</div>
+    <div class="sub-note">You can change any of the new task's configurations.</div>
+    <div class="sub-note mt-3">Tasks table</div>
     <div class="new-experiment-table"></div>
-    <div class="step">2. Run your experiment</div>
-    <div class="step sub-note mt-2">Use the <span class="bolder">“Enqueue”</span> action to enqueue the new experiment on an available queue.</div>
-    <div class="step sub-note mb-1">To have an agent service a queue, on your target machine run:</div>
+    <div class="step">2. Run your task</div>
+    <div class="sub-note mt-2">Use the <span class="bolder">“Enqueue”</span> action to enqueue the new task on an available queue.</div>
+    <div class="sub-note mb-1">To have an agent service a queue, on your target machine run:</div>
     <div class="code">
       <div #content class="content">clearml-agent daemon —queue &lt;queue name&gt;</div>
       <sm-copy-clipboard
-        [hideBackground]="true"
         [label]="''"
-        [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
         [clipboardText]="content.textContent"
         data-id="copyButton"
-        theme="text-area"
       ></sm-copy-clipboard>
     </div>
   </div>
@@ -250,11 +236,10 @@
 }
 @if (queue) {
   <div class="text">
-    <sm-checkbox-control
-      fieldName="orphanedQueue"
-      [formData]="doNotShowAgain"
-      (formDataChanged)="doNotShowThisAgain($event)"
-    label="Don’t show again"></sm-checkbox-control>
+    <mat-checkbox [checked]="doNotShowAgain"
+                  (change)="doNotShowThisAgain($event.checked)">
+      Don’t show again
+    </mat-checkbox>
   </div>
 }
 </div>

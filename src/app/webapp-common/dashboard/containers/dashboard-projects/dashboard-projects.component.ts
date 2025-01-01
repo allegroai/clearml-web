@@ -4,7 +4,7 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {fromEvent} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
-import {selectRecentProjects, selectRecentProjectsCount} from '../../common-dashboard.reducer';
+import {selectRecentProjects} from '../../common-dashboard.reducer';
 import {getRecentProjects} from '../../common-dashboard.actions';
 import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
 import {resetSelectedProject, setSelectedProjectId} from '@common/core/actions/projects.actions';
@@ -23,10 +23,8 @@ export class DashboardProjectsComponent {
   protected router = inject(Router);
   private matDialog = inject(MatDialog);
   public recentProjectsList$ = this.store.selectSignal(selectRecentProjects);
-  public recentProjectsListCount$ = this.store.selectSignal(selectRecentProjectsCount);
   private dialog: MatDialogRef<ProjectDialogComponent>;
   readonly cardsInRow = CARDS_IN_ROW;
-  overflow: boolean;
 
   @Output() width = new EventEmitter<number>();
   private header = viewChild<ElementRef<HTMLDivElement>>('header');

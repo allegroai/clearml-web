@@ -1,7 +1,7 @@
 @import "variables";
 
 .error {
-  color: $error-color;
+  color: var(--color-error);
   font-size: 12px;
   line-height: 1.2;
   &.is-full-width {

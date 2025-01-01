@@ -1,13 +1,13 @@
 <sm-dialog-template [header]="tips()[tipIndex()].title"
-                    iconClass="al-icon al-ico-tips"
-                    (xClicked)="matDialogRef.close(neverShowAgain)"
+                    iconClass="al-ico-tips"
+                    (xClicked)="matDialogRef.close(neverShowAgain())"
 >
   <div class="tip-container" smClickStopPropagation>
     @if (tips()[tipIndex()].image) {
       <div
         class="tip-image"
         [class.full-width]="!tips()[tipIndex()].content"
-        [style.background-image]="'url(' + tips()[tipIndex()].image + ')'"></div>
+        [style.background-image]="'url(' + getThemeImageSrc(tips()[tipIndex()].image) + ')'"></div>
     }
     @if (tips()[tipIndex()].content) {
       <div class="tip-content" [class.full-width]="!tips()[tipIndex()].image">

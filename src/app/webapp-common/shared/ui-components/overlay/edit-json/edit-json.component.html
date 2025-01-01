@@ -1,14 +1,25 @@
 <sm-dialog-template [header]="title">
-  <div  class="data-text">
-    <div class="data-text-ace" #aceEditor></div>
+  <div class="data-text">
+    <sm-code-editor
+      [code]="textData"
+      [mode]="mode"
+      [readonly]="readOnly"
+      [placeholder]="placeHolder"
+      [startPosition]="position()"
+    ></sm-code-editor>
   </div>
   <div>
-    <small *ngIf="this.showErrors"
-           class="text-danger">*Not a valid json.
-    </small>
+    @if (this.showErrors) {
+      <small
+        class="text-danger">*Not a valid json.
+      </small>
+    }
   </div>
   <div class="buttons">
-    <button *ngIf="!readOnly" (click)="closeDialog(false)" class="btn btn-outline-neon yes-button" data-id="cancelButton">CANCEL</button>
-    <button (click)="closeDialog(!readOnly)" class="btn btn-neon" data-id="okButton">OK</button>
+    @if (!readOnly) {
+      <button mat-stroked-button (click)="closeDialog(false)" class="yes-button" data-id="cancelButton"
+      >CANCEL</button>
+    }
+    <button mat-flat-button (click)="closeDialog(!readOnly)" data-id="okButton">OK</button>
   </div>
 </sm-dialog-template>

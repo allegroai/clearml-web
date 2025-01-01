@@ -1,19 +1,14 @@
-import {ChangeDetectorRef, Component, OnDestroy, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, viewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   selectExperimentHyperParamsSelectedSectionFromRoute,
   selectExperimentHyperParamsSelectedSectionParams,
   selectIsExperimentSaving,
-  selectIsSelectedExperimentInDev, selectSelectedExperimentReadOnly,
+  selectSelectedExperimentReadOnly,
   selectSplitSize,
 } from '../../reducers';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
-import {Observable, Subscription} from 'rxjs';
-import {
-  selectIsExperimentEditable,
-  selectSelectedExperiment,
-} from '~/features/experiments/reducers';
+import {selectIsExperimentEditable, selectSelectedExperiment,} from '~/features/experiments/reducers';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {
   activateEdit,
@@ -24,65 +19,52 @@ import {
   setExperimentFormErrors,
   updateExperimentAtPath
 } from '../../actions/common-experiments-info.actions';
-import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {Router} from '@angular/router';
-import {ExperimentExecutionParametersComponent} from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
+import {
+  ExperimentExecutionParametersComponent
+} from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
 
 @Component({
   selector   : 'sm-experiment-info-hyper-parameters-form-container',
   templateUrl: './experiment-info-hyper-parameters-form-container.component.html',
-  styleUrls  : ['./experiment-info-hyper-parameters-form-container.component.scss']
+  styleUrls  : ['./experiment-info-hyper-parameters-form-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExperimentInfoHyperParametersFormContainerComponent implements OnDestroy {
+export class ExperimentInfoHyperParametersFormContainerComponent {
+  private store = inject(Store);
+  protected router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  // parameterSection = viewChild('parameterSection');
+  private executionParamsForm = viewChild(ExperimentExecutionParametersComponent);
+
   sectionReplaceMap = {
     _legacy: 'General',
     properties: 'User Properties',
     design: 'General'
   };
-  @ViewChild('parameterSection', {static: false}) parameterSection;
-  @ViewChild('executionParamsForm', {static: false}) executionParamsForm: ExperimentExecutionParametersComponent;
-  public selectedSectionHyperParams$: Observable<ParamsItem[]>;
-  public editable$: Observable<boolean>;
-  public isInDev$: Observable<boolean>;
-  public saving$: Observable<boolean>;
-  public backdropActive$: Observable<boolean>;
-  public routerConfig$: Observable<string[]>;
-  public selectedSection$: Observable<string>;
-  private selectedSectionSubscription: Subscription;
-  public selectedSection: string;
+
+  protected selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
+  protected editable$ = this.store.select(selectIsExperimentEditable);
+  protected saving$ = this.store.select(selectIsExperimentSaving);
+  protected backdropActive$ = this.store.select(selectBackdropActive);
+  protected routerConfig$ = this.store.select(selectRouterConfig);
+  protected selectedExperiment$ = this.store.select(selectSelectedExperiment);
+  protected size$ = this.store.select(selectSplitSize);
   public isExample$ = this.store.select(selectSelectedExperimentReadOnly);
-  public selectedExperiment$: Observable<IExperimentInfo>;
-  public propSection: boolean;
+  protected selectedSection = this.store.selectSignal(selectExperimentHyperParamsSelectedSectionFromRoute);
+  protected propSection = computed(() => this.selectedSection() === 'properties');
   public searchedText: string;
   public searchResultsCount: number;
   public scrollIndexCounter: number;
-  public size$: Observable<number>;
 
-  constructor(private store: Store, protected router: Router, private cdr: ChangeDetectorRef) {
-    this.selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
-    this.editable$ = this.store.select(selectIsExperimentEditable);
-    this.selectedSection$ = this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute);
-    this.isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
-    this.saving$ = this.store.select(selectIsExperimentSaving);
-    this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.routerConfig$ = this.store.select(selectRouterConfig);
-    this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
-    this.size$ = this.store.select(selectSplitSize);
-
+  constructor() {
     this.store.dispatch(setExperimentFormErrors({errors: null}));
-    this.selectedSectionSubscription = this.selectedSection$.subscribe(section => {
-      this.selectedSection = section;
-      this.propSection = section === 'properties';
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.selectedSectionSubscription?.unsubscribe();
   }
 
 
   cancelHyperParametersChange() {
-    // this.store.dispatch(updateExperimentAtPath({path: ('hyperparams.' + this.selectedSection ), value: this.executionParamsForm.formData}));
+    // this.store.dispatch(updateExperimentAtPath({path: ('hyperparams.' + this.selectedSection() ), value: this.executionParamsForm.formData}));
     this.store.dispatch(deactivateEdit());
     this.store.dispatch(cancelExperimentEdit());
   }
@@ -96,10 +78,10 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnDe
   }
 
   sectionSaved() {
-    if (this.executionParamsForm.formData.length > 0) {
-      this.store.dispatch(saveHyperParamsSection({hyperparams: this.executionParamsForm.formData}));
+    if (this.executionParamsForm().form.length > 0) {
+      this.store.dispatch(saveHyperParamsSection({hyperparams: this.executionParamsForm().form}));
     } else {
-      this.store.dispatch(deleteHyperParamsSection({section: this.selectedSection}));
+      this.store.dispatch(deleteHyperParamsSection({section: this.selectedSection()}));
     }
     this.store.dispatch(deactivateEdit());
   }
@@ -110,19 +92,19 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnDe
       this.searchedText = value;
       this.scrollIndexCounter = -1;
       this.searchResultsCount = 0;
-      this.executionParamsForm.resetIndex();
-      this.cdr.detectChanges();
+      this.executionParamsForm().resetIndex();
+      this.cdr.markForCheck();
     }
-    this.executionParamsForm.jumpToNextResult(!searchBackward);
+    this.executionParamsForm().jumpToNextResult(!searchBackward);
   }
 
   searchCounterChanged(count: number) {
     this.searchResultsCount = count;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   scrollIndexCounterReset() {
     this.scrollIndexCounter = -1;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 }

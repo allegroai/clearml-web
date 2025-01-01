@@ -16,7 +16,6 @@ import {NgxPrintModule} from 'ngx-print';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ExistNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/exist-name-validator.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {UserPreferences} from '@common/user-preferences';
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {REPORTS_PREFIX} from '@common/reports/reports.actions';
@@ -60,6 +59,9 @@ import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe
 import {
   UniquePathValidatorDirective
 } from '@common/shared/ui-components/template-forms-ui/unique-path-validator.directive';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
 
 
 const reportsSyncedKeys = ['orderBy', 'sortOrder'];
@@ -85,7 +87,6 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ReportCardComponent,
     ExistNameValidatorDirective,
     MatProgressSpinnerModule,
-    LabeledFormFieldDirective,
     SearchTextDirective,
     UniqueNameValidatorDirective,
     MenuItemComponent,
@@ -114,11 +115,16 @@ const getInitState = (userPreferences: UserPreferences) => ({
     InvalidPrefixValidatorDirective,
     ProjectLocationPipe,
     ShortProjectNamePipe,
-    UniquePathValidatorDirective
+    UniquePathValidatorDirective,
+    MatIcon,
+    MatButton,
+    MatDialogActions,
+    MatDialogClose,
+    MatIconButton,
+    ReportDialogComponent,
+    CreateNewReportFormComponent,
   ],
-  declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportDialogComponent,
-    CreateNewReportFormComponent, ReportComponent],
-  exports: [],
+  declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportComponent],
   providers: [
     {provide: REPORTS_STORE_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
   ],

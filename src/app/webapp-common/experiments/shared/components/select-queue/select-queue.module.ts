@@ -6,7 +6,6 @@ import {SelectQueueComponent} from './select-queue.component';
 import {SelectQueueEffects} from './select-queue.effects';
 import {selectQueueReducer} from './select-queue.reducer';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
 import {MatInputModule} from '@angular/material/input';
 import {MatOptionModule} from '@angular/material/core';
@@ -20,6 +19,7 @@ import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {PushPipe} from '@ngrx/component';
+import {MatButton} from '@angular/material/button';
 
 @NgModule({
   imports: [
@@ -28,7 +28,6 @@ import {PushPipe} from '@ngrx/component';
     StoreModule.forFeature('selectQueue', selectQueueReducer),
     FormsModule,
     ReactiveFormsModule,
-    LabeledFormFieldDirective,
     StringIncludedInArrayPipe,
     MatInputModule,
     MatOptionModule,
@@ -37,7 +36,8 @@ import {PushPipe} from '@ngrx/component';
     TooltipDirective,
     RequiredAutocompleteSelectionValidatorDirective,
     ShowTooltipIfEllipsisDirective,
-        PushPipe,
+    PushPipe,
+    MatButton,
   ],
   providers      : [],
   declarations   : [SelectQueueComponent],

@@ -1,5 +1,5 @@
 <div class="header-container" [class.login]="isLogin()">
-  <div class="d-flex">
+  <div class="d-flex overflow-hidden">
     <sm-breadcrumbs
       class="spacer"
       [class.flex-grow-1]="!userFocus()"
@@ -14,17 +14,19 @@
 
   @if (showLogo() && !isLogin()) {
     <div class="logo-full middle"
-      [class.make-room-for-slogan]="environment().whiteLabelSlogan">
+         [class.make-room-for-slogan]="environment().whiteLabelSlogan">
       @if (!environment().whiteLabelLogo) {
         <img alt="logo"
-          [priority]="true"
-          [ngSrc]="environment().branding.logo"
-          width="130" height="42">
+             [priority]="true"
+             [ngSrc]="darkTheme() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
+             width="124" height="42">
       } @else {
-        <div class="slogan">{{environment().whiteLabelSlogan}}</div>
+        <div class="slogan">{{ environment().whiteLabelSlogan }}</div>
         @if (isLogin()) {
           <div class="logo-full">
-            <img alt="logo" [priority]="true" ngSrc="assets/logo-white.svg" width="130" height="42">
+            <img alt="logo" [priority]="true"
+                 [ngSrc]="darkTheme() ? environment().branding.logo : environment().branding.logo.replace('-white', '')"
+                 width="124" height="42">
           </div>
         }
       }
@@ -42,12 +44,12 @@
   @if (!hideMenus()) {
     <div class="right-buttons" data-id="rightSideHeaderpanel">
       <sm-common-search #search [class.share-view]="isShareMode()"></sm-common-search>
-      <span class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
-        <i class="al-icon al-ico-help-outlined" data-id="help Icon"></i>
-      </span>
+      <button mat-icon-button #trigger="matMenuTrigger" class="resources-trigger" [class.menu-opened]="trigger.menuOpen" [matMenuTriggerFor]="resourcesMenu">
+          <mat-icon fontSet="al" fontIcon="al-ico-help-outlined" data-id="help Icon"></mat-icon>
+      </button>
       <span class="pointer menu-trigger position-relative" data-id="Avatar" [matMenuTriggerFor]="profileMenu">
         @if (user().avatar; as avatar) {
-          <img alt="avatar" class="avatar"  [src]="avatar">
+          <img alt="avatar" class="avatar" [src]="avatar">
         } @else {
           <div class="user-icon">
             <i class="al-icon al-ico-account sm-md"></i>
@@ -59,46 +61,61 @@
       </span>
       <mat-menu #profileMenu="matMenu" class="user-menu">
         <button mat-menu-item [routerLink]="'settings/' + userNotificationPath()" data-id="Settings Button">
-          <i class="al-icon icon sm-md" [class]="userNotificationPath() ? 'al-ico-settings-alert' : 'al-ico-settings'">
+          <mat-icon fontSet="al" [fontIcon]="userNotificationPath() ? 'al-ico-settings-alert' : 'al-ico-settings'">
             <span class="path1"></span><span class="path2"></span>
-          </i>Settings
+          </mat-icon>
+          <span>Settings</span>
         </button>
+        @if (!forcedTheme()) {
+          <button mat-menu-item (click)="openAppearance($event)" data-id="Theme Options">
+            <mat-icon fontSet="al" fontIcon="al-ico-palette"></mat-icon>
+            <span>Appearance</span>
+          </button>
+        }
         <sm-header-user-menu-actions></sm-header-user-menu-actions>
+        <hr/>
         <button mat-menu-item (click)="logout()" data-id="Logout">
-          <i class="al-ico-logout al-icon icon sm-md"></i>Logout
+          <mat-icon fontSet="al" fontIcon="al-ico-logout"></mat-icon>
+          Logout
         </button>
       </mat-menu>
       <mat-menu #resourcesMenu="matMenu" class="user-menu light-theme" panelClass="light-theme">
         <button mat-menu-item (click)="openWelcome($event)" data-id="Python Package setup Option">
-          <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
+          <mat-icon fontSet="al" fontIcon="al-ico-code-file">Code</mat-icon>
+          <span>ClearML Python Package setup</span>
         </button>
         <a mat-menu-item href="https://www.youtube.com/c/ClearML/featured" target="_blank" data-id="Youtube Option">
-          <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
+          <mat-icon fontSet="al" fontIcon="al-ico-youtube">Youtube</mat-icon>
+          <span>ClearML on Youtube</span>
         </a>
         <a mat-menu-item [href]="environment().docsLink" target="_blank" data-id="Online Documentation Option">
-          <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
+          <mat-icon fontSet="al" fontIcon="al-ico-documentation">Docs</mat-icon>
+          <span>Online Documentation</span>
         </a>
         @if (tipsService.hasTips()) {
           <button mat-menu-item (click)="tipsService.showTipsModal(null, true)" data-id="Pro Tips Option">
-            <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
+            <mat-icon fontSet="al" fontIcon="al-ico-tips">Tips</mat-icon>
+            <span>Pro Tips</span>
           </button>
         }
         @if (isAdmin() && !environment().communityServer && changesService.hasChanges()) {
           <button mat-menu-item (click)="changesService.showChangesModal()" data-id="Pro Tips Option">
-            <i class="al-icon sm-md al-ico-bullhorn"></i>Version Notifications
+            <mat-icon fontSet="al" fontIcon="al-ico-bullhorn">Notifications</mat-icon>
+            <span>Version Notifications</span>
           </button>
         }
         <ng-container *smCheckPermission="'applications'">
           @if (environment()?.appsYouTubeIntroVideoId && $any(environment()).appAwarenessMenu !== false) {
             <button mat-menu-item
-              (click)="openAppsAwareness($event)" data-id="Apps Introduction Option"
-              >
-              <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
+                    (click)="openAppsAwareness($event)" data-id="Apps Introduction Option">
+              <mat-icon fontSet="al" fontIcon="al-ico-applications">Introduction</mat-icon>
+              <span>ClearML Apps Introduction</span>
             </button>
           }
         </ng-container>
         <a mat-menu-item href="mailto:support@clear.ml" data-id="Contact Us">
-          <i class="al-icon sm-md al-ico-email"></i>Contact Us
+          <mat-icon fontSet="al" fontIcon="al-ico-email">lala</mat-icon>
+          <span>Contact Us</span>
         </a>
       </mat-menu>
     </div>

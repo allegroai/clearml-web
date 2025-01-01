@@ -1,40 +1,42 @@
 <div class="sm-card-list-layout" [class.in-empty-state]="!(!newReport.observed || reports() === null || reports()?.length > 0)">
   <ng-content></ng-content>
-  <ng-container *ngIf="!newReport.observed || reports() === null || reports()?.length > 0; else: empty">
-    <sm-report-card
-      *ngFor="let report of reports(); trackBy: trackByFn"
-      class="report"
-      [hideMenu]="hideMenu"
-      [report]="report"
-      [allTags]="allTags"
-      [isArchive]="archive"
-      (cardClicked)="reportSelected.emit($event)"
-      (nameChanged)="reportCardUpdateName.emit({name: $event, report})"
-      (moveTo)="moveTo.emit(report)"
-      (addTag)="addTag.emit({report: report, tag: $event})"
-      (share)="share.emit(report)"
-      (archive)="moveToArchive.emit({report: report, archive: $event})"
-      (delete)="delete.emit(report)"
-      (removeTag)="removeTag.emit({report: report, tag: $event})"
-    >
-    </sm-report-card>
-
-    <div class="load-more" *ngIf="!noMoreReports && reports()?.length > 0">
-      <sm-dots-load-more
-        [loading]="loading"
-        (loadMore)="loadMoreAction()"
-        class="mx-auto my-2"
-      ></sm-dots-load-more>
+  @if (!newReport.observed || reports() === null || reports()?.length > 0) {
+    @for (report of reports(); track trackByFn($index, report)) {
+      <sm-report-card
+        class="report"
+        [hideMenu]="hideMenu()"
+        [report]="report"
+        [allTags]="allTags()"
+        [isArchive]="archive()"
+        (cardClicked)="reportSelected.emit($event)"
+        (nameChanged)="reportCardUpdateName.emit({name: $event, report})"
+        (moveTo)="moveTo.emit(report)"
+        (addTag)="addTag.emit({report: report, tag: $event})"
+        (share)="share.emit(report)"
+        (archive)="moveToArchive.emit({report: report, archive: $event})"
+        (delete)="delete.emit(report)"
+        (removeTag)="removeTag.emit({report: report, tag: $event})"
+        >
+      </sm-report-card>
+    }
+    @if (!noMoreReports() && reports()?.length > 0) {
+      <div class="load-more">
+        <sm-dots-load-more
+          [loading]="loading"
+          (loadMore)="loadMoreAction()"
+          class="mx-auto my-2"
+        ></sm-dots-load-more>
+      </div>
+    }
+  } @else {
+    <div class="empty-state">
+      <i class="al-icon al-ico-reports xxl"></i>
+      <h4>NO REPORTS TO SHOW</h4>
+      @if (!archive()) {
+        <button mat-flat-button (click)="newReport.emit(projectId())">
+          NEW REPORT
+        </button>
+      }
     </div>
-  </ng-container>
+  }
 </div>
-
-<ng-template #empty>
-  <div class="empty-state">
-    <i class="al-icon al-ico-reports xxl"></i>
-    <h4>NO REPORTS TO SHOW</h4>
-    <button *ngIf="!archive" (click)="newReport.emit(projectId)" class="no-data-button btn btn-neon">
-      <span>NEW REPORT</span>
-    </button>
-  </div>
-</ng-template>

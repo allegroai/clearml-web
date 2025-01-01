@@ -1,7 +1,9 @@
 @if (multiSelect) {
   <div class="d-flex title-container align-items-center" (click)="metricSelect.openMenu()">
     <span class="param-selector-title pointer">{{ title }}</span>
-    <sm-menu #metricSelect iconClass="al-icon al-ico-dropdown-arrow pointer" buttonTooltip="Select metric" smMenuClass="light-theme custom-columns" (menuClosed)="selectMetric.resetSearch()">
+    <sm-menu #metricSelect iconClass="al-ico-dropdown-arrow" buttonTooltip="Select metric"
+             smMenuClass="custom-columns" (menuClosed)="selectMetric.resetSearch()"
+    >
       <sm-select-metric-for-custom-col #selectMetric class="normal-size"
                                        [metricVariants]="metricVariantsSet"
                                        [tableCols]="selectedMetricVariants ? selectedMetricVariants : []"
@@ -13,10 +15,12 @@
     </sm-menu>
   </div>
 } @else {
-  <button class="btn btn-outline d-flex justify-content-between align-items-center" (click)="metricSelect.openMenu()">
+  <div class="like-select d-flex justify-content-between align-items-center pointer" (click)="metricSelect.openMenu()">
     <span class="selected-parameter ellipsis" smShowTooltipIfEllipsis
           [smTooltip]="(selectedMetricVariants[0] |metricVariantToName) + ' ' + (MetricValueTypeStrings[selectedMetricVariants[0]?.valueType] ?? '')">{{ selectedMetricVariants[0] ? (selectedMetricVariants[0] |metricVariantToName) : 'Select Metric' }} {{ (MetricValueTypeStrings[selectedMetricVariants[0]?.valueType] ?? '') }}</span>
-    <sm-menu #metricSelect iconClass="al-icon al-ico-dropdown-arrow pointer al-color blue-400" buttonTooltip="Select metric" smMenuClass="light-theme custom-columns" (menuClosed)="selectMetric.resetSearch()">
+    <sm-menu #metricSelect iconClass="al-ico-dropdown-arrow" buttonTooltip="Select metric"
+             smMenuClass="custom-columns" (menuClosed)="selectMetric.resetSearch()"
+    >
       <sm-select-metric-for-custom-col #selectMetric class="normal-size"
                                        [metricVariants]="metricVariantsSet"
                                        [tableCols]="selectedMetricVariants ? selectedMetricVariants : []"
@@ -26,11 +30,11 @@
                                        (selectedMetricToShow)="selectMetricVariant.emit($event)"
                                        (clearSelection)="clearSelection.emit()"></sm-select-metric-for-custom-col>
     </sm-menu>
-  </button>
+  </div>
 }
 @if (multiSelect) {
   @if (selectedMetricVariants.length > 0) {
-    @for (selectedMetricVariant of selectedMetricVariants; track trackByIndex($index)) {
+    @for (selectedMetricVariant of selectedMetricVariants; track $index) {
       <div class="multi-selected-parameter" smShowTooltipIfEllipsis [smTooltip]="(selectedMetricVariant |metricVariantToName) + ' ' + (MetricValueTypeStrings[selectedMetricVariant?.valueType] ?? '')">
         <span class="multi-selected-parameter-name ellipsis">{{ selectedMetricVariant |metricVariantToName }} {{ (MetricValueTypeStrings[selectedMetricVariant?.valueType] ?? '') }}</span>
         <i class="al-icon sm al-ico-dialog-x pointer" (click)="removeMetric.emit(selectedMetricVariant)"></i></div>

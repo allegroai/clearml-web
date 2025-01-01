@@ -1,25 +1,33 @@
-@import 'variables';
+$z-index-colorpicker: 1001;
 
 :host {
   ::ng-deep color-picker .color-picker {
-    z-index: $zindex-colorpicker;
+    z-index: $z-index-colorpicker;
     border-radius: 4px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-    border-color: $blue-200;
+    border: unset;
+    background-color: var(--color-surface-container);
+
     .saturation-lightness {
       border-radius: 3px 3px 0 0;
     }
     .preset-area {
       hr {
-        margin-top: 0;
+        margin: 0 0 12px;
+        border: none;
+        border-top: 1px solid var(--color-outline-variant);
       }
       .preset-color {
         margin: 4px;
-        border-color: white;
-        box-shadow: 0 0 0 1px $blue-200;
+        border-color: var(--color-surface-container-lowest);
+        box-shadow: 0 0 0 1px var(--color-outline-variant);
+
         &:hover {
-          box-shadow: 0 0 0 1px $blue-400;
+          box-shadow: 0 0 0 1px var(--color-outline);
         }
+      }
+      .preset-label {
+        color: var(--color-primary);
       }
     }
     .button-area {
@@ -38,4 +46,8 @@
   }
 }
 
-
+.buttons {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+}

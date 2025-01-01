@@ -17,6 +17,8 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {SelectMetricForCustomColComponent} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 import {PushPipe} from '@ngrx/component';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 @NgModule({
@@ -35,6 +37,9 @@ import {PushPipe} from '@ngrx/component';
     ShowTooltipIfEllipsisDirective,
     SelectMetricForCustomColComponent,
     PushPipe,
+    MatButton,
+    MatIcon,
+    MatIconButton,
   ]
 })
 export class ProjectInfoModule {

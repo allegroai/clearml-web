@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   display: block;
   position: relative;
@@ -8,7 +6,7 @@
   .viewport {
     height: 100%;
     width: 100%;
-    background-color: #000;
+    background-color: var(--color-surface-container-low);
     overflow-x: scroll;
   }
 
@@ -16,18 +14,15 @@
     font: 12px monospace;
 
     .timestamp {
-      background-color: #1d1d1d;
+      background-color: color-mix(in srgb, var(--color-surface-container-high), transparent 40%);
       width: 170px;
-      color: lightgray;
       float: left;
       height: 25px;
       padding: 5px 0 0 20px;
-      border-bottom: 1px solid #1d1d1d;
     }
 
     .entry {
-      background-color: #000;
-      color: #FFFFFF;
+      background-color: var(--color-surface-container-low);
       height: 25px;
       padding: 5px 0 0 190px;
       white-space: pre;
@@ -36,28 +31,21 @@
 
     &.separator {
       .timestamp, .entry {
-        border-bottom: 1px solid #343a40;
+        border-bottom: 1px solid var(--color-outline-variant);
       }
     }
   }
 
-  .dark-theme {
-    .log-line {
-      .timestamp {
-        background-color: $blue-950;
-      }
-    }
-  }
   .get-last {
     position: absolute;
-    right: -100px;
+    right: -140px;
     bottom: 30px;
     transition: right 0.5s;
   }
 
   &:hover {
     .get-last:not(.at-end) {
-      right: 30px;
+      right: 25px;
     }
   }
 

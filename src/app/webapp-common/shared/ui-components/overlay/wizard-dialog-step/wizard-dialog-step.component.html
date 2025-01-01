@@ -1,17 +1,25 @@
-<div class="h-100 d-flex flex-column step" [class.hide-step]="hideStep">
-  <div [class]="'mx-auto step-icon ' + icon" [class.hide-step]="hideStep && enableIconAnimation"></div>
-  <div class="text-center label">{{label}}</div>
-  <div class="text-center sub-label">{{subLabel}}</div>
-  <div class="text-center step-number" [class.hide-step]="hideStep">{{stepNumber}}</div>
-  <div cdkScrollable class="choose-box" [class.hide-step]="hideStep">
+<div class="h-100 d-flex flex-column step" [class.hide-step]="hideStep()">
+
+  <div class="mx-auto step-icon" [class]="icon()" [class.hide-step]="hideStep() && enableIconAnimation()">
+    <ng-content select="[icon]"></ng-content>
+  </div>
+
+  <div class="text-center label">{{label()}}</div>
+  <div class="text-center sub-label">{{subLabel()}}</div>
+  <div class="text-center step-number" [class.hide-step]="hideStep()">{{stepNumber()}}</div>
+  <div cdkScrollable class="choose-box" [class.hide-step]="hideStep()">
     <ng-content select="[choose-section]"></ng-content>
-    <div class="buttons-footer" *ngIf="showFooter">
-      <div class="w-100">
-        <div class="divider"></div>
+    @if (showFooter()) {
+      <div class="buttons-footer">
+        <div class="w-100">
+          <div class="divider"></div>
+        </div>
+        @if (showFooter()) {
+          <div class="w-100 buttons-footer-content">
+            <ng-content select="[buttons-footer]"></ng-content>
+          </div>
+        }
       </div>
-      <div class="w-100 buttons-footer-content" *ngIf="showFooter">
-      <ng-content select="[buttons-footer]"></ng-content>
-      </div>
-    </div>
+    }
   </div>
 </div>

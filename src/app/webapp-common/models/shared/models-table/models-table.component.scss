@@ -1,4 +1,3 @@
-@import "variables";
 @import "../../../layout/layout.scss";
 
 ::ng-deep sm-models footer.d-flex.justify-content-center {
@@ -12,6 +11,24 @@
     height: 100%;
     &.compare {
       height: calc(100% - #{$project-footer-height});
+    }
+  }
+  .header-checkbox {
+    ::ng-deep .mat-mdc-checkbox-touch-target {
+      width: 18px;
+    }
+  }
+  .mini-tags-container {
+    margin-right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    sm-mini-tags-list {
+      padding: 2px;
+      border-radius: 6px;
+      gap: 2px;
+      background-color: var(--color-surface-container-lowest);
     }
   }
 
@@ -49,18 +66,19 @@
   }
 
   .compact-columns-data {
-    color: $blue-250;
+    color: var(--color-on-surface-variant);
     font-size: 12px;
+    &.selected {
+      color: var(--color-primary-container);
+    }
   }
 
-  sm-table-card-filter-template {
+  sm-table-card-filter {
     margin-left: 1em;
   }
 }
 
 .menu-title {
-  background-color: white;
-  color: $blue-400;
   font-size: 15px;
   font-weight: 500;
   padding: 6px 12px 0;
@@ -69,6 +87,5 @@
 }
 
 .dot {
-  color: $blue-400;
   padding: 0 6px;
 }

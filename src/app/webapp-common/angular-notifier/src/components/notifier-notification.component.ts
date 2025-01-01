@@ -33,6 +33,13 @@ import {NotifierTimerService} from '../services/notifier-timer.service';
 })
 export class NotifierNotificationComponent implements AfterViewInit {
 
+  icons = {
+    'info': 'al-ico-info-circle',
+    'success': 'al-ico-success',
+    'warn': 'al-ico-alert',
+    'error': 'al-ico-dialog-x'
+  }
+
   /**
    * Input: Notification object, contains all details necessary to construct the notification
    */

@@ -12,5 +12,5 @@ export const projectRedirectGuardGuard: CanActivateFn = (route: ActivatedRouteSn
     tap(project => project === null && store.dispatch(setSelectedProjectId({projectId: route.params.projectId}))),
     filter(project => project?.id === route.params.projectId),
     withLatestFrom(store.select(selectSelectedMetricVariantForCurrProject)),
-    map(([project, metVar]) => router.parseUrl(`projects/${project.id}/${(project.description || metVar) ? 'overview' : 'experiments'}`)));
+    map(([project, metVar]) => router.parseUrl(`projects/${project.id}/${(project.description || metVar) ? 'overview' : 'tasks'}`)));
 };

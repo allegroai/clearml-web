@@ -1,4 +1,6 @@
 <h4>
   {{label}}
-  <span *ngIf="error" class="error" [smTooltip]="error" tooltipType='validation' [matTooltipShowDelay]="0"></span>
+  @if (error) {
+    <span class="error" [smTooltip]="error" tooltipType='validation' [matTooltipShowDelay]="0"></span>
+  }
 </h4>

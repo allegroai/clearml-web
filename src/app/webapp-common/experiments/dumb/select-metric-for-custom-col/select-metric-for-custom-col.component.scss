@@ -1,16 +1,21 @@
-@import "variables";
-:host-context(.normal-size){
+@import "mixins/link";
+
+
+:host-context(.normal-size) {
   display: block;
   height: 480px;
 }
 
 :host {
+  @include link();
+
   .actions {
     display: block;
     padding: 12px 0 0;
     font-size: 12px;
     height: 36px;
   }
+
   .metrics-container {
     display: flex;
     flex-direction: column;
@@ -27,10 +32,11 @@
     gap: 6px;
     align-items: center;
     text-align: center;
-    border-bottom: 1px solid $blue-200;
+    border-bottom: 1px solid var(--color-outline-variant);
     min-height: 48px;
+
     h3 {
-      color: $blue-400;
+      color: var(--color-primary);
       font-size: 14px;
       font-weight: normal;
       margin: 0;
@@ -42,40 +48,42 @@
   }
 
   .variant-label {
-    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    height: 36px;
 
-    sm-checkbox-control {
-      width: 100%;
+    mat-checkbox{
+      transform: scale(0.8);
+    }
+
+    .var-label {
+      color: var(--mat-menu-item-label-text-color);
+      letter-spacing: var(--mat-menu-item-label-text-tracking);
     }
   }
 
   .value-type {
     display: flex;
     align-items: center;
-    height: 42px;
+    height: 36px;
     margin-left: 24px;
     padding-left: 18px;
     font-size: 11px;
     font-weight: bold;
-    background-color: $blue-25;
-
-    sm-checkbox-control {
-      width: 100%;
-      padding-right: 24px;
-
-      ::ng-deep span.purple-v {
-        transform: scale(0.9);
-      }
+    mat-checkbox {
+      transform: scale(0.8);
     }
   }
 
   mat-expansion-panel {
+    --mat-expansion-container-background-color: transparent;
     box-shadow: none;
     font-weight: bold;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
+    margin-bottom: 2px;
 
     mat-expansion-panel-header {
-      padding: 7px 4px 7px 0;
+      padding: 0 12px;
 
       mat-panel-title {
         max-width: calc(100% - 12px);
@@ -84,12 +92,12 @@
       .panel-title {
         padding-right: 12px;
         font-size: 14px;
-        color: $blue-400;
+        color: var(--color-on-surface-variant);
       }
 
       .has-selected {
         margin-left: auto;
-        background-color: $purple;
+        background-color: var(--color-tertiary);
         width: 6px;
         height: 6px;
         flex: 0 0 6px;
@@ -101,40 +109,32 @@
         border-radius: 0;
         border-bottom: none;
         font-weight: 500;
+        background-color: var(--color-surface-container-highest);
+
         .panel-title {
-          color: $purple;
+          color: var(--color-on-surface);
+
         }
       }
     }
   }
 
   ::ng-deep .mat-expansion-panel-body {
-    padding: 4px 4px 0;
+    padding: 0;
   }
 
   .metrics {
     height: calc(100% - 34px);
     width: 100%;
     overflow-y: scroll;
-    padding: 0 24px;
+    padding: 0 12px 0 24px;
   }
 
   .metric-expansion-content {
-    li {
-      &.list-item {
-        padding: 0 47px 0 24px;
-        line-height: 40px;
-        list-style: none;
-
-        &.even {
-          background-color: #f9fafb;
-        }
-
-        &:hover {
-          background-color: $blue-50;
-          transition: background-color 0.2s;
-        }
-      }
+    border-radius: 4px;
+    margin: 1px 0;
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-surface-container), transparent 40%);
     }
   }
 
@@ -155,7 +155,7 @@
   .empty-state {
     text-align: center;
     margin: auto;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
     font-size: 14px;
   }
 }

@@ -1,7 +1,15 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild
+} from '@angular/core';
 import {
   MatStep,
-  MatStepLabel,
   MatStepper,
   MatStepperIcon,
   MatStepperNext,
@@ -11,12 +19,11 @@ import {
   MAT_FORM_FIELD_DEFAULT_OPTIONS, MatError,
   MatFormField,
   MatFormFieldDefaultOptions,
-  MatLabel
+  MatLabel, MatSuffix
 } from '@angular/material/form-field';
 import {FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MatInput} from '@angular/material/input';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
@@ -29,11 +36,15 @@ import {selectQueuesList} from '@common/experiments/shared/components/select-que
 import {NgTemplateOutlet} from '@angular/common';
 import {MatDialogRef} from '@angular/material/dialog';
 import {getQueuesForEnqueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
-import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {MAT_RIPPLE_GLOBAL_OPTIONS, RippleGlobalOptions} from '@angular/material/core';
-
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {debounceTime, distinctUntilChanged, map} from 'rxjs/operators';
+import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor/code-editor.component';
+import {shellBinaryValidator} from '@common/shared/validators/shell-binary.validator';
+import {MatExpansionPanel, MatExpansionPanelHeader} from '@angular/material/expansion';
 
 export interface createExperimentDialogResult {
   id?: string;
@@ -46,6 +57,7 @@ export interface createExperimentDialogResult {
   tag: string;
   directory: string;
   script: string;
+  uncommited?: string;
   taskInit: boolean;
   args: {key: string; value: string}[];
   poetry: boolean;
@@ -53,6 +65,7 @@ export interface createExperimentDialogResult {
   venv: string;
   requirements: 'skip' | 'text' | 'manual';
   pip: string;
+  vars: {key: string; value: string}[];
   docker : {
     image?: string;
     args?: string;
@@ -62,6 +75,8 @@ export interface createExperimentDialogResult {
   output?: string;
 }
 
+const scriptTypes = ['script', 'module', 'custom_code'] as const;
+type ScriptType = typeof scriptTypes[number];
 
 
 @Component({
@@ -77,11 +92,9 @@ export interface createExperimentDialogResult {
     ReactiveFormsModule,
     DialogTemplateComponent,
     MatStepperPrevious,
-    MatStepLabel,
     MatStepperNext,
     MatInput,
     MatLabel,
-    LabeledFormFieldDirective,
     MatSelect,
     MatOption,
     MatCheckbox,
@@ -90,8 +103,14 @@ export interface createExperimentDialogResult {
     PaginatedEntitySelectorComponent,
     MatStepperIcon,
     NgTemplateOutlet,
-    FilterPipe,
     MatError,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    CodeEditorComponent,
+    MatSuffix,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
   ],
   providers: [
     {
@@ -106,10 +125,16 @@ export class CreateExperimentDialogComponent {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialogRef);
 
+  private codeForm = viewChild<ElementRef<HTMLFormElement>>('codeForm');
+
   protected queues = this.store.selectSignal(selectQueuesList);
+  protected filteredQueues = computed(() => this.queueVal() ?
+      this.queues()
+        .filter(queue => queue.name.toLowerCase().includes(this.queueVal().toLowerCase()) || queue.display_name?.toLowerCase().includes(this.queueVal().toLowerCase())) :
+      this.queues()
+  );
 
   protected gitTypes = ['branch', 'commit', 'tag'];
-  protected scriptTypes = ['script', 'module'];
   protected requirementOptions: IOption[] = [
     {label: 'Skip', value: 'skip'},
     {label: 'requirements.txt', value: 'text'},
@@ -118,14 +143,17 @@ export class CreateExperimentDialogComponent {
 
   codeFormGroup = this.formBuilder.group({
     name: [null, [Validators.required, Validators.minLength(3)]],
-    repo: [null, Validators.required],
+    repo: [null as string],
     type: ['branch'],
-    branch: ['master', Validators.required],
+    branch: ['master'],
     commit: [null],
     tag: [null],
     directory: ['.', Validators.required],
-    scriptType: ['script'],
-    script: [null, Validators.required],
+    binaryType: ['python', Validators.required],
+    binary: [null as string, Validators.required],
+    scriptType: ['script' as ScriptType],
+    script: [null as string, Validators.required],
+    uncommited: [null as string],
     module: [null],
     existing: [false],
     taskInit: [true],
@@ -135,10 +163,10 @@ export class CreateExperimentDialogComponent {
   })
   envFormGroup = this.formBuilder.group({
     poetry: [false],
-    binary: [null],
     venv: [null],
     requirements: ['text'],
-    pip: ['']
+    pip: [''],
+    vars: this.formBuilder.array([])
   });
   dockerFormGroup = this.formBuilder.group({
     image: [null],
@@ -151,13 +179,36 @@ export class CreateExperimentDialogComponent {
   })
 
   protected queueVal = toSignal<string>(this.queueFormGroup.controls.queue.valueChanges);
+  shell = toSignal(this.codeFormGroup.controls.binaryType.valueChanges
+    .pipe(
+      debounceTime(300),
+      map(value => value === 'shell'),
+      distinctUntilChanged(),
+    ));
+  protected scriptTypes = computed(() => this.shell() ? scriptTypes.filter((e, index) => index !== 1) : scriptTypes);
+  protected editMode = signal(false);
 
   constructor() {
     this.store.dispatch(getQueuesForEnqueue());
+
+    effect(() => {
+      if(this.shell()) {
+        this.codeFormGroup.controls.binary.setValue('/bin/bash');
+        this.codeFormGroup.controls.binary.setValidators([Validators.required, shellBinaryValidator]);
+      } else {
+        this.codeFormGroup.controls.binary.setValue('python3');
+        this.codeFormGroup.controls.binary.setValidators([Validators.required]);
+      }
+      this.codeFormGroup.controls.binary.updateValueAndValidity();
+    });
   }
 
   get args() {
     return this.argsFormGroup.get('args') as FormArray;
+  }
+
+  get vars() {
+    return this.envFormGroup.get('vars') as FormArray;
   }
 
   addArg() {
@@ -171,21 +222,15 @@ export class CreateExperimentDialogComponent {
     this.args.removeAt(index);
   }
 
-  checkDocker() {
-    if (this.envFormGroup.controls.poetry.value ||
-      this.envFormGroup.controls.venv.value || this.envFormGroup.controls.requirements.value === 'skip') {
-      this.dockerFormGroup.controls.image.setValidators(Validators.required);
-    } else {
-      this.dockerFormGroup.controls.image.clearValidators();
-    }
-    this.dockerFormGroup.controls.image.updateValueAndValidity();
-  }
-
   close(action: 'save' | 'run') {
     this.dialog.close({
       action,
       ...this.codeFormGroup.value,
-      ...(this.codeFormGroup.controls.scriptType.value === 'module' && {script: `-m ${this.codeFormGroup.value.module}`}),
+      ...(this.codeFormGroup.controls.scriptType.value === 'module' && {script: `-m ${this.codeFormGroup.value.script}`}),
+      ...(this.shell() && this.codeFormGroup.controls.scriptType.value === 'script' && {script: `-c ${this.codeFormGroup.value.script}`}),
+      ...(this.codeFormGroup.controls.scriptType.value === 'custom_code' && this.codeFormGroup.controls.repo.value &&
+        {uncommited: this.createDiff(this.codeFormGroup.controls.uncommited.value)}
+      ),
       ...this.argsFormGroup.value,
       ...this.envFormGroup.value,
       ...(this.envFormGroup.controls.requirements.value === 'manual' && {pip: this.envFormGroup.controls.pip.value}),
@@ -195,9 +240,21 @@ export class CreateExperimentDialogComponent {
     } as createExperimentDialogResult)
   }
 
-  typeChange(value: string, types: string[]) {
-    types.forEach(type => {
-      if (type === value) {
+  createDiff(file: string) {
+    const fileName = this.codeFormGroup.controls.script.value;
+    const len = (file?.split('\n').length ?? 0) + 1;
+
+    return `diff --git a/${fileName} b/${fileName}
+new file mode 100644
+index 000000000..ff86f39a4
+--- /dev/null
++++ b/${fileName}
+@@ -0,0 +1,${len - 1} @@\n` + (file?.split('\n').map(line => '+' + line).join('\n') ?? '');
+  }
+
+  typeChange(value: string) {
+    this.gitTypes.forEach(type => {
+      if (this.codeFormGroup.controls.repo.value && type === value) {
         this.codeFormGroup.controls[type].setValidators(Validators.required);
       } else {
         this.codeFormGroup.controls[type].clearValidators();
@@ -223,5 +280,38 @@ export class CreateExperimentDialogComponent {
 
   loadMoreQueues() {
     this.store.dispatch(getQueuesForEnqueue());
+  }
+
+  addVar() {
+    this.vars.push(this.formBuilder.group({
+      key: ['', Validators.required],
+      value: [''],
+    }))
+  }
+
+  updateEntryFromFile($event: Event) {
+    const file = ($event.target as HTMLInputElement)?.files[0];
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      this.codeFormGroup.controls.uncommited.setValue(evt.target.result as string);
+      if (!this.codeFormGroup.controls.script.value)
+      this.codeFormGroup.controls.script.setValue(file.name ?? 'main.py');
+    };
+    reader.readAsText(file);
+  }
+
+  editScript() {
+    this.editMode.set(true);
+  }
+
+  updateScript(code: string) {
+    this.codeFormGroup.controls.uncommited.setValue(code);
+    this.editMode.set(false)
+    window.setTimeout(() => this.codeForm().nativeElement.scrollTo({top: 1000, behavior: 'smooth'}));
+  }
+
+  clearFile() {
+    this.codeFormGroup.controls.script.setValue(null);
+    this.codeFormGroup.controls.uncommited.setValue(null);
   }
 }

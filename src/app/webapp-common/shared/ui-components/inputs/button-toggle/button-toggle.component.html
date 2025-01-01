@@ -1,21 +1,26 @@
 <mat-button-toggle-group
-  [class.no-background]="noBackground"
   [formControl]="formControl"
   [hideSingleSelectionIndicator]="true"
+  [vertical]="vertical()"
   name="fontStyle"
   aria-label="Font Style">
-  <mat-button-toggle
-    *ngFor="let option of options; trackBy: trackByValue"
-    [value]="option.value"
-    [disabled]="disabled"
-    appearance="legacy"
-    [attr.data-id]="option.value"
-    (click)="valueChanged.emit(option.value)"
-    [smTooltip]="option.icon ? option.label : ''"
-    matTooltipShowDelay="500"
-    [appendComponentOnTopElement]="option.ripple && rippleEffect" [componentToAppend]="rippleComponent"
-  >
-    <i *ngIf="option.icon; else: label" class="al-icon sm-md" [class]="option.icon"></i>
-    <ng-template #label><span class="label">{{option.label}}</span></ng-template>
-  </mat-button-toggle>
+  @for (option of options(); track option.value) {
+    <mat-button-toggle
+      [value]="option.value"
+      [disabled]="disabled()"
+      appearance="legacy"
+      [attr.data-id]="option.value"
+      (click)="valueChanged.emit(option.value)"
+      [smTooltip]="option.icon ? option.label : ''"
+      matTooltipShowDelay="500"
+      [appendComponentOnTopElement]="option.ripple && rippleEffect()"
+      [componentToAppend]="rippleComponent"
+      >
+      @if (option.icon) {
+        <mat-icon fontSet="al" [fontIcon]="option.icon"></mat-icon>
+      } @else {
+        <span class="label">{{option.label}}</span>
+      }
+    </mat-button-toggle>
+  }
 </mat-button-toggle-group>

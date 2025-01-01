@@ -1,20 +1,21 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentModelInfoData, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '~/business-logic/model/models/model';
-import {combineLatest, Observable, Subject} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
 import {activateEdit, cancelExperimentEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {ExperimentModelsFormViewComponent} from '../../dumb/experiment-models-form-view/experiment-models-form-view.component';
 import {getModelDesign} from '@common/tasks/tasks.utils';
-import {distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {cloneDeep} from 'lodash-es';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -22,7 +23,7 @@ import {cloneDeep} from 'lodash-es';
   templateUrl: './experiment-info-model.component.html',
   styleUrls: ['./experiment-info-model.component.scss']
 })
-export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
+export class ExperimentInfoModelComponent {
   public modelInfo$: Observable<IExperimentModelInfo>;
   public editable$: Observable<boolean>;
   public userKnowledge$: Observable<Map<experimentSectionsEnum, boolean>>;
@@ -31,7 +32,6 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
   public modelProjectId: string;
   public inputDesign: any;
   private modelId: string;
-  private unsubscribe$: Subject<boolean> = new Subject();
   public model: IModelInfo | undefined;
   public source: IModelInfoSource;
   private models: IModelInfo[];
@@ -53,11 +53,9 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
       filter(params => !!params),
       distinctUntilChanged()
     );
-  }
 
-  ngOnInit() {
     combineLatest([this.routerModelId$, this.modelInfo$])
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(takeUntilDestroyed())
       .subscribe(([modelId, formData]) => {
         this.modelId = modelId;
         this.outputMode = this.route.snapshot.data?.outputModel;
@@ -73,10 +71,6 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
         this.inputDesign = (design.value === undefined || design.key === undefined && Object.keys(design.value).length === 0) ? null : design.value;
         this.modelProjectId = this.model?.project?.id ? this.model.project.id : '*';
       });
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next(true);
   }
 
   onModelSelected(selectedModelId: string) {
@@ -108,6 +102,8 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
 
   activateEditChanged() {
     this.store.dispatch(activateEdit('model'));
-    !this.model?.id && this.experimentModelForm.chooseModel();
+    if (!this.model?.id) {
+      this.experimentModelForm.chooseModel();
+    }
   }
 }

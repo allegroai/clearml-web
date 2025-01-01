@@ -1,38 +1,38 @@
 <div class="table-card" data-id="cardPanel"
-     [class.two-columns]="!hasTypeIcon && !noSelection"
-     [class.no-selection]="noSelection"
-     [class]="{'selected':selected, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
+     [class.two-columns]="!hasTypeIcon() && !noSelection()"
+     [class.no-selection]="noSelection()"
+     [class]="{'selected':selected(), 'checked':checked(), 'contexted': activeContextRow()?.id ===rowData()?.id && contextMenuOpen()}">
 
-  @if(!noSelection) {
+  @if(!noSelection()) {
     <div class="cbx">
-      <ng-content select="sm-checkbox-control"></ng-content>
+      <ng-content select="mat-checkbox"></ng-content>
     </div>
   }
-  @if(hasTypeIcon) {
+  @if(hasTypeIcon()) {
     <div class="type-icon">
       <ng-content select="sm-experiment-type-icon-label"></ng-content>
     </div>
   }
   <div class="card-name">
     <div class="name-container">
-      <div class="name">{{cardName}}</div>
+      <div class="name">{{cardName()}}</div>
       <ng-content select="[sm-name-icon]"></ng-content>
       <ng-content select="[sm-name-version]"></ng-content>
     </div>
-    <div class="d-flex ms-auto">
-      <ng-content select="sm-experiment-system-tags"></ng-content>
+    <div class="d-flex ms-auto align-items-center">
+      <ng-content select="[sm-mini-tags]"></ng-content>
       <ng-content select="sm-status-icon-label"></ng-content>
       <ng-content select=".uptime"></ng-content>
     </div>
   </div>
-  @if(tagsTemplate) {
+  @if(tagsTemplate()) {
     <div class="tags">
-      <ng-container *ngTemplateOutlet="tagsTemplate"></ng-container>
+      <ng-container *ngTemplateOutlet="tagsTemplate()"></ng-container>
     </div>
   }
-  @if(compactColDataTemplate) {
+  @if(compactColDataTemplate()) {
     <div class="data">
-      <ng-container *ngTemplateOutlet="compactColDataTemplate"></ng-container>
+      <ng-container *ngTemplateOutlet="compactColDataTemplate()"></ng-container>
     </div>
   }
 </div>

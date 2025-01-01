@@ -8,10 +8,11 @@
     margin: 0;
     display: block;
     position: relative;
-    color: $blue-400;
+    color: var(--color-primary);
+    font-weight: 500;
     span.error.ng-star-inserted {
-      border: solid red 4px;
-      background-color: red;
+      border: solid 4px var(--color-error);
+      background-color: var(--color-error);;
       border-radius: 6px;
       position: absolute;
       right: -14px;

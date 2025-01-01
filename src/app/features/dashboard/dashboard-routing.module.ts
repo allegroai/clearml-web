@@ -4,17 +4,18 @@ import {DashboardComponent} from './dashboard.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 const staticBreadcrumb = [[{
-        name: 'DASHBOARD',
-        type: CrumbTypeEnum.Feature
+  name: 'PROJECTS DASHBOARD',
+  type: CrumbTypeEnum.Feature
 }]];
 
 export const routes: Routes = [
   {path: '', component: DashboardComponent, data: {staticBreadcrumb}},
   {
     path: 'search',
-    loadChildren: () => import('~/features/dashboard-search/dashboard-search.module').then(m => m.DashboardSearchModule),
-    data: {staticBreadcrumb}}
+    loadChildren: () => import('~/features/dashboard-search/dashboard-search.module').then(m => m.DashboardSearchModule)
+  }
 ];
+
 
 @NgModule({
   imports: [

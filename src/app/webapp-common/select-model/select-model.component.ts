@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {Store} from '@ngrx/store';
 import * as actions from './select-model.actions';
 import {clearTableFilter, setSelectedModels, showArchive} from './select-model.actions';
@@ -6,16 +6,13 @@ import {
   selectFrameworks,
   selectGlobalFilter, selectModels, selectNoMoreModels, selectSelectedModels, selectSelectedModelsList, selectSelectModelTableFilters, selectShowArchive, selectTableSortFields, selectTags, selectViewMode
 } from './select-model.reducer';
-import {combineLatest, Observable, of, Subscription} from 'rxjs';
+import {combineLatest, Observable, of} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {SelectedModel, TableModel} from '../models/shared/models.model';
-import {MODELS_TABLE_COLS, ModelsViewModesEnum} from '../models/models.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {SelectedModel} from '../models/shared/models.model';
+import {MODELS_TABLE_COLS} from '../models/models.consts';
 import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
-import {User} from '~/business-logic/model/users/user';
-import {SortMeta} from 'primeng/api';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
 import {debounceTime, distinctUntilChanged, map, tap} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/models';
@@ -24,6 +21,15 @@ import {isEqual, unionBy} from 'lodash-es';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+
+export interface SelectModelData {
+  selectionMode?: 'multiple' | 'single' | null;
+  selectedModels?: string[];
+  header: string;
+  hideShowArchived: boolean;
+}
+
 
 @Component({
   selector: 'sm-select-model',
@@ -32,37 +38,33 @@ import {MESSAGES_SEVERITY} from '@common/constants';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectModelComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+  public dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef<ConfirmDialogComponent>);
+  public data = inject<SelectModelData>(MAT_DIALOG_DATA);
+
+  protected tableSortFields$ = this.store.select(selectTableSortFields);
+  protected tableFilters$ = this.store.select(selectSelectModelTableFilters);
+  protected selectedModels$ = this.store.select(selectSelectedModels).pipe(tap(models => this.selectedModels = models));
+  protected viewMode$ = this.store.select(selectViewMode);
+  protected searchValue$ = this.store.select(selectGlobalFilter);
+  protected noMoreModels$ = this.store.select(selectNoMoreModels);
+  protected showArchive$ = this.store.select(selectShowArchive);
+  protected users$ = this.store.select(selectAllProjectsUsers);
+  protected tags$ = this.store.select(selectTags);
+  protected systemTags$ = this.store.select(selectProjectSystemTags);
 
   public models$: Observable<SelectedModel[]>;
-  public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
-  public noMoreModels$: Observable<boolean>;
-  public tableFilters$: Observable<{ [s: string]: FilterMetadata }>;
-  public searchValue$: Observable<string>;
-  public selectedModels$: Observable<Array<TableModel>>;
-  public viewMode$: Observable<ModelsViewModesEnum>;
-  public users$: Observable<Array<User>>;
-  public tags$: Observable<string[]>;
-  public systemTags$: Observable<string[]>;
   public tableCols = MODELS_TABLE_COLS;
   public selectedProject$: Observable<Project>;
   public projectsOptions$: Observable<Project[]>;
   public frameworks$: Observable<string[]>;
-  private subs = new Subscription();
 
   public selectedProject: Project;
-  private selectedModels: Array<SelectedModel>;
+  private selectedModels: SelectedModel[];
   public tableCols$: Observable<ISmCol[]>;
-  public showArchive$: Observable<boolean>;
 
-  constructor(private store: Store,
-              public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: {
-                selectionMode: 'multiple' | 'single' | null;
-                selectedModels: string[];
-                header: string;
-                hideShowArchived: boolean;
-              }) {
+  constructor() {
     // this.models$ = this.store.select(selectModelsList);
     this.models$ = combineLatest([
       this.store.select(selectModels),
@@ -71,27 +73,20 @@ export class SelectModelComponent implements OnInit, OnDestroy {
       map(([models, selectedModels]) => unionBy(selectedModels, models, 'id')),
       map(models => models?.map(model => ({...model, system_tags: model.system_tags?.map((t => t.replace('archive', ' archive')))})))
     );
-    this.tableSortFields$ = this.store.select(selectTableSortFields);
-    this.tableFilters$ = this.store.select(selectSelectModelTableFilters);
-    this.selectedModels$ = this.store.select(selectSelectedModels).pipe(tap(models => this.selectedModels = models));
-    this.viewMode$ = this.store.select(selectViewMode);
-    this.searchValue$ = this.store.select(selectGlobalFilter);
-    this.noMoreModels$ = this.store.select(selectNoMoreModels);
-    this.showArchive$ = this.store.select(selectShowArchive);
-    this.users$ = this.store.select(selectAllProjectsUsers);
-    this.tags$ = this.store.select(selectTags);
-    this.systemTags$ = this.store.select(selectProjectSystemTags);
-    this.subs.add(this.store.select(selectSelectedProject).pipe(debounceTime(100))
+    this.store.select(selectSelectedProject)
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(100)
+      )
       .subscribe(selectedProject => {
         this.selectedProject = selectedProject;
         if (selectedProject?.id !== '*') {
           this.store.dispatch(actions.tableFilterChanged({col: {id: 'project.name'}, value: [selectedProject.id]}));
         }
-      }));
+      });
+
     this.frameworks$ = this.store.select(selectFrameworks);
-
     this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
-
     this.tableCols$ = of(this.tableCols)
       .pipe(
         distinctUntilChanged((a, b) => isEqual(a, b)),
@@ -113,18 +108,18 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   @ViewChild(ModelsTableComponent) table: ModelsTableComponent;
 
   ngOnInit() {
-    this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(actions.getNextModels());
     this.store.dispatch(actions.getFrameworks());
     this.store.dispatch(actions.getTags());
-    this.data.selectedModels && this.store.dispatch(actions.getSelectedModels({selectedIds: this.data.selectedModels}));
+    if (this.data.selectedModels) {
+      this.store.dispatch(actions.getSelectedModels({selectedIds: this.data.selectedModels}));
+    }
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
   }
 
   ngOnDestroy(): void {
     this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(actions.resetSelectModelState({fullReset: false}));
-    this.subs.unsubscribe();
   }
 
   closeDialog(modelId: string) {
@@ -176,7 +171,6 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   }
 
   filterSearchChanged({value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
-    !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getTablesFilterProjectsOptions({searchString: value.value || '', loadMore: value.loadMore}));
   }
 

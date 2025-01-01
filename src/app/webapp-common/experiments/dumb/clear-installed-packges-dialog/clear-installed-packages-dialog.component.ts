@@ -2,9 +2,9 @@ import {Component, Inject} from '@angular/core';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
 import {MatRadioButton, MatRadioChange, MatRadioGroup} from '@angular/material/radio';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-clear-installed-packages-dialog',
@@ -12,11 +12,11 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
   imports: [
     DialogTemplateComponent,
     TooltipDirective,
-    CheckboxControlComponent,
     MatRadioButton,
     MatRadioGroup,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    MatButton
   ],
   templateUrl: './clear-installed-packages-dialog.component.html',
   styleUrl: './clear-installed-packages-dialog.component.scss'

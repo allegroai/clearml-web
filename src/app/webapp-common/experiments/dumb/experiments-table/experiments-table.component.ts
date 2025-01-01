@@ -79,7 +79,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
 
   readonly getSystemTags = getSystemTags;
   public isDevelopment = isDevelopment;
-  private _selectedExperiments: ITableExperiment[] = [];
+  private _checkedExperiments: ITableExperiment[] = [];
   readonly colHeaderTypeEnum = ColHeaderTypeEnum;
   @Input() initialColumns = INITIAL_EXPERIMENT_TABLE_COLS;
   @Input() contextMenuTemplate: TemplateRef<{$implicit: IExperimentInfo}> = null;
@@ -151,13 +151,13 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.PARENT);
   }
 
-  @Input() set selectedExperiments(experiments: ITableExperiment[]) {
-    this._selectedExperiments = experiments;
+  @Input() set checkedExperiments(experiments: ITableExperiment[]) {
+    this._checkedExperiments = experiments;
     this.updateSelectionState();
   }
 
-  get selectedExperiments(): ITableExperiment[] {
-    return this._selectedExperiments;
+  get checkedExperiments(): ITableExperiment[] {
+    return this._checkedExperiments;
   }
 
   @Input() set selectedExperiment(experiment: IExperimentInfo) {
@@ -238,7 +238,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     return this._tableFilters;
   }
 
-  @Output() experimentSelectionChanged = new EventEmitter<{ experiment: ITableExperiment; openInfo?: boolean }>();
+  @Output() experimentSelectionChanged = new EventEmitter<{ experiment: ITableExperiment; openInfo?: boolean; origin: 'table' | 'row' }>();
   @Output() experimentsSelectionChanged = new EventEmitter<ITableExperiment[]>();
   @Output() loadMoreExperiments = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
@@ -256,7 +256,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   ) {
     super();
     this.entitiesKey = 'experiments';
-    this.selectedEntitiesKey = 'selectedExperiments';
+    this.selectedEntitiesKey = 'checkedExperiments';
     this.filtersOptions = {
       [EXPERIMENTS_TABLE_COL_FIELDS.STATUS]: [],
       [EXPERIMENTS_TABLE_COL_FIELDS.TYPE]: [],
@@ -296,22 +296,22 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     this.scrollTableToTop();
   }
 
-  rowSelectedChanged(change: { field: string; value: boolean; event: Event }, experiment: ITableExperiment) {
+  rowSelectedChanged(change: { value: boolean; event: Event }, experiment: ITableExperiment) {
     if (change.value) {
       const addList = this.getSelectionRange<ITableExperiment>(change, experiment);
-      this.experimentsSelectionChanged.emit([...this.selectedExperiments, ...addList]);
+      this.experimentsSelectionChanged.emit([...this.checkedExperiments, ...addList]);
     } else {
       const removeList = this.getDeselectionRange(change, experiment as any);
-      this.experimentsSelectionChanged.emit(this.selectedExperiments.filter((selectedExperiment) =>
+      this.experimentsSelectionChanged.emit(this.checkedExperiments.filter((selectedExperiment) =>
         !removeList.includes(selectedExperiment.id)));
     }
   }
 
   tableRowClicked({e, data}: { e: MouseEvent; data: ITableExperiment }) {
     if (this.selectionMode === 'single') {
-      this.experimentSelectionChanged.emit({experiment: data});
+      this.experimentSelectionChanged.emit({experiment: data, origin: 'row'});
     }
-    if (this._selectedExperiments.some(exp => exp.id === data.id)) {
+    if (this._checkedExperiments.some(exp => exp.id === data.id)) {
       this.openContextMenu({e, rowData: data, backdrop: true});
     }
   }
@@ -323,7 +323,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {
     if (!data?.single) {
       this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
-      if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
+      if (!this.checkedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
         this.prevSelected = this.contextExperiment.id;
         this.emitSelection([this.contextExperiment]);
       }
@@ -338,7 +338,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
 
   navigateToParent(event: MouseEvent, experiment: ITableExperiment) {
     event.stopPropagation();
-    return this.router.navigate(['projects', experiment.parent.project?.id || '*', 'experiments', experiment.parent.id],
+    return this.router.navigate(['projects', experiment.parent.project?.id || '*', 'tasks', experiment.parent.id],
       {queryParams: {filter: []}});
   }
 

@@ -1,8 +1,8 @@
-export type ActiveSearchLink = 'projects' | 'experiments' | 'models' | 'pipelines' | 'datasets';
+export type ActiveSearchLink = 'projects' | 'tasks' | 'models' | 'pipelines' | 'datasets';
 
 export const activeSearchLink = {
   projects: 'projects' as ActiveSearchLink,
-  experiments: 'experiments' as ActiveSearchLink,
+  experiments: 'tasks' as ActiveSearchLink,
   models: 'models' as ActiveSearchLink,
   pipelines: 'pipelines' as ActiveSearchLink,
   openDatasets: 'datasets' as ActiveSearchLink,
@@ -19,7 +19,7 @@ export const activeLinksList = [
     name: activeSearchLink.openDatasets,
   },
   {
-    label: 'EXPERIMENTS',
+    label: 'TASKS',
     name: activeSearchLink.experiments,
   },
   {

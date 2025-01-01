@@ -1,7 +1,12 @@
 @if (activateFromMenuButton()) {
-  <div [matMenuTriggerFor]="experimentMenu"
-    class="cell menu-button al-icon al-ico-bars-menu pointer" data-id="menuIcon"
-  ></div>
+  <button
+      mat-icon-button
+      [matMenuTriggerFor]="experimentMenu"
+      data-id="menuIcon"
+      #trigger="matMenuTrigger"
+      [class.menu-opened]="trigger.menuOpen">
+    <mat-icon fontSet="al" fontIcon="al-ico-bars-menu"></mat-icon>
+  </button>
 } @else {
   <div #contextTrigger
        style="visibility: hidden; position: fixed"
@@ -10,81 +15,84 @@
        [matMenuTriggerFor]="experimentMenu">
   </div>
 }
-<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop()" class="light-theme entity-context-menu">
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop()" class="entity-context-menu">
   @if (selectedDisableAvailable()[menuItems.queue]) {
     @if (tableMode() || isCompare()) {
       <button mat-menu-item (click)="toggleDetails()" data-id="Details Option">
-        <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
+        <mat-icon fontSet="al" [fontIcon]="icons.DETAILS"></mat-icon>
+        <span>Details</span>
       </button>
     }
     <button mat-menu-item (click)="toggleFullScreen(minimizedView())" [disabled]="isSharedAndNotOwner()"
             data-id="View Full Screen Option">
-      <i [class]="'al-icon '+ icons.CHART + ' sm-md'"></i>
-      {{minimizedView() ? 'View Full Screen' : 'View in Experiment Table'}}
+      <mat-icon fontSet="al" [fontIcon]="icons.CHART"></mat-icon>
+      {{minimizedView() ? 'View Full Screen' : 'View in Task Table'}}
     </button>
     <hr>
     <button mat-menu-item (click)="manageQueueClicked()"
             [disabled]="selectedDisableAvailable()[menuItems.queue].disable" data-id="Manage Queue Option">
-      <i [class]="'al-icon '+ icons.QUEUED + ' sm-md'"></i>Manage Queue
+      <mat-icon fontSet="al" [fontIcon]="icons.QUEUED"></mat-icon>
+      Manage Queue
     </button>
     <button mat-menu-item (click)="viewWorkerClicked()"
             [disabled]="selectedDisableAvailable()[menuItems.viewWorker].disable" data-id="View Worker Option">
-      <i [class]="'al-icon '+ icons.WORKER + ' sm-md'"></i>View Worker
+      <mat-icon fontSet="al" [fontIcon]="icons.WORKER"></mat-icon>
+      View Worker
     </button>
     <hr>
     @if (isCommunity()) {
       <button mat-menu-item (click)="shareExperimentPopup()"
               [disabled]="isExample() || numSelected() > 1  || isArchive()">
-        <i [class]="'al-icon '  + icons.SHARE + ' sm-md'"></i>Share
+        <mat-icon fontSet="al" [fontIcon]="icons.SHARE"></mat-icon>
+        Share
       </button>
     }
     @if (isArchive()) {
       <button mat-menu-item (click)="deleteExperimentPopup()" data-id="Delete Option"
               [disabled]="selectedDisableAvailable()[menuItems.delete].disable">
-        <i [class]="'al-icon ' + icons.REMOVE + ' sm-md'"></i>
+        <mat-icon fontSet="al" [fontIcon]="icons.REMOVE"></mat-icon>
         {{selectedDisableAvailable()[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple()}}
       </button>
     }
     <button mat-menu-item (click)="restoreArchive()" data-id="Archive Option"
             [disabled]="selectedDisableAvailable()[menuItems.archive].disable">
-      <i class="al-icon sm-md" [class]="isArchive() ? icons.RESTORE : icons.ARCHIVE"></i>
+      <mat-icon fontSet="al" [fontIcon]="isArchive() ? icons.RESTORE : icons.ARCHIVE"></mat-icon>
       {{selectedDisableAvailable()[menuItems.archive].available | menuItemText : isArchive() ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple()}}
     </button>
     @if (!selectedDisableAvailable()[menuItems.enqueue].disable && !isArchive()) {
       <button mat-menu-item (click)="enqueuePopup()" data-id="Enqueue Option"
               [disabled]="selectedDisableAvailable()[menuItems.enqueue].disable">
-        <i [class]="'al-icon ' + icons.ENQUEUE + ' sm-md'"></i>
+        <mat-icon fontSet="al" [fontIcon]="icons.ENQUEUE"></mat-icon>
         {{selectedDisableAvailable()[menuItems.enqueue]?.available | menuItemText : 'Enqueue' : selectedDisableAvailableIsMultiple()}}
       </button>
     }
     @if (!selectedDisableAvailable()[menuItems.retry].disable && !isArchive()) {
       <button mat-menu-item (click)="retryPopup()" data-id="Enqueue Option"
               [disabled]="selectedDisableAvailable()[menuItems.retry].disable">
-        <i [class]="'al-icon ' + icons.RETRY + ' sm-md'"></i>
+        <mat-icon fontSet="al" [fontIcon]="icons.RETRY"></mat-icon>
         {{selectedDisableAvailable()[menuItems.retry]?.available | menuItemText : 'Retry' : selectedDisableAvailableIsMultiple()}}
       </button>
     }
     @if (!selectedDisableAvailable()[menuItems.dequeue].disable) {
       <button mat-menu-item (click)="dequeuePopup()" data-id="Dequeue Option"
               [disabled]="selectedDisableAvailable()[menuItems.dequeue]?.disable">
-        <i [class]="'al-icon ' + icons.DEQUEUE + ' sm-md'"></i>
+        <mat-icon fontSet="al" [fontIcon]="icons.DEQUEUE"></mat-icon>
         {{selectedDisableAvailable()[menuItems.dequeue]?.available | menuItemText : 'Dequeue' : selectedDisableAvailableIsMultiple()}}
       </button>
     }
     <button mat-menu-item (click)="resetPopup()" data-id="Reset Option"
             [disabled]="selectedDisableAvailable()[menuItems.reset].disable">
-      <i [class]="'al-icon ' + icons.RESET + ' sm-md'"></i>
+      <mat-icon fontSet="al" [fontIcon]="icons.RESET"></mat-icon>
       {{selectedDisableAvailable()[menuItems.reset].available | menuItemText : 'Reset' : selectedDisableAvailableIsMultiple()}}
     </button>
     <button mat-menu-item (click)="stopPopup()" data-id="Abort Option"
             [disabled]="selectedDisableAvailable()[menuItems.abort].disable">
-      <i [class]="'al-icon ' + icons.STOPPED + ' sm-md'"></i>
+      <mat-icon fontSet="al" [fontIcon]="icons.STOPPED"></mat-icon>
       {{selectedDisableAvailable()[menuItems.abort].available | menuItemText : 'Abort' : selectedDisableAvailableIsMultiple() }}
     </button>
     @if (!selectedDisableAvailable()[menuItems.abortAllChildren]?.disable) {
-      <button mat-menu-item (click)="stopAllChildrenPopup()"
-      >
-        <i [class]="'al-icon ' + icons.STOPPED_ALL + ' sm-md'"></i>
+      <button mat-menu-item (click)="stopAllChildrenPopup()">
+        <mat-icon fontSet="al" [fontIcon]="icons.STOPPED_ALL"></mat-icon>
         {{selectedDisableAvailable()[menuItems.abortAllChildren]?.available | menuItemText : 'Abort All Children' : selectedDisableAvailableIsMultiple() }}
       </button>
     }
@@ -92,7 +100,7 @@
       mat-menu-item
       (click)="publishPopup()" data-id="Publish Option"
       [disabled]="selectedDisableAvailable()[menuItems.publish].disable">
-      <i [class]="'al-icon ' + icons.PUBLISHED + ' sm-md'"></i>
+      <mat-icon fontSet="al" [fontIcon]="icons.PUBLISHED"></mat-icon>
       {{selectedDisableAvailable()[menuItems.publish].available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple() }}
     </button>
     <hr>
@@ -101,16 +109,17 @@
             [disabled]="selectedDisableAvailable()[menuItems.tags]?.disable"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()">
-      <i [class]="'al-icon ' + icons.TAG + ' sm-md'">
-      </i><span>{{selectedDisableAvailable()[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple() }}</span>
+      <mat-icon fontSet="al" [fontIcon]="icons.TAG"></mat-icon>
+      <span>{{selectedDisableAvailable()[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple() }}</span>
     </button>
     <hr>
     <button mat-menu-item (click)="clonePopup()" data-id="Clone Option">
-      <i [class]="'al-icon ' + icons.CLONE + ' sm-md'"></i>Clone
+      <mat-icon fontSet="al" [fontIcon]="icons.CLONE"></mat-icon>
+      Clone
     </button>
     <button mat-menu-item (click)="moveToProjectPopup()" data-id="Move To Project Option"
             [disabled]="selectedDisableAvailable()[menuItems.moveTo].disable">
-      <i [class]="'al-icon ' + icons.MOVE_TO + ' sm-md'"></i>
+      <mat-icon fontSet="al" [fontIcon]="icons.MOVE_TO"></mat-icon>
       {{selectedDisableAvailable()[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple()}}
     </button>
     <ng-content select="[extended]"></ng-content>
@@ -137,7 +146,7 @@
         smShowTooltipIfEllipsis
       >{{selectedExperiments[0]?.name}}</span>
     } @else {
-      <span class="font-weight-bold me-1">{{selectedExperiments.length}} experiments</span>
+      <span class="font-weight-bold me-1">{{selectedExperiments.length}} tasks</span>
     }
     <span>will be stopped and additional model updates will not be allowed.</span>
   </div>
@@ -153,7 +162,7 @@
         smShowTooltipIfEllipsis
       >{{selectedExperiments[0]?.name}}</span>
     } @else {
-      <span class="font-weight-bold">{{selectedExperiments.length}} experiments</span>
+      <span class="font-weight-bold">{{selectedExperiments.length}} tasks</span>
     }
     will be removed from the
     @if (queueName) {
@@ -178,11 +187,11 @@
         smShowTooltipIfEllipsis
       >{{selectedExperiments[0]?.name}}</span>
     } @else {
-      <span class="font-weight-bold me-1">{{selectedExperiments.length}} experiments</span>
+      <span class="font-weight-bold me-1">{{selectedExperiments.length}} tasks</span>
     }
     <span>status will be set to Published.</span>
   </div>
   <div>
-    Published experiments are read-only and cannot be reset. The experiment's output, including models will also be published so that other experiments can use it.
+    Published tasks are read-only and cannot be reset. The task's output, including models will also be published so that other tasks can use it.
   </div>
 </ng-template>

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {addMessage} from '../../core/actions/layout.actions';
@@ -15,6 +15,7 @@ export interface TipsModalData {
   tips: Tip[];
   visitedIndex: number;
   hideDontShow: boolean;
+  darkTheme: boolean;
 }
 
 
@@ -34,18 +35,19 @@ export interface TipsModalData {
   standalone: true
 })
 export class TipOfTheDayModalComponent {
-  public tips = signal<Tip[]>(this.data.tips);
-  private visitedIndex = signal(0);
-  public hideDontShow = signal<boolean>(this.data.hideDontShow);
-  public tipIndex = signal(0);
-  neverShowAgain: boolean;
+  public matDialogRef = inject<MatDialogRef<TipOfTheDayModalComponent>>(MatDialogRef<TipOfTheDayModalComponent>);
+  private store = inject(Store);
+  protected data = inject<TipsModalData>(MAT_DIALOG_DATA);
 
-  constructor(public matDialogRef: MatDialogRef<TipOfTheDayModalComponent>, private store: Store,
-              @Inject(MAT_DIALOG_DATA) public data: TipsModalData) {
-    this.visitedIndex.set(data.visitedIndex % this.tips().length);
-    this.tipIndex.set(this.visitedIndex());
+  public tips = signal<Tip[]>(this.data.tips);
+  private visitedIndex = signal(this.data.visitedIndex % this.tips().length);
+  public hideDontShow = signal<boolean>(this.data.hideDontShow);
+  public tipIndex = signal(this.visitedIndex());
+  neverShowAgain = signal(false);
+
+  constructor() {
     this.saveIndexInLocalstorage();
-    this.matDialogRef.beforeClosed().subscribe(res => this.neverShowAgain && !res ? this.matDialogRef.close(this.neverShowAgain) : false);
+    this.matDialogRef.beforeClosed().subscribe(res => this.neverShowAgain() && !res ? this.matDialogRef.close(this.neverShowAgain()) : false);
   }
 
   copyToClipboardSuccess() {
@@ -65,6 +67,19 @@ export class TipOfTheDayModalComponent {
     if (this.visitedIndex() <= this.tipIndex()) {
       this.visitedIndex.set(this.tipIndex() + 1);
       window.localStorage.setItem('tipVisitedIndex', `${this.visitedIndex()}`);
+    }
+  }
+
+  getThemeImageSrc(src: string) {
+    if (this.data.darkTheme) {
+      return src;
+    }
+    try {
+      const parts = src.split('.');
+      parts[parts.length - 2] = parts.at(-2) + '-light';
+      return parts.join('.');
+    } catch {
+      return src
     }
   }
 }

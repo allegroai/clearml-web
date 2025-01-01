@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild, viewChildren} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
 import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
 import {debounceTime,distinctUntilChanged, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
@@ -8,8 +8,7 @@ import {
   selectSelectedProjectUsers,
   selectTablesFilterProjectsOptions
 } from '../../core/reducers/projects.reducer';
-import {IOutputData} from 'angular-split/lib/interface';
-import {SplitComponent} from 'angular-split';
+import {SplitAreaComponent, SplitComponent, SplitGutterInteractionEvent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {IFooterState, ItemFooterModel} from './footer-items/footer-items.models';
@@ -24,7 +23,6 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {
   getTablesFilterProjectsOptions,
   resetProjectSelection,
-  resetTablesFilterProjectsOptions,
   setTablesFilterProjectsOptions
 } from '@common/core/actions/projects.actions';
 import {MatDialog} from '@angular/material/dialog';
@@ -38,7 +36,7 @@ import {selectNeverShowPopups, selectTableCardsCollapsed} from '../../core/reduc
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {ContextMenuService} from '@common/shared/services/context-menu.service';
+import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {selectProjectId} from '@common/models/reducers';
 
 @Component({
@@ -54,10 +52,10 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   protected abstract setTableModeAction: ActionCreator<string, any>;
   public shouldOpenDetails = false;
   protected sub = new Subscription();
-  public selectedExperiments: IExperimentInfo[];
+  public checkedExperiments: IExperimentInfo[];
   public projectId: string;
   public isExampleProject: boolean;
-  public selectSplitSize$?: Observable<number>;
+  protected selectSplitSize$?: Observable<number>;
   public infoDisabled: boolean;
   public splitInitialSize: number;
   public minimizedView: boolean;
@@ -72,10 +70,11 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   // public compareViewMode: 'scalars' | 'plots';
 
   @ViewChild('split') split: SplitComponent;
+  splitAreas = viewChildren(SplitAreaComponent);
   protected abstract inEditMode$: Observable<boolean>;
   public selectedProject: Project;
   private currentSelection: { id: string }[];
-  public showAllSelectedIsActive$: Observable<boolean>;
+  protected showAllSelectedIsActive$: Observable<boolean>;
   private allProjects: boolean;
   public cardsCollapsed$: Observable<boolean>;
   protected minimizedView$: Observable<boolean>;
@@ -100,7 +99,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   protected router = inject(Router);
   protected dialog = inject(MatDialog);
   protected refresh = inject(RefreshService);
-  protected contextMenuService = inject(ContextMenuService);
+  protected contextMenuService = inject(HeaderMenuService);
 
   protected projectId$ = this.store.selectSignal(selectProjectId);
 
@@ -133,7 +132,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
     this.sub.add(this.minimizedView$.subscribe( minimized => {
         if (this.split && this.minimizedView === true && !minimized) {
-          this.splitInitialSize = this.split.getVisibleAreaSizes()[1] as number;
+          this.splitInitialSize = this.splitAreas()[1].size() as number;
         }
         this.minimizedView = minimized;
       }
@@ -151,7 +150,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   ngAfterViewInit() {
-    this.store.dispatch(resetTablesFilterProjectsOptions());
     if (this.setSplitSizeAction) {
       this.sub.add(this.split.dragProgress$.pipe(throttleTime(100))
         .subscribe((progress) => this.store.dispatch(this.setSplitSizeAction({splitSize: progress.sizes[1] as number})))
@@ -181,7 +179,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     this.router.navigate(['compare'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
   }
 
-  splitSizeChange(event: IOutputData) {
+  splitSizeChange(event: SplitGutterInteractionEvent) {
     if (this.setSplitSizeAction) {
       this.store.dispatch(this.setSplitSizeAction({splitSize: event.sizes[1] as number}));
     }
@@ -202,9 +200,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     }
   }
 
-  tagSelected({tags, emitValue}, entitiesType) {
+  tagSelected({tag, emitValue}, entitiesType) {
     this.store.dispatch(this.addTag({
-      tag: tags,
+      tag,
       [entitiesType]: emitValue
     }));
   }
@@ -294,7 +292,8 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
                 body: `Navigating between "Live" and "Archive" will deselect your selected ${this.entityType}s.`,
                 yes: 'Proceed',
                 no: 'Back',
-                iconClass: '',
+                iconClass: 'al-ico-alert',
+                conColor: 'var(--color-warning)',
                 showNeverShowAgain: true
               }
             }).afterClosed();
@@ -317,9 +316,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     if (colId === 'project.name') {
       if ((this.projectId || this.selectedProjectId) === '*') {
-        if (!value.loadMore) {
-          this.store.dispatch(resetTablesFilterProjectsOptions());
-        }
         this.store.dispatch(getTablesFilterProjectsOptions({
           searchString: value.value || '',
           loadMore: value.loadMore

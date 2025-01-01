@@ -1,8 +1,8 @@
 <div class="content">
   <div class="donut-container">
     <canvas
-      [style.height.px]="resizing() ? 0 : null"
-      [style.width.px]="resizing() ? 0 : null"
+      [style.height.px]="(resizing$ | ngrxPush) ? 0 : null"
+      [style.width.px]="(resizing$ | ngrxPush) ? 0 : null"
       baseChart
       class="donut-container"
       [data]="donutData()"
@@ -10,7 +10,7 @@
       [options]="$any(donutOptions)"
       (chartHover)="chartHovered($event)"
     ></canvas>
-    <div class="percent" [style.opacity]="!resizing() && highlightedData() !== null ? 1 : null">
+    <div class="percent" [style.opacity]="(resizing$ | ngrxPush) !== true && highlightedData() !== null ? 1 : null">
       @if (highlightedData(); as highlighted) {
         <div class="caption">{{highlighted.caption}} ({{highlighted.value}})</div>
         <div>{{highlighted.percent}}%</div>

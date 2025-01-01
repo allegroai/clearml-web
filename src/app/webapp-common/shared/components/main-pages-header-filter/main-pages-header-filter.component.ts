@@ -1,7 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  inject,
+  computed
+} from '@angular/core';
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
 import {setMainPageTagsFilter, setMainPageTagsFilterMatchMode} from '@common/core/actions/projects.actions';
 import {
   selectMainPageTagsFilter,
@@ -10,7 +15,7 @@ import {
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
 import {cleanTag} from '@common/shared/utils/helpers.util';
 import {MatMenuModule} from '@angular/material/menu';
-import {AsyncPipe, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {
@@ -21,6 +26,8 @@ import {FormsModule} from '@angular/forms';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
 import {PushPipe} from '@ngrx/component';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -36,45 +43,34 @@ import {PushPipe} from '@ngrx/component';
     CheckboxThreeStateListComponent,
     FilterPipe,
     FormsModule,
-    NgIf,
-    PushPipe
+    PushPipe,
+    MatIconButton,
+    MatIcon
   ]
 })
-export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
+export class MainPagesHeaderFilterComponent {
+      private store = inject(Store);
   public searchTerm: string;
-  matchMode: string;
-  tagsLabelValue: Array<{ label: string; value: string; tooltip?: string }>;
   systemTags: string[];
-  private tagsFilters: string[];
-  private tagsFiltersSubscription: Subscription;
-  private showOnlyUserWork: boolean;
-  private showOnlyUserWorkSub: Subscription;
-  private currentFeature$: Observable<string>;
-  private currentFeatureSub: Subscription;
-  private currentFeature: string;
 
-  @Input() set allTags(allTags: string[]) {
-    if (allTags) {
-      this.tagsLabelValue = allTags?.map(tag => ({label: tag, value: tag}));
-      this.sortTags();
-    }
-  }
+  allTags = input<string[]>();
+  protected tagsLabelValue = computed(() => {
+    const cleanTags = this.tagsFilters()?.map(tag=> cleanTag(tag));
+    return this.allTags()
+      ?.map(tag => ({label: tag, value: tag}))
+      .sort((a, b) =>
+        sortByArr(a.value, b.value, [...(cleanTags || [])])
+      );
+  });
 
-  public showOnlyUserWork$: Observable<boolean>;
-  private tagsFilterMatchMode$: Observable<string>;
-  private matchModeSubscription: Subscription;
-  public tagsFilters$: Observable<string[]>;
-
-  constructor(private store: Store, private cdr: ChangeDetectorRef) {
-    this.showOnlyUserWork$ = this.store.select(selectShowOnlyUserWork);
-    this.tagsFilterMatchMode$ = this.store.select(selectMainPageTagsFilterMatchMode);
-    this.tagsFilters$ = this.store.select(selectMainPageTagsFilter);
-    this.currentFeature$ = this.store.select(selectProjectType);
-  }
-
+  protected showOnlyUserWork = this.store.selectSignal(selectShowOnlyUserWork);
+  protected matchMode = this.store.selectSignal(selectMainPageTagsFilterMatchMode);
+  protected tagsFilters = this.store.selectSignal(
+    selectMainPageTagsFilter);
+  protected currentFeature = this.store.selectSignal(selectProjectType);
 
   switchUserFocus() {
-    this.store.dispatch(setFilterByUser({showOnlyUserWork: !this.showOnlyUserWork, feature: this.currentFeature}));
+    this.store.dispatch(setFilterByUser({showOnlyUserWork: !this.showOnlyUserWork(), feature: this.currentFeature()}));
   }
 
   setSearchTerm($event) {
@@ -83,7 +79,6 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
 
   closeMenu() {
     this.searchTerm = '';
-    this.sortTags();
   }
 
   clearSearch() {
@@ -92,48 +87,16 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   }
 
   toggleMatch() {
-    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: !this.matchMode ? 'AND' : undefined, feature: this.currentFeature}));
+    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: !this.matchMode() ? 'AND' : undefined, feature: this.currentFeature()}));
   }
 
   emitFilterChangedCheckBox(tags: string[]) {
-    this.store.dispatch(setMainPageTagsFilter({tags, feature: this.currentFeature}));
-  }
-
-
-  ngOnInit(): void {
-    this.matchModeSubscription = this.tagsFilterMatchMode$.subscribe(matchMode => {
-      this.matchMode = matchMode;
-    });
-    this.tagsFiltersSubscription = this.tagsFilters$.subscribe(tagsFilters => {
-      this.tagsFilters = tagsFilters;
-    });
-    this.showOnlyUserWorkSub = this.showOnlyUserWork$.subscribe((showOnlyUserWork) => {
-      this.showOnlyUserWork = showOnlyUserWork;
-    });
-
-    this.currentFeatureSub = this.currentFeature$.subscribe((feature) => {
-      this.currentFeature = feature;
-    });
-
-  }
-
-  ngOnDestroy(): void {
-    this.matchModeSubscription.unsubscribe();
-    this.tagsFiltersSubscription.unsubscribe();
-    this.showOnlyUserWorkSub.unsubscribe();
-    this.currentFeatureSub.unsubscribe();
-  }
-
-  private sortTags() {
-    const cleanTags = this.tagsFilters?.map(tag=> cleanTag(tag));
-    this.tagsLabelValue.sort((a, b) =>
-      sortByArr(a.value, b.value, [...(cleanTags || [])]));
-    this.cdr.detectChanges();
+    this.store.dispatch(setMainPageTagsFilter({tags, feature: this.currentFeature()}));
   }
 
   clearAll() {
-    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined, feature: this.currentFeature}));
-    this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature}));
-    this.store.dispatch(setFilterByUser({showOnlyUserWork: false, feature: this.currentFeature}));
+    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined, feature: this.currentFeature()}));
+    this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature()}));
+    this.store.dispatch(setFilterByUser({showOnlyUserWork: false, feature: this.currentFeature()}));
   }
 }

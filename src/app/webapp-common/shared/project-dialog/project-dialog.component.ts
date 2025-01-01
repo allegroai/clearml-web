@@ -2,10 +2,9 @@ import * as createNewProjectActions from './project-dialog.actions';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {Observable} from 'rxjs';
 import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
 import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {getTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
 import {URI_REGEX} from '~/app.constants';
 
@@ -23,22 +22,22 @@ export const OutputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WI
   styleUrls: ['./project-dialog.component.scss']
 })
 export class ProjectDialogComponent implements OnInit, OnDestroy {
-  public projects$: Observable<any>;
+  protected projects$ = this.store.select(selectTablesFilterProjectsOptions);
   public baseProject: Project;
   public mode: string;
   public header: string;
-  public modeParameters: { [mode: string]: { header: string; icon: string } } = {
+  public modeParameters: Record<string, { header: string; icon: string }> = {
     create: {
       header: 'NEW PROJECT',
-      icon: 'al-color blue-300 al-ico-projects'
+      icon: 'al-ico-projects'
     },
     move: {
       header: 'MOVE TO',
-      icon: 'al-color blue-300 al-ico-move-to'
+      icon: 'al-ico-move-to'
     },
     edit: {
       header: 'EDIT PROJECT',
-      icon: 'al-color blue-300 al-ico-projects'
+      icon: 'al-ico-projects'
     },
 
   };
@@ -51,7 +50,6 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
     this.baseProject = data.project;
     this.mode = data.mode;
-    this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
   }
 
   ngOnInit(): void {
@@ -85,15 +83,12 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
     return {
       name: `${projectForm.parent === 'Projects root' ? '' : projectForm.parent + '/'}${projectForm.name}`,
       ...(projectForm.description && {description: projectForm.description}),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       ...(projectForm.system_tags && {system_tags: projectForm.system_tags}),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       default_output_destination: projectForm.default_output_destination
     };
   }
 
   filterSearchChanged($event: {value: string; loadMore?: boolean}) {
-    !$event.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore,  allowPublic: false}));
   }
 

@@ -52,4 +52,5 @@ export interface Queue {
      * Queue metadata
      */
     metadata?: Array<MetadataItem>;
+    display_name: string;
 }

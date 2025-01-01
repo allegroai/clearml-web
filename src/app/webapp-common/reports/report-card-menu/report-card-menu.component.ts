@@ -5,6 +5,8 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MatMenuModule} from '@angular/material/menu';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatIcon} from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
 
 @Component({
   selector: 'sm-report-card-menu',
@@ -13,7 +15,9 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   imports: [
     MatMenuModule,
     TagsMenuComponent,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    MatIconButton,
+    MatIcon
   ],
   standalone: true
 })

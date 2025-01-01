@@ -7,7 +7,8 @@ import {NotifierConfig, NotifierOptions} from './models/notifier-config.model';
 import {NotifierAnimationService} from './services/notifier-animation.service';
 import {NotifierQueueService} from './services/notifier-queue.service';
 import {NotifierConfigToken, NotifierService} from './services/notifier.service';
-
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 
 /**
@@ -51,6 +52,8 @@ export const notifierDefaultConfigFactory = (): NotifierConfig => new NotifierCo
   ],
   imports: [
     CommonModule,
+    MatIconButton,
+    MatIcon
   ],
   providers: [
     NotifierAnimationService,

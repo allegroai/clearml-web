@@ -30,7 +30,6 @@ import {CompareCardListComponent} from './dumbs/compare-card-list/compare-card-l
 import {CompareCardBodyDirective} from './dumbs/compare-card-body.directive';
 import {CompareCardExtraHeaderDirective} from './dumbs/compare-card-extra-header.directive';
 import {CompareCardHeaderDirective} from './dumbs/compare-card-header.directive';
-import {TableDiffModule} from '../shared/ui-components/data/table-diff/table-diff.module';
 import {CardModule} from '../shared/ui-components/panel/card2';
 import {
   ParallelCoordinatesGraphComponent
@@ -57,7 +56,6 @@ import {
   EXPERIMENTS_COMPARE_METRICS_CHARTS_
 } from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_} from '@common/experiments-compare/actions/compare-header.actions';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
 import {CompareScatterPlotComponent} from './containers/compare-scatter-plot/compare-scatter-plot.component';
 import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
@@ -107,6 +105,8 @@ import {MetricResultToSelectedMetricPipe} from '@common/shared/pipes/metric-resu
 import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
 import {DrawerComponent} from '@common/shared/ui-components/panel/drawer/drawer.component';
 import {PushPipe} from '@ngrx/component';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 export const COMPARE_STORE_KEY = 'experimentsCompare';
@@ -164,7 +164,6 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     CommonModule,
     DragDropModule,
     DebugImagesModule,
-    TableDiffModule,
     ScrollingModule,
     CardModule,
     ExperimentSharedModule,
@@ -183,7 +182,6 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     MatRadioModule,
     FormsModule,
     ParallelCoordinatesGraphComponent,
-    LabeledFormFieldDirective,
     ReactiveFormsModule,
     EllipsisMiddleDirective,
     ScatterPlotComponent,
@@ -220,6 +218,9 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     MetricVariantToNamePipe,
     DrawerComponent,
     PushPipe,
+    MatButton,
+    MatIcon,
+    MatIconButton,
   ],
   providers: [
     {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},

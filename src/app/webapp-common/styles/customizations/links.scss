@@ -1,0 +1,11 @@
+a:not(.mat-mdc-button, .mat-mdc-menu-item, .mat-mdc-list-item, .gh-btn) {
+  color: var(--color-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: .25em;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-on-primary-container);
+    text-decoration: underline;
+  }
+}

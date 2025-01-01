@@ -1,8 +1,10 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {MatMenuModule, MenuPositionY} from '@angular/material/menu';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {HesitateDirective} from '@common/shared/ui-components/directives/hesitate.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-multi-line-tooltip',
@@ -14,10 +16,13 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
     MatMenuModule,
     HesitateDirective,
     ClickStopPropagationDirective,
-    SaferPipe
-  ],
+    SaferPipe,
+    MatIconButton,
+    MatIcon
+  ]
 })
 export class MultiLineTooltipComponent {
-  @Input() iconClass: string;
-  @Input() position: MenuPositionY = 'below';
+  iconClass = input<string>();
+  smallIcon = input<boolean>(false);
+  position = input<MenuPositionY>('below');
 }

@@ -1,17 +1,25 @@
 <div class="header-container">
   <div class="actions-container">
     <span class="d-flex">
-      <button class="btn btn-secondary btn-add-experiment" (click)="showGlobalLegend()">
-        <span>{{ entityType | uppercase }}S</span>
+      <button
+        mat-flat-button
+        class="add-experiment"
+        data-id="entity"
+        (click)="showGlobalLegend()"
+      >{{ entityType | uppercase }}S</button>
+      <button
+        mat-flat-button
+        class="add-experiment plus icon-only"
+        [smTooltip]="(allowAddExperiment$ | ngrxPush) ?
+          'Add/Remove ' + entityType + 's to comparison' :
+          compareLimitations + ' or fewer ' + entityType + 's can be compared'"
+        (click)="openAddExperimentSearch()"
+      >
+        <mat-icon fontSet="al" fontIcon="al-ico-add" data-id="addExperimentButton"></mat-icon>
       </button>
-        <button [smTooltip]="(allowAddExperiment$ | ngrxPush) ?
-      'Add/Remove ' + entityType + 's to comparison' :
-      compareLimitations + ' or fewer ' + entityType + 's can be compared'"
-        (click)="openAddExperimentSearch()" class="btn btn-secondary btn-add-experiment plus"><i
-      class="al-icon al-ico-plus sm-md" data-id="addExperimentButton"></i></button>
     </span>
     @if (viewMode) {
-      <mat-form-field appearance="outline" class="no-bottom">
+      <mat-form-field appearance="outline" class="no-bottom view-mode-select">
         <mat-select
           class="view-mode"
           panelClass="light-theme"
@@ -19,9 +27,8 @@
           [disableOptionCentering]="true"
           (selectionChange)="changeView($event)"
           >
-          <mat-select-trigger>
-            <i data-id="viewTypeMenuOption" class="al-icon sm-md me-2"
-            [class]="{'al-ico-description': viewMode.endsWith('values'), 'al-ico-charts-view': viewMode === 'graph', 'al-ico-scatter-view': viewMode === 'scatter'}"></i>
+          <mat-select-trigger class="d-flex">
+            <mat-icon fontSet="al" [fontIcon]="viewModeToIcon[viewMode] ?? 'al-ico-description'" data-id="viewTypeMenuOption" class="me-2"></mat-icon>
             @switch (true) {
               @case (currentPage === 'hyper-params' && viewMode === 'graph') {
                 <span>Parallel Coordinates</span>
@@ -42,29 +49,29 @@
           </mat-select-trigger>
           @if (currentPage === 'scalars') {
             <mat-option value="values" class="compare-mat-option">
-              <i class="al-icon al-ico-description sm-md me-2"></i>Last Values
+              <mat-icon fontSet="al" fontIcon="al-ico-description" class="me-2"></mat-icon>Last Values
             </mat-option>
             @if (currentPage === 'scalars') {
               <mat-option value="min-values" class="compare-mat-option">
-                <i class="al-icon al-ico-description sm-md me-2"></i>Min Values
+                <mat-icon fontSet="al" fontIcon="al-ico-description" class="me-2"></mat-icon>Min Values
               </mat-option>
             }
             @if (currentPage === 'scalars') {
               <mat-option value="max-values" class="compare-mat-option">
-                <i class="al-icon al-ico-description sm-md me-2"></i>Max Values
+                <mat-icon fontSet="al" fontIcon="al-ico-description" class="me-2"></mat-icon>Max Values
               </mat-option>
             }
           } @else {
             <mat-option value="values" class="compare-mat-option">
-              <i class="al-icon al-ico-description sm-md me-2"></i>Values
+              <mat-icon fontSet="al" fontIcon="al-ico-description" class="me-2"></mat-icon>Values
             </mat-option>
           }
           <mat-option value="graph" class="compare-mat-option">
-            <i class="al-icon al-ico-charts-view sm-md me-2"></i>{{ currentPage === 'hyper-params' ? 'Parallel Coordinates' : 'Graph' }}
+            <mat-icon fontSet="al" fontIcon="al-ico-charts-view" class="me-2"></mat-icon>{{ currentPage === 'hyper-params' ? 'Parallel Coordinates' : 'Graph' }}
           </mat-option>
           @if (currentPage === 'hyper-params') {
             <mat-option value="scatter" class="compare-mat-option">
-              <i class="al-icon al-ico-scatter-view sm-md me-2"></i>Scatter Plot
+              <mat-icon fontSet="al" fontIcon="al-ico-scatter-view" class="me-2"></mat-icon>Scatter Plot
             </mat-option>
           }
         </mat-select>
@@ -91,21 +98,15 @@
 
   <div id="searchDiff"></div>
 
-  <div class="settings">
+  <div class="settings gap-3">
     @if (['scalars'].includes(currentPage) && viewMode !== 'graph') {
       <button
-        class="btn export-button"
+      mat-icon-button
         (click)="exportCSV()"
         smTooltip="Export to CSV">
-        <i class="al-icon al-ico-download"></i>
+        <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
       </button>
     }
-    <!--      <div -->
-    <!--              class="export-button pointer"-->
-    <!--              (click)="showGlobalLegend()"-->
-    <!--              smTooltip="Show legend">-->
-    <!--          <i class="al-icon al-ico-legend"></i>-->
-  <!--      </div>-->
   <sm-refresh-button
     (setAutoRefresh)="setAutoRefresh($event)"
     class="light-theme"

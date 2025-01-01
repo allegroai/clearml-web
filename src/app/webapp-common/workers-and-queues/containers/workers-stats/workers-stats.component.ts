@@ -12,7 +12,7 @@ import {Store} from '@ngrx/store';
 import {Worker} from '~/business-logic/model/workers/worker';
 import {Topic} from '@common/shared/utils/statistics';
 import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
-import {getWorkers, setStats, setStatsParams} from '../../actions/workers.actions';
+import {getWorkerStats, setStats, setStatsParams} from '../../actions/workers.actions';
 import {selectStats, selectStatsErrorNotice, selectStatsParams, selectStatsTimeFrame} from '../../reducers/index.reducer';
 import {timeFrameOptions} from '@common/constants';
 import {combineLatest, interval, switchMap} from 'rxjs';
@@ -57,11 +57,11 @@ export class WorkersStatsComponent {
           const maxPoints = Math.min(0.8 * this.chartRef().nativeElement.clientWidth || 1000, 1000);
           const granularity = Math.max(Math.floor(range / maxPoints), 40);
           this.store.dispatch(setStats({data: null}));
-          this.store.dispatch(getWorkers({maxPoints}));
+          this.store.dispatch(getWorkerStats({maxPoints}));
 
           return interval(granularity * 1000)
             .pipe(map(() => {
-              this.store.dispatch(getWorkers({maxPoints}));
+              this.store.dispatch(getWorkerStats({maxPoints}));
             }));
         })
       )
@@ -84,12 +84,13 @@ export class WorkersStatsComponent {
     'network_rx;network_tx': 'Bytes/sec'
   };
 
-
-  chartParamChange(event) {
-    this.store.dispatch(setStatsParams({timeFrame: this.currentTimeFrame(), param: event}));
+  chartParamChange(event: string) {
+    const maxPoints = Math.min(0.8 * this.chartRef().nativeElement.clientWidth || 1000, 1000);
+    this.store.dispatch(setStatsParams({timeFrame: this.currentTimeFrame(), param: event, maxPoints}));
   }
 
-  timeFrameChange(event) {
-    this.store.dispatch(setStatsParams({timeFrame: event, param: this.currentParam()}));
+  timeFrameChange(event: string) {
+    const maxPoints = Math.min(0.8 * this.chartRef().nativeElement.clientWidth || 1000, 1000);
+    this.store.dispatch(setStatsParams({timeFrame: event, param: this.currentParam(), maxPoints}));
   }
 }

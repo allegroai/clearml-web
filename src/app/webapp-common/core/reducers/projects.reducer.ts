@@ -257,7 +257,8 @@ export const projectsReducer = createReducer(
     ...state,
     tablesFilterProjectsOptions: action.loadMore ? uniqBy((state.tablesFilterProjectsOptions || []).concat(action.projects), 'id') : uniqBy(action.projects, 'id'),
     projectsOptionsScrollId: action.scrollId
-  }))
+  })),
+  on(projectsActions.getTablesFilterProjectsOptions, (state, action): RootProjects => ({...state, ...(!action.loadMore && {tablesFilterProjectsOptions: null, projectsOptionsScrollId: null})})),
 );
 export const selectShowHiddenUserSelection = createSelector(projects, state => state.showHidden);
 export const selectShowHidden = createSelector(projects, selectSelectedProject,

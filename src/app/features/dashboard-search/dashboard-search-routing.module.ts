@@ -4,7 +4,7 @@ import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {DashboardSearchComponent} from '~/features/dashboard-search/containers/dashboard-search/dashboard-search.component';
 
 const staticBreadcrumb = [[{
-  name: 'DASHBOARD',
+  name: 'GLOBAL SEARCH',
   type: CrumbTypeEnum.Feature
 }]];
 

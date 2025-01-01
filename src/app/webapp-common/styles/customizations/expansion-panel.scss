@@ -1,0 +1,61 @@
+@use '@angular/material' as mat;
+
+body mat-expansion-panel.mat-expansion-panel {
+  box-shadow: none !important;
+  --mat-expansion-container-shape: 4px;
+  --mat-expansion-container-background-color:  transparent;
+
+  &.grouped-selection {
+    border-radius: 0;
+
+    .mat-expansion-panel-header {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 0 12px;
+
+      .mat-expansion-indicator {
+        height: 25px;
+      }
+
+      &.mat-expanded, mat-expanded:focus .mat-expansion-indicator {
+        height: 22px;
+      }
+
+      .mat-content {
+        padding-right: 10px;
+      }
+
+      .mat-expansion-panel-header-description {
+        flex-grow: 0;
+      }
+    }
+
+    .mat-expansion-panel-content {
+      .mat-expansion-panel-body {
+        padding: 0;
+      }
+
+    }
+  }
+  &.mat-expanded {
+    --mat-expansion-header-indicator-color: var(--color-primary);
+    mat-expansion-panel-header {
+      color: var(--color-primary);
+    }
+    .mat-expansion-panel-content {
+      padding-bottom: 12px;
+    }
+  }
+  &:not(.mat-expanded) {
+    .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+      --mat-expansion-header-hover-state-layer-color: transparent;
+      color: var(--color-primary);
+    }
+  }
+}
+
+:root {
+  --mat-expansion-container-background-color: transparent;
+  --mat-expansion-header-hover-state-layer-color: transparent;
+  --mat-expansion-header-focus-state-layer-color: transparent;
+}

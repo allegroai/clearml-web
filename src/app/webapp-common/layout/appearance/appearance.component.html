@@ -1,0 +1,22 @@
+<sm-dialog-template header="UI THEME" iconClass="al-ico-palette">
+  <mat-selection-list
+    [ngModel]="[userTheme()]"
+    [multiple]="false"
+    [hideSingleSelectionIndicator]="true"
+    class="theme-selector"
+  >
+    @for (theme of themes; track theme.value) {
+      <mat-list-option
+        class="theme-selector__option"
+        [value]="theme.value"
+        (click)="setUserTheme(theme.value)"
+        [class.selected]="userTheme() === theme.value"
+      >
+        <div class="d-flex flex-column align-content-center" style="width: 88px">
+          <img [ngSrc]="'app/webapp-common/assets/icons/theme/theme-scr-' + theme.value + '.svg'" width="88" height="88" [alt]="theme.value">
+          <span class="mt-3">{{theme.name}}</span>
+        </div>
+      </mat-list-option>
+    }
+  </mat-selection-list>
+</sm-dialog-template>

@@ -1,19 +1,15 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  Component, computed, effect,
-  EventEmitter, input,
-  Input,
-  OnChanges, OnDestroy,
-  Output,
-  ViewChild
+  Component, computed, effect, input,
+  OnChanges, OnDestroy, output, signal, viewChild
 } from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {FormsModule, NgForm} from '@angular/forms';
-import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
-import {Subscription} from 'rxjs';
+import {Subscription, switchMap} from 'rxjs';
 import {rootProjectsPageSize} from '@common/constants';
 import {MatInputModule} from '@angular/material/input';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
@@ -27,11 +23,13 @@ import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-proje
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {InvalidPrefixValidatorDirective} from '@common/shared/ui-components/template-forms-ui/invalid-prefix-validator.directive';
 import {UniquePathValidatorDirective} from '@common/shared/ui-components/template-forms-ui/unique-path-validator.directive';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 import {
   PaginatedEntitySelectorComponent
 } from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {filter} from 'rxjs/operators';
+import {MatButton} from '@angular/material/button';
 
 
 @Component({
@@ -57,9 +55,9 @@ import {
     ProjectLocationPipe,
     InvalidPrefixValidatorDirective,
     UniquePathValidatorDirective,
-    LabeledFormFieldDirective,
     DotsLoadMoreComponent,
     PaginatedEntitySelectorComponent,
+    MatButton,
   ]
 })
 export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterViewInit {
@@ -67,29 +65,32 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
   public rootFiltered: boolean;
   public projectName: string;
   public isAutoCompleteOpen: boolean;
-  public filterText: string = '';
-  public projectsNames: Array<string>;
+  protected filterText = '';
+  public projectsNames: string[];
   public project = {
     parent: null
   };
   private newProjectName: string;
   private subs = new Subscription();
-  public loading: boolean;
   public noMoreOptions: boolean;
   private previousLength: number | undefined;
 
-  @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
-  @ViewChild('projectForm') public form: NgForm;
+  moveToForm = viewChild<NgForm>('moveToForm');
+  public form = viewChild<NgForm>('projectForm');
+  baseProject = input<Project>();
   projects = input<Project[]>();
   protected allProjects = computed(() => ([
     ...(this.rootFiltered ? [] : [{name: this.projectsRoot, id: '999999999999999'}]),
     ...this.projects() ?? []
   ]));
+  protected state = computed(() => ({
+    projects: this.projects(),
+    loading: signal(false)
+  }));
 
   constructor() {
     effect(() => {
       const projects = this.projects();
-      this.loading = false;
       this.noMoreOptions = projects?.length === this.previousLength || projects?.length < rootProjectsPageSize;
       this.previousLength = projects?.length;
 
@@ -100,13 +101,30 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
         ];
       }
     });
+
+    toObservable(this.moveToForm)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap(form => form.controls['projectName'].valueChanges),
+        filter(searchString => searchString !== this.project.parent)
+      )
+      .subscribe(searchString => {
+        this.searchChanged(searchString || '');
+      });
   }
 
-  @Input() baseProject;
-
-  @Output() filterSearchChanged = new EventEmitter<{ value: string; loadMore?: boolean }>();
-  @Output() moveProject = new EventEmitter<{ location: string; name: string; fromName: string; toName: string; projectName: string }>();
-  @Output() dismissDialog = new EventEmitter();
+  filterSearchChanged = output<{
+        value: string;
+        loadMore?: boolean;
+    }>();
+  moveProject = output<{
+        location: string;
+        name: string;
+        fromName: string;
+        toName: string;
+        projectName: string;
+    }>();
+  dismissDialog = output();
 
   send() {
     this.moveProject.emit({
@@ -120,18 +138,12 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.subs.add(this.moveToForm.controls['projectName'].valueChanges.subscribe(searchString => {
-          if (searchString !== this.project.parent) {
-            this.searchChanged(searchString || '');
-          }
-        })
-      );
     });
   }
 
   ngOnChanges() {
-    if (this.projects()?.length > 0 && this.baseProject) {
-      this.projectName = this.baseProject?.name ?? this.projectsRoot;
+    if (this.projects()?.length > 0 && this.baseProject()) {
+      this.projectName = this.baseProject()?.name ?? this.projectsRoot;
       // if (this.baseProject && this.project.parent === null) {
       //   this.project.parent = this.baseProject.name;
       // }
@@ -140,15 +152,6 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
 
   clear() {
     this.project.parent = '';
-  }
-
-  setIsAutoCompleteOpen(focus: boolean) {
-    this.isAutoCompleteOpen = focus;
-  }
-
-
-  locationSelected($event: MatAutocompleteSelectedEvent) {
-    this.project.parent = $event.option.value;
   }
 
   closeDialog() {
@@ -166,11 +169,13 @@ export class ProjectMoveToFormComponent implements OnChanges, OnDestroy, AfterVi
   searchChanged(searchString: string) {
     this.projectsNames = null;
     this.rootFiltered = !this.projectsRoot.includes(searchString);
-    searchString !== null && this.filterSearchChanged.emit({value: searchString});
+    if (searchString !== null) {
+      this.filterSearchChanged.emit({value: searchString});
+    }
   }
 
   loadMore(searchString, loadMore) {
-    this.loading = true;
+    this.state().loading.set(true);
     this.filterSearchChanged.emit({value: searchString || '', loadMore});
   }
 

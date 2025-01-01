@@ -1,8 +1,8 @@
-<div class="status-line" [class]="status" >
-  <span class="d-flex align-items-center">
-    @if (showLabel) {
+<div class="status-line" [style.--status-color]="'var(--color-' + status() + ')'">
+  <span class="notch d-flex align-items-center">
+    @if (showLabel()) {
       <span class="label">
-        {{'  ' + (experimentsStatusLabels[status] ? experimentsStatusLabels[status] : '') | uppercase}}
+        {{'  ' + (experimentsStatusLabels[status()] ? experimentsStatusLabels[status()] : '') | uppercase}}
       </span>
     }
   </span>

@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, filter, map, retry, switchMap, take, tap} from 'rxjs/operators';
 import {HTTP} from '~/app.constants';
@@ -12,7 +12,6 @@ import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
 import {clone} from 'lodash-es';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {ConfigurationService} from './configuration.service';
-import {Environment} from '../../../../environments/base';
 import {USER_PREFERENCES_KEY, UserPreferences} from '@common/user-preferences';
 import {setUserLoginState} from '@common/login/login.actions';
 import {fetchCurrentUser} from '@common/core/actions/users.actions';
@@ -20,6 +19,8 @@ import {Store} from '@ngrx/store';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {Router} from '@angular/router';
 import {LocationStrategy} from '@angular/common';
+import {selectDarkTheme} from '@common/core/reducers/view.reducer';
+import {environment} from '../../../../environments/environment';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly' | 'error';
 
@@ -43,15 +44,24 @@ export class BaseLoginService {
   protected userPreferences = inject(UserPreferences);
   protected locationStrategy = inject(LocationStrategy);
 
-  signupMode: boolean;
   onlyPasswordLogin: boolean;
+  loginMode = signal<LoginMode>(null);
   protected basePath = HTTP.API_BASE_URL;
   private userKey: string;
   private userSecret: string;
   private companyID: string;
   private _loginMode: LoginMode;
   private _guestUser: { enabled: boolean; username: string; password: string };
-  private environment: Environment;
+  protected environment = this.configService.configuration;
+  protected darkTheme = this.store.selectSignal(selectDarkTheme);
+  private state = computed(() => ({
+    env: this.environment(),
+    signupMode: signal(!!this.environment().communityServer && !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin))
+  }));
+
+  get signupMode() {
+    return this.state().signupMode;
+  }
 
   get guestUser() {
     return clone(this._guestUser);
@@ -61,20 +71,11 @@ export class BaseLoginService {
     return this._authenticated;
   }
 
-  constructor() {
-    this.configService.globalEnvironmentObservable.subscribe(env => {
-      const firstLogin = !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin);
-      this.environment = env;
-      this.onlyPasswordLogin = env.onlyPasswordLogin;
-      this.signupMode = !!this.environment.communityServer && firstLogin;
-    });
-  }
-
   initCredentials() {
     const fromEnv = () => ({
-      userKey: this.environment.userKey,
-      userSecret: this.environment.userSecret,
-      companyID: this.environment.companyID
+      userKey: environment.userKey,
+      userSecret: environment.userSecret,
+      companyID: environment.companyID
     });
 
     return this.getLoginMode().pipe(
@@ -102,8 +103,8 @@ export class BaseLoginService {
     return headers;
   }
 
-  getLoginMode(): Observable<LoginMode> {
-    if (this._loginMode !== undefined) {
+  getLoginMode(force = false): Observable<LoginMode> {
+    if (this._loginMode !== undefined && !force) {
       return of(this._loginMode);
     } else {
       return this.getLoginSupportedModes()
@@ -116,7 +117,15 @@ export class BaseLoginService {
             this._loginMode = res.basic.enabled ? loginModes.password : res.sso_providers?.length > 0 ? loginModes.ssoOnly : this.onlyPasswordLogin ? loginModes.error : loginModes.simple;
             this._guestUser = res.basic.guest;
           }),
-          map(() => this._loginMode)
+          map(() => {
+            this.loginMode.set(this._loginMode);
+            return this._loginMode;
+          }),
+          catchError(() => {
+            this.loginMode.set(this.configService.configuration().onlyPasswordLogin ? loginModes.error : loginModes.simple);
+            return EMPTY;
+          }),
+
         );
     }
   }
@@ -142,7 +151,7 @@ export class BaseLoginService {
 
   login(userId: string) {
     let headers = this.getHeaders();
-    headers = headers.append(`${this.environment.headerPrefix}-Impersonate-As`, userId);
+    headers = headers.append(`${this.environment().headerPrefix}-Impersonate-As`, userId);
     return this.httpClient.post(`${this.basePath}/auth.login`, null, {headers, withCredentials: true});
   }
 
@@ -150,13 +159,13 @@ export class BaseLoginService {
     let headers = this.getHeaders();
     headers = headers.append('Content-Type', 'application/json');
     const data = {
-      /* eslint-disable @typescript-eslint/naming-convention */
+
       email: uuidV1() + '@test.ai',
       name,
       company: this.companyID,
       given_name: name.split(' ')[0],
       family_name: name.split(' ')[1] ? name.split(' ')[1] : name.split(' ')[0]
-      /* eslint-enable @typescript-eslint/naming-convention */
+
     };
     return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.create_user`, data, {headers})
       .pipe(map((x: any) => x.data.id));
@@ -169,19 +178,14 @@ export class BaseLoginService {
       );
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   private shouldOpenServerError(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
     return serverErrors?.missed_es_upgrade || serverErrors?.es_connection_error;
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private openEs7MessageDialog(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
 
-    // Mocking application header
-    const imgElement = new Image();
-    imgElement.setAttribute('src', 'assets/logo-white.svg');
-    imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
-    document.body.appendChild(imgElement);
+  private openEs7MessageDialog(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
+    this.setLogo();
 
     const body = `The ClearML Server database seems to be unavailable.<BR>Possible reasons for this state are:<BR><BR>
 <ul>
@@ -200,7 +204,8 @@ After the issue is resolved and Trains Server is up and running, reload this pag
         body,
 
         yes: 'Reload',
-        iconClass: 'i-alert'
+        iconClass: 'al-ico-alert',
+        iconColor: 'var(--color-warning)'
       }
     });
     confirmDialogRef.afterClosed().subscribe(() => {
@@ -209,13 +214,8 @@ After the issue is resolved and Trains Server is up and running, reload this pag
   }
 
   private openServerError() {
-    // Mocking application header
-    const imgElement = new Image();
-    imgElement.setAttribute('src', 'assets/logo-white.svg');
-    imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
-    document.body.appendChild(imgElement);
-
-    const body = this.environment.serverDownMessage;
+    this.setLogo();
+    const body = this.environment().serverDownMessage;
 
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       disableClose: true,
@@ -224,13 +224,21 @@ After the issue is resolved and Trains Server is up and running, reload this pag
         title: 'Server Unavailable',
         body,
         yes: 'Reload',
-        iconClass: 'i-alert',
+        iconClass: 'al-ico-alert-outline',
         centerText: true
       } as ConfirmDialogConfig
     });
     confirmDialogRef.afterClosed().subscribe(() => {
       window.location.reload();
     });
+  }
+
+  private setLogo() {
+    // Mocking application header
+    const imgElement = new Image();
+    imgElement.setAttribute('src', this.darkTheme() ? this.environment().branding.logo : this.environment().branding.logo.replace('-white', ''));
+    imgElement.setAttribute('style', 'width: 100%; height: 64px; padding: 15px;');
+    document.body.appendChild(imgElement);
   }
 
   clearLoginCache() {

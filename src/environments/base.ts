@@ -61,6 +61,9 @@ export interface Environment {
   displayTips: boolean;
   onlyPasswordLogin: boolean;
   blockUserScript?: boolean;
+  forceTheme?: 'light' | 'dark';
+  defaultTheme?: 'light' | 'dark';
+  customStyle?: string;
 }
 
 export const BASE_ENV = {
@@ -90,11 +93,11 @@ export const BASE_ENV = {
   showSurvey: false,
   accountAdministration: false,
   useFilesProxy: true,
-  legal: {TOULink: 'https://allegro.ai/legal-platform-tou/'},
-  plotlyURL: 'app/webapp-common/assets/plotly-2.31.1.min.js',
+  legal: {TOULink: 'https://github.com/allegroai/clearml-server/blob/master/LICENSE'},
+  plotlyURL: 'app/webapp-common/assets/plotly-2.35.0.min.js',
   slackLink: 'https://joinslack.clear.ml',
   docsLink: 'https://clear.ml/docs',
-  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
+  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/small-logo-white.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.<BR>' +
     'If the problem persists, verify your network connection is working and check the ClearML server logs for possible errors',

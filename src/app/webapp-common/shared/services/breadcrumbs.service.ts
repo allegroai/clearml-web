@@ -1,4 +1,4 @@
-import {inject, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {combineLatest} from 'rxjs';
 import {selectBreadcrumbOptions, selectProjectAncestors} from '@common/core/reducers/projects.reducer';
@@ -10,6 +10,9 @@ import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {selectFeatureParam, selectHasProjectId} from '@common/layout/layout.selectors';
+import {selectBreadcrumbs} from '@common/core/reducers/view.reducer';
+import {Title} from '@angular/platform-browser';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +21,23 @@ export class BreadcrumbsService {
   private store = inject(Store);
   private router = inject(Router);
   public route = inject(ActivatedRoute);
+  private titleService = inject(Title);
+  private config = inject(ConfigurationService);
   protected staticBreadcrumb = signal(null)
+  private title = computed(() => this.config.configuration().branding?.faviconUrl ? '' : 'ClearML');
+  private titlePrefix = computed(() => this.title() ? this.title() + ' - ' : '')
 
   constructor() {
+    this.titleService.setTitle(this.title());
+    this.store.select(selectBreadcrumbs)
+      .pipe(takeUntilDestroyed())
+      .subscribe(breadcrumbs => {
+        const crumbs = breadcrumbs.flat().filter((breadcrumb => !!breadcrumb?.name)).map(breadcrumb => breadcrumb.name);
+        if(crumbs.length > 0) {
+          this.titleService.setTitle(`${this.titlePrefix()}${crumbs.join(' / ')}`);
+        }
+      });
+
     combineLatest([
       this.store.select(selectHasProjectId).pipe(startWith(false)),
       this.router.events.pipe(filter((event) => event instanceof NavigationEnd))

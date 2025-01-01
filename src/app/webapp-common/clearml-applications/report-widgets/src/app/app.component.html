@@ -17,7 +17,7 @@
             [height]="singleGraphHeight"
             [chart]="plotData"
             [id]="'report-widget'"
-            [isDarkTheme]="isDarkTheme"
+            [darkTheme]="isDarkTheme"
             [showLoaderOnDraw]="false"
             [identifier]="'report-widget'"
             [width]="400"
@@ -55,7 +55,7 @@
               <sm-single-value-summary-table
                 [data]="singleValueData"
                 [experimentName]="singleValueData[0]?.metric"
-                [darkTheme]="isDarkTheme"
+                [csvButtonTemplate]="csvButtonTemplate"
               ></sm-single-value-summary-table>
             }
           </div>
@@ -66,9 +66,9 @@
       </div>
     }
   } @else {
-    <div class="container" [class.dark-theme]="isDarkTheme">
+    <div class="container">
       <div class="s3message">
-        Missing S3 credentials. Please verify credentials in <a target="_blank" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.
+        Missing cloud credentials. Please verify credentials in <a target="_blank" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.
       </div>
     </div>
   }
@@ -84,3 +84,10 @@
 }
 
 
+<ng-template #csvButtonTemplate>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path
+      d="M15,8V2l6,6h-6ZM21,9v11c0,1.1-.9,2-2,2H5c-1.1,0-2-.9-2-2V4c0-1.1.9-2,2-2h9v7h7ZM8.83,12.28c-.18-.09-.37-.16-.57-.21s-.42-.07-.64-.07c-.79,0-1.39.26-1.8.78s-.62,1.27-.62,2.25.21,1.73.62,2.25,1.01.78,1.8.78c.22,0,.43-.02.63-.07s.39-.12.57-.21v-1.28c-.2.18-.39.32-.58.4s-.38.13-.58.13c-.42,0-.74-.17-.96-.5s-.32-.83-.32-1.49.11-1.16.32-1.49.53-.5.96-.5c.2,0,.39.04.58.13s.38.22.58.4v-1.28ZM13.76,16.3c0-.43-.11-.79-.33-1.07s-.57-.51-1.04-.68l-.5-.19c-.34-.13-.57-.24-.68-.35s-.16-.24-.16-.4c0-.21.07-.37.22-.48s.36-.17.64-.17c.25,0,.5.05.76.14s.51.22.75.4v-1.12c-.26-.12-.53-.21-.8-.27s-.54-.09-.8-.09c-.59,0-1.06.15-1.39.45s-.51.72-.51,1.25c0,.41.1.74.31.98s.6.48,1.18.7l.57.21c.2.08.35.18.45.31s.16.28.16.46c0,.23-.08.41-.23.54s-.38.19-.66.19-.57-.05-.85-.16-.59-.27-.89-.49v1.19c.27.14.55.24.84.31s.58.1.87.1c.7,0,1.23-.15,1.58-.44s.52-.73.52-1.32ZM18.83,12.11h-1.16l-1.03,4.87-1.02-4.87h-1.16l1.39,5.83h1.6l1.39-5.83Z"
+      fill="#8492c2"/>
+  </svg>
+</ng-template>

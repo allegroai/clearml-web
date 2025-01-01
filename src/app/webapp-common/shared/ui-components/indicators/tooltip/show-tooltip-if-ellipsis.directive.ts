@@ -1,4 +1,4 @@
-import {Directive, ElementRef, EventEmitter, HostListener, Input, Output} from '@angular/core';
+import {Directive, ElementRef, HostListener, input} from '@angular/core';
 import {TooltipDirective} from './tooltip.directive';
 
 @Directive({
@@ -10,11 +10,11 @@ export class ShowTooltipIfEllipsisDirective {
     private matTooltip: TooltipDirective,
     private elementRef: ElementRef<HTMLElement>
   ) {}
-  @Input() showAlwaysTooltip = false;
-  @Output() smShowTooltipIfEllipsis = new EventEmitter<boolean>();
+  showAlwaysTooltip = input(false);
+  // smShowTooltipIfEllipsis = output<boolean>();
   @HostListener('mouseenter', ['$event'])
   setTooltipState(): void {
-    if (this.showAlwaysTooltip) {
+    if (this.showAlwaysTooltip()) {
       return;
     }
     const element = this.elementRef.nativeElement;
@@ -24,5 +24,4 @@ export class ShowTooltipIfEllipsisDirective {
       this.matTooltip.disabled = element.scrollWidth === element.clientWidth;
     }
   }
-
 }

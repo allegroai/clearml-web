@@ -11,6 +11,7 @@ export interface ConfirmDialogConfig<Context = unknown> {
   yes?: string;
   no?: string | boolean;
   iconClass?: string; // the icon class (see icons.scss).
+  iconColor?: string;
   iconData?: string; // the icon class (see icons.scss).
   codeSnippet?: string;
   showNeverShowAgain?: boolean;

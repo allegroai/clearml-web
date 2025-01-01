@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, input, output } from '@angular/core';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
@@ -6,14 +6,9 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
   templateUrl: './experiment-info-edit-description.component.html',
   styleUrls: ['./experiment-info-edit-description.component.scss']
 })
-export class ExperimentInfoEditDescriptionComponent implements OnInit {
-  @Input() selectedExperiment: IExperimentInfo;
-  @Output() editDescription = new EventEmitter();
+export class ExperimentInfoEditDescriptionComponent {
+  selectedExperiment = input<IExperimentInfo>();
+  editDescription = output();
 
-  public isEntered = false;
   public isOpen = false;
-  constructor() { }
-
-  ngOnInit(): void {
-  }
 }

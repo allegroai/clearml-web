@@ -1,0 +1,61 @@
+:root {
+  .mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    &:before {
+      line-height: inherit;
+    }
+
+    &.xs{
+      width: 14px;
+      height: 14px;
+      font-size: 14px;
+      &:before {
+        line-height: 14px;
+      }
+    }
+  
+    &.sm {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      &:before {
+        line-height: 16px;
+      }
+    }
+  
+    &.lg {
+      width: 32px;
+      height: 32px;
+      font-size: 32px;
+      &:before {
+        line-height: 32px;
+      }
+    }
+  
+    &.xl {
+      width: 48px;
+      height: 48px;
+      font-size: 48px;
+      &:before {
+        line-height: 48px;
+      }
+    }
+
+    &.xxxl {
+      // used for empty-state icons
+      width: 88px;
+      height: 88px;
+      font-size: 88px;
+      &:before {
+        line-height: 88px;
+      }
+    }
+
+  }
+
+}
+
+
+

@@ -2,7 +2,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   viewChild,
-  input, computed, signal, effect
+  input, computed, effect, inject,
 } from '@angular/core';
 import {BaseChartDirective} from 'ng2-charts';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -15,6 +15,8 @@ import {
 import 'chartjs-adapter-date-fns';
 import {fileSizeConfigCount} from '@common/shared/pipes/filesize.pipe';
 import {filesize} from 'filesize';
+import {Store} from '@ngrx/store';
+import {selectThemeMode} from '@common/core/reducers/view.reducer';
 
 
 declare module 'chart.js' {
@@ -52,6 +54,8 @@ export interface concatLatestFrom {
   ]
 })
 export class LineChartComponent {
+  private readonly store = inject(Store);
+
   lineChartPlugins: Plugin<'line'>[] = [{
     id: 'hoverLine',
     afterDatasetsDraw: (chart, _, opts) => {
@@ -88,13 +92,15 @@ export class LineChartComponent {
   public lineChartType: ChartType = 'line';
 
   private chart = viewChild(BaseChartDirective);
-  animationDuration = signal(500);
+  animationDuration = computed(() => this.data()?.[0]?.dates.length > 0 ? 0 : 500);
 
   colorScheme = input(['#a4a1fb', '#ff8a15']);
   yTickFormatter = input<(value: number) => string>(val => filesize(val, fileSizeConfigCount));
   yLabel = input<string>();
   showLoadingOverlay = input(false);
   data = input<Topic[]>();
+
+  theme = this.store.selectSignal(selectThemeMode);
 
   chartData = computed<ChartData<'line', Topic['dates']>>(() => {
     const topics = this.data();
@@ -113,7 +119,7 @@ export class LineChartComponent {
     },
     maintainAspectRatio: false,
     layout: {
-      padding: {top: 12, bottom: 12}
+      padding: {top: 24, bottom: 24, left: 24, right: 24}
     },
     elements: {
       line: {
@@ -132,7 +138,7 @@ export class LineChartComponent {
           autoSkip: true,
           autoSkipPadding: 50,
           maxRotation: 0,
-          color: '#c1cdf3'
+          ...(this.theme() === 'dark' && {color: '#c1cdf3'}),
         },
         time: {
           tooltipFormat: 'P pp',
@@ -146,7 +152,10 @@ export class LineChartComponent {
         }
       },
       y: {
-        title: {display: !!this.yLabel(), text: this.yLabel(), color: '#c1cdf3'},
+        title: {
+          display: !!this.yLabel(), text: this.yLabel(),
+          ...(this.theme() === 'dark' && {color: '#c1cdf3'}),
+          },
         position: 'left',
         suggestedMin: 0,
         beginAtZero: true,
@@ -154,12 +163,12 @@ export class LineChartComponent {
           autoSkip: true,
           count: 5,
           precision: 0,
-          color: '#c1cdf3',
+          ...(this.theme() === 'dark' && {color: '#c1cdf3'}),
           callback: value => typeof value === 'number' ? this.yTickFormatter()(value) : value
         },
         grid: {
           display: true,
-          color: '#39405f'
+          ...(this.theme() === 'dark' && {color: '#39405f'}),
         }
       }
     },
@@ -169,7 +178,7 @@ export class LineChartComponent {
         display: true,
         position: 'bottom',
         labels: {
-          color: '#dce0ee',
+          ...(this.theme() === 'dark' && {color: '#dce0ee'}),
           font: {weight: 'normal', size: 12},
           padding: 20,
           usePointStyle: true
@@ -179,8 +188,10 @@ export class LineChartComponent {
       tooltip: {
         backgroundColor: '#1a1e2c',
         borderWidth: 1,
-        borderColor: '#8492c2',
-        bodyColor: '#c3cdf0',
+        ...(this.theme() === 'dark' && {
+          borderColor: '#8492c2',
+          bodyColor: '#c3cdf0',
+        }),
         bodyFont: {weight: 'normal', size: 12},
         padding: 12,
         usePointStyle: true,
@@ -190,7 +201,7 @@ export class LineChartComponent {
       },
       hoverLine: {
         dash: [6, 6],
-        color: '#8492c2',
+        ...(this.theme() === 'dark' && { color: '#8492c2'}),
         width: 1
       }
     },
@@ -223,9 +234,8 @@ export class LineChartComponent {
   constructor() {
     effect(() => {
       if (this.data()?.[0]?.dates.length > 0) {
-        this.animationDuration.set(0);
         this.chart().update();
       }
-    }, {allowSignalWrites: true});
+    });
   }
 }

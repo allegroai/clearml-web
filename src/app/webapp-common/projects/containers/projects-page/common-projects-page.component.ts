@@ -67,10 +67,10 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public projectsList$: Observable<Project[]>;
   public projectsOrderBy$: Observable<string>;
 
-  /* eslint-disable @typescript-eslint/naming-convention */
+
   public ALL_EXPERIMENTS_CARD: ProjectsGetAllResponseSingle = {
     id: '*',
-    name: 'All Experiments',
+    name: 'All Tasks',
     stats: {
       active: {
         status_count: {queued: '∞' as any, in_progress: '∞' as any, published: '∞' as any},
@@ -93,7 +93,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public searching: boolean;
   public selectedProjectId$: Observable<string>;
   public allExamples: boolean;
-  /* eslint-enable @typescript-eslint/naming-convention */
+
   protected readonly searchQuery$: Observable<SearchState['searchQuery']>;
   public selectedProject$: Observable<Project>;
   public projectId: string;
@@ -142,7 +142,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   noProjectsReRoute() {
-    return this.router.navigate(['..', 'experiments'], {relativeTo: this.route.parent});
+    return this.router.navigate(['..', 'tasks'], {relativeTo: this.route.parent});
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -153,11 +153,11 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   protected getExtraProjects(selectedProjectId, selectedProject) {
     return [{
       ...((selectedProjectId && selectedProject?.id) ? selectedProject : this.ALL_EXPERIMENTS_CARD),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       id: selectedProjectId ? selectedProjectId : '*',
-      name: 'All Experiments',
-      basename: 'All Experiments',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      name: 'All Tasks',
+      basename: 'All Tasks',
+
       sub_projects: null,
     } as ProjectsGetAllResponseSingle];
   }
@@ -207,7 +207,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   protected getDeletePopupEntitiesList() {
-    return 'experiment';
+    return 'task';
   }
 
   setupBreadcrumbsOptions() {
@@ -244,7 +244,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         )} in this ${name}. <br/>
                    If you wish to delete this ${name}, you must first archive${name === 'project' ? `, delete, or move these items to another ${name}` : ' or delete these items'} .`,
         no: 'OK',
-        iconClass: 'i-alert',
+        iconClass: 'al-ico-alert',
+        iconColor: 'var(--color-warning)'
       }
     }).afterClosed()
       .subscribe(() => {
@@ -293,7 +294,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   public projectCardClicked(project: ProjectsGetAllResponseSingle) {
-    const allExperiments = project.name === 'All Experiments';
+    const allExperiments = project.name === 'All Tasks';
     if (allExperiments) {
       this.store.dispatch(setDeep({deep: true}));
     }

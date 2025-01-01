@@ -16,7 +16,7 @@ import {SelectableListComponent} from '@common/shared/ui-components/data/selecta
 })
 export class SelectableFilterListComponent {
   private _searchTerm: string;
-  private _list: Array<SelectableListItem>;
+  private _list: SelectableListItem[];
   public filteredList: SelectableListItem[];
   public searchText: string;
 
@@ -29,16 +29,15 @@ export class SelectableFilterListComponent {
     return this._searchTerm;
   }
 
-  @Input() checkedList: Array<any> = [];
-  @Input() placeholder: string = 'Search';
+  @Input() checkedList: string[] = [];
+  @Input() placeholder = 'Search';
   @Input() titleLabel: string;
   @Input() checkAllIcon: string;
-  @Input() theme: 'light' | 'dark' = 'light';
   @Output() itemSelect             = new EventEmitter<string>();
-  @Output() hiddenChanged          = new EventEmitter<Array<SelectableListItem['value']>>();
+  @Output() hiddenChanged          = new EventEmitter<SelectableListItem['value'][]>();
   @Output() searchTermChanged      = new EventEmitter<string>();
 
-  @Input() set list(list: Array<SelectableListItem>) {
+  @Input() set list(list: SelectableListItem[]) {
     this._list        = list;
     this.filteredList = this.filterList(list, this.searchTerm);
   }
@@ -47,7 +46,7 @@ export class SelectableFilterListComponent {
     return this._list;
   }
 
-  filterList(list, searchTerm): Array<SelectableListItem> {
+  filterList(list, searchTerm): SelectableListItem[] {
     if (!searchTerm || searchTerm === '') {
       return list.slice();
     } else {

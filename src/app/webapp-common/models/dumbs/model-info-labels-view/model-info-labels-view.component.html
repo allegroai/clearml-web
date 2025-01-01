@@ -1,82 +1,94 @@
 <sm-editable-section
-  [editable]=" ! model?.ready && model?.company?.id && !isSharedAndNotOwner"
-  [saving]="saving"
-  [disableSave]="!labelsFormList?.first?.valid"
+  [class.in-edit]="editable"
+  [editable]=" ! model()?.ready && model()?.company?.id && !isSharedAndNotOwner()"
+  [saving]="saving()"
+  [disableSave]="!labelsFormList()?.valid"
   (activateEditClicked)="activateEdit()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
 >
   <sm-section-header label="LABELS"></sm-section-header>
-  <ng-container *ngIf="editable; else viewMode">
-    <form
-      #labelsForm="ngForm"
-      [class.edit]="editable"
-      *ngIf="editable"
-      smUniqueInListSyncValidator2
-      prefix2="labelPrefix-"
-    >
-      <div class="body-container">
-        <div class="w-100 body">
-          <ng-container *ngFor="let parameter of formData; let i = index">
-            <mat-form-field appearance="outline" class="w-100">
-              <input #parameterLabel="ngModel"
-                     [(ngModel)]="parameter.label"
-                     [name]="'labelPrefix-' | uuid"
-                     data-id="parameterLabelField"
-                     required
-                     matInput>
-              <mat-error *ngIf="parameterLabel.invalid && parameterLabel?.errors?.required">
-                Required
-              </mat-error>
-            </mat-form-field>
-            <mat-error *ngIf="labelsForm?.errors?.uniqueName" class='outside-error'>
-              Labels must be unique.
-            </mat-error>
-            <span *ngIf="labelsForm?.errors?.uniqueName2 && labelsForm?.errors?.uniqueName2[i]" class="outside-error">Label must be unique.
-          </span>
-
-            <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
-              <input #parameterKey="ngModel"
-                     [(ngModel)]="parameter.id"
-                     type="number"
-                     min="0"
-                     step="1"
-                     pattern="\d+"
-                     [name]="('parameterId-' + parameter.label) | uuid"
-                     data-id="parameterKeyField"
-                     matInput
-                     required>
-              <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
-                Required
-              </mat-error>
-              <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.pattern">
-                Only integers are allowed
-              </mat-error>
-            </mat-form-field>
-
-            <button class="btn btn-primary d-flex-center trash" (click)="$event.detail > 0 && removeRow(i)" data-id="deleteIcon" >
-              <i class="al-icon al-ico-trash sm pointer flashing-icon"></i>
-            </button>
-          </ng-container>
+    @if (editable) {
+      <form
+        #labelsForm="ngForm"
+        [class.edit]="editable"
+        smUniqueInListSyncValidator2
+        prefix2="labelPrefix-"
+      >
+        <div class="body-container">
+          <div class="w-100 body">
+            @for (parameter of formData; track parameter; let i = $index) {
+              <mat-form-field appearance="outline" class="w-100">
+                <input #parameterLabel="ngModel"
+                       [(ngModel)]="parameter.label"
+                       [name]="'labelPrefix-' | uuid"
+                       data-id="parameterLabelField"
+                       required
+                       matInput>
+                @if (parameterLabel.invalid && parameterLabel?.errors?.required) {
+                  <mat-error>
+                    Required
+                  </mat-error>
+                }
+              </mat-form-field>
+              @if (labelsForm?.errors?.uniqueName) {
+                <mat-error class='outside-error'>
+                  Labels must be unique.
+                </mat-error>
+              }
+              @if (labelsForm?.errors?.uniqueName2 && labelsForm?.errors?.uniqueName2[i]) {
+                <span class="outside-error">
+                  Label must be unique.
+                </span>
+              }
+              <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
+                <input #parameterKey="ngModel"
+                       [(ngModel)]="parameter.id"
+                       type="number"
+                       min="0"
+                       step="1"
+                       pattern="\d+"
+                       [name]="('parameterId-' + parameter.label) | uuid"
+                       data-id="parameterKeyField"
+                       matInput
+                       required>
+                @if (parameterKey.invalid && parameterKey?.errors?.required) {
+                  <mat-error>
+                    Required
+                  </mat-error>
+                }
+                @if (parameterKey.invalid && parameterKey?.errors?.pattern) {
+                  <mat-error>
+                    Only integers are allowed
+                  </mat-error>
+                }
+              </mat-form-field>
+              <button mat-icon-button class="trash" (click)="$event.detail > 0 && removeRow(i)" data-id="deleteIcon">
+                <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+              </button>
+            }
+          </div>
         </div>
+      </form>
+      <div class="w-100">
+        <button mat-flat-button class="icon-only" (click)="addRow()" data-id="addParameterButton">
+          <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+        </button>
       </div>
-    </form>
-    <div class="w-100">
-      <button class="btn btn-cml-primary d-flex-center" (click)="addRow()" data-id="addParameterButton">
-        <i class="al-icon sm-md al-ico-plus"></i>
-      </button>
-    </div>
-  </ng-container>
-  <ng-template #viewMode>
+  } @else {
     <div class="d-flex header">
-      <div *ngFor="let col of columns; trackBy: trackById" class="cell">{{col.header}}</div>
+      @for (col of columns; track col.id) {
+        <div class="cell">{{ col.header }}</div>
+      }
     </div>
     <cdk-virtual-scroll-viewport itemSize="48" class="table">
       <div *cdkVirtualFor="let row of formData; trackBy: trackById" class="d-flex">
-        <div *ngFor="let col of columns; trackBy: trackById" class="cell">{{row[col.id]}}</div>
+        @for (col of columns; track col.id) {
+          <div class="cell">{{ row[col.id] }}</div>
+        }
       </div>
     </cdk-virtual-scroll-viewport>
-  </ng-template>
+  }
 </sm-editable-section>
 
 
