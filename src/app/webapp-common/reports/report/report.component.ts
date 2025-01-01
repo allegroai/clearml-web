@@ -5,7 +5,7 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  ViewChild
+  viewChild, inject, effect
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
@@ -30,7 +30,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  switchMap, withLatestFrom,
+  switchMap, withLatestFrom
 } from 'rxjs/operators';
 import {fromEvent, lastValueFrom, Observable, Subscription, take, combineLatest, merge} from 'rxjs';
 import {selectEditingReport, selectReport, selectReportsTags} from '@common/reports/reports.reducer';
@@ -55,6 +55,7 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {selectBlockUserScript, selectDefaultNestedModeForFeature, selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
+import {selectThemeMode} from '@common/core/reducers/view.reducer';
 
 const replaceSlash = (part) => part
   .replace('\\', '/')
@@ -73,6 +74,15 @@ const replaceSlash = (part) => part
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReportComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+  public cdr = inject(ChangeDetectorRef);
+  private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private _clipboardService = inject(ClipboardService);
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
   private sub = new Subscription();
   public icons = ICONS;
   public report: IReport;
@@ -81,9 +91,10 @@ export class ReportComponent implements OnInit, OnDestroy {
   public orgDesc: string;
   public draft: boolean;
   public archived: boolean;
-  public reportTags$: Observable<string[]>;
-  public smallScreen$: Observable<boolean>;
-  public editMode$: Observable<boolean>;
+  public reportTags$: Observable<string[]> = this.store.select(selectReportsTags);
+  public smallScreen$: Observable<boolean> = this.breakpointObserver.observe('(max-width: 1200px)')
+    .pipe(map(state => state.matches));
+  public editMode$: Observable<boolean> = this.store.select(selectEditingReport);
   public printStyle = {
     table: {border: '1px solid gray'},
     th: {border: '1px solid gray'},
@@ -97,29 +108,14 @@ export class ReportComponent implements OnInit, OnDestroy {
   public handleUpload: (files: File[]) => Promise<UploadResult[]>;
   public showDescription = false;
   public resources: { unused: boolean; url: string }[];
-  public menuPosition = { x: 0, y: 0 };
-  public blockUserScripts$: Observable<boolean>;
+  public menuPosition = {x: 0, y: 0};
+  public blockUserScripts$: Observable<boolean> = this.store.select(selectBlockUserScript);
+  public theme = this.store.selectSignal(selectThemeMode);
 
-  @ViewChild(MarkdownEditorComponent) mdEditor: MarkdownEditorComponent;
-  @ViewChild('printHiddenButton') printHiddenButton: ElementRef;
+  private mdEditor = viewChild<MarkdownEditorComponent>(MarkdownEditorComponent);
+  private printHiddenButton = viewChild<ElementRef>('printHiddenButton');
 
-  constructor(
-    private store: Store,
-    public cdr: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private route: ActivatedRoute,
-    private _clipboardService: ClipboardService,
-    private http: HttpClient,
-    private actions$: Actions
-  ) {
-    this.smallScreen$ = breakpointObserver.observe('(max-width: 1200px)')
-      .pipe(map(state => state.matches));
-    this.editMode$ = this.store.select(selectEditingReport);
-    this.reportTags$ = this.store.select(selectReportsTags);
-    this.blockUserScripts$ = this.store.select(selectBlockUserScript);
-
+  constructor() {
     this.store.dispatch(getReportsTags());
 
     this.sub.add(
@@ -145,7 +141,7 @@ export class ReportComponent implements OnInit, OnDestroy {
               img.src = reader.result as string;
               return merge(
                 fromEvent(img, 'load'),
-                fromEvent(img, 'error'),
+                fromEvent(img, 'error')
               )
                 .pipe(
                   map(() => {
@@ -183,7 +179,8 @@ export class ReportComponent implements OnInit, OnDestroy {
               results.push({
                 name: file.name,
                 url: `${filesServerUrl}/${encodeURI(url)}`,
-                isImg: true});
+                isImg: true
+              });
             });
 
           return this.http.post(filesServerUrl, formData, {withCredentials: true})
@@ -207,7 +204,15 @@ export class ReportComponent implements OnInit, OnDestroy {
       );
       return lastValueFrom(uploads$);
     };
+
+    effect(() => {
+      if (this.theme()) {
+        Array.from(window.frames).forEach(frame => frame.postMessage('themeChanged', '*'));
+      }
+    });
+
   }
+
   setupBreadcrumbsOptions() {
     this.sub.add(
       combineLatest([
@@ -216,7 +221,7 @@ export class ReportComponent implements OnInit, OnDestroy {
       ]).pipe(
         filter(([selectedReport]) => !!selectedReport),
         withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
-      ).subscribe(([[selectedReport,], defaultNestedModeForFeature]) => this.store.dispatch(setBreadcrumbsOptions({
+      ).subscribe(([[selectedReport], defaultNestedModeForFeature]) => this.store.dispatch(setBreadcrumbsOptions({
           breadcrumbOptions: {
             showProjects: !!selectedReport,
             featureBreadcrumb: {
@@ -306,7 +311,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         body: '<p class="text-center">After publishing the report it can no longer be edited</p>',
         yes: 'Publish',
         no: 'Cancel',
-        iconClass: 'al-icon al-ico-publish'
+        iconClass: 'al-ico-publish'
       }
     }).afterClosed().subscribe(accept =>
       accept && this.store.dispatch(publishReport({id: this.report.id}))
@@ -344,8 +349,11 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   editModeChanged() {
-    this.widthExpanded = this.mdEditor.isExpand;
-    this.store.dispatch(setEditMode({editing: this.mdEditor.editMode}));
+    this.widthExpanded = this.mdEditor().isExpand;
+    this.store.dispatch(setEditMode({editing: this.mdEditor().editMode}));
+    if (!this.mdEditor().editMode) {
+      this.dirtyChanged(false);
+    }
     setTimeout(() => Array.from(window.frames).forEach(frame => frame.postMessage('resizePlot', '*')), 500);
   }
 
@@ -358,7 +366,7 @@ export class ReportComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe(() => this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report markdown copied to clipboard'))
       );
-    this._clipboardService.copy(this.mdEditor.data);
+    this._clipboardService.copy(this.mdEditor().getData());
   }
 
   deleteReport() {
@@ -373,7 +381,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     )
       .subscribe(() => {
         const test = new RegExp(`!\\[(.*)\\]\\(${escapeRegex(resource)}\\)`, 'gm');
-        const ace = this.mdEditor.ace;
+        const ace = this.mdEditor().ace;
         let range = ace.find(test, {
           wrap: true,
           caseSensitive: true,
@@ -415,6 +423,6 @@ export class ReportComponent implements OnInit, OnDestroy {
     });
     document.body.appendChild(clonedNode);
     window.setTimeout(() => document.body.removeChild(clonedNode), 3000);
-    this.printHiddenButton.nativeElement.click();
+    this.printHiddenButton().nativeElement.click();
   }
 }

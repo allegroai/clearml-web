@@ -1,5 +1,4 @@
-import {Component, Input} from '@angular/core';
-import {NgClass} from '@angular/common';
+import {Component, input} from '@angular/core';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
@@ -8,13 +7,10 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   styleUrls: ['./overlay.component.scss'],
   standalone: true,
   imports: [
-    NgClass,
     ClickStopPropagationDirective
   ]
 })
 export class OverlayComponent {
-
-  @Input() backdropActive;
-  @Input() transparent: boolean = false;
-
+  backdropActive = input<boolean>();
+  transparent = input(false);
 }

@@ -8,7 +8,7 @@ import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {ClipboardService} from 'ngx-clipboard';
-import { take } from 'rxjs';
+import {take} from 'rxjs';
 
 export interface ReportCodeEmbedConfiguration {
   type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample' | 'parcoords' | 'single';
@@ -21,6 +21,7 @@ export interface ReportCodeEmbedConfiguration {
   valueType?: string;
   seriesName?: string;
   xaxis?: string;
+  group?: boolean;
 }
 
 @Injectable({
@@ -35,24 +36,25 @@ export class ReportCodeEmbedBaseService {
   protected _clipboardService: ClipboardService;
 
   constructor() {
-  this.store = inject(Store);
-  this.locationStrategy = inject(LocationStrategy);
-  this.configService = inject(ConfigurationService);
-  this._clipboardService = inject(ClipboardService);
+    this.store = inject(Store);
+    this.locationStrategy = inject(LocationStrategy);
+    this.configService = inject(ConfigurationService);
+    this._clipboardService = inject(ClipboardService);
     this.isCommunity = this.configService.getStaticEnvironment().communityServer;
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
   }
 
   createCode(conf: ReportCodeEmbedConfiguration) {
-    const code = this.generateEmbedSnippet(conf);
+    const code = conf.group ? this.generateEmbedSnippetGroup(conf) : this.generateEmbedSnippet(conf);
     this._clipboardService.copyResponse$
       .pipe(take(1))
       .subscribe(() => this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS,
-        'Resource embed code copied to clipboard.You can paste in your Reports.'))
+        'Resource embed code copied to clipboard.You can paste it in your Reports.'))
       );
     this._clipboardService.copy(code);
   }
-  encodeSrc(conf: ReportCodeEmbedConfiguration, internal = true){
+
+  encodeSrc(conf: ReportCodeEmbedConfiguration, internal = true) {
     const url = this.getUrl();
     url.searchParams.set('type', conf.type);
     url.searchParams.set('objectType', conf.objectType);
@@ -74,12 +76,19 @@ export class ReportCodeEmbedBaseService {
     return url;
   }
 
+  generateEmbedSnippetGroup(conf: ReportCodeEmbedConfiguration) {
+    const graphsUnmerged = conf.type === 'plot' && conf.variants.length > 1 && Array.from(new Set(conf.seriesName)).length < 2;
+    if (conf.objects.length > 1 && graphsUnmerged) {
+      return `<h2>${conf.metrics[0]}</h2>\n` + conf.objects.map((object, i) =>
+        this.generateEmbedSnippet({...conf, objects: [object], seriesName: conf.seriesName[i]})).join('\n');
+    } else {
+      return `<h2>${conf.metrics[0]}</h2>\n` + conf.variants.map((variant, i) =>
+        this.generateEmbedSnippet({...conf, variants: [variant], seriesName: conf.seriesName[i]})).join('\n');
+    }
+  }
+
   generateEmbedSnippet(conf: ReportCodeEmbedConfiguration) {
     const urlStr = this.encodeSrc(conf);
-    return `<iframe
-  src="${urlStr}"
-  name="${conf.name || v4()}"
-  width="100%" height="400"
-></iframe>`;
+    return `<iframe src="${urlStr}" name="${conf.name || v4()}" width="100%" height="400"></iframe>`;
   }
 }

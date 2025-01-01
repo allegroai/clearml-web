@@ -11,6 +11,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import {NAPipe} from '@common/shared/pipes/na.pipe';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
+import {StatusIconLabelComponent} from '@common/shared/experiment-status-icon-label/status-icon-label.component';
 
 @Component({
   selector: 'sm-experiment-compare-general-data',
@@ -27,8 +28,9 @@ import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/e
     NAPipe,
     TimeAgoPipe,
     DatePipe,
-    EllipsisMiddleDirective
-]
+    EllipsisMiddleDirective,
+    StatusIconLabelComponent
+  ]
 })
 export class ExperimentCompareGeneralDataComponent {
 

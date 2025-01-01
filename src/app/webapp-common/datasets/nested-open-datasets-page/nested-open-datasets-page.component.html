@@ -1,0 +1,63 @@
+<sm-nested-project-view-page
+  [projectsList]="projectsList$ | ngrxPush"
+  [projectsOrderBy]="projectsOrderBy$ | ngrxPush"
+  [projectsSortOrder]="projectsSortOrder$ | ngrxPush"
+  [noMoreProjects]="noMoreProjects$ | ngrxPush"
+  [allExamples]="allExamples"
+  [cardContentTemplateRef]="cardContent"
+  [entityType]="entityType"
+  [projectsTags]="projectsTags$ | ngrxPush"
+  [searching]="searching"
+  (cardClicked)="projectCardClicked($event)"
+  (deleteProjectClicked)="deleteProject($event)"
+  (projectNameChanged)="projectNameChanged($event)"
+  (orderByChanged)="orderByChanged($event)"
+  (loadMore)="loadMore()"
+  (toggleNestedView)="toggleNestedView($event)"
+  class="nested-project-view"
+  >
+
+  <button mat-flat-button create-button (click)="createExamples()">
+    <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+    NEW DATASET
+  </button>
+
+  <div empty-state class="empty-state">
+    <div class="title-icon">
+      <mat-icon fontSet="al" fontIcon="al-ico-datasets" class="xl"></mat-icon>
+    </div>
+    <div class="title">NO DATASETS TO SHOW</div>
+    <div class="sub-title">Run your first dataset to see it displayed here
+      @if (allExamples) {
+        or <a href="" (click)="$event.preventDefault(); createExamples()" class="link">generate
+        example
+      </a>
+    }
+  </div>
+  <sm-dataset-empty [showButton]="true"></sm-dataset-empty>
+</div>
+
+</sm-nested-project-view-page>
+
+<ng-template #cardContent let-project>
+  <sm-circle-counter
+    [counter]="project.id === '*' ? '∞' : project.stats?.datasets?.count ?? '0'"
+    [label]="'DATASETS'"
+  [type]="project.stats?.datasets?.count===0 ? circleTypeEnum.empty : circleTypeEnum.pending"></sm-circle-counter>
+  <sm-circle-counter label="TAGS IN USE" [counter]="[]">
+    @if (!hideMenu) {
+      <sm-tag-list
+        class="tags-list-counter"
+        [readonly]="true"
+        [empty]="!(project.stats?.datasets?.tags.length > 0)"
+        tagsList
+        [tags]="project.stats?.datasets?.tags"
+        smClickStopPropagation
+      ></sm-tag-list>
+    } @else {
+      <sm-tag-list [tags]="project.tags"></sm-tag-list>
+    }
+  </sm-circle-counter>
+</ng-template>
+
+

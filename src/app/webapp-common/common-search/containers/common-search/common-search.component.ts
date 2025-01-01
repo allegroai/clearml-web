@@ -6,12 +6,26 @@ import {SearchState, selectIsSearching, selectPlaceholder, selectSearchQuery} fr
 import {Observable} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {PushPipe} from '@ngrx/component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-common-search',
   templateUrl: './common-search.component.html',
   styleUrls: ['./common-search.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    SearchComponent,
+    PushPipe,
+    TooltipDirective,
+    ClickStopPropagationDirective,
+    MatIconButton,
+    MatIcon
+  ]
 })
 export class CommonSearchComponent implements OnInit {
   public searchQuery$: Observable<SearchState['searchQuery']>;
@@ -21,7 +35,7 @@ export class CommonSearchComponent implements OnInit {
 
 
   @ViewChild(SearchComponent) searchElem: SearchComponent;
-  public regExp: boolean = false;
+  public regExp = false;
   private closeTimer: number;
   minChars = 3;
   public regexError: boolean;
@@ -85,7 +99,7 @@ export class CommonSearchComponent implements OnInit {
       this.router.navigate([], {
         relativeTo: this.route,
         replaceUrl: true,
-        queryParamsHandling: "merge",
+        queryParamsHandling: 'merge',
         queryParams: {
           q: query || undefined
         }
@@ -133,7 +147,7 @@ export class CommonSearchComponent implements OnInit {
     this.router.navigate([], {
       relativeTo: this.route,
       replaceUrl: true,
-      queryParamsHandling: "merge",
+      queryParamsHandling: 'merge',
       queryParams: {
         qreg: this.regExp ? this.regExp : undefined}
     })

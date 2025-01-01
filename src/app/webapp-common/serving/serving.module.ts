@@ -26,8 +26,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ColGetterPipe} from '@common/shared/pipes/col-getter.pipe';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
-import {TableFilterSortTemplateComponent} from '@common/shared/ui-components/data/table/table-filter-sort-template/table-filter-sort-template.component';
-import {TableCardFilterTemplateComponent} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter-template.component';
+import {TableFilterSortComponent} from '@common/shared/ui-components/data/table/table-filter-sort/table-filter-sort.component';
+import {TableCardFilterComponent} from '@common/shared/ui-components/data/table/table-card-filter-template/table-card-filter.component';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
@@ -43,7 +43,10 @@ import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row
 import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
 import {ServingLoadingComponent} from '@common/serving/serving-loading.component';
 import {ServingEmptyStateComponent} from '~/features/serving/empty-state/serving-empty-state.component';
+import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
 import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 export const servingSyncedKeys    = [
@@ -106,8 +109,8 @@ const getInitState = (userPreferences: UserPreferences) => ({
     TooltipDirective,
     ColGetterPipe,
     TagListComponent,
-    TableFilterSortTemplateComponent,
-    TableCardFilterTemplateComponent,
+    TableFilterSortComponent,
+    TableCardFilterComponent,
     TableComponent,
     TimeAgoPipe,
     FilterPipe,
@@ -122,7 +125,10 @@ const getInitState = (userPreferences: UserPreferences) => ({
     LabeledRowComponent,
     CopyClipboardComponent,
     ServingEmptyStateComponent,
-    FileSizePipe
+    IsRowSelectedPipe,
+    FileSizePipe,
+    MatIconButton,
+    MatIcon
   ],
   providers: [
     SmFormBuilderService, DatePipe,

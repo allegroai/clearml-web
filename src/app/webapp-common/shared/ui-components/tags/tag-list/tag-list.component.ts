@@ -1,17 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, output} from '@angular/core';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Observable} from 'rxjs';
 import {UserTagComponent} from '@common/shared/ui-components/tags/user-tag/user-tag.component';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {PushPipe} from '@ngrx/component';
+import {injectResize} from 'ngxtension/resize';
+import {toSignal} from '@angular/core/rxjs-interop';
+
 
 export interface Tag {
   caption: string;
@@ -28,47 +22,34 @@ export interface Tag {
   standalone: true,
   imports: [
     UserTagComponent,
-    NgIf,
-    NgForOf,
-    AsyncPipe,
-    PushPipe
-  ],
+    PushPipe,
+],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagListComponent {
+  private colorService = inject(TagColorService);
+  private ref = inject(ElementRef<HTMLElement>);
+  resize$ = injectResize();
   public disableRemove: string;
-  public tagsList = [] as Tag[];
-  public maxTagHover: number;
+  public er: number;
 
-  @Input() set tags(tags: string[]) {
-    if (!tags) {
-      return;
+  tags = input([] as string[]);
+  sysTags = input([] as string[]);
+  tooltip = input<boolean>(false);
+  readonly = input<boolean>(false);
+  empty = input<boolean>(false);
+  remove = output<string>();
+  add = output<MouseEvent>();
+
+  resize = toSignal(this.resize$);
+  tagsList = computed(() => this.tags()?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)})));
+  maxTagHover = computed(() => {
+    this.disableRemove = null;
+    if (this.tagsList() && this.resize() !== undefined) {
+      return this.resize()?.width - (this.tagsList().length - 1) * 24 - 80 * ((this.add as any).listeners ? 1 : 0);
     }
-    window.setTimeout(() => {
-      this.tagsList = tags?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)}));
-      if (this.tagsList) {
-        window.setTimeout(() => {
-          this.maxTagHover = this.ref.nativeElement.getBoundingClientRect().width
-            - (this.tagsList.length - 1) * 24
-            - 80 * (this.add.observed ? 1 : 0);
-          this.cdr.detectChanges();
-        }, 100);
-      }
-      this.disableRemove = null;
-      this.cdr.detectChanges();
-    });
-  }
-  @Input() sysTags = [] as string[];
-  @Input() tooltip: boolean = false;
-  @Input() readonly: boolean = false;
-  @Output() remove = new EventEmitter();
-  @Output() add = new EventEmitter<MouseEvent>();
-
-  constructor(private colorService: TagColorService, private ref: ElementRef, private cdr: ChangeDetectorRef) { }
-
-  public trackFn(index: number, tag: Tag) {
-    return tag.caption;
-  }
+    return this.ref.nativeElement.getBoundingClientRect().width;
+  })
 
   removeTag(tag: string) {
     this.remove.emit(tag);

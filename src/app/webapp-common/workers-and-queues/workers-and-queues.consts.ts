@@ -1,7 +1,7 @@
 
 export const QUEUES_TABLE_COL_FIELDS = {
   ID          : 'id',
-  NAME        : 'name',
+  NAME        : 'caption',
   USER        : 'user.name',
   QUEUED      : 'status_changed',
   TASK        : 'entries[0].task.name',

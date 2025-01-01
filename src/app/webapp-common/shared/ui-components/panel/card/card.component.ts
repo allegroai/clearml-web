@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal, input } from '@angular/core';
 
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
@@ -6,6 +6,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   selector: 'sm-card',
   templateUrl: './card.component.html',
   styleUrls: ['./card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ClickStopPropagationDirective
@@ -13,38 +14,26 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 })
 export class CardComponent {
 
-  @Input() header: string;
-  @Input() height: number;
+  header = input<string>();
+  height = input<number>();
 
   // TODO: delete the following:
-  @Input() collapsed = false;
-  @Input() collapsible = false;
-  @Input() fixedSize = false;
-  @Input() overflowVisible = false;
-  @Input() cardSign = '';
-  @Input() showSeparator = true;
-  @Input() whiteHeader = false;
-  @Input() whiterHeader = false;
-  @Input() isExample = false;
-  @Input() isFolder = false;
-  @Input() subFolderTitle = '';
-  @Input() oneTabMode: boolean;
-  @Input() ribbonText: string;
+  collapsed = input(false);
+  collapsible = input(false);
+  fixedSize = input(false);
+  overflowVisible = input(false);
+  cardSign = input('');
+  showSeparator = input(true);
+  whiteHeader = input(false);
+  whiterHeader = input(false);
+  isExample = input(false);
+  showFolder = input(false);
+  subFolderTitle = input('');
+  oneTabMode = input<boolean>();
+  ribbonText = input<string>();
 
 
-  public showSecondTab = false;
+  public activeTab = signal(1);
   public secondTabIsHovered: boolean;
   public highlightFirstTab: boolean;
-
-  setShowSecondTab(show: boolean) {
-    this.showSecondTab = show;
-  }
-
-  setSecondTabHover(isHovered: boolean) {
-    this.secondTabIsHovered = isHovered;
-  }
-
-  setHighlightFirstTab(highlight: boolean) {
-    this.highlightFirstTab = highlight;
-  }
 }

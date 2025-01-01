@@ -7,7 +7,7 @@ import {ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/tabl
 import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {distinctUntilChanged, filter, skip, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, skip} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {Params} from '@angular/router';
 import {decodeColumns, decodeFilter, decodeOrder} from '@common/shared/utils/tableParamEncode';
@@ -242,16 +242,9 @@ export class ServingLoadingComponent extends BaseEntityPageComponent implements 
       .pipe(
         takeUntilDestroyed(),
         filter(config => !!config),
-        )    .subscribe((conf) => {
-        const contextMenu = modelServingRoutes
-          .map(route => {
-            const baseLink = route.link.at(-1);
-            return {
-              ...route,
-              isActive: baseLink === conf[0]?.path
-            };
-          });
-        this.store.dispatch(headerActions.setTabs({contextMenu}));
+      )
+      .subscribe((conf) => {
+        this.store.dispatch(headerActions.setTabs({contextMenu: modelServingRoutes, active: conf[0].path}));
       });
   }
 

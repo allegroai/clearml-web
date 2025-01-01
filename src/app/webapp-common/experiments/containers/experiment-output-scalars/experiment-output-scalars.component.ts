@@ -29,7 +29,7 @@ import {
   setExperimentSettings,
   toggleSettings
 } from '../../actions/common-experiment-output.actions';
-import {convertScalars, sortMetricsList} from '@common/tasks/tasks.utils';
+import {convertScalars, convertSplitScalars, sortMetricsList} from '@common/tasks/tasks.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
@@ -184,7 +184,6 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
           }))).flat()
         ];
         this.prepareGraphsAndUpdate(scalars);
-        this.changeDetection.markForCheck();
       })
     );
 
@@ -225,9 +224,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
   private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
-      const splitScalars = this.groupBy === 'metric' ? scalars : this.splitScalars(scalars);
-      this.scalarList = {...(this.singleValueExists && {[singleValueChartTitle]: {}}), ...prepareScalarList(splitScalars)};
-      this.graphs = convertScalars(splitScalars, this.experimentId);
+      this.scalarList = {...(this.singleValueExists && {[singleValueChartTitle]: {}}), ...prepareScalarList(scalars)};
+      this.graphs = this.groupBy === 'metric' ? convertScalars(scalars, this.experimentId) : convertSplitScalars(scalars, this.experimentId);
       this.changeDetection.markForCheck();
     }
   }
@@ -255,7 +253,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   refresh() {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
-      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
+      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, refresh: true}));
     }
   }
 
@@ -287,16 +285,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.store.dispatch(toggleSettings());
   }
 
-  private splitScalars(scalars: GroupedList): GroupedList {
-    return Object.entries(scalars).reduce((acc, [metric, variantGraph]) => {
-      Object.entries(variantGraph).forEach(([variant, graph]) => {
-        acc[metric + ' / ' + variant] = {[metric + ' / ' + variant]: {...graph, originalMetric: metric}};
-      });
-      return acc;
-    }, {});
-  }
-
-  createEmbedCode(event: { metrics?: string[]; variants?: string[]; xaxis?: ScalarKeyEnum; domRect: DOMRect }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; xaxis?: ScalarKeyEnum; domRect: DOMRect; group?: boolean }) {
     this.reportEmbed.createCode({
       type: (!event.metrics && !event.variants) ? 'single' : 'scalar',
       objects: [this.experimentId],
@@ -307,7 +296,6 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
   protected axisChanged() {
     this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
-    this.experimentGraphs.prepareRedraw();
   }
 
   selectedMetricsChanged(selectedMetrics: string[]) {

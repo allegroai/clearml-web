@@ -1,7 +1,9 @@
-import {booleanAttribute, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {booleanAttribute, Component, ElementRef, input, output, viewChild, inject } from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {CdkScrollableModule} from '@angular/cdk/scrolling';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-dialog-template',
@@ -9,37 +11,34 @@ import {SaferPipe} from '@common/shared/pipes/safe.pipe';
   styleUrls: ['./dialog-template.component.scss'],
   imports: [
     CdkScrollableModule,
-    SaferPipe
-],
+    SaferPipe,
+    MatIcon,
+    MatIconButton
+  ],
   standalone: true
 })
 export class DialogTemplateComponent {
+  private dialog = inject<MatDialogRef<DialogTemplateComponent>>(MatDialogRef<DialogTemplateComponent>);
+  displayX = input(booleanAttribute(true), { transform: booleanAttribute });
+  closeOnX = input(booleanAttribute(true), { transform: booleanAttribute });
 
+  containerClass = input<string>();
+  closedCodeLabel = input('VIEW COMMAND LINE');
+  iconClass = input<string>(); // the icon class (see icons.scss).
+  iconData = input<string>();
+  header = input<string>();
+  subHeader = input<string>();
+  pageHeader = input<string>();
+  headerClass = input<string>();
+  xClicked = output();
 
-  @Input({transform: booleanAttribute}) displayX = true;
-  @Input({transform: booleanAttribute}) closeOnX = true;
-
-  @Input() theme = 'light-theme';
-  @Input() containerClass: string;
-  @Input() closedCodeLabel = 'VIEW COMMAND LINE';
-  @Input() iconClass: string; // the icon class (see icons.scss).
-  @Input() iconData: string;
-  @Input() header: string;
-  @Input() subHeader: string;
-  @Input() pageHeader: string;
-  @Input() headerClass: string;
-  @Output() xClicked = new EventEmitter();
-
-  @ViewChild('container', {static: true}) container: ElementRef<HTMLDivElement>;
-  constructor(private dialog: MatDialogRef<DialogTemplateComponent>) {
-  }
+  container = viewChild<ElementRef<HTMLDivElement>>('container');
 
   onXPressed() {
-    if (this.closeOnX) {
+    if (this.closeOnX()) {
       this.dialog.close();
     }
     this.xClicked.emit();
   }
-
 }
 

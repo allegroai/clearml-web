@@ -1,4 +1,4 @@
-@import "variables";
+@import "../../../layout/layout";
 
 :host {
   position: fixed;
@@ -6,10 +6,32 @@
   height: 48px;
   width: 100%;
   display: block;
-  background-color: #3a425c;
 
-  .selected-number {
-    padding-left: 12px;
+  .footer-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 18px;
+
+    border-top:solid 2px var(--color-primary);
+    position: fixed;
+    left: 0;
+    height: $project-footer-height;
+    width: 100%;
+    padding-left: 76px;
+    background-color: var(--color-surface-container-low);
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 10;
+    transition:bottom 0.3s ease-out;
+
+    &.show-container {
+      bottom: 0;
+    }
+  }
+
+  sm-tags-menu {
+    margin-left: -18px;
   }
 
   .show-all {
@@ -19,55 +41,20 @@
   .divider {
     height: 20px;
     opacity: 0.3;
-    border-right: solid 1px $blue-100;
-  }
-
-  button {
-    background-color: transparent;
-    border: none;
-    color: white;
-    padding: 0;
-  }
-
-  .compare-button-container {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    margin: 0 12px;
-
-    &.compare {
-      i {
-        margin-right: 6px;
-      }
-    }
+    border-right: solid 1px var(--color-primary);
   }
 
   .has-example-item {
     margin: 0 24px 0 auto;
-    i {
-      color: $neon-yellow;
+    .mat-icon {
+      color: var(--color-tertiary);
     }
-    .title {
-      margin-left: 6px;
-    }
+
     @media screen and (max-width: 1200px) {
       .title {
         display: none;
       }
     }
-  }
-
-  .tags-container {
-    button {
-      height: 20px;
-      padding: 0 12px;
-
-    }
-  }
-  button.disabled, button[disabled] {
-    cursor: no-drop;
-    pointer-events: none;
-    opacity: 0.3 !important;
   }
 }
 

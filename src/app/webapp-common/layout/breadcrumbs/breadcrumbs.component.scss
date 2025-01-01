@@ -1,5 +1,3 @@
-@import "variables";
-
 span {
   font-size: 15px;
 }
@@ -26,10 +24,9 @@ span {
 
   .crumb {
     font-size: 15px;
-    color: $blue-100;
+    color: var(--color-on-primary-container);
 
     &:hover {
-      color: #fff;
 
       &.url {
         text-decoration: underline;
@@ -41,7 +38,7 @@ span {
     }
 
     &.last {
-      color: #fff;
+      color: var(--color-secondary);
       white-space: nowrap;
       overflow: hidden;
       display: grid;
@@ -49,49 +46,13 @@ span {
       align-items: center;
       grid-gap: 8px;
       .name {
-        font-weight: 700;
+        font-weight: 500;
       }
-    }
-  }
-
-  .sub-project {
-    color: $blue-100;
-    white-space: nowrap;
-
-    &:hover {
-      color: #fff;
-    }
-
-    &.last {
-      font-weight: 700;
-      color: #fff;
-      overflow: hidden;
-    }
-
-    &.after-collapse {
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
   }
 
   .menu-trigger-icon {
     width: 34px;
-
-    .menu-trigger-icon {
-      width: 34px;
-      height: 100%;
-      color: $blue-100;
-    }
-  }
-
-  .feature-tag {
-    color: #d3fd00;
-    font-size: 12px;
-    height: 18px;
-    margin: 4px 0 4px 6px;
-    padding: 0 6px;
-    border-radius: 9px;
-    background-color: $blue-500;
   }
 
   .archive {
@@ -101,8 +62,8 @@ span {
     padding: 0 6px;
     line-height: 18px;
     border-radius: 4px;
-    background-color: $blue-600;
-    color: $blue-100;
+    background-color: var(--color-surface-variant);
+    color: var(--color-on-surface-variant);
     font-size: 12px;
   }
 
@@ -120,9 +81,7 @@ span {
 
 .sub-project-menu-item {
   max-width: 400px;
-  font-size: 14px;
-  font-weight: 500;
-  color: $blue-900;
+
 
   ::ng-deep .mat-mdc-menu-item-text {
     display: -webkit-box;
@@ -137,16 +96,9 @@ span {
   max-width: 400px;
 }
 
-.breadcrumbLink:last-of-type a:not(.sub-project) {
-  pointer-events: none;
-  cursor: default;
-  font-weight: bold;
-  color: white;
-}
-
 .share {
-  color: #00e3b9;
-  border: 1px solid #00e3b9;
+  color: var(--color-on-neon-surface);
+  border: 1px solid var(--color-neon-surface);
   height: 22px;
   width: 22px;
   display: inline-flex;
@@ -172,9 +124,8 @@ span {
   width: 372px;
   height: 36px;
   border-radius: 4px;
-  border: solid 1px $cloudy-blue-two;
+  border: solid 1px var(--color-outline-variant);
   font-size: 14px;
-  color: #404040;
   margin: 2px 0 24px;
 }
 
@@ -186,13 +137,12 @@ span {
   display: flex;
   align-items: center;
   border-radius: 4px;
-  border: solid 1px $cloudy-blue-two;
+  border: solid 1px var(--color-outline-variant);
   height: 36px;
 
   .share-link {
     font-size: 14px;
     line-height: 1.5;
-    color: #404040;
     padding: 12px;
     flex: 1;
   }
@@ -205,11 +155,11 @@ span {
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-left: solid 1px $cloudy-blue-two;
-    color: $blue-400;
+    border-left: solid 1px var(--color-outline-variant);
+    color: var(--color-on-surface-variant);
 
     :active {
-      color: $blue-700;
+      color: var(--color-on-surface);
     }
   }
 }
@@ -227,19 +177,13 @@ span {
 
 .copy-title {
   font-size: 12px;
-  color: $blue-400;
+  color: var(--color-on-surface-variant);
 }
-
-.close-dialog {
-  color: #8491c2;
-  font-size: 20px;
-}
-
 
 .badge {
   margin-left: 12px;
-  background-color: $purple;
-  color: white;
+  background-color: var(--color-tertiary-fixed);
+  color: var(--color-on-tertiary-fixed);
   padding: 0 6px;
   border-radius: 4px;
   font-size: 11px;

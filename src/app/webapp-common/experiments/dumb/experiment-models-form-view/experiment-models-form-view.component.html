@@ -2,28 +2,39 @@
   <sm-labeled-row label="MODEL NAME">
     <div class="d-flex align-items-center">
       <div class="d-flex-center">
-        <a [href]="'projects/' + projectId + '/models/' + model?.id" target="_blank"><span>{{model?.name}}</span></a>
-        <i *ngIf="model?.uri && !isLocalFile"
-           class="pointer al-icon al-ico-download sm-md ms-2"
-           (click)="artifactFilePathClicked(model.uri)"
-        ></i>
-        <sm-copy-clipboard *ngIf="model?.uri && isLocalFile"
-                           label="" [clipboardText]="model.uri"
-                           class="light"
-                           [hideBackground]="true"
-        ></sm-copy-clipboard>
-        <sm-id-badge *ngIf="model?.id" class="ms-3" [id]="model.id" (copied)="copySuccess()"></sm-id-badge>
+        <a [href]="'projects/' + projectId() + '/models/' + model()?.id" target="_blank"><span>{{model()?.name}}</span></a>
+        @if (model()?.uri && !isLocalFile()) {
+          <button mat-icon-button (click)="artifactFilePathClicked(model().uri)">
+            <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+          </button>
+        }
+        @if (model()?.uri && isLocalFile()) {
+          <sm-copy-clipboard
+            label="" [clipboardText]="model().uri"
+          ></sm-copy-clipboard>
+        }
+        @if (model()?.id) {
+          <sm-id-badge class="ms-3" [id]="model().id" (copied)="copySuccess()"></sm-id-badge>
+        }
       </div>
-      <ng-container *ngIf="editable">
-        <i class="al-icon al-ico-edit al-color blue-400 sm-md pointer mx-3"  smTooltip="Select model" (click)="chooseModel()"></i>
-        <i *ngIf="model?.id" class="al-icon al-ico-trash al-color blue-400 sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
-      </ng-container>
+      @if (editable()) {
+        <button mat-icon-button smTooltip="Select model" class="ms-3" (click)="chooseModel()">
+          <mat-icon fontSet="al" fontIcon="al-ico-edit"></mat-icon>
+        </button>
+        @if (model()?.id) {
+          <button mat-icon-button class="ms-3" smTooltip="Remove model" (click)="removeModel()">
+            <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+          </button>
+        }
+      }
     </div>
   </sm-labeled-row>
-  <sm-labeled-row *ngIf="showCreatedExperiment" label="CREATING EXPERIMENT">
-    <a [href]="'/projects/'+ ((source?.projectId) ? source?.projectId : '*') + '/experiments/' + (source? source?.experimentId: '')"
-       target="_blank">
-      {{source?.experimentName}}
-    </a>
-  </sm-labeled-row>
+  @if (showCreatedExperiment()) {
+    <sm-labeled-row label="CREATING TASK">
+      <a [href]="'/projects/'+ ((source()?.projectId) ? source()?.projectId : '*') + '/experiments/' + (source()? source()?.experimentId: '')"
+        target="_blank">
+        {{source()?.experimentName}}
+      </a>
+    </sm-labeled-row>
+  }
 </div>

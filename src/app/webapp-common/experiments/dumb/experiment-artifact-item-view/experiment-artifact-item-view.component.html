@@ -1,36 +1,48 @@
-  <sm-editable-section [disableInEditMode]="true" [editable]="false" *ngIf="artifact">
+@if (artifact) {
+  <sm-editable-section [disableInEditMode]="true" [editable]="false">
     <div>
       <sm-labeled-row label="FILE PATH" data-id="filePathId">
-        <a href="" *ngIf="isLinkable" (click)="linkClicked($event)" href="">{{artifact?.uri}}</a>
-        <span class="uri" *ngIf="!isLinkable">{{artifact?.uri}}</span>
-        <mat-spinner *ngIf="downloading; else: downloadButton" [diameter]="16" [strokeWidth]="2" color="accent"></mat-spinner>
-        <ng-template #downloadButton>
-          <i *ngIf="artifact?.uri"
-             class="pointer al-icon al-ico-download sm ms-1"
-             (click)="artifactFilePathClicked(artifact.uri, inMemorySize)"
-          ></i>
-        </ng-template>
-        <sm-copy-clipboard *ngIf="artifact?.uri && isLocalFile"
-                           label="" [clipboardText]="artifact.uri"
-                           class="ps-2"
-                           [hideBackground]="true"
-        ></sm-copy-clipboard>
+        @if (isLinkable) {
+          <a href="" (click)="linkClicked($event)">{{artifact?.uri}}</a>
+        }
+        @if (!isLinkable) {
+          <span class="uri">{{artifact?.uri}}</span>
+        }
+        @if (downloading) {
+          <mat-spinner [diameter]="16" [strokeWidth]="2" color="accent"></mat-spinner>
+        } @else {
+          @if (artifact?.uri) {
+            <i
+              class="pointer al-icon al-ico-download sm ms-1"
+              (click)="artifactFilePathClicked(artifact.uri, inMemorySize)"
+            ></i>
+          }
+        }
+        @if (artifact?.uri && isLocalFile) {
+          <sm-copy-clipboard
+            label="" [clipboardText]="artifact.uri"
+            class="ps-2"
+          ></sm-copy-clipboard>
+        }
       </sm-labeled-row>
       <sm-labeled-row label="FILE SIZE" data-id="fileSizeId">{{(artifact?.content_size | filesize : fileSizeConfigStorage)  || ''}}</sm-labeled-row>
       <sm-labeled-row label="HASH" data-id="hashId">{{artifact?.hash}}</sm-labeled-row>
-      <sm-labeled-row *ngFor="let data of artifact?.display_data" [label]="data[0]| uppercase">{{data[1]}}</sm-labeled-row>
+      @for (data of artifact?.display_data; track data[0]) {
+        <sm-labeled-row [label]="data[0] | uppercase">{{data[1]}}</sm-labeled-row>
+      }
     </div>
   </sm-editable-section>
-  <sm-editable-section class="editable-design"
-                       [editable]="false"
-                       [disableInEditMode]="true"
-                       containerClass="h-100">
-    <sm-section-header label="PREVIEW"></sm-section-header>
-    <sm-scroll-textarea
-      class="flex-grow-1"
-      [editable]="false"
-      [formData]="artifact?.type_data?.preview"
-    ></sm-scroll-textarea>
-  </sm-editable-section>
+}
+<sm-editable-section class="editable-design"
+  [editable]="false"
+  [disableInEditMode]="true"
+  containerClass="h-100">
+  <sm-section-header label="PREVIEW"></sm-section-header>
+  <sm-scroll-textarea
+    class="flex-grow-1"
+    [editable]="false"
+    [formData]="artifact?.type_data?.preview"
+  ></sm-scroll-textarea>
+</sm-editable-section>
 
 

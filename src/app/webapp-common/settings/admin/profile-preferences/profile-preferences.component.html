@@ -1,5 +1,5 @@
 <div class="toggles">
-  <sm-usage-stats #usage [class.hidden]="!usage.shown"></sm-usage-stats>
+  <sm-usage-stats #usage [class.d-none]="!usage.shown"></sm-usage-stats>
   @if (admin() || usage.shown) {
     <mat-slide-toggle
       (change)="statsChange($event)"
@@ -18,13 +18,15 @@
     <mat-slide-toggle
       (change)="hidpiChange($event)"
       [checked]="disableHidpi"
-      color="accent"
-      >Disable HiDPI browser scale override
-      <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
-        data-id="hidpiInfoIcon"
-        smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
-      ></i>
-      <a href="#" class="reload hidden ms-3" [class.hidden]="!disableHidpiChanged" (click)="$event.preventDefault(); reload($event)">Reload to apply</a>
+    >
+      <div class="d-flex-center">
+        Disable HiDPI browser scale override
+        <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm info ms-3"
+                  data-id="hidpiInfoIcon"
+                  smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
+        ></mat-icon>
+        <a href="#" class="reload hidden ms-3" [class.hidden]="!disableHidpiChanged" (click)="$event.preventDefault(); reload($event)">Reload to apply</a>
+      </div>
     </mat-slide-toggle>
   }
   @if (tipsService.hasTips()) {
@@ -35,30 +37,41 @@
       >Don't show pro tips periodically
     </mat-slide-toggle>
   }
+  @if (!this.config.configuration().enterpriseServer) {
+    <mat-slide-toggle
+      (change)="toggleEnterpriseFeatures($event.checked)"
+      [checked]="hideEnterpriseFeatures()"
+      color="accent"
+    >Don't show Enterprise Features</mat-slide-toggle>
+  }
   <mat-slide-toggle
     (change)="toggleBlockUserScript($event)"
     [checked]="blockUserScripts()"
     [disabled]="config.configuration().blockUserScript"
-    color="accent"
-    >Block running user's scripts in the browser
-    <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
-       data-id="blockScriptsInfoIcon"
-       [smTooltip]="config.configuration().blockUserScript ?
+  >
+    <div class="d-flex-center">
+      Block running user's scripts in the browser
+      <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm info ms-3"
+                data-id="blockScriptsInfoIcon"
+                [smTooltip]="config.configuration().blockUserScript ?
          'User scripts are blocked by system administrator. you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports.' :
          'Block any user and 3rd party scripts from running anywhere in the WebApp. Note that if this is turned on, you won’t be able to view debug samples, Hyper-Dataset frame previews and embedded resources in reports.'"
-    ></i>
+      ></mat-icon>
+    </div>
   </mat-slide-toggle>
   <div class="d-flex">
     <mat-slide-toggle
       (change)="hideSpecificContainerArguments($event)"
       [checked]="!!hideRedactedArguments()"
-      color="accent"
-      >Hide specific container arguments
-      <i class="al-icon al-ico-info-circle sm info align-middle ms-3"
-        data-id="hideSpecificargInfoIcon"
-        smTooltip="Redact the values for the specified container environment variables in the experiment execution page"
-      ></i>
-      <a href="#" class="reload highlight ms-3" data-id="editButton" (click)="$event.preventDefault(); editHideSpecificContainerArguments()">Edit</a>
+    >
+      <div class="d-flex-center">
+        Hide specific container arguments
+        <mat-icon fontSet="al" fontIcon="al-ico-info-circle" class="sm info ms-3"
+                  data-id="hideSpecificargInfoIcon"
+                  smTooltip="Redact the values for the specified container environment variables in the task execution page"
+        ></mat-icon>
+        <button class="ms-2" mat-button data-id="editButton" (click)="editHideSpecificContainerArguments()">Edit</button>
+      </div>
     </mat-slide-toggle>
   </div>
 

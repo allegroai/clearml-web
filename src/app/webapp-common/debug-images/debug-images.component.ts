@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component, DestroyRef,
   ElementRef,
-  viewChildren, inject, input, output, effect, computed, signal
+  viewChildren, inject, input, output, effect, computed, signal, untracked
 } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -58,7 +58,7 @@ export class DebugImagesComponent {
   private reportEmbed = inject(ReportCodeEmbedService);
   private destroyRef = inject(DestroyRef);
 
-  isDarkTheme = input(false);
+  hideNavigation = input(false);
   disableStatusRefreshFilter = input(false);
   selected = input<Task>();
   copyIdClicked = output();
@@ -99,6 +99,7 @@ export class DebugImagesComponent {
   protected metricForTask = this.store.selectSignal(selectSelectedMetricForTask);
 
   private previousExperimentId: string;
+  private previousSelectedId: string;
   public debugImages: Record<string, DebugSamples> = null;
   public allowAutorefresh = false;
 
@@ -118,19 +119,21 @@ export class DebugImagesComponent {
     this.destroyRef.onDestroy(() => this.store.dispatch(resetDebugImages()));
 
     effect(() => {
-      if (this.selected() && !isEqual([this.selected().id], this.experimentIds())) {
-        this.selectMetric({value: this.allImages}, this.selected().id);
+      // open dataset case (selected as input)
+      if (this.selected() && this.selected().id !== this.previousSelectedId) {
+        this.previousSelectedId = this.selected().id;
+        untracked(() => this.selectMetric({value: this.allImages}, this.selected().id))
       }
     }, {allowSignalWrites: true});
 
     if (this.multipleExperiments()) {
       effect(() => {
         if (this.tasks()?.length > 0) {
-          if (this.isTaskRunning(this.tasks()) && (Object.keys(this.debugImages || {}).length > 0 || this.beginningOfTime()?.[this.ids[0]])) {
-            this.store.dispatch(getDebugImagesMetrics({tasks: this.ids()}));
+          if (this.isTaskRunning(this.tasks()) && (Object.keys(this.debugImages || {}).length > 0 || this.beginningOfTime()?.[this.ids()[0]])) {
+            untracked(() => this.store.dispatch(getDebugImagesMetrics({tasks: this.ids()})));
           }
         }
-      }, {allowSignalWrites: true});
+      });
 
       effect(() => {
         if (!isEqual(this.ids(),this.previousIds)) {
@@ -142,7 +145,7 @@ export class DebugImagesComponent {
       }, {allowSignalWrites: true});
     } else {
       effect(() => {
-        if (this.selectedExperiment() && !this.disableStatusRefreshFilter() && this.selectedExperiment()?.id !== this.previousExperimentId) {
+        if (this.selectedExperiment() && (!this.disableStatusRefreshFilter() || this.previousExperimentId === undefined) && this.selectedExperiment()?.id !== this.previousExperimentId) {
           const id = this.selectedExperiment().id;
           this.previousExperimentId = id;
           this.selectedMetric.set(null);
@@ -243,7 +246,7 @@ export class DebugImagesComponent {
               .forEach(optionalMetric => this.store.dispatch(debugActions.setSelectedMetric({
                 payload: {
                   task: optionalMetric.task,
-                  metric: this.metricForTask()[optionalMetric.task] ?? optionalMetric.metrics[0]
+                  metric: this.hideNavigation() ? null : this.metricForTask()[optionalMetric.task] ?? optionalMetric.metrics[0]
                 }
               })));
           }
@@ -270,11 +273,7 @@ export class DebugImagesComponent {
           this.createEmbedCode({metrics: [metric], variants: [variant], domRect: rect}, experimentId),
         imageSources: sources, index, snippetsMetaData: iterationSnippets, isAllMetrics
       },
-      panelClass: ['image-viewer-dialog', 'light-theme'],
-      height: '100%',
-      maxHeight: 'auto',
-      width: '100%',
-      maxWidth: 'auto'
+      panelClass: ['image-viewer-dialog','full-screen', 'light-theme'],
     });
   }
 
@@ -282,7 +281,7 @@ export class DebugImagesComponent {
     return tasks.some(task => [TaskStatusEnum.InProgress, TaskStatusEnum.Queued].includes(task.status));
   }
 
-  selectMetric(change: { value: string }, taskId) {
+  selectMetric(change: { value: string }, taskId: string) {
     this.selectedMetric.set(change.value);
     if (this.bindNavigationMode()) {
       this.experimentIds().forEach(experimentId => {

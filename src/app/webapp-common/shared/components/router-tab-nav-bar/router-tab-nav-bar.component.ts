@@ -1,12 +1,13 @@
-import {Component, Input, ViewChild} from '@angular/core';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {Component, inject, viewChild, effect, input, ChangeDetectionStrategy} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
 import {MatTabNav, MatTabsModule} from '@angular/material/tabs';
-import {AsyncPipe, NgForOf, UpperCasePipe} from '@angular/common';
+import { AsyncPipe, UpperCasePipe } from '@angular/common';
 import {Store} from '@ngrx/store';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {debounceTime} from 'rxjs/operators';
 import {PushPipe} from '@ngrx/component';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 export interface Link {
   name: string;
@@ -18,34 +19,38 @@ export interface Link {
   selector: 'sm-router-tab-nav-bar',
   templateUrl: './router-tab-nav-bar.component.html',
   styleUrls: ['./router-tab-nav-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
     MatTabsModule,
     RouterLink,
     UpperCasePipe,
     RouterLinkActive,
-    NgForOf,
-    PushPipe,
-  ],
+    PushPipe
+],
   standalone: true
 })
 export class RouterTabNavBarComponent {
-  routerConfig$: Observable<string[]>;
-  private sub = new Subscription();
+  private store = inject(Store);
+
+  protected routerConfig = this.store.selectSignal(selectRouterConfig);
   private resize$ = new BehaviorSubject(0);
 
-  @Input() links: Link[] = [];
-  @Input() set splitSize(size: number) {
-    this.resize$.next(size);
-  }
+  links = input<Link[]>([]);
+  splitSize = input<number>();
+  matTabNav = viewChild(MatTabNav);
 
-  @ViewChild(MatTabNav) matTabNav: MatTabNav;
-  trackByLink = (index: number, link: Link) => link.url.join(',');
+  constructor() {
+    effect(() => {
+      this.resize$.next(this.splitSize());
+    });
 
-  constructor(private store: Store) {
-    this.routerConfig$ = this.store.select(selectRouterConfig);
-
-    this.sub.add(this.resize$.pipe(debounceTime(50)).subscribe(() => this.matTabNav.updatePagination()));
+    this.resize$
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(50)
+      )
+      .subscribe(() => this.matTabNav().updatePagination());
     window.setTimeout(() => this.resize$.next(1), 500);
   }
 }

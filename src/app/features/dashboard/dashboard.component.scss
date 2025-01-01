@@ -1,16 +1,14 @@
-@import "../../webapp-common/shared/ui-components/styles/mixins/common";
-@import "../../webapp-common/shared/ui-components/styles/variables";
+@import "mixins/common";
+@import "variables";
 
 :host {
   .dashboard-body {
     height: 100%;
-    padding: 0 24px;
     overflow: auto;
   }
 
   .recent {
     height: 100%;
-    overflow: auto;
     max-width: 2400px;
     margin: 0 auto;
   }
@@ -28,8 +26,9 @@
 
   sm-dashboard-experiments {
     display: block;
-    margin: 24px auto 0;
-    height: calc(100% - 356px);
+    padding-top: 24px;
+    margin: 0 auto;
+    height: calc(100% - 620px);
   }
 
   .dashboard-search {

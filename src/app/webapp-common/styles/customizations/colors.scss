@@ -1,0 +1,144 @@
+@use '@angular/material' as mat;
+
+@mixin generate-colors($theme) {
+  --color-primary: #{mat.get-theme-color($theme, primary)};
+  --color-on-primary: #{mat.get-theme-color($theme, on-primary)};
+  --color-primary-container: #{mat.get-theme-color($theme, primary-container)};
+  --color-on-primary-container: #{mat.get-theme-color($theme, on-primary-container)};
+  --color-primary-fixed: #{mat.get-theme-color($theme, primary-fixed)};
+  --color-primary-fixed-dim: #{mat.get-theme-color($theme, primary-fixed-dim)};
+  --color-on-primary-fixed: #{mat.get-theme-color($theme, on-primary-fixed)};
+  --color-on-primary-fixed-variant: #{mat.get-theme-color($theme, on-primary-fixed-variant)};
+  --color-secondary: #{mat.get-theme-color($theme, secondary)};
+  --color-on-secondary: #{mat.get-theme-color($theme, on-secondary)};
+  --color-secondary-container: #{mat.get-theme-color($theme, secondary-container)};
+  --color-on-secondary-container: #{mat.get-theme-color($theme, on-secondary-container)};
+  --color-secondary-fixed: #{mat.get-theme-color($theme, secondary-fixed)};
+  --color-secondary-fixed-dim: #{mat.get-theme-color($theme, secondary-fixed-dim)};
+  --color-on-secondary-fixed: #{mat.get-theme-color($theme, on-secondary-fixed)};
+  --color-on-secondary-fixed-variant: #{mat.get-theme-color($theme, on-secondary-fixed-variant)};
+  --color-tertiary: #{mat.get-theme-color($theme, tertiary)};
+  --color-on-tertiary: #{mat.get-theme-color($theme, on-tertiary)};
+  --color-tertiary-container: #{mat.get-theme-color($theme, tertiary-container)};
+  --color-on-tertiary-container: #{mat.get-theme-color($theme, on-tertiary-container)};
+  --color-tertiary-fixed: #{mat.get-theme-color($theme, tertiary-fixed)};
+  --color-tertiary-fixed-dim: #{mat.get-theme-color($theme, tertiary-fixed-dim)};
+  --color-on-tertiary-fixed: #{mat.get-theme-color($theme, on-tertiary-fixed)};
+  --color-on-tertiary-fixed-variant: #{mat.get-theme-color($theme, on-tertiary-fixed-variant)};
+  --color-error: #{mat.get-theme-color($theme, error)};
+  --color-on-error: #{mat.get-theme-color($theme, on-error)};
+  --color-error-container: #{mat.get-theme-color($theme, error-container)};
+  --color-on-error-container: #{mat.get-theme-color($theme, on-error-container)};
+  --color-surface-dim: #{mat.get-theme-color($theme, surface-dim)};
+  --color-surface: #{mat.get-theme-color($theme, surface)};
+  --color-surface-bright: #{mat.get-theme-color($theme, surface-bright)};
+  --color-surface-container-lowest: #{mat.get-theme-color($theme, surface-container-lowest)};
+  --color-surface-container-low: #{mat.get-theme-color($theme, surface-container-low)};
+  --color-surface-container: #{mat.get-theme-color($theme, surface-container)};
+  --color-surface-container-high: #{mat.get-theme-color($theme, surface-container-high)};
+  --color-surface-container-highest: #{mat.get-theme-color($theme, surface-container-highest)};
+  --color-on-surface: #{mat.get-theme-color($theme, on-surface)};
+  --color-on-surface-variant: #{mat.get-theme-color($theme, on-surface-variant)};
+  --color-outline: #{mat.get-theme-color($theme, outline)};
+  --color-outline-variant: #{mat.get-theme-color($theme, outline-variant)};
+  --color-inverse-surface: #{mat.get-theme-color($theme, inverse-surface)};
+  --color-inverse-on-surface: #{mat.get-theme-color($theme, inverse-on-surface)};
+  --color-inverse-primary: #{mat.get-theme-color($theme, inverse-primary)};
+  --color-scrim: #{mat.get-theme-color($theme, scrim)};
+  --color-shadow: #{mat.get-theme-color($theme, shadow)};
+
+  // tint
+  --color-tint-5: rgba(from var(--color-primary) r g b / 5%);
+  --color-tint-8: rgba(from var(--color-primary) r g b / 8%);
+  --color-tint-11: rgba(from var(--color-primary) r g b / 11%);
+  --color-tint-12: rgba(from var(--color-primary) r g b / 12%);
+  --color-tint-14: rgba(from var(--color-primary) r g b / 14%);
+
+  // LIGHT
+  @if mat.get-theme-type($theme) == light {
+    --color-on-primary-container-lower: #{mat.get-theme-color($theme, primary, 40)};
+    --color-secondary-container-lower: #{mat.get-theme-color($theme, secondary, 95)};
+    //--color-inverse-primary: #{mat.get-theme-color($theme, secondary, 80)};
+    --color-surface-container: #{mat.get-theme-color($theme, neutral, 98)}; // Override theme color (white), bug?
+    --color-secondary-container-heigher: #{mat.get-theme-color($theme, secondary, 80)};
+    --color-diff-line: #{mat.get-theme-color($theme, error,90)};
+    --color-diff-line-hover: #{mat.get-theme-color($theme, error,80)};
+    --color-diff-line-active: #{mat.get-theme-color($theme, error,70)};
+    --color-diff-line-selected: #{mat.get-theme-color($theme, error,40)};
+    --color-on-diff: #{mat.get-theme-color($theme, error, 100)};
+    --color-no-diff-hover: var(--color-outline-variant);
+    --color-surface-variant: #DBE3F1;
+    //--color-on-surface-variant: #404753;
+
+    --color-total: #87A9FF;
+
+    --color-draft: #5D5E62;
+    --color-pending: #005B4C;
+    --color-running: #1EA26C;
+    --color-completed: #009aff;
+    --color-failed: #A4020D;
+    --color-published: #4c6f00;
+    --color-draft-container:  #D9D9DD;
+    --color-pending-container: #68DAC0;
+    --color-running-container: #91D5AD;
+    --color-completed-container: #4fb9ff;
+    --color-failed-container: #FFB4AB;
+    --color-published-container: #D3FF00;
+    --color-skipped-container: #{lighten(#cc9054, 30%)};
+    --color-cached-container: #{lighten(#9e54cc, 30%)};
+    --color-executed-container: #{lighten(#4040d5, 30%)};
+    --color-warning: #FF5602;
+    --color-neon-surface: #74C87A;
+    --color-on-neon-surface: #223723;
+
+  // DARK
+  } @else {
+    --color-on-primary-container-lower: #{mat.get-theme-color($theme, primary, 60)};
+    --color-secondary-container-lower: #{mat.get-theme-color($theme, secondary, 20)};
+    //--color-inverse-primary: #{mat.get-theme-color($theme, secondary, 40)};
+    --color-surface-container: #{mat.get-theme-color($theme, neutral, 4)}; // Override theme color (white), bug?
+
+    --color-secondary-container-heigher: #{mat.get-theme-color($theme, secondary, 40)};
+    --color-diff-line: #{mat.get-theme-color($theme, error,20)};
+    --color-diff-line-hover: #{mat.get-theme-color($theme, error,25)};
+    --color-diff-line-active: #{mat.get-theme-color($theme, error,20)};
+    --color-diff-line-selected: #{mat.get-theme-color($theme, error,40)};
+    --color-on-diff: #{mat.get-theme-color($theme, error, 90)};
+    --color-no-diff-hover: var(--color-on-surface-variant);
+    --color-surface-variant: #404753;
+    //--color-on-surface-variant: #BFC7D5;
+
+    --color-total: #8492c2;
+
+    --color-draft:  #D9D9DD;
+    --color-pending: #68DAC0;
+    --color-running: #50e3c2;
+    --color-completed: #15a1ff;
+    --color-failed: #FFB4AB;
+    --color-published: #D3FF00;
+    --color-draft-container: #5D5E62;
+    --color-pending-container: #005B4C;
+    --color-running-container: #32937e;
+    --color-completed-container: #009aff;
+    --color-failed-container: #d65b52;
+    --color-published-container: #98B800;
+    --color-skipped-container: #cc9054;
+    --color-cached-container: #9e54cc;
+    --color-executed-container: #4040d5;
+    --color-warning: #FD8934;
+    --color-neon-surface: #95F4DC;
+    --color-on-neon-surface:  #005143;
+
+  }
+
+  // color aliases
+  --color-in_progress: var(--color-running);
+  --color-in_progress-container: var(--color-running-container);
+  --color-aborted: var(--color-completed);
+  --color-stopped: var(--color-completed);
+  --color-created: var(--color-draft);
+  --color-stopped-container: var(--color-completed-container);
+  --color-error-container: var(--color-failed-container);
+  --color-queued: var(--color-pending);
+
+}

@@ -1,22 +1,33 @@
 <div class="counter-container">
   <div class="circle-counter" [class]="type" [class.multi]="valType === 'array'" data-id="cardStats">
-    <ng-container [ngSwitch]="valType">
-      <div *ngSwitchCase="'array'" class="d-flex-center flex-row wrapper">
-        <ng-content select="[tagsList]"></ng-content>
-        <div *ngFor="let subCounter of counter; trackBy: trackByLabel">
-          <div class="sub-counter"
-               [class.no-value]="subCounter.value === NA">{{subCounter.value | filesize : fileSizeConfigCount}}</div>
-          <div class="sub-label">{{subCounter.label}}</div>
+    @switch (valType) {
+      @case ('array') {
+        <div class="d-flex-center flex-row wrapper">
+          <ng-content select="[tagsList]"></ng-content>
+          @for (subCounter of counter; track trackByLabel($index, subCounter)) {
+            <div>
+              <div class="sub-counter"
+              [class.no-value]="subCounter.value === NA">{{subCounter.value | filesize : fileSizeConfigCount}}</div>
+              <div class="sub-label">{{subCounter.label}}</div>
+            </div>
+          }
         </div>
-      </div>
-      <div *ngSwitchCase="'number'" class="counter">
+      }
+      @case ('number') {
+        <div class="counter">
         {{counter | filesize: counter < 100000 ? fileSizeConfigCount : fileSizeConfigShortCount}}</div>
-      <div *ngSwitchCase="'tags'" class="counter-tags">
-      </div>
-      <div *ngSwitchDefault class="counter">{{counter}}</div>
-
-    </ng-container>
+      }
+      @case ('tags') {
+        <div class="counter-tags">
+        </div>
+      }
+      @default {
+        <div class="counter">{{counter}}</div>
+      }
+    }
   </div>
   <div class="counter-label">{{label}}</div>
-  <div *ngIf="underLabel" class="counter-label leave-space">{{underLabel}}</div>
+  @if (underLabel) {
+    <div class="counter-label leave-space">{{underLabel}}</div>
+  }
 </div>

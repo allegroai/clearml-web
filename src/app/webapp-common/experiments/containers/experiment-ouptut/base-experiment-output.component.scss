@@ -6,18 +6,19 @@ $output-tabs-height: 64px;
 :host {
   display: block;
   height: 100%;
+  background-color: var(--color-surface-container-lowest);
 
   .experiment-output-container {
     height: 100%;
 
     &.minimized {
-      height: calc(100% - 32px);
+      height: calc(100% - 41px);
     }
   }
 
   ::ng-deep .no-output {
     text-align: center;
-    color: $cloudy-blue-two;
+    color: var(--color-on-surface-variant);
     position: absolute;
     top: 50%;
     left: 50%;
@@ -35,17 +36,18 @@ $output-tabs-height: 64px;
     padding-top: 6px;
   }
 
-  .refresh-position {
+  .close-button,
+  .refresh-position{
     display: flex;
     align-items: center;
     margin-right: 24px;
     margin-left: auto;
+  }
 
-    .scalar-buttons {
-      gap: 12px;
-      display: flex;
-      align-items: center;
-    }
+  .scalar-buttons {
+    gap: 12px;
+    display: flex;
+    align-items: center;
   }
 
   .refreshIcon {
@@ -53,10 +55,9 @@ $output-tabs-height: 64px;
   }
 
   .table-graph-toggle {
-    height: 28px;
+
 
     &.maximized {
-      height: 32px;
       align-items: center;
       display: flex;
       margin-right: 14px;

@@ -1,11 +1,9 @@
-@import "variables";
-
 .table-card {
   display: grid;
   grid-template-columns: 20px 32px 1fr;
   align-items: center;
   gap: 0 6px;
-  padding: 16px;
+  padding: 16px 16px 16px 10px;
   grid-template-areas:
     "cbx type-icon card-name"
     ". tags tags"
@@ -23,6 +21,16 @@
     "card-name"
     "tags"
     "data";
+  }
+
+  &.checked.selected {
+    --mdc-checkbox-unselected-icon-color: var(--color-on-surface);
+
+    ::ng-deep mat-checkbox:not(.mat-mdc-checkbox-checked) {
+      .mdc-checkbox:hover .mdc-checkbox__background {
+        background-color: var(--color-surface);
+      }
+    }
   }
 }
 
@@ -51,16 +59,11 @@
   display: flex;
   margin-right: 12px;
 }
+
 .name {
   flex: 1;
   font-weight: 500;
-  color: $blue-50;
   min-width: 60px;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.content-row {
-  padding: 2px;
-  color: $cloudy-blue-two;
 }

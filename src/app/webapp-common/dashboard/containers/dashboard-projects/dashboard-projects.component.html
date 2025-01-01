@@ -1,18 +1,15 @@
-<div class="sm-card-list-layout" (smOverflows)="overflow = $event">
+<div class="sm-card-list-layout">
   <div #header class="sm-card-list-header">
     <div class="recent-title">RECENT PROJECTS
-      <button class="btn btn-link view-all" (click)="router.navigateByUrl('/projects')">VIEW ALL</button>
+      <button mat-button class="view-all" (click)="router.navigateByUrl('/projects')">VIEW ALL</button>
     </div>
-    <div>
-      @if (recentProjectsListCount$() >= cardsInRow || overflow) {
-        <button
-          class="btn btn-cml-primary d-flex align-items-center"
-          data-id="New Project"
-          (click)="openCreateProjectDialog()">
-          <i class="al-icon sm al-ico-add me-2"></i>NEW PROJECT
-        </button>
-      }
-    </div>
+    <button
+      mat-flat-button
+      data-id="New Project"
+      (click)="openCreateProjectDialog()">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+      NEW PROJECT
+    </button>
   </div>
   @if (recentProjectsList$(); as recentProjectsList) {
     @for(project of recentProjectsList; track project.id) {

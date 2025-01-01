@@ -1,24 +1,43 @@
 <form class="create-queue-form" #queueForm='ngForm'>
   <div class="row position-relative">
     <mat-form-field appearance="outline" class="w-100 pt-3">
-      <mat-error *ngIf="name?.errors?.required">Required</mat-error>
-      <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
-      <mat-error *ngIf="name?.errors?.uniqueName">Name should be unique</mat-error>
-      <mat-label>Queue name</mat-label>
+      @if (name?.errors?.required) {
+        <mat-error>Required</mat-error>
+      }
+      @if (name?.errors?.minlength) {
+        <mat-error>Name should contain at least 3 characters</mat-error>
+      }
+      @if (name?.errors?.uniqueName) {
+        <mat-error>Name should be unique</mat-error>
+      }
+      <mat-label>Name</mat-label>
       <input matInput type="text"
-             name="queueName"
-             #name="ngModel"
-             [(ngModel)]="queue.name"
-             required
+        name="queueName"
+        #name="ngModel"
+        [(ngModel)]="queue.name"
+        required
+        minlength="3"
+        smUniqueNameValidator
+        [existingNames]="queuesNames">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Display Name</mat-label>
+      <input matInput type="text"
+             name="queueCaption"
+             #caption="ngModel"
+             [(ngModel)]="queue.display_name"
              minlength="3"
              smUniqueNameValidator
              [existingNames]="queuesNames">
+      @if (caption?.errors?.minlength) {
+        <mat-error>Display name should contain at least 3 characters</mat-error>
+      }
     </mat-form-field>
   </div>
   <br/>
-  <div class="create-queue-button">
-    <button class="btn btn-dark-fill center" [disabled]="queueForm.invalid || (isEdit && queueForm.pristine)"
-            (click)="send()">{{isEdit ? 'RENAME' : 'CREATE'}}
+  <mat-dialog-actions>
+    <button mat-flat-button [disabled]="queueForm.invalid || (isEdit && queueForm.pristine)" (click)="send()">
+      {{isEdit ? 'UPDATE' : 'CREATE'}}
     </button>
-  </div>
+  </mat-dialog-actions>
 </form>

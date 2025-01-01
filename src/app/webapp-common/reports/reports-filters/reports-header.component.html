@@ -1,42 +1,38 @@
-<div class="sm-card-list-header" [class.archive-mode]="archive">
-  <div *ngIf="!disableSort" class="recent-title">
-    <sm-menu [header]="sortByTitle" class="menu" panelClasses="light-theme">
-      <sm-menu-item itemLabel="Recent" (itemClicked)="orderByChanged.emit('last_update')"
-                    [sortOrder]="sortByTitle==='RECENT' && sortOrder"></sm-menu-item>
-      <sm-menu-item itemLabel="Name" (itemClicked)="orderByChanged.emit('name')"
-                    [sortOrder]="sortByTitle==='NAME' && sortOrder"></sm-menu-item>
-    </sm-menu>
-    <sm-main-pages-header-filter [allTags]="allTags"></sm-main-pages-header-filter>
-    <sm-button-toggle
-      left-items
-      class="ms-3"
-      [value]="!!projectId"
-      [disabled]="archive"
-      [options]="[
+<div class="sm-card-list-header" [class.archive-mode]="archive()">
+  @if (!disableSort()) {
+    <div class="recent-title">
+      <sm-menu [header]="sortByTitle()" class="menu">
+        <sm-menu-item itemLabel="Recent"
+                      [sortOrder]="sortByTitle() === 'RECENT' && sortOrder()"
+                      (itemClicked)="orderByChanged.emit('last_update')"></sm-menu-item>
+        <sm-menu-item itemLabel="Name"
+                      [sortOrder]="sortByTitle() === 'NAME' && sortOrder()"
+                      (itemClicked)="orderByChanged.emit('name')"></sm-menu-item>
+      </sm-menu>
+      <sm-main-pages-header-filter [allTags]="allTags()"></sm-main-pages-header-filter>
+      <sm-button-toggle
+        [value]="!!projectId()"
+        [disabled]="archive()"
+        [options]="[
              {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
              {value: true, icon:'al-ico-project-path', label: 'Project view'}
             ]"
-      (valueChanged)="!archive && !(!!projectId && $event) && toggleNestedView.emit($event)"
-    ></sm-button-toggle>
-  </div>
-  <div *ngIf="activeSearch">
-    <sm-search
-      class="light-theme"
-      placeholder="Search for reports"
-      [value]="queryString"
-      (valueChanged)="filterReports($event)"
-    ></sm-search>
-  </div>
+        (valueChanged)="!archive() && !(!!projectId() && $event) && toggleNestedView.emit($any($event))"
+      ></sm-button-toggle>
+    </div>
+  }
   <div class="d-flex-center gap">
     <sm-toggle-archive
-      [showArchived]="archive"
+      [showArchived]="archive()"
       (toggleArchived)="archiveToggled.emit($event)"
     ></sm-toggle-archive>
-    <button
-      *ngIf="!disableCreate"
-      [disabled]="archive"
-      class="btn btn-cml-primary d-flex align-items-center"
-      (click)="createReportClicked.emit(projectId)"
-    ><i class="al-icon sm al-ico-add me-2"></i>NEW REPORT</button>
+    @if (!disableCreate()) {
+      <button mat-flat-button
+              [disabled]="archive()"
+              (click)="createReportClicked.emit(projectId())">
+        <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+        NEW REPORT
+      </button>
+    }
   </div>
 </div>

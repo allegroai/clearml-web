@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentConfigObj, selectExperimentInfoErrors, selectExperimentSelectedConfigObjectFromRoute, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
 import {Model} from '~/business-logic/model/models/model';
@@ -21,6 +21,8 @@ import {EditableSectionComponent} from '@common/shared/ui-components/panel/edita
   styleUrls: ['./experiment-info-task-model.component.scss']
 })
 export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
+      private store = inject(Store);
+      private dialog = inject(MatDialog);
   public selectedExperimentSubscription: Subscription;
   private selectedExperiment: IExperimentInfo;
   public editable$: Observable<boolean>;
@@ -40,9 +42,9 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
     design: 'General'
   };
 
-  @ViewChild('prototext') prototext: EditableSectionComponent;
+  prototext = viewChild<EditableSectionComponent>('prototext');
 
-  constructor(private store: Store, private dialog: MatDialog) {
+  constructor() {
     this.configInfo$ = this.store.select(selectExperimentConfigObj);
     this.selectedConfigObj$ = this.store.select(selectExperimentSelectedConfigObjectFromRoute);
     this.editable$ = this.store.select(selectIsExperimentEditable);
@@ -97,7 +99,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
 
     editPrototextDialog.afterClosed().pipe(take(1)).subscribe((data) => {
       if (data === undefined) {
-        this.prototext.cancelClickedEvent();
+        this.prototext().cancelClickedEvent();
       } else {
         this.saveModelData([{name: this.formData.name, type: this.formData.type, value: data, description: this.formData.description}]);
         this.store.dispatch(deactivateEdit());
@@ -112,7 +114,8 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
         body: 'Are you sure you want to clear the entire contents of Model Configuration?',
         yes: 'Clear',
         no: 'Keep',
-        iconClass: 'al-icon al-ico-trash al-color blue-300',
+        iconClass: 'al-ico-trash',
+        centerText: true,
       }
     });
 
@@ -124,5 +127,4 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
       }
     });
   }
-
 }

@@ -1,7 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed, effect, signal, inject, untracked
+} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {combineLatest, Observable, Subscription} from 'rxjs';
-import {filter, take} from 'rxjs/operators';
+import {combineLatest} from 'rxjs';
+import {debounceTime, filter, take} from 'rxjs/operators';
 import 'ngx-markdown-editor';
 import {
   selectBlockUserScript,
@@ -10,9 +14,8 @@ import {
   selectSelectedProject
 } from '../core/reducers/projects.reducer';
 import {setBreadcrumbsOptions, updateProject} from '../core/actions/projects.actions';
-import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '../shared/utils/shared-utils';
-import {ContextMenuService} from '@common/shared/services/context-menu.service';
+import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
@@ -22,63 +25,44 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
   styleUrls: ['./project-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectInfoComponent implements OnInit, OnDestroy {
-  private selectedProject$: Observable<Project>;
-  public blockUserScripts$: Observable<boolean>;
-  public info: string;
-  public editMode: boolean;
-  public loading: boolean;
-  public project: Project;
-  public panelOpen: boolean = false;
-  public example: boolean;
+export class ProjectInfoComponent {
+  private store = inject(Store);
+  private contextMenuService = inject(HeaderMenuService);
+
+  protected blockUserScripts$ = this.store.select(selectBlockUserScript);
+  private selectedProject$ = this.store.select(selectSelectedProject);
   public isDirty: boolean;
-  private projectId: string;
+  public panelOpen = signal(false);
+  protected project = this.store.selectSignal(selectSelectedProject);
+  protected example = computed(() => isExample(this.project()));
+  private projectId = computed(() => this.project()?.id);
+  protected info = computed(() => this.project()?.description);
+  protected loading = computed(() => !this.project());
 
-  private selectedVariantSub: Subscription;
-
-  constructor(private store: Store, private cdr: ChangeDetectorRef,private contextMenuService: ContextMenuService) {
-    this.blockUserScripts$ = this.store.select(selectBlockUserScript);
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-    this.loading = true;
-    this.selectedProject$
-      .pipe(
-        takeUntilDestroyed(),
-        filter(project => !!project?.id)
-      )
-      .subscribe(project => {
-        this.project = project;
-        this.example = isExample(project);
-        this.info = project.description;
-        this.projectId = project.id;
-        this.contextMenuService.setupProjectContextMenu('overview', this.projectId);
-        this.loading = false;
-        this.cdr.markForCheck();
-      });
+  constructor() {
+    effect(() => {
+      if (this.projectId()) {
+        untracked(() => this.contextMenuService.setupProjectContextMenu('overview', this.projectId()));
+      }
+    });
     this.setupBreadcrumbsOptions();
-  }
 
-  ngOnInit() {
-    this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject)
+    this.store.select(selectSelectedMetricVariantForCurrProject)
       .pipe(
         filter(data => !!data),
         take(1)
       )
       .subscribe(() => {
         this.setMetricsPanel(true);
-        this.cdr.markForCheck();
       });
   }
 
-  ngOnDestroy() {
-    this.selectedVariantSub?.unsubscribe();
-  }
-
   setMetricsPanel(open: boolean) {
-    this.panelOpen = open;
+    this.panelOpen.set(open);
   }
 
   saveInfo(info: string) {
-    this.store.dispatch(updateProject({id: this.projectId, changes: {description: info}}));
+    this.store.dispatch(updateProject({id: this.projectId(), changes: {description: info}}));
   }
 
   setupBreadcrumbsOptions() {
@@ -86,7 +70,9 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
       this.selectedProject$,
       this.store.select(selectIsDeepMode)
     ])
-      .pipe(takeUntilDestroyed())
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(0))
       .subscribe(([selectedProject, isDeep]) => this.store.dispatch(
         setBreadcrumbsOptions({
           breadcrumbOptions: {
@@ -97,7 +83,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
             },
             ...(isDeep && selectedProject?.id !== '*' && {
               subFeatureBreadcrumb: {
-                name: 'All Experiments'
+                name: 'All Tasks'
               }
             }),
             projectsOptions: {
@@ -107,7 +93,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
               showSelectedProject: selectedProject?.id !== '*',
               ...(selectedProject && {
                 selectedProjectBreadcrumb: {
-                  name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename,
+                  name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename,
                   url: `projects/${selectedProject?.id}/projects`
                 }
               })

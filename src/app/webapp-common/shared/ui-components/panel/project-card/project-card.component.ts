@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChi
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
-import {ICONS} from '@common/constants';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
@@ -14,7 +13,7 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
-import {NgIf} from '@angular/common';
+
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-tooltip/multi-line-tooltip.component';
 
@@ -34,11 +33,10 @@ import {MultiLineTooltipComponent} from '@common/shared/components/multi-line-to
     ProjectsSharedModule,
     CircleCounterComponent,
     CdkFixedSizeVirtualScroll,
-    NgIf,
     CdkVirtualForOf,
     ClickStopPropagationDirective,
     MultiLineTooltipComponent
-  ],
+],
   standalone: true
 })
 export class ProjectCardComponent {
@@ -47,7 +45,6 @@ export class ProjectCardComponent {
   public hidden = false;
   trackById = trackById;
   readonly circleTypeEnum = CircleTypeEnum;
-  readonly icons = ICONS;
 
   @Input() projectsNames: string[];
 

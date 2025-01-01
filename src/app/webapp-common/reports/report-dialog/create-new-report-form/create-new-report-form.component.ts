@@ -1,13 +1,17 @@
 import {
   ChangeDetectionStrategy,
-  Component, computed, effect,
-  EventEmitter, inject, input,
-  Output, signal,
-} from '@angular/core';
-import {FormBuilder, Validators} from '@angular/forms';
+  Component, computed, effect, inject, input, signal, output } from '@angular/core';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Project} from '~/business-logic/model/projects/project';
-import {trackByValue} from '@common/shared/utils/forms-track-by';
 import {rootProjectsPageSize} from '@common/constants';
+import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
+import {
+  PaginatedEntitySelectorComponent
+} from '@common/shared/components/paginated-entity-selector/paginated-entity-selector.component';
+import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
+import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
+import {MatInput} from '@angular/material/input';
+import {MatButton} from '@angular/material/button';
 
 export interface NewReportData {
   name: string;
@@ -19,12 +23,24 @@ export interface NewReportData {
   selector: 'sm-create-new-report-form',
   templateUrl: './create-new-report-form.component.html',
   styleUrls: ['./create-new-report-form.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatFormField,
+    PaginatedEntitySelectorComponent,
+    StringIncludedInArrayPipe,
+    MatDialogActions,
+    MatDialogClose,
+    MatLabel,
+    MatError,
+    MatInput,
+    MatButton
+  ]
 })
 export class CreateNewReportFormComponent {
   private builder = inject(FormBuilder);
 
-  public trackByValue = trackByValue;
   private createNew: string;
   public readonly projectsRoot = {name: 'Projects root', id: null};
 
@@ -42,10 +58,12 @@ export class CreateNewReportFormComponent {
   defaultProjectId = input<string>();
   projects = input<Project[]>(null);
 
-  @Output() filterSearchChanged = new EventEmitter<{value: string; loadMore?: boolean}>();
-  @Output() reportCreated = new EventEmitter<NewReportData>();
+  filterSearchChanged = output<{
+        value: string;
+        loadMore?: boolean;
+    }>();
+  reportCreated = output<NewReportData>();
 
-  protected loading = signal(true);
   private initialized = false;
   protected noMoreOptions = computed(() => this.projects()?.length < rootProjectsPageSize);
   protected projectsOptions = computed(() => [
@@ -53,15 +71,13 @@ export class CreateNewReportFormComponent {
     ...(this.projects() ?? [])
   ]);
   protected projectsNames = computed(() => [this.projectsRoot.name, ...this.projectsOptions().map(project => project.name)]);
+  protected projectsState = computed(() => ({
+    projects: this.projects(),
+    loading: signal(this.projects() === null)
+  }))
 
 
   constructor() {
-    effect(() => {
-      if (this.projects() !== null) {
-        this.loading.set(false);
-      }
-    }, {allowSignalWrites: true});
-
     effect(() => {
       if (this.projects()?.length > 0 && !this.initialized) {
         this.initialized = true;
@@ -94,7 +110,7 @@ export class CreateNewReportFormComponent {
   }
 
   loadMore(term: string, loadMore: boolean) {
-    this.loading.set(true);
+    this.projectsState().loading.set(true);
     this.filterSearchChanged.emit({value: term || '', loadMore});
   }
 }

@@ -19,7 +19,7 @@ sm-selectable-list {
   > span  {
     margin-left: auto;
     font-size: 11px;
-    color: $blue-480;
+    color: var(--color-outline);
     cursor: pointer;
   }
 }

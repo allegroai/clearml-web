@@ -1,5 +1,5 @@
 @import "variables";
-@import "empty";
+@import "mixins/empty";
 
 :host {
   display: block;
@@ -19,7 +19,7 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    background-color: $blue-800;
+    background-color: var(--color-surface);
     margin-bottom: -12px;
   }
 

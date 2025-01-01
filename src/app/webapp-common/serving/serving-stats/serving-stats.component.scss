@@ -1,20 +1,18 @@
-@import "variables";
-@import "../../../../webapp-common/layout/layout.scss";
+@import "../../layout/layout";
 
 :host {
   display: block;
   height: $graph-height;
   min-height: $graph-height;
   padding: 20px 20px 0;
-  background-color: $black;
-  border-bottom: 1px solid $dark-grey-blue;
+  border-bottom: 1px solid var(--color-surface-container-high);
 
   .header {
     padding: 0 4px;
     margin-bottom: 12px;
 
     .title {
-      font-size: 15px;
+      color: var(--color-primary);
     }
 
     .time-selector {
@@ -30,7 +28,7 @@
     .warnning {
       margin-left: 10px;
       line-height: 20px;
-      color: $neon-yellow;
+      color: var(--color-warning);
     }
   }
 

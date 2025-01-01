@@ -1,10 +1,6 @@
 @import "mixins/common";
 @import "mixins/icon";
 
-.title {
-  @include card-title();
-}
-
 .top-labels {
   @include counter-label();
   text-align: left;
@@ -14,11 +10,6 @@
 .sub-title {
   @include counter-label();
   padding-right: 10px;
-}
-
-.model-tag {
-  @include card-header-tag();
-  color: $blue-300;
 }
 
 .model-footer {
@@ -35,12 +26,6 @@
     margin-top: 4px;
     margin-bottom: 20px;
     padding-top: 8px;
-  }
-}
-
-::ng-deep .model-card {
-  .card-container:hover {
-    background-color: $blue-400 !important;
   }
 }
 

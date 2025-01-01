@@ -1,10 +1,10 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Project} from '~/business-logic/model/projects/project';
-import {ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject, computed} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {getTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {filter, map, tap} from 'rxjs/operators';
 import {castArray, isEqual} from 'lodash-es';
 import {NgForm} from '@angular/forms';
@@ -20,6 +20,8 @@ import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/proj
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+  public dialogRef = inject<MatDialogRef<ChangeProjectDialogComponent>>(MatDialogRef<ChangeProjectDialogComponent>);
 
   public projects$: Observable<Project[]>;
   public sourceProject: Project;
@@ -30,8 +32,6 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
   };
   public reference: string;
   private subs = new Subscription();
-  filterText: string = '';
-  isNewName: boolean = false;
 
   @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
   public readOnlyProjects$: Observable<string[]>;
@@ -41,22 +41,21 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
   type: EntityTypeEnum;
   private projectRoot = 'Projects root';
   private rootFiltered: boolean;
-  public projectsNames: string[];
   public loading: boolean;
   public noMoreOptions: boolean;
   private allProjectsBeforeFilter: Partial<ProjectsGetAllResponseSingle>[];
   private previousLength: number | undefined;
+  protected allProjects = this.store.selectSignal(selectTablesFilterProjectsOptions);
+  protected allProjectsNames = computed(() => this.allProjects().map(project => project.name));
 
-  constructor(
-    private store: Store,
-    public dialogRef: MatDialogRef<ChangeProjectDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: {
+  constructor() {
+    const data = inject<{
       currentProjects: Project['id'] | Project['id'][];
       defaultProject: Project;
       reference?: string | any[];
       type: EntityTypeEnum;
-    }
-  ) {
+    }>(MAT_DIALOG_DATA);
+
     this.sourceProject = data.defaultProject;
     this.currentProjects = castArray(data.currentProjects);
     this.isMulti = !!Array.isArray(data.reference);
@@ -88,10 +87,9 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
         ...(this.rootFiltered ? [] : [{value: null, label: this.projectRoot}]),
         ...projects.map(project => ({value: project.id, label: project.name}))
       ]
-          .filter( project => project.value !== this.sourceProject?.id);
+        .filter( project => project.value !== this.sourceProject?.id);
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;
-        this.projectsNames = projectList.map(p => p.label);
       }
     }));
 
@@ -113,7 +111,6 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
   searchChanged(searchString: string) {
     this.projects = null;
     this.rootFiltered = !this.projectRoot.includes(searchString);
-    this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getTablesFilterProjectsOptions({searchString, loadMore: false,  allowPublic: false}));
   }
 

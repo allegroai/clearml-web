@@ -5,6 +5,7 @@ import {WebappConfigurationComponent} from '~/features/settings/containers/webap
 import {WorkspaceConfigurationComponent} from '@common/settings/workspace-configuration/workspace-configuration.component';
 import {SettingsComponent} from './settings.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {StorageCredentialsComponent} from '@common/settings/storage-credentials/storage-credentials.component';
 
 const settingsBreadcrumb = {
   name: 'Settings',
@@ -45,6 +46,18 @@ const routes: Routes = [
             name: 'Workspace',
             type: CrumbTypeEnum.SubFeature
           }]]},
+      },
+      {
+        path: 'storage-credentials',
+        component: StorageCredentialsComponent,
+        data: {
+          workspaceNeutral: true,
+          route: '/settings/storage-credentials',
+          staticBreadcrumb: [[settingsBreadcrumb, {
+            name: 'Storage Credentials',
+            type: CrumbTypeEnum.SubFeature
+          }]]
+        }
       }
     ]
   }

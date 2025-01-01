@@ -1,47 +1,57 @@
-<div mat-button class='cell pointer'>
-  <i [class]="'al-icon ' + ((showOnlyUserWork$ | ngrxPush)||  ((tagsFilters$ | ngrxPush)?.length > 0)? 'al-ico-filter-on':'al-ico-filter-off')" [matMenuTriggerFor]="menu"><span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span></i>
-</div>
-<mat-menu #menu="matMenu" class="light-theme" (close)="closeMenu()">
-  <button mat-menu-item
-          smClickStopPropagation
-          class="user-filter-button"
-          (click)="switchUserFocus()">
-    <i [class.al-ico-success]="showOnlyUserWork$ | ngrxPush" class="al-icon sm-md" data-id="MyworkCheckbox"></i>
-    <div class="me-3" data-id="MyWorkFilterOption">My Work</div>
+<button mat-icon-button class='cell' [matMenuTriggerFor]="menu" #trigger="matMenuTrigger" [class.menu-opened]="trigger.menuOpen">
+  <mat-icon fontSet="al" [fontIcon]="(showOnlyUserWork() ||  (tagsFilters()?.length > 0) ? 'al-ico-filter-on' : 'al-ico-filter-off')">
+    <span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span>
+  </mat-icon>
+</button>
+
+<mat-menu #menu="matMenu" class="light-theme" (closed)="closeMenu()">
+  <button mat-menu-item smClickStopPropagation (click)="switchUserFocus()">
+    <mat-icon matIconPrefix fontSet="al" [fontIcon]="showOnlyUserWork() ? 'al-ico-success' : ''" data-id="MyworkCheckbox"></mat-icon>
+    <div data-id="MyWorkFilterOption">My Work</div>
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="subMenu" class="d-flex align-items-center">
-    <i [class.hidden]="!((tagsFilters$ | ngrxPush)?.length > 0)" class="filter-point al-icon sm-md al-ico-success" data-id="TagCheckbox" ></i>
-    <span data-id="TagOption" >Tags</span>
+  <button mat-menu-item [matMenuTriggerFor]="subMenu">
+    <mat-icon matIconPrefix fontSet="al"
+              [fontIcon]="!(tagsFilters()?.length > 0) ? '' : 'al-ico-success'"
+              data-id="TagCheckbox"
+    ></mat-icon>
+    <span data-id="TagOption">Tags</span>
   </button>
   <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu()">
     <form class="filter-form">
       <mat-form-field appearance="fill"  smClickStopPropagation class="tags-menu-input w-100 no-bottom">
         <input matInput (input)="setSearchTerm($event)" name="filter" [(ngModel)]="searchTerm" autocomplete="off">
-        <i matSuffix class="fa me-3" [class]="searchTerm ? 'fa-times pointer' : 'fa-search'" (click)="searchTerm && clearSearch()" data-id="TagsearchIcon"></i>
+        @if (searchTerm) {
+          <button matSuffix mat-icon-button (click)="clearSearch()" data-id="TagsearchIcon">
+            <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+          </button>
+        } @else {
+          <mat-icon matIconSuffix fontSet="al" fontIcon="al-ico-search"></mat-icon>
+        }
       </mat-form-field>
     </form>
     <div class="filter-type" smClickStopPropagation>
-          <span data-id="AnyTagOption" class="link me-3" [class.selected]="matchMode !== 'AND'"
-                (click)="toggleMatch()">Any</span>
-      <span data-id="allTagOption" class="link" [class.selected]="matchMode === 'AND'"
-            (click)="toggleMatch()">All</span>
+      <span data-id="AnyTagOption" class="link me-3" [class.selected]="matchMode() !== 'AND'" (click)="toggleMatch()">Any</span>
+      <span data-id="allTagOption" class="link" [class.selected]="matchMode() === 'AND'" (click)="toggleMatch()">All</span>
     </div>
     <div class="results scroll"  smClickStopPropagation>
       <sm-checkbox-three-state-list
         [supportExcludeFilter]="true"
-        [checkedList]="tagsFilters$ | ngrxPush"
-        [options]="tagsLabelValue | filter : searchTerm: 'label'"
-        (filterChanged)="emitFilterChangedCheckBox( $event)"
+        [checkedList]="tagsFilters()"
+        [options]="tagsLabelValue() | filter : searchTerm: 'label'"
+        (filterChanged)="emitFilterChangedCheckBox($event)"
       > </sm-checkbox-three-state-list>
     </div>
-    <div *ngIf="tagsLabelValue?.length>0" class="column-explanation">Click to include tag. Click again to exclude.</div>
+    @if (tagsLabelValue()?.length>0) {
+      <div class="column-explanation">Click to include tag. Click again to exclude.</div>
+    }
   </mat-menu>
   <hr/>
   <button mat-menu-item
-          [disabled]="!((showOnlyUserWork$ | ngrxPush) ||  ((tagsFilters$ | ngrxPush)?.length > 0))"
-          smClickStopPropagation
-          class="user-filter-button"
-          (click)="clearAll()">
+    [disabled]="!(showOnlyUserWork() ||  (tagsFilters()?.length > 0))"
+    smClickStopPropagation
+    class="user-filter-button"
+    (click)="clearAll()"
+  >
     <div class="lbl" data-id="clearAllFilter">Clear all</div>
   </button>
 </mat-menu>

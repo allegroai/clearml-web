@@ -20,13 +20,12 @@ import {TinyColor} from '@ctrl/tinycolor';
 import {select} from 'd3-selection';
 import {cloneDeep} from 'lodash-es';
 import plotly from 'plotly.js';
-import {Subject} from 'rxjs';
-import {debounceTime, filter} from 'rxjs/operators';
+import {of, Subject, timer} from 'rxjs';
+import {debounce, debounceTime, filter} from 'rxjs/operators';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {GraphViewerComponent, GraphViewerData} from './graph-viewer/graph-viewer.component';
 import {
-  DARK_THEME_GRAPH_LINES_COLOR,
-  DARK_THEME_GRAPH_TICK_COLOR,
+  Colors,
   ExtData,
   ExtFrame,
   ExtLayout,
@@ -50,7 +49,7 @@ export type ChartHoverModeEnum = 'x' | 'y' | 'closest' | false | 'x unified' | '
 })
 export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public alreadyDrawn = false;
-  public shouldRefresh = false;
+
   public loading: boolean;
   public type: (plotly.PlotData['type'] | 'table')[];
   public ratio: number;
@@ -65,22 +64,21 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   private _height: number;
   private _hoverMode: ChartHoverModeEnum;
   public singleColorKey: string;
-  private drawGraph$ = new Subject<{ forceRedraw?: boolean; forceSkipReact?: boolean }>();
 
   @Input() identifier: string;
   @Input() hideTitle = false;
   @Input() hideLegend = false;
-  @Input() isDarkTheme: boolean;
   @Input() showLoaderOnDraw = true;
   @Input() hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
   @Input() legendConfiguration: Partial<ExtLegend> = {};
   @Input() yAxisType: plotly.AxisType = 'linear';
   private previousHoverMode: 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
 
+
   @Input() set height(height: number) {
     this._height = height;
     if (this.chart) {
-      this.drawGraph$.next({forceRedraw: false, forceSkipReact: false});
+      this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
     }
   }
 
@@ -205,7 +203,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
     this.sub.add(this.drawGraph$
       .pipe(
-        debounceTime(100),
+        debounce(({forceRedraw, forceSkipReact, noTimer}) => noTimer ? of({forceRedraw, forceSkipReact}) : timer(100)),
         filter(() => !!this.chart)
       )
       .subscribe(({forceRedraw, forceSkipReact}) => {
@@ -288,47 +286,51 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       height: this.type[0] === 'table' ? this.height - 30 : this.height,
       width: this.ratio ? (this.height * this.ratio) + RATIO_OFFSET_FIX : undefined,
       modebar: {
-        color: '#5a658e',
-        activecolor: '#4D66FF',
+        color: this.themeColors().icon,
+        activecolor: this.themeColors().iconActive,
         ...this.addParametersIfDarkTheme({
-          color: PALLET.blue300,
-          activecolor: PALLET.blue100,
           bgcolor: 'transparent'
         })
       },
       title: {
         ...this.addParametersIfDarkTheme({
           font: {
-            color: this.isDarkTheme ? PALLET.blue100 : 'dce0ee'
+            color: this.isDarkTheme() ? 'PALLET.blue100' : 'dce0ee'
           }
         })
       },
-      ...this.addParametersIfDarkTheme({
-        xaxis: {
-          color: DARK_THEME_GRAPH_TICK_COLOR,
-          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
-          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
-          tickfont: {
-            color: DARK_THEME_GRAPH_TICK_COLOR
-          },
-          title: {
-            text: graph.layout.xaxis.title,
-            font: {
-              color: '#dce0ee'
-            }
-          },
-          ...graph.layout.xaxis
+      xaxis: {
+        automargin: true,
+        color: this.themeColors().tick,
+        gridcolor: this.themeColors().lines,
+        zerolinecolor: this.themeColors().lines,
+        tickfont: {
+          color: this.themeColors().tick
         },
-        yaxis: {
-          color: DARK_THEME_GRAPH_TICK_COLOR,
-          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
-          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
-          tickfont: {
-            color: DARK_THEME_GRAPH_TICK_COLOR
-          },
-          ...graph.layout.yaxis
-        }
-      } as Partial<ExtLayout>),
+        ...(graph.layout.xaxis?.title && {title: {
+
+            text: (graph.layout.xaxis.title as any)?.text ?? graph.layout.xaxis.title,
+            font: {
+              color: this.themeColors().font
+            }
+          }}),
+        ...graph.layout.xaxis
+      },
+      yaxis: {
+        color: this.themeColors().tick,
+        gridcolor: this.themeColors().lines,
+        zerolinecolor: this.themeColors().lines,
+        tickfont: {
+          color: this.themeColors().tick
+        },
+        ...(graph.layout.yaxis?.title && {title: {
+            text: (graph.layout.yaxis.title as any)?.text ?? graph.layout.yaxis.title,
+            font: {
+              color: this.themeColors().font
+            }
+          }}),
+        ...graph.layout.yaxis
+      },
       uirevision: 'static', // Saves the UI state between redraws https://plot.ly/javascript/uirevision/
       hoverlabel: {namelength: -1},
       legend: {
@@ -338,14 +340,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         orientation: 'h',
         y: -0.2,
         borderwidth: 2,
-        bordercolor: '#FFFFFF',
         valign: 'top',
-        font: {color: '#000', size: 12, family: 'sans-serif'},
-        ...this.addParametersIfDarkTheme({
-          bgcolor: 'transparent',
-          bordercolor: 'transparent',
-          font: {color: '#dce0ee', size: 12, family: 'sans-serif'}
-        }),
+        font: {color: this.themeColors().font, size: 12, family: 'sans-serif'},
+        bgcolor: 'transparent',
+        bordercolor: 'transparent',
         ...this.legendConfiguration,
         ...graph.layout.legend
       },
@@ -373,14 +371,14 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         // override header design
         data.header = {
           ...data.header,
-          line: {width: 1, color: this.isDarkTheme ? '#5a658e' : '#d4d6e0'},
+          line: {width: 1, color: this.isDarkTheme() ? '#5a658e' : '#d4d6e0'},
           height: 29,
           align: 'left',
           font: {
-            color: [this.isDarkTheme ? PALLET.blue200 : PALLET.blue400],
+            color: [this.themeColors().font],
             size: 12
           },
-          fill: {...data.header?.fill, color: this.isDarkTheme ? PALLET.blue800 : PALLET.blue50}
+          fill: {...data.header?.fill, color: this.isDarkTheme() ? '#262a31' : '#e5e8f1'}
         };
 
         // override cells design
@@ -388,13 +386,13 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         data.cells = {
           ...data.cells,
           align: 'left',
-          height: (isFireFox && this.isDarkTheme) ? 'auto' : 30,
+          height: (isFireFox && this.isDarkTheme()) ? 'auto' : 30,
           font: {
-            color: [this.isDarkTheme ? PALLET.blue200 : PALLET.blue400],
+            color: [this.themeColors().font],
             size: 12
           },
-          fill: {...data.cells, color: this.isDarkTheme ? PALLET.blue950 : '#ffffff'},
-          line: {width: 1, color: this.isDarkTheme ? DARK_THEME_GRAPH_LINES_COLOR : PALLET.blue100}
+          fill: {...data.cells, color: this.isDarkTheme() ? '#0f141a' : '#ffffff'},
+          line: {width: 1, color: this.themeColors().lines}
         };
         layout.width = Math.max((data?.cells?.values?.length ?? 0) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3);
         layout.title = {
@@ -429,14 +427,18 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         spikedash: 'solid',
         rangeslider: {visible: false},
         fixedrange: false,
-        ...this.addParametersIfDarkTheme({
-          color: DARK_THEME_GRAPH_TICK_COLOR,
-          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
-          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
-          tickfont: {
-            color: DARK_THEME_GRAPH_TICK_COLOR
-          }
-        })
+        color: this.themeColors().tick,
+        gridcolor: this.themeColors().lines,
+        zerolinecolor: this.themeColors().lines,
+        tickfont: {
+          color: this.themeColors().tick
+        },
+        ...(graph.layout.xaxis?.title && {title: {
+            text: (graph.layout.xaxis.title as any)?.text ?? graph.layout.xaxis.title,
+            font: {
+              color: '#c1cdf3'
+            }
+          }}),
       },
       yaxis: {
         ...graph.layout.yaxis,
@@ -449,14 +451,18 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         rangeslider: {visible: false},
         fixedrange: false,
         type: this.yAxisType,
-        ...this.addParametersIfDarkTheme({
-          color: DARK_THEME_GRAPH_TICK_COLOR,
-          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
-          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
-          tickfont: {
-            color: DARK_THEME_GRAPH_TICK_COLOR
-          }
-        })
+        color: this.themeColors().tick,
+        gridcolor: this.themeColors().lines,
+        zerolinecolor: this.themeColors().lines,
+        tickfont: {
+          color: this.themeColors().tick
+        },
+        ...(graph.layout.yaxis?.title && {title: {
+            text: (graph.layout.yaxis.title as any)?.text ?? graph.layout.yaxis.title,
+            font: {
+              color: '#c1cdf3'
+            }
+          }}),
       }
     };
 
@@ -586,7 +592,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         attr: 'plotly-embedded-modebar-button',
         icon: this.getEmbedIcon(),
         click: (event) => {
-          this.createEmbedCode.emit({xaxis: this.xAxisType, domRect: event.querySelector('[data-title="Copy embed code"]').getBoundingClientRect()});
+          this.createEmbedCode.emit({
+            xaxis: this.xAxisType,
+            domRect: event.querySelector('[data-title="Copy embed code"]').getBoundingClientRect()
+          });
         }
       };
       modeBarButtonsToAdd.push(button);
@@ -651,6 +660,11 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
   private updateLegend() {
     const graph = select(this.plotlyContainer.nativeElement);
+    if (this.isDarkTheme()) {
+      graph.selectAll('.axis .domain')
+        .style('stroke', Colors.dark.lines)
+        .style('stroke-opacity', 1);
+    }
     graph.selectAll('.legendpoints path')
       .attr('d', 'M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z');
     graph.selectAll('.legendtoggle')
@@ -681,25 +695,28 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       }
 
       if (this.isCompare) {
-        this.removeUserColorFromPlot(graph.data[i])
+        this.removeUserColorFromPlot(graph.data[i]);
       }
       const originalColor = this.isCompare ? undefined : this.getOriginalColor(i);
       const task = graph.data[i].task ?? graph.task;
       const colorKey = this.generateColorKey(graph.data[i].name.trim(), task, graph.data[i].colorKey);
       if (!this.alreadyDrawn) {
         (graph.data[i] as any).originalColor = originalColor;
-        (graph.data[i] as any).fullName = colorKey.replace(`.${task?.substring(0,6)}-`,'-') ?? graph.data[i].name;
+        (graph.data[i] as any).fullName = colorKey.replace(`.${task?.substring(0, 6)}-`, '-') ?? graph.data[i].name;
 
         if (this.xAxisType === ScalarKeyEnum.Timestamp) {
           const zeroTime = graph.data[i].x[0] as number;
-          graph.data[i].x = (graph.data[i].x as plotly.Datum[]).map((timestamp: number) => (timestamp - zeroTime) / timeUnit.time);
+          // If already calculated => zeroTime = 0
+          if (zeroTime > 0) {
+            graph.data[i].x = (graph.data[i].x as plotly.Datum[]).map((timestamp: number) => (timestamp - zeroTime) / timeUnit.time);
+          }
           // graph.data[i].hovertext = graph.data[i].x.map(timestamp => timeInWords((timestamp - zeroTime)));
         }
         if (graph.data[i].type === 'bar' && !graph.data[i].marker) {
           graph.data[i].marker = {} as Partial<plotly.PlotMarker>;
         }
         this.singleColorKey = colorKey;
-        graph.data[i].name = (this.scaleFactor === 100 || this.isSmooth) ? graph.data[i].name : `${graph.data[i].name.trim()}      `;
+        graph.data[i].name = (this.scaleFactor() === 100 || this.isSmooth) ? graph.data[i].name : `${graph.data[i].name.trim()}      `;
       }
 
       if (!Array.isArray(originalColor)) {
@@ -708,7 +725,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           const c = new TinyColor(this.getOriginalColor(i)).toRgb();
           color = [c.r, c.g, c.b];
         } else {
-          color = this.colorHash.initColor(colorKey, null, this.isDarkTheme);
+          color = this.colorHash.initColor(colorKey, null, this.isDarkTheme());
         }
         // if (this.colorHash.hasColor(colorKey)) { // We don't save init color in color cache, so we need to recolor everytime
         this._reColorTrace(graph.data[i], color);
@@ -743,7 +760,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public generateColorKey(name: string, task: string, colorKey: string) {
     const variant = colorKey || name;
     if (!this.isCompare) {
-      return `${variant}?`;  // "?" to adjust desired colors (legend title is removing this ?)
+      // "?" to adjust desired colors (legend title is removing this ?)
+      // trim() because in hiDpi we add spaces to name
+      return `${variant?.trim()}?`;
     } else {
       return variant?.endsWith(task) ? variant : `${variant}-${task}`;
     }
@@ -754,7 +773,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       ...data,
       line: {width: 1, ...data.line, color: `rgb(${color[0]},${color[1]},${color[2]})`},
       legendgroup: data.name,
-      name: `${data.name} (Smoothed)${this.scaleFactor === 100 ? '' : '      '}`,
+      name: `${data.name} (Smoothed)${this.scaleFactor() === 100 ? '' : '      '}`,
       showlegend: true,
       isSmoothed: true,
       ...(hidden && {visible: 'legendonly'}),
@@ -808,7 +827,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       .raise()
       .on('click', (event, data) => {
         const colorKey = data[0].trace._input.colorKey;
-        const name = data[0].trace._input.name;
+        const name = data[0].trace._input.name.replace(/ \(Smoothed\)$/, '');
         const task = data[0].trace._input.task;
         const originalColor = data[0].trace._input.originalColor;
         const colorKey2 = this.generateColorKey(name, task, colorKey);
@@ -827,7 +846,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       .selectAll('.traces .legendtoggle')
       .append('title')
       .text((data, i) => (this.chart.data[i] as any).fullName ?? data[0].trace.name);
-  }
+  };
 
 
   private setAxisText(chart: ExtFrame, timeUnit?: { time: number; str: string }) {
@@ -974,12 +993,21 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     this.zone.run(() => {
       this.dialog.open<GraphViewerComponent, GraphViewerData>(GraphViewerComponent, {
         data: {
-          ...(this.exportForReport && {embedFunction: (data) => this.createEmbedCode.emit({xaxis: data.xaxis, domRect: data.domRect})}),
+          ...(this.exportForReport && {
+            embedFunction: (data) => this.createEmbedCode.emit({
+              xaxis: data.xaxis,
+              domRect: data.domRect
+            })
+          }),
           // signed url are updated after originChart was cloned - need to update images urls!
           chart: cloneDeep({
             ...this.originalChart,
             data: this.originalChart.data.map((d, i) => ({...d, visible: this._chart.data[i].visible})),
-            layout: {...this.originalChart.layout, showlegend: this.moveLegendToTitle || this.chartElm.layout.showlegend, images: this.chart.layout?.images}
+            layout: {
+              ...this.originalChart.layout,
+              showlegend: this.moveLegendToTitle || this.chartElm.layout.showlegend,
+              images: this.chart.layout?.images
+            }
           }),
           id: this.identifier,
           xAxisType: this.xAxisType,
@@ -987,22 +1015,19 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           smoothWeight: this.smoothWeight,
           smoothType: this.smoothType,
           hoverMode: this.hoverMode,
-          darkTheme: this.isDarkTheme,
+          hideNavigation: this.darkTheme(),
           isCompare: this.isCompare,
           moveLegendToTitle: this.moveLegendToTitle,
           legendConfiguration: this.legendConfiguration
         },
-        panelClass: ['image-viewer-dialog', this.isDarkTheme ? 'dark-theme' : 'light-theme'],
-        height: '100%',
-        maxHeight: 'auto',
-        width: '100%',
+        panelClass: ['image-viewer-dialog','full-screen'],
         maxWidth: this.maximizeClicked.observed ? '100%' : 'auto'
       }).beforeClosed().subscribe(() => this.maximizeClicked.emit());
     });
   }
 
   private addParametersIfDarkTheme(object: Record<string, unknown>) {
-    return this.isDarkTheme ? object : {};
+    return this.isDarkTheme() ? object : {};
   }
 
   private addIterationString(name: string, iter: number) {

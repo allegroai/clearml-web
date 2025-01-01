@@ -14,14 +14,16 @@ import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-o
 import {MatRadioModule} from '@angular/material/radio';
 import {PipelineControllerInfoComponent} from './pipeline-controller-info/pipeline-controller-info.component';
 import {PipelineControllerStepComponent} from './pipeline-controller-step/pipeline-controller-step.component';
-import { PipelineInfoComponent } from './pipeline-details/pipeline-info.component';
-import {PipelineControllerMenuComponent} from '@common/pipelines-controller/pipeline-controller-menu/pipeline-controller-menu.component';
-import {RunPipelineControllerDialogComponent} from './run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
-import {AbortControllerDialogComponent} from '@common/pipelines-controller/pipeline-controller-menu/abort-controller-dialog/abort-controller-dialog.component';
+import {PipelineInfoComponent} from './pipeline-details/pipeline-info.component';
 import {
-    SimpleDatasetVersionPreviewComponent
-} from '@common/dataset-version/simple-dataset-version-preview/simple-dataset-version-preview.component';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+  PipelineControllerMenuComponent
+} from '@common/pipelines-controller/pipeline-controller-menu/pipeline-controller-menu.component';
+import {
+  RunPipelineControllerDialogComponent
+} from './run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
+import {
+  OpenDatasetVersionPreviewComponent
+} from '@common/dataset-version/open-dataset-version-preview/open-dataset-version-preview.component';
 import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {DurationPipe} from '@common/shared/pipes/duration.pipe';
@@ -50,13 +52,28 @@ import {SelectQueueModule} from '@common/experiments/shared/components/select-qu
 import {PushPipe} from '@ngrx/component';
 import {compareNavigationGuard} from '@common/experiments/compare-navigation.guard';
 import {compareViewStateGuard} from '@common/experiments/compare-view-state.guard';
-import {ExperimentCompareScalarChartsComponent} from '@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
-import {COMPARE_CONFIG_TOKEN, COMPARE_STORE_KEY, getCompareConfig} from '@common/experiments-compare/experiments-compare.module';
+import {
+  ExperimentCompareScalarChartsComponent
+} from '@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
+import {
+  COMPARE_CONFIG_TOKEN,
+  COMPARE_STORE_KEY,
+  getCompareConfig
+} from '@common/experiments-compare/experiments-compare.module';
 import {UserPreferences} from '@common/user-preferences';
 import {StoreModule} from '@ngrx/store';
 import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
-import {ExperimentComparePlotsComponent} from '@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component';
+import {
+  ExperimentComparePlotsComponent
+} from '@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component';
 import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatDialogActions, MatDialogClose} from '@angular/material/dialog';
+import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor/code-editor.component';
+import {MatButtonToggle} from '@angular/material/button-toggle';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {provideAnimations} from '@angular/platform-browser/animations';
 
 export const routes: Routes = [
   {
@@ -107,8 +124,7 @@ export const routes: Routes = [
     PipelineControllerStepComponent,
     PipelineInfoComponent,
     PipelineControllerMenuComponent,
-    RunPipelineControllerDialogComponent,
-    AbortControllerDialogComponent
+    RunPipelineControllerDialogComponent
   ],
   exports: [
     PipelineControllerStepComponent
@@ -128,8 +144,7 @@ export const routes: Routes = [
     MatProgressSpinnerModule,
     ExperimentOutputLogModule,
     MatRadioModule,
-    SimpleDatasetVersionPreviewComponent,
-    LabeledFormFieldDirective,
+    OpenDatasetVersionPreviewComponent,
     SearchTextDirective,
     FilterPipe,
     DurationPipe,
@@ -152,7 +167,15 @@ export const routes: Routes = [
     ShowTooltipIfEllipsisDirective,
     SelectQueueModule,
     PushPipe,
-    ExperimentHeaderComponent
+    ExperimentHeaderComponent,
+    MatIcon,
+    MatButton,
+    MatDialogActions,
+    MatDialogClose,
+    MatIconButton,
+    CodeEditorComponent,
+    MatButtonToggle,
+    MatSlideToggle
   ],
   providers: [
     ControllersComponent,

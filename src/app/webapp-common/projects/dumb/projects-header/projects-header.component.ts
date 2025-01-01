@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, input, output, computed} from '@angular/core';
 import {TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
@@ -7,19 +7,16 @@ import {TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.
   styleUrls: ['./projects-header.component.scss']
 })
 export class ProjectsHeaderComponent {
-  @Input() searchQuery: string;
-  @Input() sortOrder: TableSortOrderEnum;
-  @Input() tags: string[];
-  @Input() enableTagsFilter: boolean = false;
+  searchQuery = input<string>();
+  sortOrder = input<TableSortOrderEnum>();
+  tags = input<string[]>();
+  enableTagsFilter = input(false);
+  sortByField = input<string>();
 
-  @Input() set sortByField(sortByField: string) {
-    this.sortByTitle = sortByField.includes('name') ? 'NAME' : 'RECENT';
-  }
+  sortByTitle = computed(() => this.sortByField().includes('name') ? 'NAME' : 'RECENT');
 
-  @Output() orderByChanged = new EventEmitter<string>();
-  @Output() searchChanged = new EventEmitter<string>();
-  @ViewChild('menu') vcDropDownMenu;
-  public sortByTitle: string;
+  orderByChanged = output<string>();
+  searchChanged = output<string>();
 }
 
 

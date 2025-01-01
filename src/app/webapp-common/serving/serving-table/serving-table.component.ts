@@ -13,7 +13,6 @@ import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@
 import {animate, style, transition, trigger} from '@angular/animations';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {ServingActions, servingLoadingTableColFields, servingTableColFields} from '@common/serving/serving.actions';
-import {isExample} from '@common/shared/utils/shared-utils';
 import {servingTableCols} from '@common/serving/serving.consts';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
 import { EntityTypeEnum } from '~/shared/constants/non-common-consts';
@@ -71,9 +70,7 @@ export class ServingTableComponent extends BaseTableView implements OnChanges {
   public companyTags$: Observable<string[]>;
   private _selectedEndpoints: EndpointStats[];
   private _endpoints: EndpointStats[];
-  public getSysTags = (endpoint) => endpoint?.system_tags?.concat(isExample(endpoint) ? 'example' : []);
   public filtersMatch: Record<string, string> = {};
-  public filtersSubValues: Record<string, string[]> = {};
   public singleRowContext: boolean;
   private _tableFilters: Record<string, FilterMetadata>;
   public roundedMetricValues: Record<string, Record<string, boolean>> = {};

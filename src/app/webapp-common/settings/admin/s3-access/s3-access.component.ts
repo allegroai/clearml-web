@@ -6,7 +6,10 @@ import {ICONS} from '@common/constants';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Credentials} from '@common/core/reducers/common-auth-reducer';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {MatInput} from '@angular/material/input';
+import {MatFormField, MatInput} from '@angular/material/input';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions} from '@angular/material/form-field';
 
 @Component({
   selector: 'sm-s3-access',
@@ -17,14 +20,20 @@ import {MatInput} from '@angular/material/input';
   imports: [
     ReactiveFormsModule,
     TooltipDirective,
-    MatInput
+    MatInput,
+    MatFormField,
+    MatButton,
+    MatIcon,
+    MatIconButton
   ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => S3AccessComponent),
       multi: true
-    }]
+    },
+    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {subscriptSizing: 'dynamic'} as MatFormFieldDefaultOptions}
+  ]
 })
 export class S3AccessComponent implements ControlValueAccessor {
   private formBuilder = inject(FormBuilder);

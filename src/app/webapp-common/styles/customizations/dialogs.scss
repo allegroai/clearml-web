@@ -1,0 +1,35 @@
+@use '@angular/material' as mat;
+
+html.cdk-global-scrollblock {
+  overflow-y: hidden;
+}
+
+.cdk-overlay-container .cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.mat-mdc-dialog-surface {
+  border: 1px solid var(--color-outline-variant);
+}
+
+.mat-mdc-dialog-panel {
+  --mat-dialog-container-max-width: 100%;
+  --mat-dialog-container-min-width: 430px;
+  --mat-dialog-actions-alignment: center;
+
+  &.full-screen {
+    height: calc(100vh - 32px);
+    width:  calc(100vw - 32px);
+    max-width: 100vw;
+  }
+
+}
+
+@mixin dialogs($theme) {
+  @if mat.get-theme-type($theme) == light {
+    --mdc-dialog-container-color: var(--color-surface-container-lowest);
+  } @else {
+    --mdc-dialog-container-color: var(--color-surface-container-low);
+  }
+}
+

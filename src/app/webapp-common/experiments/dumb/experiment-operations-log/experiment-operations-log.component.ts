@@ -1,6 +1,5 @@
-import {AfterViewInit, Component, EventEmitter, input, Output, QueryList, ViewChildren} from '@angular/core';
-import {DatePipe, NgSwitch, NgSwitchCase, NgSwitchDefault, TitleCasePipe} from '@angular/common';
-import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {Component, EventEmitter, input, Output, viewChild} from '@angular/core';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {PrimeTemplate} from 'primeng/api';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
@@ -9,7 +8,6 @@ import {
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {trackByIndex} from '@common/shared/utils/forms-track-by';
-import {filter, take} from 'rxjs/operators';
 import {
   TasksGetOperationsLogResponseOperations
 } from '~/business-logic/model/tasks/tasksGetOperationsLogResponseOperations';
@@ -22,21 +20,15 @@ import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experimen
   styleUrls: ['./experiment-operations-log.component.scss'],
   imports: [
     DatePipe,
-    CdkVirtualScrollViewport,
-    CdkFixedSizeVirtualScroll,
-    CdkVirtualForOf,
+    TitleCasePipe,
     TableComponent,
     PrimeTemplate,
-    NgSwitchCase,
-    NgSwitchDefault,
-    NgSwitch,
     ShowTooltipIfEllipsisDirective,
     TooltipDirective,
-    TitleCasePipe,
-  ],
+],
   standalone: true
 })
-export class ExperimentOperationsLogComponent implements AfterViewInit {
+export class ExperimentOperationsLogComponent {
   OPERATIONS = {...EXPERIMENTS_STATUS_LABELS, archived: 'Archived'};
 
   columns: ISmCol[] = [
@@ -84,21 +76,11 @@ export class ExperimentOperationsLogComponent implements AfterViewInit {
       style: {maxWidth: '360px'}
     },
   ];
-  public table: TableComponent<{ id: string }>;
 
   lines = input<TasksGetOperationsLogResponseOperations[]>([]);
   @Output() downloadFullLog = new EventEmitter();
   @Output() openFullLog = new EventEmitter();
-  @ViewChildren(TableComponent) tables: QueryList<TableComponent<{ id: string }>>;
+  table = viewChild(TableComponent<{ id: string }>);
 
   protected readonly trackByIndex = trackByIndex;
-
-  ngAfterViewInit(): void {
-    this.tables.changes
-      .pipe(filter((comps: QueryList<TableComponent<{ id: string }>>) => !!comps.first), take(1))
-      .subscribe((comps: QueryList<TableComponent<{ id: string }>>) => {
-        this.table = comps.first;
-      });
-    this.tables.forEach(item => this.table = item);
-  }
 }

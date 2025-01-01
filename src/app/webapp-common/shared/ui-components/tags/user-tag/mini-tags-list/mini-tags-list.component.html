@@ -1,0 +1,3 @@
+@for (tag of tagsList; track tag.caption) {
+  <sm-mini-tag [smTooltip]="tag.caption" [matTooltipShowDelay]="100" [color]="tag.colorObservable | ngrxPush"></sm-mini-tag>
+}

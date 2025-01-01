@@ -1,9 +1,8 @@
-@import "variables";
-
 
 .single-table-container {
   position: relative;
   width: 100%;
+  min-width: 280px;
 
   .summary-header {
     height: 48px;
@@ -11,10 +10,10 @@
     max-height: 48px;
     padding: 12px;
     font-size: 16px;
-    color: $blue-600;
+    color: var(--color-on-surface-variant);
     text-align: center;
     border-radius: 4px 4px 0 0;
-    border: 1px solid $blue-100;
+    border: 1px solid var(--color-outline-variant);
     border-bottom: none;
   }
 
@@ -26,7 +25,7 @@
       top: 48px;
       left: 0;
       border-radius: 0 0 4px 4px;
-      border: 1px solid $blue-100;
+      border: 1px solid var(--color-outline-variant);
       width: 100%;
       height: calc(100% - 62px);
       z-index: -1;
@@ -36,9 +35,11 @@
       padding: 12px 24px;
       text-align: center;
       margin-bottom: 2px;
+      min-width: 120px;
+      width: 100%;
 
       &:not(:last-child) {
-        border-right: solid 1px $blue-100;
+        border-right: solid 1px var(--color-outline-variant);
       }
 
       .variant {
@@ -47,54 +48,18 @@
       }
 
       .value {
-        color: $blue-500;
+        color: var(--color-on-surface-variant);
       }
     }
   }
 
-  .csv-no-icon {
-    display: none;
-  }
-
-  &.dark-theme {
-
-    .summary-header {
-      color: $blue-300;
-      border-color: $dark-border;
-    }
-
-    .items-container {
-      .wrapper {
-        border-color: $dark-border;
-      }
-
-      .item {
-        &:not(:last-child) {
-          border-color: $dark-border;
-        }
-
-        .variant {
-          color: $blue-300;
-        }
-
-        .value {
-          color: $blue-100;
-        }
-      }
-    }
-
-
-    .csv-no-icon {
+  .csv-svg {
       display: block;
       width: 24px;
       height: 24px;
       cursor: pointer;
     }
 
-    .al-ico-csv {
-      display: none;
-    }
-  }
 }
 
 :host {
@@ -108,15 +73,15 @@
     position: absolute;
     display: flex;
     align-items: center;
-    top: 12px;
-    right: 12px;
-    gap: 6px;
+    top: 6px;
+    right: 8px;
+    gap: 4px;
     opacity: 0;
     transition: opacity 300ms ease;
 
     .clickable-icon {
-      background-color: $blue-300;
-      color: $blue-50;
+      background-color: var(--color-inverse-surface);
+      color: var(--color-inverse-on-surface);
       border-radius: 4px;
       cursor: pointer;
     }
@@ -127,8 +92,6 @@
       opacity: 1;
     }
   }
-
-  /////// DARK THEME //////////
 
   @supports (-moz-appearance:none) {
     .single-table-container .items-container {

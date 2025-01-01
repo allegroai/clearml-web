@@ -1,25 +1,37 @@
-<div *ngFor="let kpi of kpis">
-  <sm-labeled-row label="{{kpi.label}}:">
-    <div *ngIf="!kpi.href">
-      <span [class.preserve-spaces]="kpi.downloadable">{{kpi.value}}</span>
-      <span *ngIf="kpi.downloadable">
-        <sm-copy-clipboard *ngIf="isLocalFile" [clipboardText]="kpi.value" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
-        <i *ngIf="model?.uri && !isLocalFile"
-           class="pointer al-icon al-ico-download sm-md ms-2"
-           (click)="downloadModelClicked()"
-           data-id="downloadIcon"
-        ></i>
-      </span>
-    </div>
-    <div *ngIf="kpi.href && kpi.value">
-      <a [routerLink]="kpi.href">
-        {{kpi.value}}
-      </a>
-      <sm-copy-clipboard  [clipboardText]="kpi.task" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
-    </div>
-    <div *ngIf="kpi.href && (!kpi.value) ">N/A</div>
-  </sm-labeled-row>
-</div>
+@for (kpi of kpis; track kpi.label) {
+  <div>
+    <sm-labeled-row label="{{kpi.label}}:">
+      @if (!kpi.href) {
+        <div [class.preserve-spaces]="kpi.downloadable">
+          <span class="value">{{kpi.value}}</span>
+          @if (kpi.downloadable) {
+            <span>
+              @if (isLocalFile) {
+                <sm-copy-clipboard [clipboardText]="kpi.value" label=""></sm-copy-clipboard>
+              }
+              @if (model?.uri && !isLocalFile) {
+                <button mat-icon-button (click)="downloadModelClicked()" data-id="downloadIcon" class="ms-2">
+                  <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+                </button>
+              }
+            </span>
+          }
+        </div>
+      }
+      @if (kpi.href && kpi.value) {
+        <div>
+          <a [routerLink]="kpi.href">
+            {{kpi.value}}
+          </a>
+          <sm-copy-clipboard  [clipboardText]="kpi.task" label=""></sm-copy-clipboard>
+        </div>
+      }
+      @if (kpi.href && (!kpi.value) ) {
+        <div>N/A</div>
+      }
+    </sm-labeled-row>
+  </div>
+}
 
 <sm-labeled-row label="DESCRIPTION:" labelClass="align-self-start">
   <sm-inline-edit
@@ -30,5 +42,6 @@
     (inlineActiveStateChanged)="editExperimentComment($event)"
     (cancel)="cancelEdit()"
     >
-    <span class="preserve-spaces">{{!model? '-': (model?.comment | NA)}}</span></sm-inline-edit>
+    <span class="preserve-spaces value me-3">{{!model? '-': (model?.comment | NA)}}</span>
+  </sm-inline-edit>
 </sm-labeled-row>

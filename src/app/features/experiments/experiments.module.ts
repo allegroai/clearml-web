@@ -10,7 +10,6 @@ import {LayoutModule} from '~/layout/layout.module';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {AngularSplitModule} from 'angular-split';
-import {CommonLayoutModule} from '@common/layout/layout.module';
 import {DebugImagesModule} from '@common/debug-images/debug-images.module';
 import {
   ExperimentInfoExecutionComponent
@@ -71,7 +70,6 @@ import {
 import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
 import {RouterModule} from '@angular/router';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {CommonDeleteDialogModule} from '@common/shared/entity-page/entity-delete/common-delete-dialog.module';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatRadioModule} from '@angular/material/radio';
 import {SharedModule} from '~/shared/shared.module';
@@ -81,7 +79,6 @@ import {Overlay} from '@angular/cdk/overlay';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {MatTabsModule} from '@angular/material/tabs';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
 import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
 import {
@@ -133,75 +130,79 @@ import {
 import {
   ExperimentArtifactsNavbarComponent
 } from '@common/experiments/dumb/experiment-artifacts-navbar/experiment-artifacts-navbar.component';
+import {CommonDeleteDialogModule} from '@common/shared/entity-page/entity-delete/common-delete-dialog.module';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
 
 
 @NgModule({
-  imports: [
-    FormsModule,
-    LayoutModule,
-    ReactiveFormsModule,
-    CommonModule,
-    ExperimentRouterModule,
-    ExperimentSharedModule,
-    ExperimentGraphsModule,
-    SelectModelModule,
-    DebugImagesModule,
-    ExperimentCompareSharedModule,
-    CommonLayoutModule,
-    MatSidenavModule,
-    MatListModule,
-    AngularSplitModule,
-    ScrollingModule,
-    CommonDeleteDialogModule,
-    RouterModule,
-    SharedModule,
-    ExperimentOutputLogModule,
-    MatProgressSpinnerModule,
-    MatRadioModule,
-    RouterTabNavBarComponent,
-    MatTabsModule,
-    RouterTabNavBarComponent,
-    LabeledFormFieldDirective,
-    OverlayComponent,
-    RefreshButtonComponent,
-    InfoHeaderStatusIconLabelComponent,
-    NAPipe,
-    SortPipe,
-    safeAngularUrlParameterPipe,
-    ReplaceViaMapPipe,
-    FilterOutPipe,
-    DurationPipe,
-    FilterInternalPipe,
-    FileSizePipe,
-    HideRedactedArgumentsPipe,
-    MenuItemComponent,
-    CopyClipboardComponent,
-    SectionHeaderComponent,
-    InlineEditComponent,
-    TagsMenuComponent,
-    EntityFooterComponent,
-    MenuComponent,
-    ExperimentTypeIconLabelComponent,
-    SearchComponent,
-    IdBadgeComponent,
-    ScrollTextareaComponent,
-    TagListComponent,
-    TooltipDirective,
-    LabeledRowComponent,
-    EditableSectionComponent,
-    SelectableGroupedFilterListComponent,
-    MatMenuModule,
-    MatExpansionModule,
-    MatInputModule,
-    MatSelectModule,
-    HesitateDirective,
-    ShowTooltipIfEllipsisDirective,
-    SelectQueueModule,
-    PushPipe,
-    ExperimentHeaderComponent,
-    ExperimentOperationsLogComponent,
-    ExperimentArtifactsNavbarComponent,
-  ],
+    imports: [
+        FormsModule,
+        LayoutModule,
+        ReactiveFormsModule,
+        CommonModule,
+        ExperimentRouterModule,
+        ExperimentSharedModule,
+        ExperimentGraphsModule,
+        SelectModelModule,
+        DebugImagesModule,
+        ExperimentCompareSharedModule,
+        MatSidenavModule,
+        MatListModule,
+        AngularSplitModule,
+        ScrollingModule,
+        RouterModule,
+        SharedModule,
+        ExperimentOutputLogModule,
+        MatProgressSpinnerModule,
+        MatRadioModule,
+        RouterTabNavBarComponent,
+        MatTabsModule,
+        RouterTabNavBarComponent,
+        OverlayComponent,
+        RefreshButtonComponent,
+        InfoHeaderStatusIconLabelComponent,
+        NAPipe,
+        SortPipe,
+        safeAngularUrlParameterPipe,
+        ReplaceViaMapPipe,
+        FilterOutPipe,
+        DurationPipe,
+        FilterInternalPipe,
+        FileSizePipe,
+        HideRedactedArgumentsPipe,
+        MenuItemComponent,
+        CopyClipboardComponent,
+        SectionHeaderComponent,
+        InlineEditComponent,
+        TagsMenuComponent,
+        EntityFooterComponent,
+        MenuComponent,
+        ExperimentTypeIconLabelComponent,
+        SearchComponent,
+        IdBadgeComponent,
+        ScrollTextareaComponent,
+        TagListComponent,
+        TooltipDirective,
+        LabeledRowComponent,
+        EditableSectionComponent,
+        SelectableGroupedFilterListComponent,
+        MatMenuModule,
+        MatExpansionModule,
+        MatInputModule,
+        MatSelectModule,
+        HesitateDirective,
+        ShowTooltipIfEllipsisDirective,
+        SelectQueueModule,
+        PushPipe,
+        ExperimentHeaderComponent,
+        ExperimentOperationsLogComponent,
+        ExperimentArtifactsNavbarComponent,
+        CommonDeleteDialogModule,
+        MatIcon,
+        MatButton,
+        MatIconButton
+    ],
   declarations: [
     ExperimentsComponent,
     ExperimentInfoExecutionComponent,

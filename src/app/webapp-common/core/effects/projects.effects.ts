@@ -66,7 +66,7 @@ import {selectSelectModelTableFilters} from '@common/select-model/select-model.r
 import {TagColorMenuComponent} from '@common/shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 import {selectProjectType} from '@common/core/reducers/view.reducer';
 
-export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
+export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Tasks'};
 
 
 @Injectable()
@@ -107,7 +107,7 @@ export class ProjectsEffects {
     ]),
     switchMap(([action, showHidden, scrollId, filters]) => forkJoin([
         this.projectsApi.projectsGetAllEx({
-          /* eslint-disable @typescript-eslint/naming-convention */
+
           allow_public: action.allowPublic,
           page_size: rootProjectsPageSize,
           size: rootProjectsPageSize,
@@ -122,7 +122,7 @@ export class ProjectsEffects {
             only_fields: ['name', 'company'],
             search_hidden: showHidden,
               _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']},
-            /* eslint-enable @typescript-eslint/naming-convention */
+
           } as ProjectsGetAllExRequest)
             .pipe(
               map((res: ProjectsGetAllExResponse) => res.projects.filter(project => project.name === action.searchString)),
@@ -132,7 +132,7 @@ export class ProjectsEffects {
           this.projectsApi.projectsGetAllEx({
             id: filters['project.name']?.value,
             only_fields: ['name', 'company'],
-            /* eslint-enable @typescript-eslint/naming-convention */
+
           } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
           of([]),
       ])
@@ -184,10 +184,10 @@ export class ProjectsEffects {
         [[], []]
       );
       return this.projectsApi.projectsGetAllEx({
-        /* eslint-disable @typescript-eslint/naming-convention */
+
         _any_: {fields: ['name'], pattern: projectsNames.map(name => `^${name}$`).join('|')},
         search_hidden: true
-        /* eslint-enable @typescript-eslint/naming-convention */
+
       }).pipe(map(res => [res, simpleProjectNames]));
     }),
     switchMap(([res, projectsNames]) => [actions.setProjectAncestors({
@@ -231,7 +231,7 @@ export class ProjectsEffects {
   //getAll but not projects'
   getAllTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getCompanyTags),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     switchMap(() => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
         map((res: OrganizationGetTagsResponse) => actions.setCompanyTags({
@@ -245,7 +245,6 @@ export class ProjectsEffects {
 
   getProjectsTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectsTags),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: [action.entity]}})
       .pipe(
         withLatestFrom(this.store.select(selectMainPageTagsFilter), this.store.select(selectProjectType)),
@@ -313,7 +312,7 @@ export class ProjectsEffects {
         cols = [createMetricColumn(cols as unknown as MetricColumn, projectId)];
       }
       return forkJoin(cols.map(col => this.tasksApi.tasksGetAllEx({
-        /* eslint-disable @typescript-eslint/naming-convention */
+
         project: [projectId],
         only_fields: ['started', 'last_iteration', 'user.name', 'type', 'name', 'status', 'active_duration', col.id],
         [col.id]: [0, null],
@@ -324,7 +323,7 @@ export class ProjectsEffects {
         system_tags: ['-archived'],
         scroll_id: null,
         size: 1000
-        /* eslint-enable @typescript-eslint/naming-convention */
+
       } as unknown as TasksGetAllExRequest)
         .pipe(map(({tasks}) => tasks))
       ))
@@ -362,9 +361,9 @@ export class ProjectsEffects {
   getAllProjectsUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
     switchMap(() => this.projectsApi.projectsGetUserNames({
-      /* eslint-disable @typescript-eslint/naming-convention */
+
       include_subprojects: true
-      /* eslint-enable @typescript-eslint/naming-convention */
+
     }, {adminQuery: true}).pipe(
       mergeMap(res => [actions.setAllProjectUsers(res)]),
       catchError(error => [
@@ -382,7 +381,7 @@ export class ProjectsEffects {
       of({users: all}) :
       this.projectsApi.projectsGetUserNames({
         projects: [action.projectId],
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         include_subprojects: isDeep
       }, {adminQuery: true})).pipe(
       mergeMap(res => [actions.setProjectUsers(res)]),
@@ -396,11 +395,11 @@ export class ProjectsEffects {
   getExtraUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getFilteredUsers),
     switchMap(action => this.usersApi.usersGetAllEx({
-      /* eslint-disable @typescript-eslint/naming-convention */
+
       order_by: ['name'],
       only_fields: ['name'],
       id: action.filteredUsers || []
-      /* eslint-enable @typescript-eslint/naming-convention */
+
     }, {adminQuery: true}).pipe(
       mergeMap(res => [
         actions.setProjectExtraUsers(res),
@@ -452,7 +451,7 @@ export class ProjectsEffects {
 
   private getRelevantTableFilters(routerConfig$: Observable<Params>) {
     return routerConfig$.pipe(switchMap(config => {
-      if (config.includes('compare-experiments')) {
+      if (config.includes('compare-tasks')) {
         return this.store.select(selectCompareAddTableFilters);
       } else if (config?.includes('models')) {
         return this.store.select(selectTableFilters);

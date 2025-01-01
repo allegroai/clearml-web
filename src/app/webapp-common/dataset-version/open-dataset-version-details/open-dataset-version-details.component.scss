@@ -1,0 +1,43 @@
+:host {
+  .header {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  .section {
+    .param {
+      &.continue {
+        border-bottom: unset;
+      }
+
+      .comment {
+        color: var(--color-on-surface-variant);
+        margin-left: 4px;
+      }
+
+      .multi-line-value {
+        flex: 1 1 0;
+        color: var(--color-on-surface-variant);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        white-space: pre-line;
+      }
+    }
+
+    .mat-mdc-icon-button {
+      opacity: 0;
+      transition: opacity 300ms ease-in-out;
+    }
+
+    &:hover .mat-mdc-icon-button {
+      opacity: 1;
+    }
+  }
+
+  sm-id-badge {
+    border: 1px solid var(--color-outline-variant);
+    border-radius: 4px;
+  }
+}

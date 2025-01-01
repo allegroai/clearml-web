@@ -1,22 +1,12 @@
-@import 'variables';
-
 :host {
   .data-text {
     margin: 0 -32px;
     width: 70vw;
     height: calc(90vh - 200px);
     overflow: auto;
-    background-color: $blue-900;
+    background-color: var(--color-surface-container);
     border-radius: 4px;
     resize: none;
-
-    .data-text-ace  {
-      width: 100%;
-      height: 100%;
-      background-color: $blue-900;
-      color: $blue-100;
-      line-height: 1.6;
-    }
   }
 
   ::ng-deep {
@@ -26,10 +16,12 @@
         border: none;
       }
       .ace_selection {
-        background-color: darken($neon-yellow, 20%);
+        background-color: var(--color-tertiary-container);
+        color: var(--color-on-tertiary-container);
       }
       .ace_selected-word {
-        background-color: darken($orangada, 10%);
+        background-color: var(--color-secondary-container);
+        color: var(--color-on-secondary-container);
       }
     }
   }

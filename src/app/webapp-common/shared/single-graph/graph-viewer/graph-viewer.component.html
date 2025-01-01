@@ -1,5 +1,5 @@
-<div class="modal-container" [class.dark-theme]="darkTheme" #modalContainer>
-  <div class="graph-viewer-header">
+<div class="modal-container" #modalContainer>
+  <div class="graph-viewer-header" [class.has-tags]="chart?.tags">
     <div class="chart-title ellipsis"
       [class.w-100]="!(minMaxIterations$ | ngrxPush)?.minIteration"
       [smTooltip]="title" smShowTooltipIfEllipsis>
@@ -16,7 +16,7 @@
       <sm-tag-list [tags]="chart?.tags"></sm-tag-list>
     </div>
     <input #fakeInput name="Don't remove - it take the autofocus from slider" style="opacity: 0; height: 0; width: 0">
-    @if (!darkTheme) {
+    @if (!disableNavigation) {
       <div class="viewer-iteration">
         @if (minMaxIterations$ | ngrxPush; as minMaxIterations) {
           <div>
@@ -44,14 +44,16 @@
         }
       </div>
     }
-    <div class="header-actions">
-      <div [class.load-spinner]="(isFetchingData$ | ngrxPush) || !plotLoaded" class="d-flex align-items-center me-3"></div>
+    <div class="header-actions gap-3">
+      <div [class.load-spinner]="(isFetchingData$ | ngrxPush) || !plotLoaded" class="d-flex align-items-center"></div>
       @if ((isFetchingData$ | ngrxPush) === false && isFullDetailsMode) {
-        <div class="pointer d-flex align-items-center me-3" smTooltip="Refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+        <button mat-icon-button smTooltip="Refresh" matTooltipPosition="below" (click)="refresh()">
+          <mat-icon fontSet="al" fontIcon="al-ico-refresh"></mat-icon>
+        </button>
       }
-      <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
-        <i class="al-icon al-ico-dialog-x al-color blue-300"></i>
-      </div>
+      <button mat-icon-button smTooltip="Close" matTooltipPosition="below" (click)="closeGraphViewer()">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
     </div>
 
   </div>
@@ -60,10 +62,9 @@
       @if (!isCompare) {
         <div class="d-flex field" >
           <span class="label-text axis-text-margin-left">Horizontal Axis</span>
-          <mat-form-field appearance="outline" class="axis-type-field no-bottom" [class.black]="darkTheme">
+          <mat-form-field appearance="outline" class="axis-type-field no-bottom">
             <mat-select
               [value]="xAxisType$ | ngrxPush" (selectionChange)="xAxisTypeChanged($event)"
-              [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'"
               [disabled]="isFetchingData$ | ngrxPush"
               >
               @for (type of xAxisTypeOption; track type.value) {
@@ -83,7 +84,7 @@
             [disabled]="smoothType === smoothTypeEnum.any"
             ><input matSliderThumb [(ngModel)]="smoothWeight"/>
           </mat-slider>
-          <mat-form-field appearance="outline" class="smooth-input no-bottom" [class.black]="darkTheme">
+          <mat-form-field appearance="outline" class="smooth-input no-bottom">
             <input
               matInput
               name="minCount"
@@ -98,8 +99,8 @@
               (blur)="smoothWeight === null && changeWeight(-1)"
               />
           </mat-form-field>
-          <mat-form-field appearance="outline" class="smooth-selector no-bottom" [class.black]="darkTheme">
-            <mat-select [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'" [value]="smoothType" (selectionChange)="selectSmoothType($event)">
+          <mat-form-field appearance="outline" class="smooth-selector no-bottom">
+            <mat-select [value]="smoothType" (selectionChange)="selectSmoothType($event)">
               @for (smoothTypeOption of smoothTypeEnum | keyvalue; track smoothTypeOption.key) {
                 <mat-option [value]="smoothTypeOption.value">
                   {{smoothTypeOption.value}}
@@ -133,20 +134,19 @@
         [yAxisType]="yAxisType"
         [moveLegendToTitle]="data.moveLegendToTitle && !chart.layout.showlegend"
         [legendConfiguration]="this.data.legendConfiguration || {}"
-        [isDarkTheme]="darkTheme"
         [graphsNumber]="9999"
         [exportForReport]="!!embedFunction"
         (createEmbedCode)="embedFunction($event)"
         >
       </sm-single-graph>
-      @if (!isFullDetailsMode && !isCompare && !darkTheme) {
+      @if (!isFullDetailsMode && !isCompare && !disableNavigation) {
         <div class="navigation">
           <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next"
             (click)="canGoNext() && next()" [class.disabled]="endOfTime">
-            <i class="al-icon al-ico-next al-color blue-300"></i></div>
+            <i class="al-icon al-ico-next "></i></div>
             <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous"
               (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime">
-              <i class="al-icon al-ico-previous al-color blue-300"></i></div>
+              <i class="al-icon al-ico-previous "></i></div>
             </div>
           }
         </div>

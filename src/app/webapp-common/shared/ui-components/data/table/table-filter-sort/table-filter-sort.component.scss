@@ -1,0 +1,64 @@
+:host {
+  .filter-sort-container {
+    position: relative;
+    z-index: 20;
+
+    .sort-icon {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -4px;
+      .mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        --mdc-icon-button-icon-size: 16px;
+      }
+    }
+  }
+}
+
+.filter-type {
+  padding: 4px 0;
+  text-align: right;
+
+  .link {
+    color: var(--color-outline);
+
+    &.selected {
+      color: var(--color-on-surface);
+      pointer-events: none;
+    }
+  }
+}
+
+.column-explanation {
+  padding: 5px;
+  font-size: 10px;
+}
+
+.options-section {
+  height: 60vh;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.arrow {
+  fill: var(--color-outline);
+  &.active {
+    fill: var(--color-on-surface);
+  }
+}
+
+.menu-button {
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+sm-menu {
+  transform: translateY(-1px);
+}

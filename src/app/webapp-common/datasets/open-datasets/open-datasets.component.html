@@ -1,0 +1,64 @@
+<div class="sm-card-list-layout projects"
+  [class.in-empty-state]="!(((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush)))||  searching)">
+  <sm-projects-header
+    (orderByChanged)="orderByChanged($event)"
+    [sortByField]="projectsOrderBy$ | ngrxPush"
+    [sortOrder]="projectsSortOrder$ | ngrxPush"
+    [enableTagsFilter]="true"
+    [tags]="projectsTags$ | ngrxPush"
+    >
+    <sm-button-toggle
+      left-items
+      [value]="!!projectId"
+      [options]="[
+                  {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
+                  {value: true, icon:'al-ico-project-path', label: 'Project view'}
+            ]"
+      (valueChanged)="!(!!projectId && $event) && toggleNestedView($event)"
+    ></sm-button-toggle>
+    <button mat-flat-button (click)="createDataset()">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+      NEW DATASET
+    </button>
+  </sm-projects-header>
+  @if (((projectsList$ | ngrxPush)?.length !== 0 && (!allExamples || (showExamples$ | ngrxPush)))||  searching) {
+    @for (project of projectsList$ | ngrxPush; track trackById($index, project); let last = $last) {
+      <sm-open-dataset-card
+        [hideMenu]="['All Tasks'].includes(project.name) || project['isRoot'] || isExample(project)"
+        [hideProjectPathIcon]="!!projectId"
+        [project]="project"
+        [allTags]="projectsTags$ | ngrxPush"
+        (projectCardClicked)="projectCardClicked($event)"
+        (projectNameChanged)="projectNameChanged({id: project.id, name: $event})"
+        (addTag)="addTag(project, $event)"
+        (removeTag)="removeTag(project, $event)"
+        (delete)="deleteProject(project)"
+      ></sm-open-dataset-card>
+    }
+  } @else {
+    <div class="empty-state">
+      <div class="title-icon">
+        <mat-icon fontSet="al" fontIcon="al-ico-datasets" class="xl"></mat-icon>
+      </div>
+      <div class="title">NO DATASETS TO SHOW</div>
+      <div class="sub-title">Run your first dataset to see it displayed here
+        @if (allExamples) {
+          or <a href="" (click)="$event.preventDefault(); createExamples()" class="link">generate
+          example
+        </a>
+      }
+    </div>
+    <sm-dataset-empty [showButton]="true"></sm-dataset-empty>
+  </div>
+}
+
+@if ((noMoreProjects$ | ngrxPush) === false && (projectsList$ | ngrxPush)?.length > 0) {
+  <div class="load-more">
+    <sm-dots-load-more
+      [loading]="loading"
+      (loadMore)="loadMore()"
+      class="mx-auto my-2"
+    ></sm-dots-load-more>
+  </div>
+}
+</div>

@@ -1,98 +1,81 @@
-@if (isFolder) {
-  <div class="folder-tab" smClickStopPropagation>
-    <div class="first-tab" [class.not-active]="showSecondTab" (click)="setShowSecondTab(false)"
-      [class.hide-second-tab]="oneTabMode">
-      @if (!showSecondTab ) {
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20"
-          >
-          @if (!oneTabMode && !secondTabIsHovered) {
-            <path d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"
-              fill="#2c3246"/>
+<div class="card">
+  @if (showFolder()) {
+    <div class="folder-tab" smClickStopPropagation>
+      <div class="first-tab-parts" (click)="activeTab.set(1)"
+           [class.hide-second-tab]="oneTabMode()">
+        <svg class="tabs" xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20">
+          @if (!oneTabMode()) {
+            <g [class]="(activeTab() === 2 ? 'first' : 'second') + '-tab'">
+              <path class="tab" d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"/>
+            </g>
           }
-          @if (!oneTabMode && secondTabIsHovered) {
-            <path d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"
-              fill="#5a658e"/>
-          }
-          @if (!highlightFirstTab) {
-            <path d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#384161"
-              (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
-          }
-          @if (highlightFirstTab) {
-            <path d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#5a658e"
-              (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
+          <g class="first-tab" [class.active]="activeTab() === 1">
+            <path class="tab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z"></path>
+          </g>
+          @if (activeTab() === 2) {
+            <g class="second-tab" [class.active]="activeTab() === 2">
+              <path class="tab second" d="M64,0V20H30C45.18,12.36,40.63,0,54.39,0Z"/>
+            </g>
           }
         </svg>
-      } @else {
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20">
-          @if (!highlightFirstTab) {
-            <path d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z"
-              fill="#384161" (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
-          } @else {
-            <path d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#5a658e"
-              (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
-          }
-          <path d="M64,0V20H30C45.18,12.36,40.63,0,54.39,0Z" fill="#2c3246"/>
-        </svg>
+      </div>
+      @if (!oneTabMode()) {
+        <div
+          class="second-tab text"
+          [class.tab-hovered]="secondTabIsHovered"
+          (click)="activeTab.set(2)"
+          [class.active]="activeTab() === 2"
+        >{{subFolderTitle()}}</div>
+        <div
+          class="second-tab"
+          [class.tab-hovered]="secondTabIsHovered"
+          [class.active]="activeTab() === 2"
+          (click)="activeTab.set(2)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="20" viewBox="0 0 28 20">
+              <path class="tab" d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z"/>
+          </svg>
+        </div>
       }
     </div>
-    @if (!oneTabMode) {
-      <div [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
-        class="middle-tab" (click)="setShowSecondTab(true)" [class.second-tab-active]="showSecondTab"
-      (mouseenter)="setSecondTabHover(true)" (mouseleave)="setSecondTabHover(false)">{{subFolderTitle}}</div>
-    }
-    @if (!oneTabMode) {
-      <div [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
-        class="second-tab" (click)="setShowSecondTab(true)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="20" viewBox="0 0 28 20">
-          @if (!secondTabIsHovered || showSecondTab) {
-            <path d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z" fill="#2c3246"/>
+  }
+  <div class="card-container" [class.is-folder]="showFolder()" [style.height.px]="height()" data-id="cardContainer">
+    @if (activeTab() === 1) {
+      <div
+        class="tab-container first-tab-container"
+        [class.is-folder]="showFolder()"
+        [class.first-tab-hovered]="highlightFirstTab"
+        [class.tab-hovered]="secondTabIsHovered"
+      >
+        <header [class.empty]="(!header()) && headerWarp?.children.length===0 ">
+          <div #headerWarp>
+            {{header()}}
+            <ng-content select="[header-content]"></ng-content>
+            <ng-content select="[headerButtons]"></ng-content>
+          </div>
+        </header>
+        @if (showSeparator()) {
+          <div class="line"></div>
+        }
+        <div class="card-body" data-id="hyperDatasetCard">
+          <ng-content></ng-content>
+        </div>
+        <footer>
+          <ng-content select="[footer]">
+          </ng-content>
+          @if ((isExample() || !!ribbonText())) {
+            <div class="ribbon">
+              <div class="txt d-flex justify-content-center w-100" data-id="cardContainer">
+                <div>{{ribbonText() ? ribbonText() : 'EXAMPLE' }}</div>
+              </div>
+            </div>
           }
-          @if (secondTabIsHovered && !showSecondTab) {
-            <path d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z" fill="#5a658e"/>
-          }
-        </svg>
+        </footer>
+      </div>
+    } @else {
+      <div class="tab-container second-tab-container">
+        <ng-content select="[secondTab]"></ng-content>
       </div>
     }
   </div>
-}
-<div class="card-container" [class.is-folder]="isFolder" [style.height.px]="height" data-id="cardContainer">
-  @if (!showSecondTab ) {
-    <div
-      class="tab-container first-tab-container"
-      [class.is-folder]="isFolder"
-      [class.first-tab-hovered]="highlightFirstTab"
-      [class.tab-hovered]="secondTabIsHovered"
-      (mouseenter)="setHighlightFirstTab(true)"
-      (mouseleave)="setHighlightFirstTab(false)"
-      >
-      <header [class.empty]="(!header) && headerWarp?.children.length===0 ">
-        <div #headerWarp>
-          {{header}}
-          <ng-content select="[header-content]"></ng-content>
-          <ng-content select="[headerButtons]"></ng-content>
-        </div>
-      </header>
-      @if (showSeparator) {
-        <div class="line"></div>
-      }
-      <div class="card-body" data-id="hyperDatasetCard">
-        <ng-content></ng-content>
-      </div>
-      <footer>
-        <ng-content select="[footer]">
-        </ng-content>
-        @if ((isExample || !!ribbonText)) {
-          <div class="ribbon">
-            <div class="txt d-flex justify-content-center w-100" data-id="cardContainer">
-              <div>{{ribbonText ? ribbonText : 'EXAMPLE' }}</div>
-            </div>
-          </div>
-        }
-      </footer>
-    </div>
-  } @else {
-    <div class="tab-container second-tab-container">
-      <ng-content select="[secondTab]"></ng-content>
-    </div>
-  }
 </div>

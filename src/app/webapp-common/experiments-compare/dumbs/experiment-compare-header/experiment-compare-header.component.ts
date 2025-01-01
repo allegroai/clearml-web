@@ -27,6 +27,12 @@ import {setArchive} from '@common/core/actions/projects.actions';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
+
+  viewModeToIcon = {
+    graph: 'al-ico-charts-view',
+    scatter: 'al-ico-scatter-view',
+  }
+
   private routerSubscription: Subscription;
   public selectHideIdenticalFields$: Observable<boolean>;
   public selectShowRowExtremes$: Observable<boolean>;
@@ -101,16 +107,12 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
           selectionMode: 'multiple',
           selectedModels: selectedIds,
         header: 'Select compared model'},
-        height: '94vh',
-        width: '98%',
-        maxWidth: '100%'
+        panelClass: 'full-screen',
       }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
     } else {
       this.dialog.open(SelectExperimentsForCompareComponent, {
         data: {entityType: this.entityType},
-        height: '94vh',
-        width: '98%',
-        maxWidth: '100%'
+        panelClass: 'full-screen',
       }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
     }
   }

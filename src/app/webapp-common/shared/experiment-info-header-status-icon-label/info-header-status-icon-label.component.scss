@@ -1,30 +1,26 @@
-@import "variables";
-
 :host {
-
   .status-line {
-    background: white;
     height:32px;
     position: relative;
+
     .label {
       display: flex;
       justify-content: center;
       padding: 2px 12px 0 12px;
       letter-spacing: 0.03em;
+      background-color: var(--status-color);
+      color: color-mix(in srgb, var(--status-color), var(--color-surface) 90%)
     }
-    .view-only {
-      padding-left: 4px;
-      margin-top: 0;
-      margin-bottom: 0;
-    }
+
     &::before {
       content: "";
-      border-top: 6px solid;
+      border-top: 6px solid var(--status-color);
       display: block;
       position: relative;
       z-index: 2;
     }
-    > span {
+
+    > .notch {
       display: inline-flex;
       align-items: center;
       position: absolute; z-index: 1; top: 0; left: 50%;
@@ -32,14 +28,15 @@
       height: inherit;
       font-size: 12px; font-weight: 500;
       letter-spacing: 0.05em;
-      color: $blue-600;
+      background-color: var(--status-color);
+
       &::before, &::after {
         content:"";
         display: block;
         position: relative;
         width: 0;
         height: 0;
-        border-bottom: 34px solid white;
+        border-bottom: 34px solid var(--color-surface-container-lowest);
       }
       &::before {
         left: -1px;
@@ -49,37 +46,6 @@
         right: -1px;
         border-left: 16px solid transparent;
       }
-
-    }
-
-    &.published {
-      &::before {border-color: $neon-yellow;}
-      span {background-color: $neon-yellow;}
-    }
-
-    &.in_progress {
-      &::before {border-color: #50e3c2;}
-      span {background-color: #50e3c2;}
-    }
-
-    &.queued {
-      &::before {border-color: #c4f0e4;}
-      span {background-color: #c4f0e4;}
-    }
-
-    &.created {
-      &::before {border-color: #dbdee6;}
-      span {background-color: #dbdee6;}
-    }
-
-    &.failed {
-      &::before {border-color: $strong-red}
-      span {background-color: $strong-red; color: $blue-25;}
-    }
-
-    &.completed, &.stopped {
-      &::before {border-color: $completed-blue}
-      span {background-color: $completed-blue; color: $blue-25;}
     }
   }
 }

@@ -2,7 +2,6 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SharedModule} from '~/shared/shared.module';
-import {SimpleDatasetCardComponent} from '@common/datasets/simple-dataset-card/simple-dataset-card.component';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
@@ -16,9 +15,10 @@ import {NAPipe} from '@common/shared/pipes/na.pipe';
 import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {OpenDatasetCardComponent} from '@common/datasets/open-dataset-card/open-dataset-card.component';
 
 const _declerations = [
-SimpleDatasetCardComponent
+OpenDatasetCardComponent
 ];
 
 @NgModule({

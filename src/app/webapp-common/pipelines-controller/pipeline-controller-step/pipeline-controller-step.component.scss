@@ -1,9 +1,7 @@
-@import "variables";
-
 :host {
   flex: 0 0 200px;
   padding: 2px;
-  color: $blue-50;
+  color: var(--color-on-primary-container);
 }
 .title {
   flex: 1;
@@ -13,26 +11,28 @@
   white-space: nowrap;
 }
 
-.al-ico-console {
-  display: none;
-  color: $blue-200;
-  &:hover {
-    color: inherit;
-  }
+.console-button {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .step-container {
   border-radius: 4px;
   padding: 2px;
+  transition: scale 0.3s ease;
+  &.enlarged {
+    transform: scale(1.3);
+  }
 
   &:hover {
-    box-shadow: 0 0 0 2px rgba(220, 224, 238, 0.4);
-    .al-ico-console {
-      display: block;
+    box-shadow: 0 0 0 2px rgba(from var(--color-inverse-surface) r g b / 0.4);
+    .console-button {
+      visibility: visible;
+      pointer-events: all;
     }
   }
   &.selected {
-    box-shadow: 0 0 0 2px rgba(220, 224, 238, 1);
+    box-shadow: 0 0 0 2px rgba(from var(--color-inverse-surface) r g b / 1);
   }
 }
 
@@ -47,75 +47,32 @@
 .step-title {
   border-radius: 4px 4px 0 0;
   height: 48px;
-  background-color: mix($pipeline-pending, $blue-950, 20%);
-
-  &.queued {
-    background-color: mix($pipeline-queued, $blue-950, 20%);
-  }
-  &.pending {
-    background-color: mix($pipeline-pending, $blue-950, 20%);
-  }
-  &.skipped {
-    background-color: mix($pipeline-skipped, $blue-950, 20%);
-  }
-  &.cached {
-    background-color: mix($pipeline-cached, $blue-950, 20%);
-  }
-  &.executed {
-    background-color: mix($pipeline-executed, $blue-950, 20%);
-  }
-  &.running {
-    background-color: mix($pipeline-running, $blue-950, 20%);
-  }
-  &.failed {
-    background-color: mix($pipeline-failed, $blue-950, 20%);
-  }
-  &.aborted {
-    background-color: mix($pipeline-aborted, $blue-950, 20%);
-  }
-  &.completed {
-    background-color: mix($pipeline-completed, $blue-950, 20%);
-  }
-  &.published {
-    background-color: mix($pipeline-published, $blue-950, 20%);
+  background-color: var(--status-color, var(--color-draft-container));
+  &.stage-step{
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    --mdc-icon-button-icon-color: var(--color-on-primary);
+    --mat-icon-button-state-layer-color: var(--color-on-primary);
   }
 }
 
 //  STEP FOOTER
 .step-footer {
   border-radius: 0 0 4px 4px;
-  justify-content: space-between;
-  height: 26px;
-  background-color: $pipeline-pending;
+  .footer-container{ --as-gutter-background-color: ;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    div{
+      display: flex;
+      align-items: center;
+    }
+  }
 
-  &.queued {
-    background-color: $pipeline-queued;
-  }
-  &.pending {
-    background-color: $pipeline-pending;
-  }
-  &.skipped {
-    background-color: $pipeline-skipped;
-  }
-  &.cached {
-    background-color: $pipeline-cached;
-  }
-  &.executed {
-    background-color: $pipeline-executed;
-  }
-  &.running {
-    background-color: $pipeline-running;
-  }
-  &.failed {
-    background-color: $pipeline-failed;
-  }
-  &.aborted {
-    background-color: $pipeline-aborted
-  }
-  &.completed {
-    background-color: $pipeline-completed
-  }
-  &.published {
-    background-color: $pipeline-published
+  height: 26px;
+  background-color: color-mix(in oklab, var(--status-color, var(--color-draft-container)), black 20%);
+  &.stage-step{
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
   }
 }

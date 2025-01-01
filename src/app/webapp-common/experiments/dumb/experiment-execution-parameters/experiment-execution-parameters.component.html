@@ -1,114 +1,135 @@
-<form [class.editable]="editable" #hyperParameters="ngForm">
+<form [class.editable]="editable()" #hyperParameters="ngForm">
   <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="58" minBufferPx="280" maxBufferPx="560">
-    <ng-container *ngIf="editable">
-      <div *ngFor="let parameter of formData; let index= index" class="w-100 d-flex pe-2">
-        <mat-form-field
-          [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''"
-          appearance="outline"
-          class="strength"
-        >
-          <input
-            #parameterKey="ngModel"
-            #row="matInput"
-            [(ngModel)]="parameter['name']"
-            (keydown.enter)="nextRow($event, index)"
-            placeholder="Parameter"
-            name="parameterKey-{{parameter.id}}"
-            matInput
-            smUniqueNameValidator
-            [class.highlight-text]="(searchedText?.length > 0) && parameter['name'].includes(searchedText)"
-            [class.current-match]="searchIndexList[matchIndex]?.index===index && searchIndexList[matchIndex]?.col==='name'"
-            [existingNames]="formNames(parameter.id)"
-            required/>
-          <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
-            Required
-          </mat-error>
-          <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
-            .(dot) $(dollar) and space are not allowed in parameter key.
-          </mat-error>
-          <mat-error *ngIf="!parameterKey?.errors?.required && parameterKey.invalid && parameterKey?.errors?.uniqueName">
-            key already exists
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline"
-                        class="strength">
-          <input
-            #parameterValue="ngModel"
-            [(ngModel)]="parameter['value']"
-            (keydown.enter)="nextRow($event, index)"
-            name="parameterValue-{{parameter.id}}"
-            placeholder="Value"
-            [class.highlight-text]="(searchedText?.length > 0) && parameter['value'].includes(searchedText)"
-            [class.current-match]="searchIndexList[matchIndex]?.index===index && searchIndexList[matchIndex]?.col==='value'"
-            matInput/>
-        </mat-form-field>
-        <button class="remove-button btn" (click)="removeRow(index)">
-          <i class="al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon"></i>
-        </button>
-      </div>
-    </ng-container>
+    @if (editable()) {
+      @for (parameter of form; track $index) {
+        <div class="w-100 d-flex pe-2">
+          <mat-form-field
+            [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''"
+            appearance="outline"
+            class="strength"
+            >
+            <input
+              #parameterKey="ngModel"
+              #row="matInput"
+              [(ngModel)]="parameter['name']"
+              (keydown.enter)="nextRow($event, $index)"
+              placeholder="Parameter"
+              name="parameterKey-{{parameter.id}}"
+              matInput
+              smUniqueNameValidator
+              [class.highlight-text]="(searchedText()?.length > 0) && parameter['name'].includes(searchedText())"
+              [class.current-match]="searchIndexList[matchIndex]?.index === $index && searchIndexList[matchIndex]?.col==='name'"
+              [existingNames]="formNames(parameter.id)"
+              required/>
+            @if (parameterKey.invalid && parameterKey?.errors?.required) {
+              <mat-error>
+                Required
+              </mat-error>
+            }
+            @if (parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator) {
+              <mat-error>
+                .(dot) $(dollar) and space are not allowed in parameter key.
+              </mat-error>
+            }
+            @if (!parameterKey?.errors?.required && parameterKey.invalid && parameterKey?.errors?.uniqueName) {
+              <mat-error>
+                key already exists
+              </mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline"
+            class="strength">
+            <input
+              #parameterValue="ngModel"
+              [(ngModel)]="parameter['value']"
+              (keydown.enter)="nextRow($event, $index)"
+              name="parameterValue-{{parameter.id}}"
+              placeholder="Value"
+              [class.highlight-text]="(searchedText()?.length > 0) && parameter['value'].includes(searchedText())"
+              [class.current-match]="searchIndexList[matchIndex]?.index === $index && searchIndexList[matchIndex]?.col==='value'"
+              matInput/>
+          </mat-form-field>
+          <button mat-icon-button class="remove-button" (click)="removeRow($index)">
+            <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+          </button>
+        </div>
+      }
+    }
   </cdk-virtual-scroll-viewport>
 </form>
-<button *ngIf="editable" class="btn btn-dark-fill add-parameter" (click)="addRow()"><i class="fas fa-plus" data-id="AddParamterButton"></i> ADD PARAMETER</button>
-<div class="table-container" *ngIf="!editable">
-  <sm-table
-    [columns]="cols"
-    columnResizeMode="fit"
-    [tableData]="formData"
-    [enableTableSearch]="true"
-    [globalFilterFields]="['name', 'value','description']"
-    [noHeader]="true"
-    [simple]="true"
-    [scrollable]="true"
-    [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: formData, itemSize: 32}"
-    [virtualScroll]="true"
-    [rowHeight]="32"
-    (rowClicked)="rowActivated($event)"
-  >
-    <ng-template pTemplate="body"
-                 let-col
-                 let-i="rowIndex"
-                 let-row="rowData">
-      <ng-container [ngSwitch]="col.id">
-        <ng-container *ngSwitchCase="'description'">
-        <span *ngIf="row.type!=='legacy' && (row.description || row.type)"
-              class="allow-multi-space pointer"
-              customClass="hyper-parameters-tooltip parameter-tooltip"
-              smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"
-              matTooltipPosition="before"
-        ><i class="al-icon al-ico-description"></i></span>
-        </ng-container>
-        <span
-          *ngSwitchCase="'name'"
-          class="ellipsis name"
-          smShowTooltipIfEllipsis
-          matTooltipPosition="before"
-          [matTooltipShowDelay]="250"
-          [smTooltip]="row.name"
-          [smSearchText]="searchedText"
-          highlightClass="highlight-text"
-          [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='name'"
-        >{{row.name}}</span>
-        <ng-container *ngSwitchCase="'value'">
-          <a *ngIf="row.section === 'Datasets' && row.value.length === 32; else: noLink"
-             (click)="$event.preventDefault(); navigateToDataset(row.value)"
-             href="" target="_blank"
-          >{{row.value}}</a>
-          <ng-template #noLink>
-            <span
-              class="ellipsis"
-              smShowTooltipIfEllipsis
-              matTooltipPosition="before"
-              [matTooltipShowDelay]="250"
-              [smTooltip]="row.value"
-              [smSearchText]="searchedText"
-              highlightClass="highlight-text"
-              [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='value'"
-            >{{row.value}}</span>
-          </ng-template>
-        </ng-container>
-      </ng-container>
-    </ng-template>
-  </sm-table>
-</div>
+@if (editable()) {
+  <button mat-stroked-button (click)="addRow()">
+    <mat-icon fontSet="al" fontIcon="al-ico-plus" data-id="AddParamterButton"></mat-icon>
+    ADD PARAMETER
+  </button>
+}
+@if (!editable()) {
+  <div class="table-container">
+    <sm-table
+      [columns]="cols"
+      columnResizeMode="fit"
+      [tableData]="formData()"
+      [enableTableSearch]="true"
+      [globalFilterFields]="['name', 'value','description']"
+      [noHeader]="true"
+      [simple]="true"
+      [scrollable]="true"
+      [virtualScroll]="false"
+      [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: formData(), itemSize: 36}"
+      [rowHeight]="36"
+      [selectionMode]="null"
+      [selection]="[]"
+      (rowClicked)="rowActivated($event)"
+      >
+      <ng-template pTemplate="body"
+        let-col
+        let-i="rowIndex"
+        let-row="rowData">
+        @switch (col.id) {
+          @case ('description') {
+            @if (row.type!=='legacy' && (row.description || row.type)) {
+              <span
+                class="allow-multi-space pointer"
+                customClass="hyper-parameters-tooltip parameter-tooltip"
+                smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"
+                matTooltipPosition="before"
+                ><i class="al-icon al-ico-description"></i></span>
+              }
+            }
+            @case ('name') {
+              <span
+                class="ellipsis name"
+                smShowTooltipIfEllipsis
+                matTooltipPosition="before"
+                [matTooltipShowDelay]="250"
+                [smTooltip]="row.name"
+                [smSearchText]="searchedText()"
+                highlightClass="highlight-text"
+                [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='name'"
+              >{{row.name}}</span>
+            }
+            @case ('value') {
+              @if (row.section === 'Datasets' && row.value.length === 36) {
+                <a
+                  (click)="$event.preventDefault(); navigateToDataset(row.value)"
+                  href="" target="_blank"
+                >{{row.value}}</a>
+              } @else {
+                <span
+                  class="ellipsis"
+                  smShowTooltipIfEllipsis
+                  matTooltipPosition="before"
+                  [matTooltipShowDelay]="250"
+                  [smTooltip]="row.value"
+                  [smSearchText]="searchedText()"
+                  highlightClass="highlight-text"
+                  [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='value'"
+                >{{row.value}}</span>
+              }
+            }
+          }
+        </ng-template>
+      </sm-table>
+    </div>
+  }
 

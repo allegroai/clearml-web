@@ -1,15 +1,18 @@
-@import "variables";
-
 :host {
+  ::ng-deep .p-datatable-table {
+    border-collapse: collapse;
+  }
+
   ::ng-deep th.resize-enabled span.p-column-resizer {
     width: 8px;
     z-index: 20;
 
     &:hover {
-      background: $blue-300;
+      background: color-mix(in srgb, var(--color-primary), transparent 80%);
       background-clip: content-box;
     }
   }
+
 
   th.resize-disabled {
     ::ng-deep span.p-column-resizer {
@@ -18,8 +21,12 @@
   }
 
   ::ng-deep .p-column-resizer-helper {
-    background-color: $blue-300;
+    background-color: var(--color-primary);
     z-index: 1000;
+  }
+
+  ::ng-deep .p-icon path {
+    fill: var(--color-primary);
   }
 
   .has-header {
@@ -35,7 +42,7 @@
           right: 0;
           top: 0;
           height: var(--table-row-height);
-          background-color: $blue-700;
+          background-color: var(--row-header-color);
         }
       }
     }
@@ -47,8 +54,14 @@
     }
   }
 
+  .card-view {
+    ::ng-deep .p-datatable-wrapper {
+      overflow-x: hidden;
+    }
+  }
+
   .card-header {
-    box-shadow: 0 0 12px 6px rgba($blue-800, 0.9);
+    box-shadow: var(--mat-app-elevation-shadow-level-2);
   }
 
   .table-header {
@@ -70,13 +83,12 @@
     margin-top: -2px;
 
     &.active {
-      color: $neon-yellow;
+      color: var(--color-tertiary);
     }
 
     &:hover:not(.active) {
-      color: $blue-200;
+      color: var(--color-primary);
     }
-
   }
 
   .table-actions {
@@ -84,7 +96,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-right: 24px;
+    margin-right: 6px;
   }
 
   .selected-col-header {
@@ -138,28 +150,31 @@
       position: sticky;
       left: 50%;
       transform: translateX(-50%);
+      color: var(--color-on-surface);
     }
   }
 
   tr:not(.cards-table) {
     &:not(.no-data-row):not(.load-more-wrapper) {
-      border-bottom: 1px solid $blue-600;
+      border-bottom: 1px solid var(--row-border-color);
     }
 
     &:not(.header):not(.selected):not(.checked):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
+      background-color: var(--row-default-color);
       &:hover, &.contexted {
-        background-color: $blue-650;
-        border-bottom: 1px solid $blue-600;
+        background-color: var(--row-default-hover-color);
+        border-bottom: 1px solid var(--row-border-color);
 
         .p-frozen-column {
-          background-color: $blue-650 !important;
+          background-color: var(--row-default-hover-color) !important;;
           z-index: 1;
         }
       }
     }
 
     &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
-      background-color: $blue-500;
+      background-color: var(--row-selection-color);
+      color: var(--row-selection-text-color);
 
       .card-wrapper {
         border-bottom: none;
@@ -167,24 +182,33 @@
 
       &:hover, &.contexted {
         &:not(.cards-table) {
-          background-color: $blue-550;
+          background-color: var(--row-selection-hover-color);
         }
 
         .card-wrapper {
-          background-color: $blue-550;
+          background-color: var(--row-selection-hover-color);
         }
       }
     }
 
     &.selected {
       .card-wrapper {
-        border-bottom-color: $blue-600;
+        border-bottom-color: var(--row-border-color);
       }
 
-      background-color: $blue-400;
+      background-color: var(--row-selected-color);
+      color: var(--row-selected-text-color);
+
+      --mdc-checkbox-unselected-icon-color: var(--color-on-surface);
+
+      ::ng-deep mat-checkbox:not(.mat-mdc-checkbox-checked) {
+        .mdc-checkbox:hover .mdc-checkbox__background {
+          background-color: var(--color-surface);
+        }
+      }
 
       &:hover {
-        background-color: $blue-480;
+        background-color: var(--row-selected-hover-color);
       }
     }
   }
@@ -192,14 +216,18 @@
   tr {
     position: relative;
     transition: height 0.35s ease-in-out;
+    color: var(--row-default-text-color);
 
     &.header {
       height: var(--table-row-height, 48px);
-      background-color: $blue-700;
+      background-color: var(--row-header-color);
+    }
+
+    &:not(.card-header) th:hover {
+      background-color: var(--row-header-hover-color);
     }
 
     th {
-      color: $blue-300;
       border-bottom: none;
       padding: 0 8px;
 
@@ -218,14 +246,10 @@
         white-space: nowrap;
       }
 
-      &:hover {
-        background-color: $blue-600;
-      }
     }
 
     td {
       align-items: center;
-      color: $blue-100;
       font-size: 1rem;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -236,21 +260,8 @@
         padding-left: 24px;
       }
 
-      &:not(.no-data):not(.load-more-wrapper) {
-        &.simple {
-          border-bottom-color: $blue-100;
-
-        }
-      }
-
-      &.no-data {
-        color: $blue-250;
-        text-align: center;
-        padding: 15px 0 10px 0;;
-      }
-
       &.p-frozen-column {
-        background-color: $blue-800;
+        background-color: var(--row-default-color);
         z-index: 1;
       }
     }
@@ -271,30 +282,21 @@
     .context-button {
       position: sticky;
       z-index: 2;
-      left: calc(100% - 46px);
-      cursor: pointer;
+      left: calc(100% - 56px);
       opacity: 0;
       transition: opacity 0.35s ease-in-out;
       margin-top: calc(var(--table-row-height) * 0.166);
       width: calc(var(--table-row-height) * 0.666);
+      min-width: calc(var(--table-row-height) * 0.666);
       height: calc(var(--table-row-height) * 0.666);
-      padding: 3px;
-      color: $blue-400;
-      background-color: rgba($blue-600, 95%);
-      border-radius: 4px;
-      border: solid 1px $blue-400;
-
-      &:hover {
-        color: $blue-300;
-        background-color: lighten($blue-600, 5%);
-      }
     }
 
     &.cards-table {
 
       .card-wrapper {
         margin: 6px 2px 6px 12px;
-        border: 1px solid $dark-border;
+        border: 1px solid var(--row-border-color);
+        background-color: var(--row-default-color);
         border-radius: 4px;
         overflow: hidden;
         animation-name: expand;
@@ -313,116 +315,35 @@
       }
 
       &:hover:not(.selected):not(.simple) .card-wrapper {
-        background-color: $blue-650;
+        background-color: var(--row-default-hover-color);
       }
 
       &.selected {
         .card-wrapper {
-          background-color: $blue-400;
+          background-color: var(--row-selected-color);
+          color: var(--row-selected-text-color);
         }
 
         &:hover .card-wrapper {
-          background-color: $blue-480;
+          background-color: var(--row-selected-hover-color);
         }
       }
 
       &.checked:not(.selected):not(.simple) {
         .card-wrapper {
-          background-color: $blue-500;
+          background-color: var(--row-selection-color);
+          color: var(--row-selection-text-color);
         }
 
         &:hover, &.contexted {
           .card-wrapper {
-            background-color: $blue-550;
+            background-color: var(--row-selection-hover-color);
           }
         }
       }
     }
   }
 
-  :host-context(.light-theme) {
-    tr:not(.cards-table) {
-      &:not(.no-data-row):not(.load-more-wrapper) {
-        border-bottom: 1px solid $blue-100;
-      }
-
-      &:not(.header):not(.selected):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
-        &:hover, &.contexted {
-          background-color: $blue-50;
-          border-bottom: 1px solid $blue-50;
-        }
-      }
-
-      &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
-        background-color: $blue-100;
-        border-bottom-color: $blue-50;
-
-        &:hover, &.contexted {
-          .simple-row, .card-wrapper {
-            background-color: $blue-50;
-          }
-        }
-
-        &.selected {
-          .card-wrapper {
-            border-bottom-color: $blue-50;
-          }
-
-          background-color: $blue-100;
-
-          &:hover {
-            background-color: $blue-50;
-          }
-        }
-      }
-
-      &.header {
-        background-color: $blue-50;
-        @supports (-moz-appearance:meterbar) {
-          border-bottom: 3px solid $blue-100;
-        }
-      }
-
-      th {
-        color: $blue-400;
-        font-weight: 500;
-        border-bottom: none;
-
-        &:hover {
-          background-color: $blue-50;
-        }
-      }
-
-      td {
-        color: $blue-400;
-        border-bottom: none;
-
-        &.no-data {
-          color: $blue-300;
-        }
-
-        &.p-frozen-column {
-          background-color: $blue-100;
-          z-index: 1;
-        }
-
-      }
-
-      &.selected {
-        background-color: $blue-100;
-
-        &:hover {
-          background-color: $blue-200;
-        }
-      }
-    }
-
-    .has-header ::ng-deep .p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
-      &:after {
-        background-color: $blue-50;
-      }
-    }
-  }
 
   @supports (-moz-appearance:none) {
     tr.cards-table .card-wrapper {
@@ -431,16 +352,10 @@
   }
 }
 
-:host-context(.dark-theme-table.table-first-column-color) {
-  tr td:not(.no-data):not(.load-more-wrapper).simple {
-    border-bottom-color: $dark-grey-blue;
-    color: $blue-280;
-
-    &:first-child {
-      color: $blue-400;
-    }
-  }
+.no-data-row {
+  height: 60px!important;
 }
+
 
 :host-context(.snippets-sources-container) {
   tr td.p-frozen-column {

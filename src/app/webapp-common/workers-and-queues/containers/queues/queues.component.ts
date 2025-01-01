@@ -1,55 +1,72 @@
-import {Component, effect, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, untracked} from '@angular/core';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {queueActions, Queue} from '../../actions/queues.actions';
 import {
-  selectQueues,
   selectQueuesTableSortFields,
-  selectSelectedQueue, selectSelectedQueueId
+  selectSelectedQueue, selectSelectedQueueId, selectSortedQueues
 } from '../../reducers/index.reducer';
-import {filter, take} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, take} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
-import {RefreshService} from '@common/core/services/refresh.service';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import { setAutoRefresh } from '@common/core/actions/layout.actions';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {QueueCreateDialogComponent} from '@common/shared/queue-create-dialog/queue-create-dialog.component';
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {combineLatest, interval} from 'rxjs';
+
+const REFRESH_INTERVAL = 30000;
 
 @Component({
   selector: 'sm-queues',
   templateUrl: './queues.component.html',
-  styleUrls: ['./queues.component.scss']
+  styleUrls: ['./queues.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QueuesComponent {
   private store = inject(Store);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
-  private refresh = inject(RefreshService);
+  private breakpointObserver = inject(BreakpointObserver);
+  private destroy = inject(DestroyRef);
 
-  queues = this.store.selectSignal(selectQueues);
+  queues = this.store.selectSignal(selectSortedQueues);
   selectedQueueId = this.store.selectSignal(selectSelectedQueueId);
   selectedQueue = this.store.selectSignal(selectSelectedQueue);
   tableSortFields = this.store.selectSignal(selectQueuesTableSortFields);
+
+  protected shortScreen$ = this.breakpointObserver.observe(['(max-height: 750px)'])
+    .pipe(map(res => res.matches));
   public queuesManager: boolean;
 
   constructor() {
-    this.store.dispatch(queueActions.getQueues());
     this.queuesManager = this.route.snapshot.data.queuesManager;
+    this.store.dispatch(queueActions.getQueues({}));
+
+    combineLatest([interval(REFRESH_INTERVAL),
+      toObservable(this.selectedQueue).pipe(distinctUntilChanged((a, b) => a?.id === b?.id))
+    ])
+      .pipe(
+        takeUntilDestroyed()
+      )
+      .subscribe(() => {
+        this.store.dispatch(queueActions.getQueues({autoRefresh: true}));
+        this.store.dispatch(queueActions.refreshSelectedQueue({autoRefresh: true}));
+      });
+
+    this.destroy.onDestroy(() => {
+      this.store.dispatch(queueActions.resetQueues());
+    });
 
     effect(() => {
       if (this.selectedQueueId() !== this.selectedQueue()?.id) {
         const queue = this.queues()?.find(queue => queue.id === this.selectedQueueId());
-        this.store.dispatch(queueActions.setSelectedQueue({queue}));
+        untracked(() => this.store.dispatch(queueActions.setSelectedQueue({queue})));
       }
-    }, {allowSignalWrites: true});
-
-    this.refresh.tick
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.store.dispatch(queueActions.refreshSelectedQueue({autoRefresh: true})));
+    });
   }
 
   sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {
@@ -74,10 +91,11 @@ export class QueuesComponent {
       this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, boolean>(ConfirmDialogComponent, {
         data: {
           title    : 'Clear all pending tasks',
-          body     : `Are you sure you want to dequeue the ${queue.entries.length} task${queue.entries.length>1?'s':''} currently pending on the ${queue.name} queue?`,
+          body     : `Are you sure you want to dequeue the ${queue.entries.length} task${queue.entries.length>1?'s':''} currently pending on the ${queue.caption} queue?`,
           yes      : 'Clear Queue',
           no       : 'Cancel',
-          iconClass: 'i-alert',
+          iconClass: 'al-ico-alert',
+          iconColor: 'var(--color-warning)'
         }
       }).afterClosed()
         .pipe(filter(res => res))
@@ -92,7 +110,7 @@ export class QueuesComponent {
         filter(q => !!q),
         take(1)
       )
-      .subscribe(() => this.store.dispatch(queueActions.getQueues()));
+      .subscribe(() => this.store.dispatch(queueActions.getQueues({})));
   }
 
   moveExperimentToBottomOfQueue(task: Task) {
@@ -114,6 +132,7 @@ export class QueuesComponent {
   moveExperimentInQueue({task, count}) {
     this.store.dispatch(queueActions.moveExperimentInQueue({task, count}));
   }
+
   addQueue() {
     this.dialog.open<QueueCreateDialogComponent, unknown, boolean>(QueueCreateDialogComponent).afterClosed()
       .pipe(
@@ -121,11 +140,8 @@ export class QueuesComponent {
         take(1)
       )
       .subscribe(() => {
-        this.store.dispatch(queueActions.getQueues());
+        this.store.dispatch(queueActions.getQueues({}));
       });
   }
 
-  setAutoRefresh($event: boolean) {
-    this.store.dispatch(setAutoRefresh({autoRefresh: $event}));
-  }
 }

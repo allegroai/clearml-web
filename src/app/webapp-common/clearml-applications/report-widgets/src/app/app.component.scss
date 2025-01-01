@@ -1,8 +1,7 @@
-@import "variables";
 
 .placeholder {
   height: 100%;
-  color: $blue-400;
+  color: var(--color-on-surface-variant);
   min-height: 150px;
   display: flex;
   align-items: center;
@@ -26,7 +25,7 @@
 
 .show-text {
   cursor: pointer;
-  color: $neon-yellow;
+  color: var(--color-primary);
   margin-top: 12px;
 }
 
@@ -34,10 +33,10 @@
 .link {
   display: inline;
   cursor: pointer;
-  color: $neon-yellow;
+  color: var(--color-primary);
 
   &:hover {
-    color: $neon-yellow;
+    color: var(--color-primary);
   }
 }
 
@@ -52,30 +51,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 14px;
-  color: $blue-400;
-  background: #fff;
+  color: var(--color-on-surface-variant);
+  background: var(--color-surface);
 
   // links
   a:link, a:visited {
-    color: $purple;
+    color: var(--color-primary);
     text-decoration: none;
   }
   a:hover {
     text-decoration: underline;
   }
-  &.dark-theme {
-    background: $blue-800;
-    color: $blue-250;
-    a:link, a:visited {
-      color: $neon-yellow;
-    }
-  }
 }
 
 .s3message {
   padding: 24px;
+  color: var(--color-on-surface);
   // min-height: 150px;
 }
 
@@ -89,12 +81,6 @@
   cursor: pointer;
   z-index: 2;
   visibility: hidden;
-
-  &:hover {
-    svg path {
-      fill: $blue-100;
-    }
-  }
 }
 
 :host {
@@ -124,13 +110,3 @@ a.webapp-link:hover .webapp-link_tooltip {
   display: block;
 }
 
-.webapp-link.dark-theme {
-  svg path {
-    fill: $blue-300;
-  }
-  &:hover {
-    svg path {
-      fill: $blue-400;
-    }
-  }
-}

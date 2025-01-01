@@ -2,16 +2,22 @@
 
 :host {
   display: flex;
+  gap: 4px;
   align-items: center;
   width: 100%;
 }
 
+.measure {
+  opacity: 0;
+}
+
 .hidden-labels {
-  color: $blue-300;
-  padding-left: 6px;
+  color: var(--color-on-surface);
+  padding: 2px 8px 2px 6px;
+  border-radius: 45%;
+  transition: background-color 0.3s ease-in-out;
 
   &:hover {
-    text-decoration: underline;
-    color: $blue-200;
+    background-color: var(--color-surface-container-highest);
   }
 }

@@ -8,11 +8,9 @@
       data-id="Equals Or GreaterThan"
       [errorStateMatcher]="immediate"
       >
-    <i matSuffix
-      data-id="cross button"
-      class="al-icon al-ico-dialog-x sm me-2"
-      (click)="iterationsForm.get('greaterThan').setValue(null)"
-    ></i>
+    <button matSuffix mat-icon-button (click)="iterationsForm.get('greaterThan').setValue(null)" data-id="cross button">
+      <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+    </button>
   </mat-form-field>
   <sm-divider [label]="'and'"></sm-divider>
   <mat-form-field appearance="outline" class="no-bottom">
@@ -25,13 +23,11 @@
       name="greaterThan"
       [errorStateMatcher]="immediate"
       >
-    <i matSuffix
-      data-id="cross button"
-      class="al-icon al-ico-dialog-x sm me-2"
-      (click)="iterationsForm.get('lessThan').setValue(null)"
-    ></i>
+    <button matSuffix mat-icon-button (click)="iterationsForm.get('lessThan').setValue(null)" data-id="cross button">
+      <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+    </button>
   </mat-form-field>
 </form>
 @if (hasTimeError) {
-  <sm-table-filter-duration-error  [isFullWidth]="true"></sm-table-filter-duration-error>
+  <sm-table-filter-duration-error  [fullWidth]="true"></sm-table-filter-duration-error>
 }

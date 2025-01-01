@@ -1,6 +1,12 @@
 @import "variables";
 
 :host {
+  width: 260px;
+  z-index: 1;
+  border: 1px solid var(--color-surface-container-high);
+  border-radius: 4px;
+  background-color: var(--color-surface-container-low);
+
   ::ng-deep {
     .mat-expansion-panel-body {
       padding: 0;
@@ -8,22 +14,17 @@
     .mat-expansion-panel-header {
       padding: 0 16px;
     }
-}
-
-  width: 260px;
-  z-index: 1;
-  border-radius: 4px;
-  background-color: $blue-700;
+  }
 
   .expand-header {
     height: 32px;
     line-height: 34px;
-    color: $white;
+    color: var(--color-inverse-surface);
     font-size: 12px;
     font-weight: 500;
   }
 
-  .panel-body{
+  .panel-body {
     max-height: calc(70vh - 100px);
     min-height: 350px;
     overflow: auto;
@@ -37,30 +38,33 @@
     }
 
     .header {
-      color: $blue-200;
+      color: var(--color-primary);
       font-size: $font-size-small;
       font-weight: 500;
       display: flex;
       justify-content: space-between;
+      line-height: 36px;
     }
+
     .param {
       display: flex;
       align-items: center;
       height: 32px;
+      line-height: 32px;
       font-size: 12px;
-      border-bottom: solid 1px $dark-border;
+      border-bottom: solid 1px var(--color-outline-variant);
 
       .key {
         flex: 1 1 0;
-        color: $blue-300;
         margin-right: 12px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+
       .value {
         flex: 1 1 0;
-        color: $blue-100;
+        color: var(--color-on-surface-variant);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -78,7 +82,7 @@
     width: 100%;
     margin: 12px 0 24px;
     padding-bottom: 12px;
-    color: $blue-100;
+    color: var(--color-on-surface-variant);
     .al-icon {
       grid-area: icon;
     }
@@ -93,54 +97,27 @@
     grid-area: status;
     margin-right: auto;
     height: 16px;
-    line-height: 16px;
+    line-height: 18px;
     padding: 0 6px;
     border-radius: 2px;
     font-size: 10px;
     font-weight: 500;
     text-transform: uppercase;
-    background-color: $pipeline-pending;
-    &.queued {
-      background-color: $pipeline-queued;
-    }
-    &.skipped {
-      background-color: $pipeline-skipped;
-    }
-    &.cached {
-      background-color: $pipeline-cached;
-    }
-    &.executed {
-      background-color: $pipeline-executed;
-    }
-    &.running {
-      background-color: $pipeline-running;
-    }
-    &.failed {
-      background-color: $pipeline-failed;
-    }
-    &.aborted {
-      background-color: $pipeline-aborted;
-    }
-    &.completed {
-      background-color: $pipeline-completed;
-    }
-    &.published {
-      background-color: $pipeline-published;
-    }
+    color: var(--color-on-primary-container);
+    background-color: var(--status-color, var(--color-draft-container));
   }
 
   .empty-msg {
     text-align: center;
     padding-top: 12px;
     font-size: $font-size-small;
-    color: $blue-400;
   }
 
   footer {
     height: 48px;
     line-height: 48px;
     padding: 0 16px;
-    border-top: solid 1px $dark-border;
+    border-top: solid 1px var(--color-surface-container-high);
     .arr-link {
       i {
         margin-left:4px;

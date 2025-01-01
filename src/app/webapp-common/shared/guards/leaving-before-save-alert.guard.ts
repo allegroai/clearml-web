@@ -32,7 +32,9 @@ export const leavingBeforeSaveAlertGuard = (inEditSelector: MemoizedSelector<any
               body     : 'You have unsaved changes. Do you want to stay on this page or leave without saving?',
               yes      : 'Leave',
               no       : 'Stay',
-              iconClass: 'i-alert',
+              iconClass: 'al-ico-alert',
+              iconColor: 'var(--color-warning)',
+              width: 440
             }
           }).afterClosed().pipe(map((leave)=> !!leave));
         }),

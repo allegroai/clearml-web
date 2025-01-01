@@ -47,7 +47,7 @@ export const routes: Routes = [
             canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)],
             data: {minimized: true}
           },
-          {path: 'experiments',
+          {path: 'tasks',
             component: ModelInfoExperimentsComponent,
             canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)],
             data: {minimized: true}
@@ -68,7 +68,7 @@ export const routes: Routes = [
       {path: 'network', component: ModelInfoNetworkComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},
       {path: 'labels', component: ModelInfoLabelsComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},
       {path: 'metadata', component: ModelInfoMetadataComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},
-      {path: 'experiments', component: ModelInfoExperimentsComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},
+      {path: 'tasks', component: ModelInfoExperimentsComponent, canDeactivate: [leavingBeforeSaveAlertGuard(selectIsModelInEditMode)]},
       {path: 'scalars', component: ModelInfoScalarsComponent},
       {path: 'plots', component: ModelInfoPlotsComponent},
     ]

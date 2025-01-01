@@ -5,7 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {debounceTime, filter, take} from 'rxjs/operators';
 import {setDeep} from '@common/core/actions/projects.actions';
-import {getRecentProjects, getRecentExperiments} from '@common/dashboard/common-dashboard.actions';
+import {getRecentProjects, getRecentExperiments, getRecentReports} from '@common/dashboard/common-dashboard.actions';
 import {selectFirstLogin} from '@common/core/reducers/view.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
@@ -52,6 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
      .subscribe(() => {
        this.store.dispatch(getRecentProjects());
        this.store.dispatch(getRecentExperiments());
+       this.store.dispatch(getRecentReports());
      });
 
     this.welcomeSub = this.store.select(selectFirstLogin)

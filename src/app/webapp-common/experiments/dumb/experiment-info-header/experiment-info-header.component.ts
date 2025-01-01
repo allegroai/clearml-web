@@ -1,12 +1,11 @@
-import {Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
+import {Component, viewChild, input, output, computed, inject } from '@angular/core';
 import {getSystemTags, isDevelopment} from '~/features/experiments/shared/experiments.utils';
-import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
-import {activateEdit, deactivateEdit, setExperiment} from '../../actions/common-experiments-info.actions';
-import {EXPERIMENTS_STATUS_LABELS, ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
+import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
+import {ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
 import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
@@ -27,107 +26,81 @@ import {
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MatMenuTrigger} from '@angular/material/menu';
 import { selectExperimentsTags } from '@common/experiments/reducers';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
   selector: 'sm-experiment-info-header',
   templateUrl: './experiment-info-header.component.html',
   styleUrls: ['./experiment-info-header.component.scss']
 })
-export class ExperimentInfoHeaderComponent implements OnDestroy {
+export class ExperimentInfoHeaderComponent {
+  private store = inject(Store);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
 
-  public viewId: boolean;
-  public tagsFilterByProject$: Observable<boolean>;
-  public projectTags$: Observable<string[]>;
-  public companyTags$: Observable<string[]>;
-  public isDev = false;
-  public systemTags = [] as string[];
-  public shared: boolean;
-  public isPipeline: boolean;
-  public selectedDisableAvailable = {};
+  protected tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+  protected projectTags$ = this.store.select(selectExperimentsTags);
+  protected companyTags$ = this.store.select(selectCompanyTags);
 
-  @Input() editable: boolean = true;
-  @Input() infoData;
-  @Input() backdropActive = false;
-  @Input() showMenu: boolean;
-  @Input() minimized: boolean;
-  @Input() isSharedAndNotOwner: boolean;
-  @Output() experimentNameChanged = new EventEmitter<string>();
-  @Output() minimizeClicked = new EventEmitter();
-  @Output() closeInfoClicked = new EventEmitter();
-  @Output() maximizedClicked = new EventEmitter();
-  @ViewChild('tagsMenuTrigger') tagMenuTrigger: MatMenuTrigger;
-  @ViewChild(TagsMenuComponent) tagMenu: TagsMenuComponent;
+  experiment = input<any>();
+  editable = input(true);
+  infoData = input<IExperimentInfo>();
+  backdropActive = input(false);
+  showMenu = input<boolean>();
+  minimized = input<boolean>();
+  isSharedAndNotOwner = input<boolean>();
+  experimentNameChanged = output<string>();
+  minimizeClicked = output();
+  closeInfoClicked = output();
+  maximizedClicked = output();
+  tagMenuTrigger = viewChild<MatMenuTrigger>('tagsMenuTrigger');
+  tagMenu = viewChild(TagsMenuComponent);
 
-  constructor(private store: Store, private router: Router, private activatedRoute: ActivatedRoute) {
-    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-    this.projectTags$ = this.store.select(selectExperimentsTags);
-    this.companyTags$ = this.store.select(selectCompanyTags);
-  }
-
-  ngOnDestroy(): void {
-    this.tagMenuTrigger = null;
-    this.tagMenu = null;
-    this.store.dispatch(setExperiment(null));
-  }
-
-  private _experiment: any;
-  get experiment() {
-    return this._experiment;
-  }
-
-  @Input() set experiment(experiment) {
-    if (experiment?.id !== this._experiment?.id) {
-      this.viewId = false;
-    }
-    this._experiment = experiment;
-    this.isDev = isDevelopment(experiment);
-    this.systemTags = getSystemTags(experiment);
-
-    this.isPipeline = !!experiment?.system_tags?.includes(ExperimentTagsEnum.Pipeline);
-    this.shared = experiment?.system_tags?.includes(ExperimentTagsEnum.Shared);
-    this.selectedDisableAvailable = {
-      [MenuItems.abort]: selectionDisabledAbort([experiment]),
-      [MenuItems.abortAllChildren]: selectionDisabledAbortAllChildren([experiment]),
-      [MenuItems.publish]: selectionDisabledPublishExperiments([experiment]),
-      [MenuItems.reset]: selectionDisabledReset([experiment]),
-      [MenuItems.delete]: selectionDisabledDelete([experiment]),
-      [MenuItems.moveTo]: selectionDisabledMoveTo([experiment]),
-      [MenuItems.enqueue]: selectionDisabledEnqueue([experiment]),
-      [MenuItems.retry]: selectionDisabledRetry([experiment]),
-      [MenuItems.dequeue]: selectionDisabledDequeue([experiment]),
-      [MenuItems.queue]: selectionDisabledQueue([experiment]),
-      [MenuItems.viewWorker]: selectionDisabledViewWorker([experiment]),
-      [MenuItems.archive]: selectionDisabledArchive([experiment])
-    };
-  }
-
+  protected isDev = computed(() => isDevelopment(this.experiment()));
+  protected systemTags = computed(() => getSystemTags(this.experiment()));
+  protected isPipeline = computed(() => !!this.experiment()?.system_tags?.includes(ExperimentTagsEnum.Pipeline));
+  protected shared = computed(() => this.experiment()?.system_tags?.includes(ExperimentTagsEnum.Shared));
+  protected selectedDisableAvailable = computed(() => ({
+    [MenuItems.abort]: selectionDisabledAbort([this.experiment()]),
+    [MenuItems.abortAllChildren]: selectionDisabledAbortAllChildren([this.experiment()]),
+    [MenuItems.publish]: selectionDisabledPublishExperiments([this.experiment()]),
+    [MenuItems.reset]: selectionDisabledReset([this.experiment()]),
+    [MenuItems.delete]: selectionDisabledDelete([this.experiment()]),
+    [MenuItems.moveTo]: selectionDisabledMoveTo([this.experiment()]),
+    [MenuItems.enqueue]: selectionDisabledEnqueue([this.experiment()]),
+    [MenuItems.retry]: selectionDisabledRetry([this.experiment()]),
+    [MenuItems.dequeue]: selectionDisabledDequeue([this.experiment()]),
+    [MenuItems.queue]: selectionDisabledQueue([this.experiment()]),
+    [MenuItems.viewWorker]: selectionDisabledViewWorker([this.experiment()]),
+    [MenuItems.archive]: selectionDisabledArchive([this.experiment()])
+  }));
 
   onNameChanged(name) {
     this.experimentNameChanged.emit(name);
   }
 
   openTagMenu() {
-    if (!this.tagMenuTrigger) {
+    if (!this.tagMenuTrigger()) {
       return;
     }
     window.setTimeout(() => this.store.dispatch(activateEdit('tags')), 200);
     window.setTimeout(() => {
-      this.tagMenuTrigger.openMenu();
-      this.tagMenu.focus();
+      this.tagMenuTrigger().openMenu();
+      this.tagMenu().focus();
     });
   }
 
   addTag(tag: string) {
-    this.store.dispatch(addTag({tag, experiments: [this.experiment]}));
+    this.store.dispatch(addTag({tag, experiments: [this.experiment()]}));
   }
 
   removeTag(tag: string) {
-    this.store.dispatch(removeTag({tag, experiments: [this.experiment]}));
+    this.store.dispatch(removeTag({tag, experiments: [this.experiment()]}));
   }
 
   tagsMenuClosed() {
     this.store.dispatch(deactivateEdit());
-    this.tagMenu.clear();
+    this.tagMenu().clear();
   }
 
   editExperimentName(edit) {
@@ -136,14 +109,6 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
     } else {
       this.store.dispatch(deactivateEdit());
     }
-  }
-
-  showID() {
-    this.viewId = true;
-  }
-
-  getStatusLabel() {
-    return EXPERIMENTS_STATUS_LABELS[this.experiment?.status] || '';
   }
 
   editDescriptionHandler() {

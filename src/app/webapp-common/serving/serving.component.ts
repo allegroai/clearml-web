@@ -8,7 +8,7 @@ import {SearchState, selectSearchQuery} from '@common/common-search/common-searc
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {selectCompanyTags, selectProjectSystemTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
-import {distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {Params} from '@angular/router';
 import {createMetricColumn, decodeColumns, decodeFilter, decodeOrder} from '@common/shared/utils/tableParamEncode';
@@ -20,9 +20,9 @@ import {ServingActions} from '@common/serving/serving.actions';
 import {ServingTableComponent} from '@common/serving/serving-table/serving-table.component';
 import {servingFeature} from '@common/serving/serving.reducer';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {headerActions} from '@common/core/actions/router.actions';
 import {EndpointStats} from '~/business-logic/model/serving/endpointStats';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 type EndpointsTableViewMode = 'active' | 'loading';
 
@@ -354,17 +354,13 @@ export class ServingComponent extends BaseEntityPageComponent implements OnInit,
       .pipe(
         takeUntilDestroyed(),
         filter(config => !!config),
-      )    .subscribe((conf) => {
-      const contextMenu = modelServingRoutes
-        .map(route => {
-          const baseLink = route.link.at(-1);
-          return {
-            ...route,
-            isActive: baseLink === conf[0]?.path
-          };
-        });
-      this.store.dispatch(headerActions.setTabs({contextMenu}));
-    });
+        debounceTime(50),
+        map(conf => conf[0]),
+        distinctUntilChanged()
+      )
+      .subscribe((feature) => {
+        this.store.dispatch(headerActions.setTabs({contextMenu: modelServingRoutes, active: feature[0]?.path}));
+      });
   }
 
 }

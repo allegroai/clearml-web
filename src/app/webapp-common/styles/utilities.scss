@@ -1,0 +1,46 @@
+.pointer {
+  cursor: pointer;
+}
+
+.grab {
+  cursor: grab;
+}
+
+.cursor-default {
+  cursor: default;
+}
+
+.pointer-events-none {
+  pointer-events: none !important;
+}
+
+.noselect {
+  user-select: none;
+}
+
+.resize-none {
+  resize: none !important;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.ellipsis {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &.inline {
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+
+:root {
+  --font-family-base: 'Heebo', sans-serif; // Assumes the browser default, typically `16px`
+  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}

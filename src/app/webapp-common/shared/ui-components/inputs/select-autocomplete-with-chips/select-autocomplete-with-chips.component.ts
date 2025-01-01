@@ -19,7 +19,6 @@ import {MatChipGrid, MatChipInput, MatChipInputEvent} from '@angular/material/ch
 import {MatFormField, MatSuffix} from '@angular/material/form-field';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ChipsComponent} from '@common/shared/ui-components/buttons/chips/chips.component';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {takeUntilDestroyed, toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {MatOptionSelectionChange} from '@angular/material/core';
 import {computedPrevious} from 'ngxtension/computed-previous';
@@ -43,7 +42,7 @@ export interface IOption {
       multi: true
     }],
   standalone: true,
-  imports: [ClickStopPropagationDirective, ChipsComponent, LabeledFormFieldDirective, ReactiveFormsModule, MatChipGrid,
+  imports: [ClickStopPropagationDirective, ChipsComponent, ReactiveFormsModule, MatChipGrid,
     MatChipInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatFormField, MatSuffix]
 })
 

@@ -1,11 +1,14 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
 import {
   EventsGetTaskSingleValueMetricsResponseValues
 } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {download} from '../utils/download';
-import {NgForOf, NgIf} from '@angular/common';
+
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {SortPipe} from '@common/shared/pipes/sort.pipe';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
+import {NgTemplateOutlet} from '@angular/common';
 
 @Component({
   selector: 'sm-single-value-summary-table',
@@ -13,16 +16,17 @@ import {SortPipe} from '@common/shared/pipes/sort.pipe';
   styleUrls: ['./single-value-summary-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    NgForOf,
-    NgIf,
-    SortPipe
+    SortPipe,
+    MatIcon,
+    MatIconButton,
+    NgTemplateOutlet
   ],
   standalone: true
 })
 export class SingleValueSummaryTableComponent {
   @Input() data: Array<EventsGetTaskSingleValueMetricsResponseValues>;
   @Input() experimentName;
-  @Input() darkTheme: boolean;
+  @Input() csvButtonTemplate: TemplateRef<SVGAElement>;
   @Output() createEmbedCode = new EventEmitter<{xaxis: ScalarKeyEnum; domRect: any}>();
   public hover: boolean;
   constructor() { }

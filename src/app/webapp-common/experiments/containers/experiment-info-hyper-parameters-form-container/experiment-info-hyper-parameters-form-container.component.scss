@@ -1,9 +1,11 @@
-@import "variables";
-
 :host {
   display: block;
   position: relative;
   height: 100%;
+
+  .form-section {
+    margin-top: 18px;
+  }
 
   sm-section-header {
 
@@ -12,12 +14,11 @@
 
   sm-experiment-execution-parameters {
     display: block;
-    height: calc(100% - 42px);
+    height: calc(100% - 60px);
   }
+
   sm-search.table-search {
     padding-right: 2px;
     border-radius: 4px;
-    color: $blue-280 !important;
-    background-color: $blue-600 !important;
   }
 }

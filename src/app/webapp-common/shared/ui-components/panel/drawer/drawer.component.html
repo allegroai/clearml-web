@@ -10,7 +10,7 @@
       (click)="toggleDrawer()"
       >
       @if (!closed) {
-        <i class="arrows-icon fas fa-angle-double-left" data-id="drawerCollapseButton"></i>
+        <mat-icon fontSet="al" fontIcon="al-ico-previous" data-id="drawerCollapseButton"></mat-icon>
       }
       <div #closedLabel [class.hidden]="!closed" class="label">{{label}}</div>
     </button>

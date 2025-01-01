@@ -13,10 +13,10 @@
   &:after {
     flex: 1;
     content: '';
-    border-top: var(--width) solid var(--divider-line, #ededed);
+    border-top: var(--width) solid var(--mat-divider-color);
   }
   span {
-    color: $blue-300;
+    color: var(--color-on-surface-variant);
     padding: 4px 12px;
     border-radius: 5px;
     &:empty {

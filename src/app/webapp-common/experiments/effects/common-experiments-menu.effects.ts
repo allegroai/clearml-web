@@ -223,7 +223,7 @@ export class CommonExperimentsMenuEffects {
       } as TasksCloneRequest)
         .pipe(
           mergeMap((res: TasksCloneResponse) => {
-            this.router.navigate(['projects', action.cloneData.project?.value || res.id || '*', 'experiments', res.id]);
+            this.router.navigate(['projects', action.cloneData.project?.value || res.id || '*', 'tasks', res.id]);
             return [
               viewActions.getExperiments(),
               deactivateLoader(action.type),
@@ -232,7 +232,7 @@ export class CommonExperimentsMenuEffects {
           }),
           catchError(error => [
             deactivateLoader(action.type),
-            setServerError(error, null, 'Clone Experiment failed'),
+            setServerError(error, null, 'Clone Task failed'),
             requestFailed(error)
           ])
         )
@@ -258,11 +258,10 @@ export class CommonExperimentsMenuEffects {
     switchMap(([action, isPipeline]) => getChildrenExperiments(this.apiTasks, action.experiments)
       .pipe(
         tap(() => this.store.dispatch(deactivateLoader(action.type))),
-        mergeMap(shouldBeAbortedTasks => (isPipeline ? this.dialog.open(AbortControllerDialogComponent, {
-          data: {tasks: action.experiments, shouldBeAbortedTasks}
-        }) : this.dialog.open(AbortAllChildrenDialogComponent, {
-          data: {tasks: action.experiments, shouldBeAbortedTasks}
-        })).afterClosed()),
+        mergeMap(shouldBeAbortedTasks => (isPipeline ?
+          this.dialog.open(AbortControllerDialogComponent, {data: {tasks: action.experiments, shouldBeAbortedTasks}}) :
+          this.dialog.open(AbortAllChildrenDialogComponent, {data: {tasks: action.experiments, shouldBeAbortedTasks}})
+        ).afterClosed()),
         mergeMap(confirmed => [
           confirmed ? stopClicked({selectedEntities: action.experiments, includePipelineSteps: isPipeline }) : emptyAction(),
           deactivateLoader(action.type)
@@ -297,7 +296,7 @@ export class CommonExperimentsMenuEffects {
         project_name: action.project.name
       })
         .pipe(
-          tap((res) => this.router.navigate([`projects/${action.project.id ? action.project.id : res.project_id ?? '*'}/experiments/${action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''}`], {queryParamsHandling: 'merge'})),
+          tap((res) => this.router.navigate(['projects', action.project.id ? action.project.id : res.project_id ?? '*', 'tasks', action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''], {queryParamsHandling: 'merge'})),
           concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
           mergeMap(([, selectedExperiment]) => [
             viewActions.resetExperiments({}),
@@ -305,9 +304,9 @@ export class CommonExperimentsMenuEffects {
             ...action.selectedEntities.map(exp => this.setExperimentIfSelected(selectedExperiment, exp.id, {project: action.project ?? '*'})),
             deactivateLoader(action.type),
             viewActions.getExperiments(),
-            addMessage(MESSAGES_SEVERITY.SUCCESS, `Experiment moved successfully to ${action.project.name ?? 'Projects root'}`)
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `Task moved successfully to ${action.project.name ?? 'Projects root'}`)
           ]),
-          catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Failed to move experiments')])
+          catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Failed to move tasks')])
         )
     )
   ));
@@ -390,7 +389,7 @@ export class CommonExperimentsMenuEffects {
             changes: {tags: experiment.tags.filter(tag => tag !== action.tag)}
           })
         ),
-      addMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” experiment`, [
+      addMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” task`, [
         {
           name: 'Undo',
           actions: [
@@ -438,7 +437,7 @@ export class CommonExperimentsMenuEffects {
             viewActions.setSelectedExperiments({experiments: []}),
             getNotificationAction(res, action, MenuItems.archive, action.entityType || EntityTypeEnum.experiment, (action.skipUndo || allFailed) ? [] : undoAction)
           ];
-          if (routerConfig.includes('experiments')) {
+          if (routerConfig.includes('tasks')) {
             const failedIds = res.failed.map(fail => fail.id);
             const successExperiments = experiments.map(exp => exp.id).filter(id => !failedIds.includes(id));
             actions = actions.concat([
@@ -461,7 +460,7 @@ export class CommonExperimentsMenuEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          setServerError(error, null, `Failed To Archive ${action.entityType || 'Experiment'}s`)
+          setServerError(error, null, `Failed To Archive ${action.entityType || 'Task'}s`)
         ])
       )
     )
@@ -499,7 +498,7 @@ export class CommonExperimentsMenuEffects {
             viewActions.setSelectedExperiments({experiments: []}),
             getNotificationAction(res, action, MoreMenuItems.restore, action.entityType || EntityTypeEnum.experiment, (action.skipUndo || allFailed) ? [] : undoAction)
           ];
-          if (routerConfig.includes('experiments')) {
+          if (routerConfig.includes('tasks')) {
             const failedIds = res.failed.map(fail => fail.id);
             const successExperiments = experiments.map(exp => exp.id).filter(id => !failedIds.includes(id));
             actions = actions.concat([
@@ -522,7 +521,7 @@ export class CommonExperimentsMenuEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          setServerError(error, null, `Failed To Restore ${action.entityType || 'Experiment'}s`)
+          setServerError(error, null, `Failed To Restore ${action.entityType || 'Task'}s`)
         ])
       )
     )
@@ -545,7 +544,7 @@ export class CommonExperimentsMenuEffects {
     }),
     map((res: TasksGetAllExResponse) => {
       const queue = (res.tasks[0] as unknown as ITask).execution.queue;
-      return this.router.navigate(['/workers-and-queues/queues'], {queryParams: {id: queue.id}});
+      return this.router.navigate(['workers-and-queues', 'queues'], {queryParams: {id: queue.id}});
     })
   ), {dispatch: false});
 
@@ -566,6 +565,7 @@ export class CommonExperimentsMenuEffects {
       map((res: TasksGetByIdExResponse) => {
         const worker = (res.tasks[0]).last_worker;
         // return this.router.navigate(['/workers-and-queues/queues'], {queryParams: {id: queue.id}});
+
         this.router.navigate(['workers-and-queues', 'workers'], {queryParams: {id: worker}});
       })
     )

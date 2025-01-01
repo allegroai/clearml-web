@@ -15,9 +15,9 @@
     [sortByField]="projectsOrderBy$ | ngrxPush"
     [sortOrder]="projectsSortOrder$ | ngrxPush"
   >
-    <button class="btn btn-cml-primary d-flex align-items-center" data-id="New Project"
-            (click)="openProjectDialog('create')">
-      <i class="al-icon al-ico-add sm me-2"></i>NEW PROJECT
+    <button mat-flat-button data-id="New Project" (click)="openProjectDialog('create')">
+      <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+      NEW PROJECT
     </button>
   </sm-projects-header>
 </sm-projects-list>

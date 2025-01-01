@@ -1,86 +1,85 @@
-@import "variables";
-
 :host {
-  display: grid;
-  grid-template-columns: 14px 70px;
-  align-items: center;
-  grid-gap: 4px;
+  .status-icon-container {
+    display: grid;
+    grid-template-columns: 14px 70px;
+    align-items: center;
+    grid-column-gap: 4px;
 
-  &.show-spinner {
-    grid-template-columns: 14px 70px 18px;
+    &.show-spinner {
+      grid-template-columns: 14px 70px 18px;
+    }
+
+    &.hide-label {
+      grid-template-columns: 14px;
+
+      &.show-spinner {
+        grid-template-columns: 14px 18px;
+      }
+    }
+
+    .mat-icon.inline {
+      width: 14px;
+      height: 14px;
+      font-size: 12px;
+
+      &:before {
+        line-height: 14px;
+      }
+    }
+
+    &.created, &.queued {
+      color: var(--color-draft);
+    }
+
+    &.completed, &.Final {
+      color: var(--color-completed);
+
+    }
+
+    &.aborted {
+      color: var(--color-aborted);
+    }
+
+    &.running {
+      color: var(--color-running);
+    }
+
+    &.failed {
+      color: var(--color-failed);
+    }
+
+    &.in_progress, &.Uploading {
+      color: var(--color-running);
+    }
+
+    &.published {
+      color: var(--color-published);
+    }
+
+    &.closed {
+      color: var(--color-completed);
+    }
+
+    &.stopped {
+      color: var(--color-completed);
+    }
   }
 
-  &.hide-label {
-    grid-template-columns: 14px;
-  }
+  .label {
+    line-height: 14px;
 
-  &.created, &.queued {
-    color: $grey-purple
-  }
-
-  &.completed, &.Final {
-    color: $completed-blue;
-
-  }
-  &.aborted {
-    color: $completed-blue;
-  }
-  &.running {
-    color: $running-green;
-  }
-
-  &.failed {
-    color: $strong-red;
-  }
-
-  &.in_progress, &.Uploading {
-    color: $running-green;
-  }
-
-  &.published {
-    color: $neon-yellow;
-    line-height: 23px;
-  }
-
-  &.closed {
-    color: $blue-sky;
-  }
-
-  &.stopped {
-    color: $blue-sky;
-  }
-}
-
-.icon {
-  min-width: 10px;
-}
-
-.label {
-  line-height: 18px;
-
-  &.with-spinner {
-    min-width: 50px;
-  }
-}
-
-:host-context(.light-theme) {
-  .published {
-    color: darken($neon-yellow, 10%);
-    .icon.i-published{
-      filter: brightness(0.8)
+    &.with-spinner {
+      min-width: 50px;
     }
   }
 }
 
 :host-context(.selected) {
   :host {
-    color: $blue-50;
-    filter: brightness(0) invert(1);
+    .status-icon-container {
+      color: var(--row-selected-text-color);
+    }
   }
-}
-
-.middle {
-  height: 14px;
 }
 
 .spinner {
@@ -90,3 +89,4 @@
     opacity: 1;
   }
 }
+

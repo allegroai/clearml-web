@@ -32,7 +32,7 @@ export class ParamSelectorComponent {
 
   @Input() selectedHyperParams: string[];
   @Input() title: string;
-  @Input() itemsList: { [section: string]: any };
+  @Input() itemsList: Record<string, any>;
   @Input() single: boolean;
   @Input() selectFilteredItems: boolean;
 

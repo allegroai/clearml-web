@@ -1,11 +1,10 @@
-@import "variables";
 @import "mixins/link";
 @import "../../../layout/layout";
 
 :host{
   display: block;
   height: $graph-height;
-  background-color: $blue-900;
+  background-color: var(--color-surface-container-low);
 
   .header {
     display: flex;
@@ -17,9 +16,12 @@
     left: calc(50% - 90px);
     z-index: 1;
 
-    .btn {
-      height: 32px;
+    button {
       max-width: 230px;
+    }
+
+    .info {
+      color: var(--color-secondary);
     }
   }
 
@@ -33,17 +35,12 @@
       margin: 24px 0;
     }
 
-    .al-ico-no-scatter-graph {
-      color: $blue-300;
-    }
-
     .no-data-button {
       display: flex;
       justify-content: center;
       align-items: center;
     }
   }
-  @include link($neon-yellow);
 }
 
 .close-button {
@@ -62,13 +59,13 @@
   flex-direction: column;
   align-items: center;
 
-  i {
-    color: $blue-400;
+  i{
+    color: var(--color-secondary);
   }
 
   .title {
     font-size: 20px;
-    color: $blue-800;
+    color: var(--color-on-surface);
     font-weight: 500;
     margin: 24px 0;
   }

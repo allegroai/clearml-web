@@ -1,0 +1,40 @@
+:host {
+  cursor: pointer;
+
+  .card-name {
+    height: 32px;
+  }
+
+  .al-ico-project-path {
+    color: var(--color-primary);
+  }
+
+  .project-name {
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .last-run {
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: color-mix(in srgb, var(--color-on-primary-container), transparent 40%);
+  }
+  .title {
+    font-weight: 500;
+  }
+
+  .footer-tags {
+    display: flex;
+    min-height: 38px;
+    padding: 0 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .rename-state .last-run {
+    visibility: hidden;
+    height: 18px;
+  }
+}

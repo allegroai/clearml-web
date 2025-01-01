@@ -6,7 +6,7 @@
   }
   .input-duration.disabled {
     ::ng-deep input {
-      color: $blue-250 !important;
+      color: var(--color-outline) !important;
     }
   }
 }

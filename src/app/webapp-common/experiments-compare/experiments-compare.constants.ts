@@ -22,7 +22,7 @@ export interface DataDictionary {
 export const RENAME_MAP = {
   'network_design': 'Network Design',
   'uncommitted_changes': 'Uncommitted Changes',
-  'installed_packages': 'Installed Packages',
+  'installed_packages': 'Python Packages',
   'setup_shell_script': 'Setup Shell Script',
   ' input models': 'Input Models',
   ' output models': 'Output Models',
@@ -73,6 +73,7 @@ export const COMPARE_DETAILS_ONLY_FIELDS_BASE = [
   'user.name',
   'parent.name',
   'execution.queue.name',
+  'execution.queue.display_name',
   'active_duration',
   'started',
   'status_message',

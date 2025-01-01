@@ -1,7 +1,9 @@
-@import "variables";
-
 :host {
-  display: inline-block;
+  height: 36px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   .refresh-wrapper {
     &.show-menu {
@@ -10,23 +12,34 @@
         pointer-events: auto;
       }
     }
-    .btn.btn-icon:hover {
-      background-color: transparent;
+  }
+
+  .mdc-icon-button {
+    .path_arrows {
+      fill: var(--color-outline);
+    }
+
+    .path_play, .path_pause {
+      fill: var(--color-tertiary);
+    }
+
+    &:hover {
       .path_arrows {
-        fill: $blue-200;
+        fill: var(--color-on-surface-variant);
       }
     }
   }
 
   .refresh {
     position: relative;
-    width: 24px;
-    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
 
     span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       height: inherit;
       width: inherit;
       position: absolute;
@@ -40,10 +53,9 @@
     right: 64px;
     display: flex;
     align-items: center;
-    padding: 8px 12px;
-    border-radius: 4px;
-    background-color: $blue-600;
-    color: $blue-250;
+    padding: 4px 12px;
+    border-radius: 48px;
+    background-color: var(--color-surface-container-low);
     line-height: normal;
     font-size: 12px;
     font-weight: 600;
@@ -51,13 +63,13 @@
     transition: opacity 0.3s 0.3s;
 
     .toggle-label {
-      color: $blue-300;
+      color: var(--color-on-primary-container);
       font-size: 12px;
       font-weight: 500;
       white-space: nowrap;
 
       &.enabled {
-        color: $neon-yellow
+        color: var(--color-primary);
       }
     }
   }
@@ -71,43 +83,8 @@
     position: absolute;
     right: 60px;
     transform: rotate(45deg);
-    background-color: $blue-600;
+    background-color: var(--color-surface-container-low);
     transition: opacity 0.3s 0.3s;
-  }
-
-  &.light-theme {
-    border-radius: 4px;
-
-    .refresh-wrapper {
-      .btn.btn-icon {
-        background-color: transparent;
-        &:hover {
-          .path_arrows {
-            fill: $blue-500;
-          }
-        }
-      }
-      .path_arrows {
-        fill: $blue-400;
-      }
-    }
-
-    .path_play, .path_pause {
-      fill: $purple;
-    }
-
-    .tooltip-container, .tip {
-      background-color: $blue-50;
-      color: $blue-600;
-
-      .toggle-label.enabled {
-        color: $purple;
-      }
-
-      .btn {
-        background-color: transparent;
-      }
-    }
   }
 }
 

@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   .hide-me {
     position: absolute;
@@ -17,7 +15,7 @@
   }
 
   .modal-container {
-    background-color: $white;
+    background-color: var(--color-surface-container-low);
     height: 100%;
   }
 
@@ -28,9 +26,9 @@
     gap: 0 24px;
     width: 100%;
     height: 58px;
-    background-color: white;
+    background-color: var(--color-surface-container-low);
     padding: 0 24px;
-    border-bottom: solid 1px #f1f1f1;
+    border-bottom: solid 1px var(--color-outline-variant);
     position: relative;
     z-index: 1;
 
@@ -42,11 +40,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: $blue-400;
       font-size: 16px;
 
       .number {
-        color: $blue-500;
+        color: var(--color-secondary);
       }
 
       @media screen and (min-width: 960px) {
@@ -61,7 +58,7 @@
       h1 {
         font-size: 16px;
         font-weight: 400;
-        color: $blue-500;
+        color: var(--color-secondary);
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -80,7 +77,7 @@
     bottom: 0;
     left: 50%;
     transform: translate(-50%, 0);
-    background-color: white;
+    background-color: var(--color-surface-container-low);
     box-shadow: 0 -3px 3px 0 rgba(0, 0, 0, 0.1);
     border-radius: 4px 4px 0 0;
     padding: 0 24px;
@@ -100,7 +97,6 @@
       }
 
       label {
-        color: $blue-300;
         padding-right: 4px;
         margin-bottom: 0;
       }
@@ -109,7 +105,7 @@
 
   .icon-container {
     display: inherit;
-    color: $blue-400;
+    color: var(--color-secondary);
 
     &.disabled {
       opacity: 0.5;
@@ -123,9 +119,9 @@
   .debug-image-container {
     position: relative;
     overflow: hidden;
-    background-color: white;
-    background-image: linear-gradient(45deg, #F6F6F6 25%, transparent 25%, transparent 75%, #F6F6F6 75%, #F6F6F6),
-      linear-gradient(45deg, #F6F6F6 25%, transparent 25%, transparent 75%, #F6F6F6 75%, #F6F6F6);
+    background-color: var(--color-surface-container-low);
+    background-image: linear-gradient(45deg, var(--color-surface-container) 25%, transparent 25%, transparent 75%, var(--color-surface-container) 75%,  var(--color-surface-container)),
+      linear-gradient(45deg, var(--color-surface-container) 25%, transparent 25%, transparent 75%, var(--color-surface-container) 75%,  var(--color-surface-container));
     background-size: 24px 24px;
     background-position: 0 0, 12px 12px;
     height: calc(100% - 58px);
@@ -141,7 +137,7 @@
 
       img {
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-        border: 1px solid #fff;
+        border: 1px solid var(--color-surface-container-low);
         width: 100%;
         height: 100%;
         cursor: grab;
@@ -162,7 +158,7 @@
       height: 38px;
       border-radius: 30px;
       box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-      background-color: rgba(255, 255, 255, 0.85);
+      background-color: rgba(from var(--color-inverse-on-surface) r g b / 0.85);
       transition: background-color 0.35s ease;
 
 
@@ -171,7 +167,7 @@
       }
 
       &:hover {
-        background-color: rgba(255, 255, 255, 1);
+        background-color: rgba(from var(--color-inverse-on-surface) r g b / 1);
       }
     }
 

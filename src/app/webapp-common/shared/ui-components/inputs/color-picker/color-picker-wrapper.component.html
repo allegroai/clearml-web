@@ -1,35 +1,23 @@
 <div
   class="color-picker-wrapper"
-  [class.light-theme]="props?.theme === 'light'"
-  [style.top.px]="props?.top"
-  [style.left.px]="props?.left">
-  <div
-    *ngIf="props?.alpha; else noAlpha"
-    [(colorPicker)]="defaultColor"
-    [(cpToggle)]="toggle"
-    [cpOKButton]="true"
-    [cpCancelButton]="true"
-    [cpSaveClickOutside]="false"
-    [cpOKButtonClass]="'btn btn-cml-primary btn-xs'"
-    [cpCancelButtonClass]="'btn btn-cml-primary btn-xs me-1'"
-    [cpAlphaChannel]="'forced'"
-    [cpDisableInput]="true"
-    [cpPresetColors]="alphaPresetColors"
-    (colorPickerSelect)="selectColor($event)">
-  </div>
-  <ng-template #noAlpha>
-  <div
-    [(colorPicker)]="defaultColor"
-    [(cpToggle)]="toggle"
-    [cpOKButton]="true"
-    [cpCancelButton]="true"
-    [cpSaveClickOutside]="false"
-    [cpOKButtonClass]="'btn btn-cml-primary btn-xs'"
-    [cpCancelButtonClass]="'btn btn-cml-primary btn-xs m-3'"
-    [cpAlphaChannel]="'disabled'"
-    [cpDisableInput]="true"
-    [cpPresetColors]="presetColors"
-    (colorPickerSelect)="selectColor($event)">
-  </div>
+  [style.top.px]="props()?.top"
+  [style.left.px]="props()?.left">
+  @if (props()) {
+    <div
+      [(colorPicker)]="state().color"
+      [cpOKButton]="false"
+      [cpCancelButton]="false"
+      [cpSaveClickOutside]="false"
+      [cpAlphaChannel]="props()?.alpha ? 'forced' : 'disabled'"
+      [cpDisableInput]="true"
+      [cpPresetColors]="props()?.alpha ? alphaPresetColors : presetColors"
+      [cpExtraTemplate]="buttons"
+    ></div>
+  }
+  <ng-template #buttons>
+    <div class="buttons">
+      <button mat-stroked-button (click)="closeColorPicker()">CLOSE</button>
+      <button mat-flat-button (click)="selectColor()">APPLY</button>
+    </div>
   </ng-template>
 </div>

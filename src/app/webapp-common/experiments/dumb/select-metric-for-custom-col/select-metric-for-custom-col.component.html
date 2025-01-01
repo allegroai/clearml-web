@@ -33,7 +33,7 @@
       <mat-expansion-panel
         [expanded]="searchText?.length > 0 || expandedMetrics[metric[1][0].metric_hash]">
         <mat-expansion-panel-header
-          class="py-2" expandedHeight="42px" collapsedHeight="42px"
+           expandedHeight="36px" collapsedHeight="36px"
           (click)="expandedMetrics[metric[1][0].metric_hash] = !expandedMetrics[metric[1][0].metric_hash]">
           <mat-panel-title class="w-100">
             <span class="panel-title ellipsis" data-id="metricType" [smTooltip]="metric[0]" smShowTooltipIfEllipsis>{{ metric[0] }}</span>
@@ -47,26 +47,36 @@
             <div class="metric-expansion-content">
               @if (multiSelect) {
                 <div class="variant-label">
-                  <sm-checkbox-control #metricVariant
-                                       (formDataChanged)="!skipValueType ? toggleAllMetricsToDisplay(variant, metricVariant.formData) : toggleMetricToDisplay(variant, metricVariant.formData, 'value')"
-                                       [formData]="metricsCols[variant.metric_hash + variant.variant_hash] !== undefined"
-                                       [label]="variant.variant"
-                  ></sm-checkbox-control>
+                  <mat-checkbox #metricVariant
+                                smClickStopPropagation
+                                [checked]="metricsCols[variant.metric_hash + variant.variant_hash]"
+                                (change)="!skipValueType ? toggleAllMetricsToDisplay(variant, metricVariant.checked) : toggleMetricToDisplay(variant, metricVariant.checked, 'value')">
+                  </mat-checkbox>
+                  <span class="var-label ellipsis pointer"
+                        (click)="metricVariant.toggle(); !skipValueType ? toggleAllMetricsToDisplay(variant, metricVariant.checked) : toggleMetricToDisplay(variant, metricVariant.checked, 'value')">
+                    {{ variant.variant }}
+                  </span>
                 </div>
-                @if (metricVariant.formData && !skipValueType) {
+                @if (metricVariant.checked && !skipValueType) {
                   <div class="value-type">
-                    <sm-checkbox-control #last label="LAST"
-                                         [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('value')"
-                                         (formDataChanged)="toggleMetricToDisplay(variant, last.formData, 'value')"
-                    ></sm-checkbox-control>
-                    <sm-checkbox-control #min label="MIN"
-                                         [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('min_value')"
-                                         (formDataChanged)="toggleMetricToDisplay(variant, min.formData, 'min_value')"
-                    ></sm-checkbox-control>
-                    <sm-checkbox-control #max label="MAX"
-                                         [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('max_value')"
-                                         (formDataChanged)="toggleMetricToDisplay(variant, max.formData, 'max_value')"
-                    ></sm-checkbox-control>
+                    <mat-checkbox #last
+                                  smClickStopPropagation
+                                  [checked]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('value')"
+                                  (change)="toggleMetricToDisplay(variant, last.checked, 'value')">
+                      LAST
+                    </mat-checkbox>
+                    <mat-checkbox #min
+                                  smClickStopPropagation
+                                  [checked]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('min_value')"
+                                  (change)="toggleMetricToDisplay(variant, min.checked, 'min_value')">
+                      MIN
+                    </mat-checkbox>
+                    <mat-checkbox #max
+                                  smClickStopPropagation
+                                  [checked]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('max_value')"
+                                  (change)="toggleMetricToDisplay(variant, max.checked, 'max_value')">
+                      MAX
+                    </mat-checkbox>
                   </div>
                 }
               } @else {
@@ -82,11 +92,11 @@
                 @if (metricVariant.checked) {
                   <div class="value-type">
                     <mat-radio-group
-                      [ngModel]="metricsCols[variant.metric_hash + variant.variant_hash][0]"
+                      [ngModel]="metricsCols[variant.metric_hash + variant.variant_hash]?.[0]"
                       (change)="toggleMetricToDisplay(variant, true, $event.value)"
                     >
                       <mat-radio-button class="sm" value="value">LAST</mat-radio-button>
-                      <mat-radio-button class="sm px-4" value="min_value">MIN</mat-radio-button>
+                      <mat-radio-button class="sm px-3" value="min_value">MIN</mat-radio-button>
                       <mat-radio-button class="sm" value="max_value">MAX</mat-radio-button>
                     </mat-radio-group>
                   </div>

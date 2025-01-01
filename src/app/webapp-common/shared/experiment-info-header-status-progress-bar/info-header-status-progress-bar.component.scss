@@ -18,7 +18,7 @@
 
 
   &.published {
-    background-color: $neon-yellow;
+    background-color: var(--color-published);
   }
 
   &.in_progress {
@@ -34,10 +34,10 @@
   }
 
   &.failed {
-    background-color: $strong-red;
+    background-color: var(--color-failed);
   }
 
   &.completed, &.stopped {
-    background-color: $completed-blue;
+    background-color: var(--color-completed);
   }
 }

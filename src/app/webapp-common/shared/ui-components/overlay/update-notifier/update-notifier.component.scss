@@ -1,5 +1,3 @@
-@import "variables";
-
 .circle-container {
   position: fixed;
   bottom: 36px;
@@ -30,14 +28,14 @@
   position: absolute;
   z-index: 999;
   top: calc(100% - 40px);
-  background-color: $neon-yellow;
+  background-color: var(--color-tertiary-fixed);
   width: 0;
   height: 15px;
   left: 40px;
   transition: all 0.4s ease-in-out;
 
   &.show {
-    top: 0px;
+    top: 0;
     left: 0;
     height: 30px;
     border-radius: 0;
@@ -57,15 +55,6 @@
 }
 
 .notifier-container {
-  a.link {
-    color: $blue-800;
-    text-decoration: underline;
-
-    &:hover {
-      color: $blue-400;
-    }
-  }
-
   opacity: 0;
   align-items: center;
   justify-content: space-between;
@@ -77,14 +66,12 @@
     transition: all 0.4s 0.4s;
     display: flex;
   }
-
 }
 
-
 .update-container {
-  color: $blue-800;
+  color: var(--color-on-surface-variant);
 }
 
 .notification-bell {
-  color: $neon-yellow
+  color: var(--color-neon-surface);
 }

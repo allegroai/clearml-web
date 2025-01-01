@@ -149,9 +149,9 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
         return 'This will also remove the model weights file. Note: Experiments using deleted models will no longer be able to run.';
       case EntityTypeEnum.project:
         // eslint-disable-next-line no-case-declarations
-        const entitiesBreakDown = getDeleteProjectPopupStatsBreakdown(stats, 'total', 'experiment');
+        const entitiesBreakDown = getDeleteProjectPopupStatsBreakdown(stats, 'total', 'task');
         return entitiesBreakDown.trim().length > 0 ? `${entitiesBreakDown} will be deleted, including their artifacts. This may take a few minutes.` : '';
-      case EntityTypeEnum.simpleDataset: {
+      case EntityTypeEnum.openDataset: {
         const entitiesBreakDown2 = getDeleteProjectPopupStatsBreakdown(stats, 'total', `version`);
         const single = Object.values(stats).reduce((a, b) => a + (b.total || 0), 0) == 1;
         return entitiesBreakDown2.trim().length > 0 ? `${entitiesBreakDown2} will be deleted and ${single ? 'its' : 'their'} data. This may take a few minutes.` : '';

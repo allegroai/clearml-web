@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, signal, untracked} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {getAllCredentials} from '@common/core/actions/common-auth.actions';
@@ -20,9 +20,9 @@ export class ProfileNameComponent {
   constructor(private store: Store) {
     effect(() => {
       if (this.currentUser()) {
-        this.store.dispatch(getAllCredentials({}));
+        untracked(() => this.store.dispatch(getAllCredentials({})));
       }
-    }, {allowSignalWrites: true});
+    });
   }
 
   nameChange(updatedUserName: string, currentUser: GetCurrentUserResponseUserObject) {

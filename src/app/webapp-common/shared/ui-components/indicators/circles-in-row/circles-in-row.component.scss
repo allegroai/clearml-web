@@ -10,19 +10,18 @@
       height: 32px;
       line-height: 30px;
       text-align: center;
-      background-color: $blue-300;
-      color: $blue-800;
+      background-color: var(--color-surface-container-lowest);
+      color: var(--color-on-surface);
       border-radius: 50%;
       font-size: 12px;
-      border: $blue-800 solid 2px;
+      border: var(--color-outline-variant) solid 2px;
       position: relative;
       box-sizing: border-box;
       cursor: default;
 
 
       &.empty {
-        background-color: $blue-700;
-        border-color: $blue-700;
+        background-color: var(--color-surface-container-low);
         height: 32px;
         width: 32px;
         min-width: 32px;
@@ -36,16 +35,16 @@
       }
 
       &.rest {
-        border: solid 2px $blue-800;
-        background-color: $blue-800;
-        color: $light-periwinkle-two;
+        border: solid 2px var(--color-outline);
+        background-color: var(--color-surface);
+        color: var(--color-on-surface);
       }
 
       .inner-circle {
         width: 100%;
         height: 100%;
         border-radius: 100%;
-        border: 2px solid $blue-300;
+        // border: 2px solid var(--color-outline-variant);
         display: flex;
         align-items: center;
         justify-content: center;

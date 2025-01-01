@@ -1,5 +1,3 @@
-@import "variables";
-// @import "../experiment-graphs/experiment-graphs.component";
 
 .graph-title {
   position: absolute;
@@ -12,30 +10,28 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 0 60px;
+  pointer-events: none;
   z-index: 1;
   font-size: 16px;
-  color: $blue-600;
+  color: var(--color-on-surface-variant);
 
   &.table-title {
     top: 30px
   }
-
-  .title-color {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    flex: 0 0 10px;
-    margin-right: 6px;
-    cursor: pointer;
-  }
-  sm-tag-list {
-    flex-shrink: 2;
-    max-width: 50%;
-  }
 }
 
-.dark-theme .graph-title {
-  color: $blue-100;
+.title-color {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+sm-tag-list {
+  flex-shrink: 2;
+  max-width: 50%;
 }
 
 .resize-ghost-element .graph-title {
@@ -45,188 +41,186 @@
 :host {
   display: block;
   position: relative;
+}
 
-  .whitebg {
-    display: block;
-    background: white;
-    margin-left: -4px;
-    overflow-y: hidden;
-    overflow-x: auto;
-    margin-right: 10px;
-    min-height: 250px;
+.plot-loader {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  z-index: 2;
+}
 
-    &.loading .chart {
-      opacity: 0.3;
-    }
+::ng-deep sm-color-picker-wrapper {
+  display: block;
+  top: 0;
+}
 
-    &.whitebg-table {
-      height: unset !important;
-      margin-left: 24px;
-      margin-right: 24px;
-    }
+::ng-deep .legendlines path, ::ng-deep .legendpoints path {
+  cursor: url(../../assets/icons/pallete-cursor.svg) 6 0, pointer;
+}
 
+::ng-deep .legendpoints path:not(.scatterpts) {
+  d: path('M8,8H-8V-8H8Z') !important;
+}
+
+::ng-deep .legendlines path {
+  stroke-width: 12px !important;
+}
+
+::ng-deep .legendpoints path.scatterpts {
+  // chrome only
+  d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
+}
+
+.move-title {
+  ::ng-deep .infolayer > .g-gtitle > .gtitle {
+    transform: translateY(12px);
   }
+}
 
-  .whitebg-table {
-    overflow-x: auto;
-    overflow-y: visible;
-  }
-
-  .plot-loader {
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateY(-50%) translateX(-50%);
-    z-index: 2;
-  }
-
-  ::ng-deep sm-color-picker-wrapper {
-    display: block;
-    top: 0;
-  }
-
-  ::ng-deep .legendlines path, ::ng-deep .legendpoints path {
-    cursor: url(../../assets/icons/pallete-cursor.svg) 6 0, pointer;
-  }
-
-  ::ng-deep .legendpoints path:not(.scatterpts) {
-    d: path('M8,8H-8V-8H8Z') !important;
-  }
-
-  ::ng-deep .legendlines path {
-    stroke-width: 12px !important;
-  }
-
-  ::ng-deep .legendpoints path.scatterpts {
-    // chrome only
-    d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
-  }
-
-  .move-title {
-    ::ng-deep .infolayer > .g-gtitle > .gtitle {
-      transform: translateY(12px);
-    }
-  }
-
-  ::ng-deep .modebar-container svg.icon {
+::ng-deep .modebar-container {
+  top: 24px;
+  svg.icon {
     height: 1em;
     width: 1em;
     font-size: 16px;
   }
+}
 
   // moving legend next to title without text
-  ::ng-deep .legend.hide-text {
-    .legendtext,
-    .legendtoggle {
-      display: none;
+::ng-deep .legend.hide-text {
+  .legendtext,
+  .legendtoggle {
+    display: none;
+  }
+}
+
+::ng-deep .js-plotly-plot .plotly {
+  .svg-container {
+    svg.main-svg {
+      background: transparent !important;
     }
   }
+}
 
 
-  .dark-theme {
-    background: transparent !important;
+::ng-deep .js-plotly-plot .plotly {
+  .modebar-group {
+    padding-left: 8px; /* instead of padding-right */
+    padding-right: 0;
+    margin-left: 8px;
+    border-left: 1px solid var(--color-surface-container-low);
+    background-color: transparent !important;
+  }
 
-    ::ng-deep .parcoords .tick text {
-      text-shadow: rgb(0 0 0) 1px 1px 1px, rgb(0 0 0) -1px -1px 1px, rgb(0 0 0) 1px -1px 1px, rgb(0 0 0) -1px 1px 1px !important;
-    }
+  .modebar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    ::ng-deep .js-plotly-plot .plotly {
-      .modebar-group:not(:empty) {
-        border-left: 1px solid $blue-500;
+  .modebar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    top: 6px !important;
+    padding-right: 12px;
 
-        &:last-child {
-          .modebar-btn:last-child {
-            border-left: 1px solid $blue-500;
+  }
 
-            &:only-child {
-              border-left: none;
-            }
-          }
-        }
-      }
+  .modebar-group:last-child {
+    .modebar-btn:last-child {
+      margin-left: 12px;
+      padding-left: 12px;
+      border-left: 1px solid var(--color-surface-container-low);
 
-      .modebar-group:empty {
+      &:only-child {
         border-left: none;
-      }
-
-      .node-label {
-        fill: white !important;;
-        text-shadow: #0d0e15 1px 1px 1px !important;
-      }
-
-      .svg-container {
-        svg.main-svg {
-          background: transparent !important;
-
-          .scrollbar-kit .scrollbar .scrollbar-glyph {
-            stroke: $blue-200;
-          }
-        }
-      }
-
-      svg a {
-        fill: $blue-300;
-
-        &:hover {
-          fill: $blue-50;
-        }
-      }
-
-      svg .cell-text:has(a):hover {
-        a {
-          fill: $blue-50;
-        }
-      }
-
-      .hoverlayer .spikeline:nth-child(even) {
-        stroke: $blue-300 !important;
-      }
-
-      .selectionlayer path,
-      .zoomlayer .select-outline {
-        stroke: #ffffff !important;
-        fill: #ffffff !important;
-      }
-    }
-  }
-
-  ::ng-deep .js-plotly-plot .plotly {
-    .modebar-group {
-      padding-left: 8px; /* instead of padding-right */
-      padding-right: 0;
-      margin-left: 8px;
-      border-left: 1px solid #efefef;
-    }
-
-    .modebar-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modebar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      top: 6px !important;
-      padding-right: 12px;
-
-    }
-
-    .modebar .modebar-group:last-child {
-      .modebar-btn:last-child {
-        margin-left: 12px;
-        padding-left: 12px;
-        border-left: 1px solid #efefef;
-
-        &:only-child {
-          border-left: none;
-          margin-left: 0;
-          padding-left: 0;
-        }
+        margin-left: 0;
+        padding-left: 0;
       }
     }
   }
 }
 
+.whitebg-table {
+  overflow-x: auto;
+  overflow-y: visible;
+  margin-right: 8px;
+}
+
+.dark-theme {
+  background: transparent !important;
+
+  ::ng-deep .parcoords .tick text {
+    text-shadow: rgb(0 0 0) 1px 1px 1px, rgb(0 0 0) -1px -1px 1px, rgb(0 0 0) 1px -1px 1px, rgb(0 0 0) -1px 1px 1px !important;
+  }
+
+  ::ng-deep .js-plotly-plot .plotly {
+    .modebar-group:not(:empty) {
+      border-left: 1px solid var(--color-outline);
+
+      &:last-child {
+        .modebar-btn:last-child {
+          border-left: 1px solid var(--color-outline);;
+
+          &:only-child {
+            border-left: none;
+          }
+        }
+      }
+    }
+
+    .modebar-group:empty {
+      border-left: none;
+    }
+
+    .node-label {
+      fill: white !important;;
+      text-shadow: var(--color-shadow) 1px 1px 1px !important;
+    }
+
+    svg.main-svg {
+      background: transparent !important;
+
+      .scrollbar-kit .scrollbar .scrollbar-glyph {
+        stroke: var(--color-surface-container);
+      }
+    }
+
+    svg a {
+      fill: var(--color-secondary);
+      &:hover {
+        fill: var(--color-primary);
+        text-decoration: underline;
+      }
+    }
+
+    svg .cell-text:has(a):hover {
+      a {
+        fill: var(--color-secondary);
+        text-decoration: underline;
+      }
+    }
+
+    .hoverlayer .spikeline:nth-child(even) {
+      stroke: var(--color-on-primary-container);
+    }
+    .hoverlayer .spikeline:nth-child(odd) {
+      stroke: transparent !important;
+    }
+
+    .selectionlayer path,
+    .zoomlayer .select-outline {
+      stroke: var(--color-on-surface) !important;
+      fill: var(--color-surface-container-lowest) !important;
+    }
+
+    .hoverlayer .hovertext .name {
+      fill: var(--color-on-surface) !important;
+    }
+
+  }
+}

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, model, signal} from '@angular/core';
 
 @Component({
   selector: 'sm-dataset-empty',
@@ -36,17 +36,12 @@ dataset.upload()
 
 # commit dataset changes
 dataset.finalize()`;
-  @Input() showButton;
-  emptyStateTab= 'cli';
-  showCode = false;
-  constructor(private cdr: ChangeDetectorRef) {
-    window.setTimeout(()=> {
-      this.showCode = true;
-      this.cdr.detectChanges();
-    }, 300);
-  }
-  emptyStateTabClicked(codeTab: string) {
-    this.emptyStateTab = codeTab;
-  }
+  showButton = input();
+  index = signal(0);
+  emptyStateTab = computed(() => this.index() === 0 ? 'cli' : 'sdk');
+  showCode = signal(false);
 
+  constructor() {
+    window.setTimeout(()=> this.showCode.set(true), 300);
+  }
 }

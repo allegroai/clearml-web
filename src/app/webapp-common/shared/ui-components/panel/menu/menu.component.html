@@ -1,38 +1,59 @@
-  <div mat-button
-       smClickStopPropagation
-       [matMenuTriggerFor]="menu"
-       class=" p-0 cell menu-button"
-       [class]="buttonClass"
-       [class.btn]="hasButtonClass"
-       [class.disabled-menu-btn]="disabled"
-       [smTooltip]="buttonTooltip"
-       (menuOpened)="menuOpened.emit()"
+<button
+  #trigger="matMenuTrigger"
+  [class.menu-opened]="trigger.menuOpen"
+  mat-button smClickStopPropagation
+  [disableRipple]="true"
+  [matMenuTriggerFor]="menuHandle"
+  class="menu-button"
+  [class]="buttonClass()"
+  [class.icon-only]="!header()"
+  [disabled]="disabled()"
+  [smTooltip]="buttonTooltip()"
+  (menuOpened)="menuOpened.emit()"
   >
-    <i [class]="prefixIconClass" *ngIf="prefixIconClass"></i>
-    <div class="ellipsis me-auto" [smTooltip]="header" smShowTooltipIfEllipsis>{{header}}</div>
-     <i *ngIf="showCart" [class]="iconClass" data-id="OpenMenu"></i>
-  </div>
+  @if (prefixIconClass()) {
+    <mat-icon fontSet="al" [fontIcon]="prefixIconClass()">
+      <span class="path1"></span><span class="path2"></span>
+    </mat-icon>
+  }
+  <span class="ellipsis me-auto" [smTooltip]="header()" smShowTooltipIfEllipsis>{{header()}}</span>
+  @if (showCart()) {
+    <mat-icon inline iconPositionEnd fontSet="al" [fontIcon]="iconClass()" data-id="OpenMenu"></mat-icon>
+  }
+</button>
 
 <mat-menu
-  #menu="matMenu"
+  #menuHandle="matMenu"
   class="sm-menu"
-  [class]="smMenuClass + ' ' + panelClasses"
+  [class]="smMenuClass() + ' ' + panelClasses()"
   [overlapTrigger]="false"
-  [hasBackdrop]="showOverlay"
+  [hasBackdrop]="showOverlay()"
   (closed)="menuClosed.emit()"
->
-  <mat-form-field appearance="fill" *ngIf="enableSearch" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
-    <input matInput [placeholder]="searchPlaceholder" (input)="searchValueChanged.emit($any($event.target).value)" [(ngModel)]="searchValue" autocomplete="off">
-    <i matSuffix class="fa me-3" [class]="searchValue ? 'fa-times pointer' : 'fa-search'" (click)="searchValue && clearSearch()"></i>
-  </mat-form-field>
-  <div class="results" [class.search-results]="enableSearch">
+  >
+  @if (enableSearch()) {
+    <mat-form-field appearance="fill" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
+      <input matInput [placeholder]="searchPlaceholder()" (input)="searchValueChanged.emit($any($event.target).value)" [(ngModel)]="searchValue" autocomplete="off">
+      @if (searchValue()) {
+      <button mat-icon-button matSuffix class="me-1" (click)="clearSearch()">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
+      } @else {
+        <mat-icon matSuffix fontSet="al" fontIcon="al-ico-search" class="me-1"></mat-icon>
+      }
+    </mat-form-field>
+  }
+  <div class="results" [class.search-results]="enableSearch()">
     <ng-content></ng-content>
   </div>
   <div class="fixed-options">
-    <mat-divider *ngIf="fixedOptionsSubheader || refFixedOptions.hasChildNodes()"></mat-divider>
-    <div *ngIf="fixedOptionsSubheader" class="fixed-options-subheader">
-      {{fixedOptionsSubheader}}
-    </div>
+    @if (fixedOptionsSubheader() || refFixedOptions.hasChildNodes()) {
+      <mat-divider></mat-divider>
+    }
+    @if (fixedOptionsSubheader()) {
+      <div class="fixed-options-subheader">
+        {{fixedOptionsSubheader()}}
+      </div>
+    }
     <div #refFixedOptions><ng-content select="[fixedOptions]"></ng-content></div>
   </div>
 </mat-menu>

@@ -4,7 +4,6 @@
   smTooltip="Local, browser cached, access tokens that facilitate retrieving your cloud stored resources"></i>
 </div>
 <sm-s3-access
-  class="dark-theme"
   [ngModel]="s3BucketCredentials()"
   [externalCredentials]="externalCredentials()"
   (ngModelChange)="onS3BucketCredentialsChanged($event)">

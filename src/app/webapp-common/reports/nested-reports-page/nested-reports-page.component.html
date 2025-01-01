@@ -19,17 +19,21 @@
 >
 
   <button create-button
-          class="btn btn-cml-primary d-flex align-items-center"
+          mat-flat-button
+          data-id="New Report"
           (click)="openCreateReportDialog(projectId)">
-    <i class="al-icon al-ico-add sm me-2" data-id="New Report"></i>NEW REPORT
+    <mat-icon fontSet="al" fontIcon="al-ico-add"></mat-icon>
+    NEW REPORT
   </button>
 
   <div empty-state class="empty-state justify-content-center">
-    <div class="title-icon"><i class="al-icon al-ico-reports xxl"></i></div>
+    <div class="title-icon">
+      <mat-icon fontSet="al" fontIcon="al-ico-reports" class="xl"></mat-icon>
+    </div>
     <div class="title">NO REPORTS TO SHOW</div>
     <div class="sub-title">
-      <button (click)="openCreateReportDialog(projectId)" class="no-data-button btn btn-neon">
-        <span>NEW REPORT</span>
+      <button mat-flat-button (click)="openCreateReportDialog(projectId)">
+        NEW REPORT
       </button>
     </div>
   </div>

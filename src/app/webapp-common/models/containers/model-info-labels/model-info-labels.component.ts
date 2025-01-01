@@ -1,10 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {SelectedModel} from '../../shared/models.model';
-import {Observable} from 'rxjs';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
-import {filter} from 'rxjs/operators';
-import {activateModelEdit, cancelModelEdit, editModel, setSavingModel } from '../../actions/models-info.actions';
+import {activateModelEdit, cancelModelEdit, editModel, setSavingModel} from '../../actions/models-info.actions';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 
 @Component({
@@ -14,15 +11,10 @@ import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 })
 export class ModelInfoLabelsComponent {
 
-  public selectedModel$: Observable<SelectedModel>;
-  public saving$: Observable<boolean>;
-  public isSharedAndNotOwner$: Observable<boolean>;
-
-  constructor(private store: Store) {
-    this.selectedModel$ = this.store.select(selectSelectedModel).pipe(filter(model => !!model));
-    this.saving$         = this.store.select(selectIsModelSaving);
-    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
-  }
+  private  store = inject(Store);
+  protected selectedModel = this.store.selectSignal(selectSelectedModel);
+  protected saving         = this.store.selectSignal(selectIsModelSaving);
+  protected isSharedAndNotOwner = this.store.selectSignal(selectIsSharedAndNotOwner);
 
   saveFormData(changedModel) {
     this.store.dispatch(setSavingModel (true));

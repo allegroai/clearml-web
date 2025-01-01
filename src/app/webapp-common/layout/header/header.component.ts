@@ -17,6 +17,8 @@ import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {ChangesService} from '@common/shared/services/changes.service';
+import {selectDarkTheme, selectForcedTheme} from '@common/core/reducers/view.reducer';
+import { AppearanceComponent } from '../appearance/appearance.component';
 
 @Component({
   selector: 'sm-header',
@@ -44,6 +46,8 @@ export class HeaderComponent {
   protected isAdmin = this.store.selectSignal(selectIsAdmin);
   protected userNotificationPath = this.store.selectSignal(selectUserSettingsNotificationPath);
   protected invitesPending = this.store.selectSignal(selectInvitesPending);
+  protected darkTheme = this.store.selectSignal(selectDarkTheme);
+  protected forcedTheme = this.store.selectSignal(selectForcedTheme);
   protected userFocus = signal<boolean>(false);
   protected hideSideNav = signal<boolean>(false);
   protected dashboard = signal<boolean>(false);
@@ -89,5 +93,10 @@ export class HeaderComponent {
   openAppsAwareness($event: MouseEvent) {
     $event.preventDefault();
     this.store.dispatch(openAppsAwarenessDialog());
+  }
+
+  openAppearance(event: MouseEvent) {
+    event.preventDefault();
+    this.dialog.open(AppearanceComponent)
   }
 }

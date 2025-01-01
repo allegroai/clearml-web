@@ -1,0 +1,18 @@
+
+.fa-check-square {
+  font-family: "trains";
+  display:inline-block;
+  font-style: normal;
+  &::before {
+    content: $al-ico-sqr-ok;
+  }
+}
+
+.fa-square {
+  font-family: "trains";
+  display:inline-block;
+  font-style: normal;
+  &::before {
+    content: $al-ico-sqr-empty;
+  }
+}

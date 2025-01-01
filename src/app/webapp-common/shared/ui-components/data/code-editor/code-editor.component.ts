@@ -1,22 +1,18 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
-  NgZone,
-  Output,
-  ViewChild,
+  NgZone, input, output, viewChild, inject, effect, computed
 } from '@angular/core';
 import {Ace} from 'ace-builds';
 import {Store} from '@ngrx/store';
-import {selectAceReady} from '@common/core/reducers/view.reducer';
-import {filter} from 'rxjs/operators';
+import {selectAceReady, selectThemeMode} from '@common/core/reducers/view.reducer';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {NgIf} from '@angular/common';
+
 import {ClipboardModule} from 'ngx-clipboard';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 declare const ace;
 
 @Component({
@@ -26,60 +22,69 @@ declare const ace;
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgIf,
-    ClipboardModule
+    ClipboardModule,
+    MatButton,
+    MatIcon
   ]
 })
-export class CodeEditorComponent implements AfterViewInit {
-  _mode: string = 'ace/mode/python';
+export class CodeEditorComponent {
+  private zone = inject(NgZone);
+  private store = inject(Store);
 
-  @Input() set mode(mode) {
-    this.aceEditor?.session?.setMode(mode);
-    this._mode = mode;
-  }
+  mode = input('python');
+  readonly = input(false);
+  placeholder = input<string>();
+  showCopyButton = input(false);
+  code = input<string>();
+  startPosition = input<Ace.Point>();
+  codeChanged = output<string>();
+  private aceEditorElement = viewChild<ElementRef<HTMLDivElement>>('aceEditor');
+  private aceMode = computed(() => 'ace/mode/' + this .mode());
+  private theme = this.store.selectSignal(selectThemeMode);
+  private aceReady = this.store.selectSignal(selectAceReady);
 
-  get mode() {
-    return this._mode;
-  }
+  constructor() {
+    effect(() => {
+      if (this.aceReady() && this.aceEditorElement()) {
+        this.initAceEditor();
+      }
+    });
 
-  @Input() readonly = false;
-  @Input() placeholder: string;
-  @Output() codeChanged = new EventEmitter<string>();
-  @Input() showCopyButton = false;
-  private _code: string;
-  @Input() set code(text: string) {
-    this._code = text;
-    if (this.aceEditor) {
-      this.aceEditor.getSession().setValue(this.code);
-    }
-  }
+    effect(() => {
+      this.aceEditor?.getSession().setValue(this.code());
+    });
 
-  get code() {
-    return this._code;
+    effect(() => {
+      this.aceEditor?.getSession().setMode(this.aceMode());
+    });
+
+    effect(() => {
+      this.updateTheme();
+    });
   }
 
   get aceCode() {
     return this.aceEditor.getSession().getValue();
   }
 
-  @ViewChild('aceEditor') private aceEditorElement: ElementRef<HTMLDivElement>;
-  private aceEditor: Ace.Editor;
-
-  constructor(private zone: NgZone, private store: Store) {
+  getEditor() {
+    return this.aceEditor;
   }
 
+  private aceEditor: Ace.Editor;
+
   private initAceEditor() {
-    if (!this.aceEditorElement) {
+    if (!this.aceEditorElement()) {
       this.aceEditor = null;
       return;
     }
     this.zone.runOutsideAngular(() => {
-      const aceEditor = ace.edit(this.aceEditorElement.nativeElement) as Ace.Editor;
+      const aceEditor = ace.edit(this.aceEditorElement().nativeElement) as Ace.Editor;
       ace.config.set('basePath', '/node_modules/ace-builds/src-min-noconflict');
       this.aceEditor = aceEditor;
       aceEditor.setOptions({
-        readOnly: this.readonly,
-        placeholder: this.placeholder,
+        readOnly: this.readonly(),
+        placeholder: this.placeholder(),
         showLineNumbers: false,
         showGutter: false,
         fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
@@ -95,27 +100,28 @@ export class CodeEditorComponent implements AfterViewInit {
 
       aceEditor.renderer.setScrollMargin(12, 12, 12, 12);
       aceEditor.renderer.setPadding(24);
-      aceEditor.session.setMode(this.mode);
-      aceEditor.setTheme('ace/theme/monokai');
+      aceEditor.session.setMode(this.aceMode());
+      this.updateTheme()
 
-      if (this.readonly) {
+      if (this.readonly()) {
         aceEditor.renderer.hideCursor();
-      } else {
-        (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
       }
 
-      aceEditor.getSession().setValue(this.code);
+      aceEditor.getSession().setValue(this.code());
+      if (this.startPosition()) {
+        this.aceEditor.moveCursorTo(this.startPosition()?.row || 0, this.startPosition()?.column || 0);
+        this.aceEditor.scrollToLine(this.startPosition()?.row || 0, true, false, () => {});
+      }
 
       this.aceEditor = aceEditor;
     });
   }
-
-  ngAfterViewInit(): void {
-    this.store.select(selectAceReady)
-      .pipe(
-        filter((ready: boolean) => ready),
-      )
-      .subscribe(() => this.initAceEditor());
+  updateTheme() {
+    if(this.theme() === 'dark') {
+      this.aceEditor?.setTheme('ace/theme/github_dark');
+    } else {
+      this.aceEditor?.setTheme('ace/theme/github_light_default');
+    }
   }
 
   copySuccess() {

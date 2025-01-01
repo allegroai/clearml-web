@@ -1,22 +1,13 @@
 import {
-  AfterViewInit,
   Component,
-  EventEmitter,
-  Input, OnChanges,
-  OnDestroy,
-  Output,
-  QueryList, SimpleChanges,
-  ViewChild,
-  ViewChildren
-} from '@angular/core';
-import {IExperimentInfoFormComponent} from '~/features/experiments/shared/experiment-info.model';
+  OnChanges,
+  SimpleChanges, inject, viewChild, viewChildren, output, effect, input } from '@angular/core';
 import {cloneDeep} from 'lodash-es';
 import {v4 as uuidV4} from 'uuid';
 import {NgForm} from '@angular/forms';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
-import {Subscription} from 'rxjs';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {isEqual} from 'lodash-es';
 import {MatInput} from '@angular/material/input';
@@ -38,11 +29,10 @@ export interface ExecutionParameter {
   templateUrl: './experiment-execution-parameters.component.html',
   styleUrls: ['./experiment-execution-parameters.component.scss']
 })
-export class ExperimentExecutionParametersComponent implements IExperimentInfoFormComponent, OnDestroy, AfterViewInit, OnChanges {
-  private _formData = [] as ExecutionParameter[];
-  private formContainersSub: Subscription;
-  private _editable: boolean;
-  private formContainer: CdkVirtualScrollViewport;
+export class ExperimentExecutionParametersComponent implements OnChanges {
+  private store = inject(Store);
+
+  form = [] as ExecutionParameter[];
   private clickedRow: number;
 
   public search = '';
@@ -50,92 +40,84 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   public matchIndex = -1;
   public cols = [
     {id: 'name', style: {width: '300px'}},
-    {id: 'value', style: {width: '300px'}},
+    {id: 'value', style: {width: '60%'}},
     {id: 'description', style: {width: '48px'}}
   ] as ISmCol[];
 
 
-  @ViewChild('hyperParameters') hyperParameters: NgForm;
-  @ViewChild(TableComponent) executionParametersTable: TableComponent<ExecutionParameter>;
+  hyperParameters = viewChild<NgForm>('hyperParameters');
+  executionParametersTable = viewChild<TableComponent<ExecutionParameter>>(TableComponent);
 
-  @ViewChildren('formContainer') formContainers: QueryList<CdkVirtualScrollViewport>;
-  @ViewChildren('row') rows: QueryList<MatInput>;
-  @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
-  @Output() formDataChanged = new EventEmitter<{ field: string; value: ParamsItem[] }>();
-  @Output() searchCounterChanged = new EventEmitter<number>();
-  @Output() resetSearch = new EventEmitter();
-  @Output() scrollToResultCounterReset = new EventEmitter();
-  @Input() section;
-  private _originalData: ExperimentExecutionParametersComponent['formData'];
+  formContainer = viewChild(CdkVirtualScrollViewport);
+  rows = viewChildren<MatInput>('row');
+  viewPort = viewChild(CdkVirtualScrollViewport);
+  formDataChanged = output<{
+        field: string;
+        value: ParamsItem[];
+    }>();
+  searchCounterChanged = output<number>();
+  resetSearch = output();
+  scrollToResultCounterReset = output();
+  section = input<string>();
 
-  @Input() set size(size: number) {
-    this.executionParametersTable?.resize();
-  }
-
-  @Input() set formData(formData) {
-    this._originalData = formData;
-    this._formData = cloneDeep(formData).map((row: ParamsItem) => ({...row, id: uuidV4()}));
-  }
-
-  get formData() {
-    return this._formData;
-  }
+  size = input<number>();
+  formData = input<ExecutionParameter[]>();
 
 
-  @Input() set editable(editable: boolean) {
-    this._editable = editable;
-    this.executionParametersTable?.resize();
-    editable && window.setTimeout(() => this.rows.first?.focus());
-  }
-  get editable() {
-    return this._editable;
-  }
+  editable = input<boolean>();
 
-  @Input() searchedText: string;
+  searchedText = input<string>();
 
-  constructor(private store: Store) {}
+  constructor() {
+    effect(() => {
+      if (this.formContainer() && this.clickedRow !== null) {
+        this.formContainer().scrollToIndex(this.clickedRow, 'smooth');
+        this.clickedRow = null;
+      }
+    });
 
-  ngAfterViewInit() {
-    this.formContainersSub = this.formContainers.changes
-      .subscribe((list: QueryList<CdkVirtualScrollViewport>) => {
-        this.formContainer = list.first;
-        if (this.formContainer && this.clickedRow !== null) {
-          this.formContainer.scrollToIndex(this.clickedRow, 'smooth');
-          this.clickedRow = null;
-        }
-      });
-    this.executionParametersTable.resize();
+    effect(() => {
+      this.size();
+      this.executionParametersTable()?.resize();
+    });
+
+    effect(() => {
+      this.form = cloneDeep(this.formData()).map((row: ParamsItem) => ({...row, id: uuidV4()}));
+    });
+
+    effect(() => {
+      if (this.editable()) {
+        window.setTimeout(() => this.rows()?.[0]?.focus());
+      }
+      this.executionParametersTable()?.resize();
+    });
   }
 
   formNames(id) {
-    return this.formData.filter(parameter => parameter.id !== id).map(parameter => parameter.name);
+    return this.form.filter(parameter => parameter.id !== id).map(parameter => parameter.name);
   }
 
   addRow() {
-    this.formData.push({
+    this.form.push({
       id: uuidV4(),
-      section: this.section,
+      section: this.section(),
       name: '',
       value: '',
       description: '',
       type: ''
     });
     window.setTimeout(() => {
-      const height = this.viewPort.elementRef.nativeElement.scrollHeight;
-      this.viewPort.scrollToIndex(height, 'smooth');
+      const height = this.viewPort().elementRef.nativeElement.scrollHeight;
+      this.viewPort().scrollToIndex(height, 'smooth');
     }, 50);
   }
 
   removeRow(index) {
-    this.formData.splice(index, 1);
+    this.form.splice(index, 1);
   }
 
   rowActivated({data}: { data: ExecutionParameter; e: MouseEvent }) {
-    this.clickedRow = this.formData.findIndex(row => row.name === data.name);
-  }
-
-  ngOnDestroy(): void {
-    this.formContainersSub?.unsubscribe();
+    this.clickedRow = this.form.findIndex(row => row.name === data.name);
   }
 
   resetIndex() {
@@ -144,10 +126,10 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
 
   jumpToNextResult(forward: boolean) {
     this.matchIndex = forward ? this.matchIndex + 1 : this.matchIndex - 1;
-    if (this.editable) {
-      this.viewPort.scrollToIndex(this.searchIndexList[this.matchIndex]?.index, 'smooth');
+    if (this.editable()) {
+      this.viewPort().scrollToIndex(this.searchIndexList[this.matchIndex]?.index, 'smooth');
     } else {
-      this.executionParametersTable.scrollToIndex(this.searchIndexList[this.matchIndex]?.index);
+      this.executionParametersTable().scrollToIndex(this.searchIndexList[this.matchIndex]?.index);
     }
   }
 
@@ -161,7 +143,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
       let searchResultsCounter = 0;
       const searchedIndexList = [];
       if (changes?.searchedText?.currentValue) {
-        this.formData.forEach((parameter, index) => {
+        this.formData().forEach((parameter, index) => {
           if (parameter?.name.includes(changes.searchedText.currentValue)) {
             searchResultsCounter++;
             searchedIndexList.push({index, col: 'name'});
@@ -179,16 +161,16 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   }
 
   cancel() {
-    this._formData = cloneDeep(this._originalData).map((row: ParamsItem) => ({...row, id: uuidV4()}));
+    this.form = cloneDeep(this.formData()).map((row: ParamsItem) => ({...row, id: uuidV4()}));
   }
 
   nextRow(event: Event, index: number) {
     event.stopPropagation();
     event.preventDefault();
-    if (this.formData.length === index + 1) {
+    if (this.formData().length === index + 1) {
       this.addRow();
     }
-    window.setTimeout(()=> this.rows.get(index + 1)?.focus());
+    window.setTimeout(()=> this.rows().at(index + 1)?.focus());
   }
 
   navigateToDataset(datasetId: string) {

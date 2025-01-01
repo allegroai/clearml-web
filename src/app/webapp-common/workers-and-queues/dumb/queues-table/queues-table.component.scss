@@ -12,6 +12,10 @@
 .queues-container {
   width: 100%;
   height: 100%;
+
+  &.short {
+    max-height: 400px;
+  }
 }
 
 .table-cell {

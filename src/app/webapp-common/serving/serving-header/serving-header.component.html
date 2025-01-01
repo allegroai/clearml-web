@@ -2,26 +2,23 @@
   <div class="d-flex-center">
     @if (!hideNavigation()) {
       <sm-button-toggle
-        [disabled]="!tableMode() || noData"
+        [disabled]="!tableMode() || noData()"
         [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
-        [value]="!noData && tableMode()"
+        [value]="!noData() && tableMode()"
         [rippleEffect]="rippleEffect()"
-        (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
+        (valueChanged)="tableModeChanged.emit($any($event))"></sm-button-toggle>
     }
   </div>
-  <div class="d-flex justify-content-end align-items-center right-buttons">
+  <div class="d-flex justify-content-end align-items-center gap-3">
     @if (!minimizedView()) {
       <sm-clear-filters-button
         [tableFilters]="tableFilters()"
         (clearTableFilters)="clearTableFilters.emit(tableFilters())"
       ></sm-clear-filters-button>
     }
-    <i class="download-btn al-icon al-ico-download pointer lm"
-             smTooltip="Download table as CSV"
-            [class.disabled]="noData"
-            (click)="!noData && downloadTableAsCSV.emit()"
-            data-id="downloadCSVButton">
-    </i>
+    <button mat-icon-button class="download-btn" [disabled]="noData()" (click)="!noData() && downloadTableAsCSV.emit()" data-id="downloadCSVButton" smTooltip="Download table as CSV">
+      <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+    </button>
     <sm-refresh-button (setAutoRefresh)="setAutoRefresh.emit($event)"></sm-refresh-button>
   </div>
 </div>

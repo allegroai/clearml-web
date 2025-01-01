@@ -1,5 +1,3 @@
-@import "variables";
-
 :host {
   display: flex;
   position: relative;
@@ -26,9 +24,9 @@
     white-space: nowrap;
 
     &.add-button {
-      border-left: solid 1px $blue-280;
-      border-top: solid 1px $blue-280;
-      border-bottom: solid 1px $blue-280;
+      border-left: solid 1px var(--color-outline-variant);
+      border-top: solid 1px var(--color-outline-variant);
+      border-bottom: solid 1px var(--color-outline-variant);
       cursor: pointer;
       font-size: 10px;
       font-weight: 500;
@@ -60,8 +58,8 @@
     background-color: inherit;
 
     &.add-button {
-      border-right: solid 1px $blue-280;
-      border-top: solid 1px $blue-280;
+      border-right: solid 1px var(--color-outline-variant);
+      border-top: solid 1px var(--color-outline-variant);
       right: 17px;
     }
   }

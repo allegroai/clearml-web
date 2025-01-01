@@ -30,7 +30,7 @@ export interface GraphViewerData {
   smoothWeight?: number;
   smoothType?: SmoothTypeEnum;
   hoverMode?: ChartHoverModeEnum;
-  darkTheme: boolean;
+  hideNavigation: boolean;
   isCompare: boolean;
   moveLegendToTitle: boolean;
   embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
@@ -105,7 +105,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   public id: string;
-  public darkTheme: boolean;
+  public disableNavigation: boolean;
   public chart$: Observable<ExtFrame>;
   public plotLoaded: boolean = false;
   public beginningOfTime: boolean = false;
@@ -149,7 +149,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     this.isFullDetailsMode = this.showSmooth && !this.isCompare;
     this.id = data.id;
     this.embedFunction = data.embedFunction;
-    this.darkTheme = data.darkTheme;
+    this.disableNavigation = data.hideNavigation;
     this.smoothWeight = data.smoothWeight ?? 0;
     this.smoothType = data.smoothType ?? smoothTypeEnum.exponential;
 
@@ -160,7 +160,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     };
     if (this.isFullDetailsMode) {
       this.store.dispatch(setGraphDisplayFullDetailsScalars({data: data.chart}));
-    } else if (this.isCompare || this.darkTheme) {
+    } else if (this.isCompare || this.disableNavigation) {
       this.chart = data.chart;
     } else {
       this.store.dispatch(getPlotSample(reqData));
@@ -239,7 +239,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    if (!this.isFullDetailsMode && (this.isCompare || this.darkTheme)) {
+    if (!this.isFullDetailsMode && (this.isCompare || this.disableNavigation)) {
       this.plotLoaded = true;
       setTimeout(() => {
         this.singleGraph.redrawPlot();
@@ -337,7 +337,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   next() {
-    if (this.canGoNext() && this.chart && !this.darkTheme) {
+    if (this.canGoNext() && this.chart && !this.disableNavigation) {
       this.isForward = true;
       const task = this.chart.task;
       if (this.charts?.[this.index + 1]) {
@@ -352,7 +352,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   previous() {
-    if (this.canGoBack() && this.chart && !this.darkTheme) {
+    if (this.canGoBack() && this.chart && !this.disableNavigation) {
       this.isForward = false;
       const task = this.chart.task;
       if (this.charts?.[this.index - 1]) {
@@ -367,14 +367,14 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   nextIteration() {
-    if (!this.isFullDetailsMode && this.canGoNext() && this.chart && !this.darkTheme) {
+    if (!this.isFullDetailsMode && this.canGoNext() && this.chart && !this.disableNavigation) {
       this.plotLoaded = false;
       this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false, iteration: true}));
     }
   }
 
   previousIteration() {
-    if (!this.isFullDetailsMode && this.canGoBack() && this.chart && !this.darkTheme) {
+    if (!this.isFullDetailsMode && this.canGoBack() && this.chart && !this.disableNavigation) {
       this.plotLoaded = false;
       this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true, iteration: true}));
     }
@@ -404,7 +404,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
       return `${chart.metric ?? ''}${chart.metric !== chart.layout.title ? (chart.metric && chart.layout.title ? ' - ' : '') + chart.layout.title : ''}
       ${chart.variants?.length > 0 ? '' : chart.variant ? ' - ' + chart.variant : ''}`;
     } else {
-      if (this.darkTheme) {
+      if (this.disableNavigation) {
         return chart?.variants?.length > 1 ? chart.variants.join(', ') : chart?.layout?.title as string || chart?.metric;
       } else {
         return `${chart.metric}${chart.metric !== chart.layout.title ? (chart.metric && chart.layout.title ? ' - ' : '') + chart.layout.title : ''}

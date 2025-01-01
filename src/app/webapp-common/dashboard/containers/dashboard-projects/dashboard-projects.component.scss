@@ -1,16 +1,15 @@
-@import "../../../shared/ui-components/styles/mixins/common";
-@import "variables";
+@import "mixins/common";
 
 .view-all {
   font-size: 12px;
-  font-weight: 500;
+  margin-left: 12px;
 }
 
 .sm-card-list-layout {
   height: 320px;
   overflow: hidden;
   grid-gap: 16px 24px;
-  padding-top: 24px;
+  padding-top: 18px;
   padding-bottom: 0;
 }
 

@@ -1,12 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, Renderer2, ViewChild} from '@angular/core';
-import {ICONS} from '@common/constants';
 import {FormsModule, NgModel} from '@angular/forms';
-import {NgIf} from '@angular/common';
+
 import {
   UniqueNameValidatorDirective
 } from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'sm-inline-edit',
@@ -16,19 +17,19 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   standalone: true,
   imports: [
     FormsModule,
-    NgIf,
     UniqueNameValidatorDirective,
     TooltipDirective,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    MatIcon,
+    MatIconButton,
   ]
 })
 export class InlineEditComponent implements OnDestroy {
   public readonly cancelButton = 'CANCEL_BUTTON';
   public readonly saveButton = 'SAVE_BUTTON';
-  public icons = ICONS;
   public active = false;
   public inlineValue: string;
-  private shouldSave: boolean = true;
+  private shouldSave = true;
   private _forbiddenString: string[];
 
   @Input() pattern;
@@ -45,8 +46,8 @@ export class InlineEditComponent implements OnDestroy {
   // *DEFAULTS*
   @Input() editable = true;
   @Input() fixedWidth;
-  @Input() multiline: boolean = false;
-  @Input() rows: number = 3; // Only relevant to multiline
+  @Input() multiline = false;
+  @Input() rows = 3; // Only relevant to multiline
   @Input() inlineDisabled = false;
   @Input() warning: string;
 
@@ -93,8 +94,10 @@ export class InlineEditComponent implements OnDestroy {
       return;
     }
 
-    const templateWidth = this.fixedWidth || Math.max(this.template.nativeElement.getBoundingClientRect().width - (this.multiline ? 20 : 120), 200);
-    this.renderer.setStyle(this.inlineInputRef.nativeElement.parentElement, 'width', `${templateWidth}px`);
+    if (!this.multiline) {
+      const templateWidth = this.fixedWidth || Math.max(this.template.nativeElement.getBoundingClientRect().width - (this.multiline ? 20 : 70), 200);
+      this.renderer.setStyle(this.inlineInputRef.nativeElement, 'width', `${templateWidth}px`);
+    }
     this.inlineValue = this.originalText;
     event?.stopPropagation();
     setTimeout(() => {

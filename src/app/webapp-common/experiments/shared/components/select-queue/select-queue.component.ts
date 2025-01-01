@@ -1,15 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {Store} from '@ngrx/store';
 import {getQueuesForEnqueue, getTaskForEnqueue, setTaskForEnqueue} from './select-queue.actions';
 import {selectQueuesList, selectTaskForEnqueue} from './select-queue.reducer';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {filter, map, startWith} from 'rxjs/operators';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {userAllowedToCreateQueue$} from '~/core/reducers/users.reducer';
-import {trackById} from '@common/shared/utils/forms-track-by';
 import {FormControl} from '@angular/forms';
 import { splitLine } from '@common/shared/utils/shared-utils';
 
@@ -30,10 +29,10 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
   public reference: string;
   private queuesSub: Subscription;
   public queuesNames: string[];
+  protected queuesDisplays: string[];
   public queueControl = new FormControl<string | Queue>('');
   split = splitLine;
-  displayFn = (item: any): string => typeof item === 'string' ? item : item?.name;
-  trackById = trackById;
+  displayFn = (item: any): string => typeof item === 'string' ? item : item?.caption ?? item?.name;
   public filteredOptions$: Observable<Queue[]>;
   defaultQueue: Queue;
 
@@ -67,11 +66,11 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
           if (!queues) {
             return [];
           }
-          const name = (typeof value === 'string' ? value : value?.name).toLowerCase();
+          const name = (typeof value === 'string' ? value : value?.name)?.toLowerCase();
           if (this.queueControl.pristine || !name) {
             return queues;
           }
-          return queues.filter(q => q.name.toLowerCase().includes(name));
+          return queues.filter(q => q.name.toLowerCase().includes(name) || q.display_name?.toLowerCase().includes(name));
         }),
       );
 
@@ -79,6 +78,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       if (queues) {
         this.queues = queues;
         this.queuesNames = queues.map(q => q.name);
+        this.queuesDisplays = queues.map(q => q.display_name).filter(name => !!name);
         this.defaultQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
         this.queueControl.reset(this.defaultQueue, {emitEvent: false});
         this.cdr.detectChanges();

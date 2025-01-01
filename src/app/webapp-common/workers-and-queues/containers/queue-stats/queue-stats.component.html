@@ -1,12 +1,9 @@
 <div class="chart-container overflow-hidden">
   <div class="header">
     <div class="title">
-      <div class="ellipsis">{{queue()?.name ?? 'Overall'}} Experiment Wait Time</div>
+      <div class="ellipsis">{{queue()?.name ?? 'Overall'}} Task Wait Time</div>
       @if (statsError()) {
-        <i
-          class="warnning fas fa-exclamation-triangle"
-          smTooltip="Data temporarily not available">
-        </i>
+        <mat-icon fontSet="al" fontIcon="al-ico-alert-outline" class="warning" smTooltip="Data temporarily not available"></mat-icon>
       }
     </div>
   </div>
@@ -22,16 +19,13 @@
 <div class="chart-container right overflow-hidden">
   <div class="header">
     <div class="title">
-      <div class="ellipsis">{{queue()?.name ?? 'Overall'}} Queued Experiments</div>
+      <div class="ellipsis">{{queue()?.name ?? 'Overall'}} Queued Tasks</div>
       @if (statsError()) {
-        <i
-          class="warnning fas fa-exclamation-triangle"
-          smTooltip="Data temporarily not available">
-        </i>
+        <mat-icon fontSet="al" fontIcon="al-ico-alert-outline" class="warning" smTooltip="Data temporarily not available"></mat-icon>
       }
     </div>
-    <mat-form-field appearance="outline" class="dark-outline thin time-selector no-bottom">
-      <mat-select [value]="timeFrame()" (selectionChange)="timeFrameChanged($event.value)" panelClass="dark-outline">
+    <mat-form-field appearance="outline" class="time-selector no-bottom">
+      <mat-select [value]="timeFrame()" (selectionChange)="timeFrameChanged($event.value)">
         @for (timeFrame of timeFrameOptions; track timeFrame.value) {
           <mat-option [value]="timeFrame.value">{{timeFrame.label}}</mat-option>
         }

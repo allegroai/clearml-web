@@ -1,0 +1,135 @@
+@use '../../../../../../../../node_modules/@angular/material/index' as mat;
+
+//@import "../assets/fonts/trains-icons.scss";
+//@import "reboot";
+//@import "minimal-bootstrap";
+//@import "layout";
+//@import "utilities";
+@import "themes";
+@import "./customizations";
+@import "../../../../../styles/icons"; //needs a clean from sass vars
+
+
+:root {
+  @include mat.all-component-themes($theme);
+  @include components($theme);
+
+  &.dark-mode {
+    @include mat.all-component-colors($dark-theme);
+    @include components($dark-theme);
+  }
+}
+
+
+$neon-yellow: #d3ff00;
+$purple: #4d66ff;
+$white-primary-text: rgba(white, 0.87);
+$dark-primary-text: rgba(black, 0.87);
+
+@import "../../../../../styles/variables";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  --mat-select-trigger-text-size: 14px;
+}
+
+body {
+  font-family: sans-serif;
+  border: 1px solid color-mix(in srgb, var(--color-outline), transparent 60%);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.d-flex-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  &.gap {
+    gap: 12px !important;
+  }
+}
+
+.ellipsis {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mat-mdc-dialog-container {
+  padding: 0 !important;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.w-100 {
+  width: 100% !important;
+}
+
+.al-icon {
+  text-align: center;
+  display: inline-block;
+}
+
+.modebar-btn[data-attr="plotly-disabled-maximize"] {
+  cursor: default !important;
+
+  path {
+    fill: var(--color-on-secondary-container) !important;
+  }
+}
+
+.legendlines path,
+.legendpoints path {
+  cursor: default !important;
+}
+
+sm-debug-image-snippet {
+  .image-var {
+    top: 8px;
+    bottom: unset;
+    line-height: 20px;
+  }
+}
+
+.dark-theme {
+  //.axis {
+  //  .domain {
+  //    stroke: red;
+  //    fill: red;
+  //  }
+  //
+  //  .tick line{
+  //    stroke: green;
+  //    fill: green;
+  //    stroke-opacity: 1;
+  //  }
+  //}
+  .hoverlayer .spikeline:nth-child(even) {
+    stroke: var(--color-outline-variant) !important;
+  }
+}

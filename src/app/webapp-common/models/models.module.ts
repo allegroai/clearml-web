@@ -98,6 +98,8 @@ import {
   ExperimentCustomColsMenuComponent
 } from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
 import {PushPipe} from '@ngrx/component';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 export const modelSyncedKeys    = [
@@ -203,6 +205,9 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ExperimentCustomColsMenuComponent,
     ModelInfoMetadataComponent,
     PushPipe,
+    MatIconButton,
+    MatButton,
+    MatIcon,
   ],
   providers: [
     SmFormBuilderService, DatePipe,

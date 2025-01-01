@@ -15,7 +15,7 @@ import {tap} from 'rxjs/operators';
 import {IsAudioPipe} from '../../pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../pipes/is-video.pipe';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {MESSAGES_SEVERITY, ThemeEnum} from '@common/constants';
+import {MESSAGES_SEVERITY} from '@common/constants';
 import {isHtmlPage} from '@common/shared/utils/is-html-page';
 import {isTextFileURL} from '@common/shared/utils/is-text-file';
 import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
@@ -32,10 +32,8 @@ export class DebugImageSnippetComponent implements OnDestroy{
   public type: 'image' | 'player' | 'html';
   public source$: Observable<string>;
   private _frame: any;
-  public themeEnum = ThemeEnum;
   blockUserScripts = this.store.selectSignal(selectBlockUserScript);
 
-  @Input() theme: ThemeEnum = ThemeEnum.Light;
   @Input() noHoverEffects: boolean;
   @Input() set frame(frame) {
     if (frame.url) {

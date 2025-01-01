@@ -2,7 +2,6 @@
 @import "../layout/layout.scss";
 
 :host {
-
   .models-body {
     width: 100%;
     height: calc(100% - #{$project-header-height});

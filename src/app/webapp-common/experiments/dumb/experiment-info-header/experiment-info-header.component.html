@@ -1,105 +1,116 @@
 <div class="d-flex align-items-center">
   <div class="d-flex align-items-center experiment-name-cont">
-    <sm-experiment-type-icon-label class="experiment-icon" data-id="experimentIcon" [showLabel]="false" [type]="experiment?.type" iconClass="l-40">
+    <sm-experiment-type-icon-label class="me-3" data-id="experimentIcon" [showLabel]="false" [type]="experiment()?.type" iconClass="lg">
     </sm-experiment-type-icon-label>
     <sm-inline-edit
-      #editName
       class="edit-name"
       [minLength]="2"
       [required]="true"
-      [originalText]="infoData?.name || experiment?.name"
-      [editable]="editable"
+      [originalText]="infoData()?.name || experiment()?.name"
+      [editable]="editable()"
       (textChanged)="onNameChanged($event)"
       (inlineActiveStateChanged)="editExperimentName($event)"
-    >
+      >
       <div class="experiment-name">
-        <span [smTooltip]="experiment?.name" smShowTooltipIfEllipsis>{{experiment?.name}}</span>
+        <span [smTooltip]="experiment()?.name" smShowTooltipIfEllipsis>{{experiment()?.name}}</span>
       </div>
     </sm-inline-edit>
   </div>
-  <div class="d-flex align-items-center ms-auto">
-    <div class="shared line-item"
-         *ngIf="(!minimized) && shared"
-    ><i class="al-icon al-ico-link sm-md"></i></div>
-    <sm-id-badge class="me-3" [id]="experiment?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
-    <span class="comment line-item"
-          [delay]="1000" [action]="'leave'"
-          (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
-    >
-      <i class="al-icon  pointer" data-id="descriptionIcon"
-         #commentElement
-         [class]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
-         [matMenuTriggerFor]="menu"
-         [delay]="500"
-         [action]="'enter'"
-         (smHesitate)="commentElement.click(); menuHesitate.hesitateStatus = true"
-         (click)="false"
-      ></i>
-    </span>
-    <mat-menu #menu="matMenu" backdropClass="hello" [hasBackdrop]="false" class="line-item" yPosition="above">
-      <sm-experiment-info-edit-description
-        #menuHesitate="hesitate"
-        [delay]="1000"
-        [action]="'leave'"
-        (smHesitate)="menu.closed.emit();"
-        [selectedExperiment]="infoData"
-        (editDescription)="editDescriptionHandler()"
-      ></sm-experiment-info-edit-description>
-    </mat-menu>
-    <div *ngIf="minimized" (click)="maximizedClicked.emit()"
-         smTooltip="View Full Screen" class="d-flex fullscreen line-item">
-      <i class="al-icon al-ico-info-max pointer" data-id="fullscreenIcon"></i>
-    </div>
+  <div class="d-flex align-items-center ms-auto gap-3">
+    @if ((!minimized()) && shared()) {
+      <div class="shared line-item"
+        ><i class="al-icon al-ico-link sm-md"></i></div>
+      }
+      @if (experiment()?.id) {
+        <sm-id-badge [id]="experiment()?.id" (copied)="copyToClipboard()"></sm-id-badge>
+      }
+      <span class="comment line-item"
+        [delay]="1000" [action]="'leave'"
+        (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
+        >
+        <button
+        mat-icon-button
+        data-id="descriptionIcon"
+        #trigger="matMenuTrigger"
+        [class.menu-opened]="trigger.menuOpen"
+        [matMenuTriggerFor]="menu"
+        (smHesitate)="menuHesitate.hesitateStatus = true; trigger.openMenu()"
+        [delay]="500"
+        [action]="'enter'"
+        (click)="false">
+        <mat-icon fontSet="al" [fontIcon]="infoData()?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"></mat-icon>
+      </button>
+      </span>
 
-    <div class="line-item" (click)="minimizeClicked.emit()"
-            *ngIf="experiment && (!minimized) && !isSharedAndNotOwner && !isPipeline"
-            smTooltip="View in experiment table">
-      <i class="al-icon al-ico-info-min al-color pointer" data-id="experimentDetailsView"></i>
-    </div>
-    <sm-experiment-menu-extended class="line-item"
-      *ngIf="showMenu && experiment"
-      [experiment]="experiment"
-      [selectedExperiment]="experiment"
-      [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
-      [selectedDisableAvailable]="selectedDisableAvailable"
-      [selectedDisableAvailableIsMultiple]="false"
-      [projectTags]="projectTags$ | ngrxPush"
-      [companyTags]="companyTags$ | ngrxPush"
-      [minimizedView]="minimized"
-      [isSharedAndNotOwner]="isSharedAndNotOwner"
-      [numSelected]="1"
-      (tagSelected)="addTag($event)"
-    ></sm-experiment-menu-extended>
-    <div *ngIf="minimized" (click)="closeInfoClicked.emit()" class="d-flex align-items-center line-item" data-id="Cross Button">
-      <i class="al-icon al-ico-dialog-x pointer" data-id="closeButton"></i>
+      <mat-menu #menu="matMenu"  [hasBackdrop]="false" class="line-item" yPosition="above" >
+        <sm-experiment-info-edit-description
+          #menuHesitate="hesitate"
+          [delay]="1000"
+          [action]="'leave'"
+          (smHesitate)="menu.closed.emit();"
+          [selectedExperiment]="infoData()"
+          (editDescription)="editDescriptionHandler()"
+        ></sm-experiment-info-edit-description>
+      </mat-menu>
+      @if (minimized()) {
+        <button class="line-item" mat-icon-button (click)="maximizedClicked.emit()" smTooltip="View Full Screen" data-id="fullscreenIcon">
+          <mat-icon fontSet="al" fontIcon="al-ico-info-max"></mat-icon>
+        </button>
+      }
+
+      @if (experiment() && (!minimized()) && !isSharedAndNotOwner() && !isPipeline()) {
+        <button class="line-item" mat-icon-button (click)="minimizeClicked.emit()" smTooltip="View in tasks table" data-id="tasksDetailsView">
+          <mat-icon fontSet="al" fontIcon="al-ico-info-min"></mat-icon>
+        </button>
+      }
+      @if (showMenu() && experiment()) {
+        <sm-experiment-menu-extended
+          class="line-item"
+          [experiment]="experiment()"
+          [selectedExperiment]="experiment()"
+          [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+          [selectedDisableAvailable]="selectedDisableAvailable()"
+          [selectedDisableAvailableIsMultiple]="false"
+          [projectTags]="projectTags$ | ngrxPush"
+          [companyTags]="companyTags$ | ngrxPush"
+          [minimizedView]="minimized()"
+          [isSharedAndNotOwner]="isSharedAndNotOwner()"
+          [numSelected]="1"
+          (tagSelected)="addTag($event)"
+        ></sm-experiment-menu-extended>
+      }
+      @if (minimized()) {
+        <button class="line-item" mat-icon-button (click)="closeInfoClicked.emit()" data-id="Cross Button">
+          <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+        </button>
+      }
     </div>
   </div>
-</div>
-<div class="middle-col">
-  <sm-tag-list
-    *ngIf="editable; else readOnlyTags"
-    [class.menu-open]="tagsMenuTrigger?.menuOpen"
-    [sysTags]="systemTags"
-    [tags]="experiment?.tags"
-    (add)="openTagMenu()"
-    (remove)="removeTag($event)"></sm-tag-list>
-  <ng-template #readOnlyTags>
-    <sm-tag-list
-      [sysTags]="systemTags"
-      [tags]="experiment?.tags"></sm-tag-list>
-  </ng-template>
-  <span
-    #tagsMenuTrigger="matMenuTrigger"
-    [matMenuTriggerFor]="tagsMenu.matMenu"
-    (menuClosed)="tagsMenuClosed()"
-  ></span>
-  <sm-tags-menu
-    #tagsMenu
-    class="light-theme"
-    [tags]="experiment?.tags"
-    [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
-    [projectTags]="projectTags$ | ngrxPush"
-    [companyTags]="companyTags$ | ngrxPush"
-    (tagSelected)="addTag($event)"
-  ></sm-tags-menu>
-</div>
+  <div class="middle-col">
+    @if (editable()) {
+      <sm-tag-list
+        [class.menu-open]="tagsMenuTrigger?.menuOpen"
+        [sysTags]="systemTags()"
+        [tags]="experiment()?.tags"
+        (add)="openTagMenu()"
+      (remove)="removeTag($event)"></sm-tag-list>
+    } @else {
+      <sm-tag-list
+        [sysTags]="systemTags()"
+      [tags]="experiment()?.tags"></sm-tag-list>
+    }
+    <span
+      #tagsMenuTrigger="matMenuTrigger"
+      [matMenuTriggerFor]="tagsMenu.matMenu"
+      (menuClosed)="tagsMenuClosed()"
+    ></span>
+    <sm-tags-menu
+      #tagsMenu
+      class="light-theme"
+      [tags]="experiment()?.tags"
+      [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
+      [projectTags]="projectTags$ | ngrxPush"
+      [companyTags]="companyTags$ | ngrxPush"
+      (tagSelected)="addTag($event)"
+    ></sm-tags-menu>
+  </div>

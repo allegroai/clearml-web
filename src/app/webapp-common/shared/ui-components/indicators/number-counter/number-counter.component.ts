@@ -1,12 +1,13 @@
-import {Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 @Component({
   selector   : 'sm-number-counter',
   templateUrl: './number-counter.component.html',
   styleUrls  : ['./number-counter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class NumberCounterComponent {
-  @Input() counter;
-  @Input() label;
+  counter = input();
+  label = input();
 }

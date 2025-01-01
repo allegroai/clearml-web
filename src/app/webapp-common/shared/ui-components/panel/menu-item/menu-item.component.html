@@ -1,22 +1,24 @@
-<div class="d-flex align-items-center" mat-menu-item (click)="buttonClickedEvent($event)" [disabled]="disabled">
-  @if (selectable) {
-    <sm-checkbox-control
-      [formData]="checked"
-      [fieldName]="itemValue"
-      (formDataChanged)="itemClickedEvent()"
-      >
-    </sm-checkbox-control>
-  }
-  @if (enableIcon && iconClass) {
-    <i class="sm-md" [class]="iconClass"></i>
-  }
-  <div class="item-label" [class.placeForIcon]="enableIcon">
-    <div class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="enableTooltip? (itemTooltip || itemLabel): ''" data-id="sortByOption">{{itemLabel}}</div>
-    @if (sortOrder) {
-      <i class="ms-2 al-icon sm-md" [class]="sortOrder === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' " data-id="orderTypeIcon"></i>
+<div mat-menu-item [disabled]="disabled()" (click)="buttonClickedEvent($event)">
+  <div class="item-container"  >
+    @if (selectable()) {
+      <mat-checkbox smClickStopPropagation
+                    [checked]="checked()"
+                    (change)="itemClickedEvent()">
+      </mat-checkbox>
+    }
+    @if (enableIcon() && iconClass()) {
+      <mat-icon fontSet="al" [fontIcon]="iconClass()"></mat-icon>
+    }
+    <div class="item-label" [class.placeForIcon]="enableIcon()">
+      <div class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="enableTooltip()? (itemTooltip() || itemLabel()): ''" data-id="sortByOption">{{ itemLabel() }}</div>
+      @if (sortOrder()) {
+        <i class="ms-2 al-icon sm-md" [class]="sortOrder() === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' " data-id="orderTypeIcon"></i>
+      }
+    </div>
+    @if (removable()) {
+      <button mat-icon-button (click)="removeItem($event)" class="remove-button sm ms-auto">
+        <mat-icon data-id="Delete Icon" fontSet="al" class="al-ico-trash"></mat-icon>
+      </button>
     }
   </div>
-  @if (removable) {
-    <div (click)="removeItem($event)" class="remove-button"><i data-id="Delete Icon" class="al-icon al-ico-trash sm-md al-color blue-300 pointer m-0"></i></div>
-  }
 </div>

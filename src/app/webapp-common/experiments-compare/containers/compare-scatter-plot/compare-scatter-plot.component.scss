@@ -1,7 +1,7 @@
 :host {
   display: block;
   position: relative;
-  background-color: white;
+  background-color: var(--color-surface-container-lowest);
 
   &:hover .buttons {
     opacity: 1;

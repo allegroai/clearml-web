@@ -1,20 +1,14 @@
 @import "variables";
 
 :host {
-  .label {
-    font-size: 12px;
-  }  .input-duration.disabled {
-    ::ng-deep /*sm-duration-input-list ng-form input,*/ input {
-      color: $blue-250 !important;
-    }
-  }
   .mat-datepicker-container {
     width: 130px;
     input {
       width: 80px;
     }
-    input.input-to::placeholder {
-      color: $blue-400 !important;;
-    };
+  }
+
+  .mat-mdc-form-field {
+    width: 130px;
   }
 }

@@ -9,11 +9,12 @@ import {MatExpansionPanel, MatExpansionPanelContent, MatExpansionPanelHeader, Ma
 import {IsEmptyPipe} from '@common/shared/pipes/is-empty.pipe';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {AdvancedFilterPipe} from '@common/shared/pipes/advanced-filter.pipe';
-import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {HasSelectedPipe} from '@common/experiments/dumb/select-metric-for-custom-col/has-selected.pipe';
+import {IsRowSelectedPipe} from '@common/shared/ui-components/data/table/is-rwo-selected.pipe';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 export interface SelectionEvent {
   variant: MetricVariantResult;
@@ -36,13 +37,14 @@ export interface SelectionEvent {
     MatExpansionPanelTitle,
     TooltipDirective,
     AdvancedFilterPipe,
-    CheckboxControlComponent,
     MatExpansionPanelContent,
     ShowTooltipIfEllipsisDirective,
     MatRadioButton,
     MatRadioGroup,
     FormsModule,
-    HasSelectedPipe
+    HasSelectedPipe,
+    IsRowSelectedPipe,
+    MatCheckbox
   ],
   standalone: true
 })
@@ -55,7 +57,7 @@ export class SelectMetricForCustomColComponent {
   public entriesLimit = 300;
   public moreResults: number;
   private debounceTimer: number;
-  public selectedMetric: {[metric: string]: boolean};
+  public selectedMetric: Record<string, boolean>;
 
   @Input() set metricVariants(metricVar: MetricVariantResult[]) {
     if (metricVar === null) {
@@ -79,9 +81,11 @@ export class SelectMetricForCustomColComponent {
     tableCols?.filter(tableCol => tableCol.metric_hash)?.forEach(tableCol => {
       this.expandedMetrics[tableCol.metric_hash] = this.expandedMetrics[tableCol.metric_hash] ?? true;
       this.selectedMetric[tableCol.metric_hash] = true;
-      this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] ?
-        this.metricsCols[tableCol.metric_hash + tableCol.variant_hash].push(tableCol.valueType ?? tableCol.metricName) :
+      if (this.metricsCols[tableCol.metric_hash + tableCol.variant_hash]) {
+        this.metricsCols[tableCol.metric_hash + tableCol.variant_hash].push(tableCol.valueType ?? tableCol.metricName);
+      } else {
         this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] = [tableCol.valueType ?? tableCol.metricName];
+      }
     });
   }
 
@@ -97,20 +101,22 @@ export class SelectMetricForCustomColComponent {
   }
 
   toggleAllMetricsToDisplay(variant: ISmCol, on: boolean) {
-    if (!on) {
+    if (on) {
       this.toggleMetricToDisplay(variant, on, null);
-      this.multiSelect ?
-        this.metricsCols[variant.metric_hash + variant.variant_hash] = [] :
+      if (this.multiSelect) {
+        this.metricsCols[variant.metric_hash + variant.variant_hash] = [];
+      } else {
         this.metricsCols = {[variant.metric_hash + variant.variant_hash]: []};
+      }
     } else {
-      this.toggleMetricToDisplay(variant, on, 'value');
       this.toggleMetricToDisplay(variant, on, 'min_value');
       this.toggleMetricToDisplay(variant, on, 'max_value');
+      this.toggleMetricToDisplay(variant, on, 'value');
     }
   }
 
   public toggleMetricToDisplay(variant: ISmCol, value: boolean, valueType: MetricValueType) {
-    this.selectedMetricToShow.emit({variant, addCol: !value, valueType});
+    this.selectedMetricToShow.emit({variant, addCol: value, valueType});
   }
 
   public resetSearch() {

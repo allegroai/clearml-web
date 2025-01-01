@@ -1,13 +1,13 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
 <sm-experiment-header
-  [tableCols]="(tableMode$ | ngrxPush) === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
+  [tableCols]="tableMode() === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | ngrxPush) : (compareSelectedMetricsScalars$ | ngrxPush)) : (filteredTableCols$| ngrxPush)"
   [isArchived]="isArchived$ | ngrxPush"
   [metricVariants]="metricsVariants$()"
   [hyperParams]="hyperParams$ | ngrxPush"
   [minimizedView]="minimizedView"
   [isMetricsLoading]="metricLoading$ | ngrxPush"
   [tableFilters]="tableFilters$ | ngrxPush"
-  [tableMode]="firstExperiment ? (tableMode$ | ngrxPush) : 'table'"
+  [tableMode]="firstExperiment ? tableMode() : 'table'"
   [showCompareScalarSettings]="showCompareScalarSettings$ | ngrxPush"
   [compareView]="tableCompareView$()"
   [rippleEffect]="tableModeAwareness$ | ngrxPush"
@@ -31,14 +31,18 @@
 >
 </sm-experiment-header>
 <ng-template #addButton let-isSmallScreen="smallScreen">
-  <button class="btn d-flex-center btn-highlighted"
-          [disabled]="isArchived$ | ngrxPush"
-          (click)="newRun()">
-    <i class="al-icon al-ico-add sm" data-id="newRunButton"></i> NEW RUN
+  <button
+    mat-flat-button
+    class="tertiary-button me-3"
+    [disabled]="isArchived$ | ngrxPush"
+    (click)="newRun()"
+  >
+    <mat-icon fontSet="al" fontIcon="al-ico-add" data-id="newRunButton"></mat-icon>
+     NEW RUN
   </button>
 </ng-template>
 <div class="experiment-body"
-     [class.footer-visible]="((selectedExperiments$ | ngrxPush) && (selectedExperiments$ | ngrxPush)?.length > 1) || (showAllSelectedIsActive$ |ngrxPush)">
+     [class.footer-visible]="((checkedExperiments$ | ngrxPush) && (checkedExperiments$ | ngrxPush)?.length > 1) || (showAllSelectedIsActive$ |ngrxPush)">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -55,7 +59,6 @@
       [size]="100 - (splitInitialSize)"
       [minSize]="1"
       [maxSize]="99"
-      [order]="1"
     >
       <sm-experiments-table
         #experimentsTable
@@ -75,9 +78,9 @@
         [tableSortFields]="(tableSortFields$ | ngrxPush)"
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
-        [selectedExperiments]="selectedExperiments$ | ngrxPush"
+        [checkedExperiments]="checkedExperiments$ | ngrxPush"
         [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | ngrxPush"
-        [selectedExperiment]="selectedTableExperiment$ |ngrxPush"
+        [selectedExperiment]="highlited()"
         [minimizedView]="minimizedView"
         [noMoreExperiments]="noMoreExperiments$ | ngrxPush"
         [split]="selectSplitSize$ | ngrxPush"
@@ -109,7 +112,6 @@
       [class.light-theme]="getTableModeFromURL() === 'compare'"
       [size]="splitInitialSize"
       [visible]="minimizedView"
-      [order]="2"
     >
       <router-outlet></router-outlet>
     </as-split-area>
@@ -128,10 +130,10 @@
     #contextMenu
     [experiment]="contextExperiment"
     [selectedExperiment]="selectedExperiment$ | ngrxPush"
-    [selectedExperiments]="singleRowContext ? [contextExperiment] : selectedExperiments"
+    [selectedExperiments]="singleRowContext ? [contextExperiment] : checkedExperiments"
     [selectedDisableAvailableIsMultiple]="!singleRowContext"
     [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable(contextExperiment) : (selectedExperimentsDisableAvailable$ | ngrxPush)"
-    [numSelected]="singleRowContext ? 1 : selectedExperiments.length"
+    [numSelected]="singleRowContext ? 1 : checkedExperiments.length"
     [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
     [projectTags]="tags$ | ngrxPush"
     [companyTags]="companyTags$ | ngrxPush"

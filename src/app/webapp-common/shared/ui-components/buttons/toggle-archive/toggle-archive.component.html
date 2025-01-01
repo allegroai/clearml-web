@@ -1,8 +1,12 @@
-<button
-  class="btn btn-cml-primary" [class.show-archived]="showArchived"
-  (click)="toggleArchived.emit(!showArchived)"
-  [smTooltip]="minimize ? showArchived ? 'EXIT ARCHIVE': 'OPEN ARCHIVE' : ''"
->
-  <i [class]="'al-icon sm ' + (showArchived? ' al-ico-exit-archive' : 'al-ico-archive' )" data-id="Open Archive"></i>
-  <span *ngIf="!minimize" class="button-label">{{showArchived? 'EXIT': 'OPEN'}} ARCHIVE</span>
-</button>
+  <button
+    mat-stroked-button
+    [class.icon-only]="minimize()"
+    (click)="toggleArchived.emit(!showArchived())"
+    [smTooltip]="minimize() ? showArchived() ? 'EXIT ARCHIVE': 'OPEN ARCHIVE' : ''"
+    data-id="Open Archive"
+  >
+    <mat-icon fontSet="al" [fontIcon]="showArchived() ? 'al-ico-exit-archive' : 'al-ico-archive'" ></mat-icon>
+    @if (!minimize()) {
+      <span class="button-label">{{showArchived()? 'EXIT': 'OPEN'}} ARCHIVE</span>
+    }
+  </button>

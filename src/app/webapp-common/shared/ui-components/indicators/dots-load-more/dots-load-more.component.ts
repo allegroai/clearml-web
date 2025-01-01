@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 
 @Component({
@@ -8,7 +8,8 @@ import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll
     ScrollEndDirective
   ],
   templateUrl: './dots-load-more.component.html',
-  styleUrl: './dots-load-more.component.scss'
+  styleUrl: './dots-load-more.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DotsLoadMoreComponent {
   @Input() loading: boolean;

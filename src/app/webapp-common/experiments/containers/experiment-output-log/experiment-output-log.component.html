@@ -1,33 +1,38 @@
-<div class="px-4 py-2 d-flex align-items-center" *ngIf="hasLog && showHeader">
-  <div class="p-2 me-auto">
-    <span>
-      <b>Hostname:</b> {{creator}}
-    </span>
+@if (hasLog && showHeader) {
+  <div class="px-4 py-2 d-flex align-items-center">
+    <div class="p-2 me-auto">
+      <span>
+        <b class="me-2">Hostname:</b>{{creator}}
+      </span>
+    </div>
+    <button mat-stroked-button class="me-5" (click)="downloadLog()">
+      <mat-icon fontSet="al" fontIcon="al-ico-download"></mat-icon>
+      Download full log
+    </button>
+    <mat-form-field appearance="fill" class="no-bottom" style="width: 250px;">
+      <input
+        matInput
+        placeholder="Filter By Regex"
+        [value]="filter$ | ngrxPush"
+        (keyup)="filterLog($event)"
+        />
+    </mat-form-field>
   </div>
-  <button class="d-flex-center btn btn-cml-primary me-5" (click)="downloadLog()">
-    <i class="al-icon al-ico-download sm me-2"></i>
-    Download full log
-  </button>
-  <span style="width: 45px;">Filter: </span>
-  <input
-    placeholder="Filter By Regex"
-    class="form-control"
-    style="width: 250px;"
-    [value]="filter$ |ngrxPush"
-    (keyup)="filterLog($event)"
-  />
-</div>
-<div *ngIf="hasLog === false" class="no-output">
-  <i class="icon no-output-icon" [class]="isDarkTheme ? 'i-no-log-dark' : 'i-no-log'"></i>
-  <h4>NO LOG DATA</h4>
-</div>
+}
+@if (hasLog === false) {
+  <div class="no-output">
+    <mat-icon fontSet="al" fontIcon="al-ico-log" class="xxxl"></mat-icon>
+    <h4>NO LOG DATA</h4>
+  </div>
+}
 
-<sm-experiment-log-info *ngIf="hasLog"
-  [class.no-header]="!showHeader"
-  [isDarkTheme]="isDarkTheme"
-  [logs]="log$ | ngrxPush"
-  [beginningOfLog]="logBeginning$ | ngrxPush"
-  [filterString]="filter$ | ngrxPush"
-  [fetching]="fetching$ | ngrxPush"
-  (fetchMore)="getLogs($event)"
-></sm-experiment-log-info>
+@if (hasLog) {
+  <sm-experiment-log-info
+    [class.no-header]="!showHeader"
+    [logs]="log$ | ngrxPush"
+    [beginningOfLog]="logBeginning$ | ngrxPush"
+    [filterString]="filter$ | ngrxPush"
+    [fetching]="fetching$ | ngrxPush"
+    (fetchMore)="getLogs($event)"
+  ></sm-experiment-log-info>
+}

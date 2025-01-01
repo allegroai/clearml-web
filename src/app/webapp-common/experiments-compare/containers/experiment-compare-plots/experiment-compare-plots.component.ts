@@ -257,9 +257,11 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.store.dispatch(resetExperimentMetrics());
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[]; originalObject?: string; domRect: DOMRect }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; originalObject?: string[]; domRect: DOMRect }) {
     const entityType = this.entityType === EntityTypeEnum.model ? 'model' : 'task';
-    const idsOriginalFirst = event.originalObject ? [event.originalObject, ...this.taskIds.filter(id => id !== event.originalObject)] : this.taskIds;
+    // When do we need more tasks than involved in chart?
+    // const idsOriginalFirst = event.originalObject ? [...event.originalObject, ...this.taskIds.filter(id => event.originalObject.includes(id))] : this.taskIds;
+    const idsOriginalFirst = event.originalObject ?? this.taskIds;
     this.reportEmbed.createCode({
       type: 'plot',
       objects: idsOriginalFirst,

@@ -1,22 +1,21 @@
-@import "variables";
-
 :host {
-  input {
-    font-size: 14px;
-    color: $blue-250;
-    height: auto;
-    padding: 0;
-  }
-  .active {
+  .empty {
     input {
-      color: $blue-400;
+      color: var(--color-on-surface-variant);
     }
   }
-  input[name="days"], input[name="ms"], .max-length-3{
-    width: 24px
-  }
-  input[name="hours"], input[name="minutes"], .max-length-2 {
-    width: 16px
+  .mat-mdc-form-field {
+    &[name="days"], &[name="ms"], .max-length-3 {
+      width: 60px
+    }
+
+    &[name="hours"], &[name="minutes"], &[name="seconds"], .max-length-2 {
+      width: 40px
+    }
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      padding: 0;
+    }
   }
   i.al-ico-time-colon {
     font-size: 8px;
@@ -34,11 +33,5 @@
       position: absolute;
       right: 0;
     }
-  }
-}
-
-:host-context(sm-duration-input-list.input-disabled) {
-  ::ng-deep input {
-    color: $blue-250 !important;
   }
 }

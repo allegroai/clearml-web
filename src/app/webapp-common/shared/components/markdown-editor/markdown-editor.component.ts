@@ -1,12 +1,8 @@
 import {
-  ChangeDetectorRef,
   Component,
-  EventEmitter,
   HostListener, inject,
-  Input,
-  Output,
   Renderer2,
-  ViewChild
+  input, output, Output, EventEmitter, computed, signal, effect, viewChild
 } from '@angular/core';
 import {
   LMarkdownEditorModule,
@@ -22,13 +18,17 @@ import {
 import {getBaseName} from '@common/shared/utils/shared-utils';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import { NgClass } from '@angular/common';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {FormsModule} from '@angular/forms';
 import {MatMenuModule} from '@angular/material/menu';
 import {BaseNamePipe} from '@common/shared/pipes/base-name.pipe';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ReportCodeEmbedBaseService} from '@common/shared/services/report-code-embed-base.service';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {selectThemeMode} from '@common/core/reducers/view.reducer';
+import {Store} from '@ngrx/store';
 
 const BREAK_POINT = 990;
 
@@ -39,23 +39,23 @@ const BREAK_POINT = 990;
   styleUrls: ['./markdown-editor.component.scss'],
   standalone: true,
   imports: [
-    NgIf,
     TooltipDirective,
-    NgClass,
     LMarkdownEditorModule,
     FormsModule,
     MatMenuModule,
     BaseNamePipe,
     ClickStopPropagationDirective,
-    NgForOf
+    MatButton,
+    MatIcon,
+    MatIconButton
   ]
 })
 export class MarkdownEditorComponent {
+  private store = inject(Store);
   private reportService = inject(ReportCodeEmbedBaseService);
-  private renderer = inject( Renderer2);
-  protected cdr = inject( ChangeDetectorRef);
-  protected dialog = inject( MatDialog);
-  private originalInfo: string;
+  private renderer = inject(Renderer2);
+  protected dialog = inject(MatDialog);
+
   private ready = false;
   private preview: Element;
   private editor: Element;
@@ -63,12 +63,6 @@ export class MarkdownEditorComponent {
   public editorVisible: boolean;
   private _editMode: boolean;
   public options = {
-    // markedjsOpt: {
-    //   sanitizer: (dirty: string): string => {
-    //     debugger
-    //     return DOMPurify.sanitize(dirty, { ADD_TAGS: ["iframe"], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'] })
-    //   }
-    // },
     enablePreviewContentClick: true,
     fontAwesomeVersion: '6',
     showPreviewPanel: true,
@@ -79,15 +73,24 @@ export class MarkdownEditorComponent {
   public ace: Ace.Editor;
   public isExpand = false;
   public duplicateNames: boolean;
+  theme = this.store.selectSignal(selectThemeMode);
   public postRender = (dirty: string): string => {
-    if (this.blockUserScripts) {
-      return '<div class="d-flex-center flex-column h-100 mt-4"><div>Preview not available because 3rd party scripts are blocked.</div><div>You can enable it in configuration section in the settings page.</div></div>';
+    if (this.blockUserScripts()) {
+      return '<div class="d-flex-center flex-column h-100 mt-4">' +
+        '<div>Preview not available because 3rd party scripts are blocked.</div>' +
+        '<div>You can enable it in under <a href="/settings/webapp-configuration">User Preferences</a>.</div>' +
+        '</div>';
     }
     return DOMPurify.sanitize(dirty, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'], FORBID_ATTR: ['action'] })
   };
+  protected state = computed(() => ({
+    data: this.data(),
+    model: signal(this.data())
+  }));
 
-
-  trackByUrl = (index: number, resource) => resource.url;
+  get getData() {
+    return this.state().model;
+  }
 
   set editMode(editMode: boolean) {
     this._editMode = editMode;
@@ -100,17 +103,20 @@ export class MarkdownEditorComponent {
     return this._editMode;
   }
 
-  @Input() data: string;
-  @Input() readOnly: boolean;
-  @Input() handleUpload: (files: File[]) => Promise<UploadResult[]>;
-  @Input() resources = [] as {unused: boolean; url: string}[];
-  @Input() blockUserScripts = false;
-  @Output() saveInfo = new EventEmitter<string>();
+  data = input<string>();
+  readOnly = input<boolean>();
+  handleUpload = input<(files: File[]) => Promise<UploadResult[]>>();
+  resources = input([] as {
+        unused: boolean;
+        url: string;
+    }[]);
+  blockUserScripts = input(false);
+  saveInfo = output<string>();
   @Output() editModeChanged = new EventEmitter();
-  @Output() dirtyChanged = new EventEmitter<boolean>();
-  @Output() deleteResource = new EventEmitter<string>();
-  @Output() imageMenuOpened = new EventEmitter<string>();
-  @ViewChild(MDComponent) editorComponent: MDComponent;
+  dirtyChanged = output<boolean>();
+  deleteResource = output<string>();
+  imageMenuOpened = output<string>();
+  editorComponent = viewChild(MDComponent);
   @HostListener('window:resize', ['$event'])
   updateEditorVisibility() {
     if (!this.ready) {
@@ -149,17 +155,28 @@ export class MarkdownEditorComponent {
         return currentNode;
       }
     );
+
+    effect(() => {
+      if (this.editorComponent()) {
+        const aceEditor = this.editorComponent()['_aceEditorIns'] as unknown as Ace.Editor;
+        aceEditor.setShowPrintMargin(false);
+        if (this.theme() === 'dark') {
+          aceEditor.setTheme('ace/theme/github_dark');
+        } else {
+          aceEditor.setTheme('ace/theme/github_light_default');
+        }
+      }
+    });
   }
 
   save() {
-    this.saveInfo.emit(this.data);
+    this.saveInfo.emit(this.getData());
     this.editMode = false;
     this.isDirty = false;
     this.updateEditorVisibility();
   }
 
   editClicked() {
-    this.originalInfo = this.data;
     this.editMode = true;
     this.editorVisible = false;
     setTimeout(() => {
@@ -169,7 +186,7 @@ export class MarkdownEditorComponent {
   }
 
   cancelClicked() {
-    this.data = this.originalInfo;
+    this.getData.set(this.data());
     this.editMode = false;
     this.isDirty = false;
     this.updateEditorVisibility();
@@ -177,9 +194,10 @@ export class MarkdownEditorComponent {
 
   editorReady(ace: Ace.Editor) {
     this.ace = ace;
+    this.ace.container.style.lineHeight = '1.8em';
     this.ace.setOptions({
       fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-      fontSize: 13,
+      fontSize: 12,
     });
     this.ready = true;
     this.preview = document.querySelector('.preview-container');
@@ -193,16 +211,18 @@ export class MarkdownEditorComponent {
   }
 
   checkDirty() {
-    const isDirty = this.originalInfo !== this.data;
-    isDirty !== this.isDirty && this.dirtyChanged.emit(isDirty);
+    const isDirty = this.getData() !== this.data();
+    if (isDirty !== this.isDirty) {
+      this.dirtyChanged.emit(isDirty);
+    }
     this.isDirty = isDirty;
     this.getDuplicateIframes();
   }
 
   domFixes() {
-    this.renderer.setProperty(this.editorComponent.previewContainer.nativeElement, 'id', 'print-element');
+    this.renderer.setProperty(this.editorComponent().previewContainer.nativeElement, 'id', 'print-element');
 
-    if (this.data.indexOf('```language') > -1) {
+    if (this.getData().indexOf('```language') > -1) {
       const manager = this.ace.session.getUndoManager();
       const range = this.ace.find('```language',{
         wrap: true,
@@ -223,7 +243,7 @@ export class MarkdownEditorComponent {
   }
 
   private getDuplicateIframes() {
-    const names = Array.from(this.data.matchAll(/<iframe[^>]*?name=(["\'])?((?:.(?!\1|>))*.?)\1?/g)).map(a => a[2]);
+    const names = Array.from(this.getData().matchAll(/<iframe[^>]*?name=(["\'])?((?:.(?!\1|>))*.?)\1?/g)).map(a => a[2]);
     const uniqueNames = new Set(names);
     let duplicatedNames = [];
     for (const name of uniqueNames) {
@@ -241,7 +261,7 @@ export class MarkdownEditorComponent {
     if (!evt) {
       return;
     }
-    this.handleUpload(evt.target.files).then(
+    this.handleUpload()(evt.target.files).then(
       results => results.map(result => this.ace.insert(`![${result.name}](${result.url})\n`))
     );
   }

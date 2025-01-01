@@ -158,7 +158,7 @@ export class CommonExperimentOutputEffects {
       ]
     ),
     switchMap(([action, axisType, prevAxisType]) => {
-        if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
+        if (!action.refresh && [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
           [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
           return [
             deactivateLoader(refreshExperiments.type),

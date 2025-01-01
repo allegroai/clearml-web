@@ -4,20 +4,19 @@
   [action]="'leave'"
   (smHesitate)="hesitateMenu.hesitateStatus && tooltipMenu.closed.emit()"
 >
-  <i
-    class="al-icon pointer"
-    [class]="iconClass ? iconClass : 'al-ico-info-circle msm'"
-    #tooltipElement
-    [matMenuTriggerFor]="tooltipMenu"
-    smClickStopPropagation
-    [delay]="100"
-    [action]="'enter'"
-    (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
-    (click)="false"
-  ></i>
+    <mat-icon
+      smClickStopPropagation
+      fontSet="al"
+      [fontIcon]="iconClass() ?? 'al-ico-info-circle'"
+      [class.xs]="smallIcon()"
+      [delay]="100"
+      [action]="'enter'"
+      (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
+    ></mat-icon>
+  <span #tooltipElement [matMenuTriggerFor]="tooltipMenu" smClickStopPropagation></span>
 </span>
 
-<mat-menu #tooltipMenu="matMenu" [xPosition]="'after'" [yPosition]="position" [hasBackdrop]="false">
+<mat-menu #tooltipMenu="matMenu" [xPosition]="'after'" [yPosition]="position()" [hasBackdrop]="false" [class]="'multiline-tooltip'">
   <div
     class="tooltip-container"
     [delay]="500"

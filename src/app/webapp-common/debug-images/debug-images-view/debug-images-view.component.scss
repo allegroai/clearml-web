@@ -3,6 +3,8 @@
 :host {
   display: block;
 
+  --mat-expansion-container-background-color: transparent;
+
 
   .images-section {
     margin-top: 0;
@@ -21,9 +23,9 @@
   }
 
   .no-output-inner {
-    background: #e4e4e4;
+    background: var(--color-surface-container-lowest);
     height: 100%;
-    color: white;
+    color: var(--color-surface-container-lowest);;
     text-align: center;
     font-size: 20px;
 
@@ -52,8 +54,8 @@
 
     ::ng-deep .mat-expansion-panel-content {
       .mat-expansion-panel-body {
-        height: 400px;
-        padding: 12px 0 12px 28px;
+        height: 420px;
+        padding: 12px 0;
       }
     }
 
@@ -72,22 +74,17 @@
     .mat-expansion-panel-header-title {
       margin: 10px 0;
       font-family: $font-family-base, sans-serif;
-      color: rgba(56, 65, 97, 0.8)
+      color: var(--color-on-surface-variant);
 
 
     }
 
     &-header {
-      padding: 0 4px;
+      padding: 0 8px;
       height: 32px !important;
-      max-height: 32px;
-      font-size: 14px;
-      font-weight: bold;
-
       &:hover {
-
         .mat-expansion-panel-header-title {
-          color: rgba(56, 65, 97, 1);
+          color: var(--color-on-surface);
         }
       }
 
@@ -99,7 +96,7 @@
     .details-body {
       height: 200px;
       overflow-y: scroll;
-      background-color: white;
+      background-color: var(--color-surface-container-lowest);
     }
   }
 

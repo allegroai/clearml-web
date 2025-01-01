@@ -1,0 +1,134 @@
+@import 'variables';
+@import "../../../webapp-common/assets/fonts/variables.scss";
+
+:host {
+  display: block;
+  position: relative;
+
+  .download-button {
+    position: absolute;
+    right: 24px;
+    top: 4px;
+    z-index: 21;
+  }
+
+  ::ng-deep sm-table {
+    [filetype]::before {
+      content: $al-ico-file; // fallback icon (file)
+      color: #596c71;
+      font-family: #{$icomoon-font-family};
+      font-size: 24px;
+      margin-right: 12px;
+      vertical-align: middle;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    // FILE TYPE ICONS
+    // ---------------
+
+    // Image
+    [filetype="png"]::before,
+    [filetype="jpg"]::before,
+    [filetype="jpeg"]::before,
+    [filetype="gif"]::before {
+      content: $al-ico-image;
+      color: #3a7777;
+    }
+
+    // Video
+    [filetype="mp4"]::before,
+    [filetype="mov"]::before,
+    [filetype="wmv"]::before,
+    [filetype="avi"]::before {
+      content: $al-ico-video;
+      color: #846300;
+    }
+
+    // Audio
+    [filetype="mp3"]::before,
+    [filetype="aac"]::before,
+    [filetype="wav"]::before {
+      content: $al-ico-audio;
+      color: #833e65;
+    }
+
+    [filetype="csv"]::before {
+      content: $al-ico-csv;
+      color: #145f82;
+    }
+
+    [filetype="txt"]::before {
+      content: $al-ico-txt;
+      color: #803d3d;
+    }
+
+    [filetype="zip"]::before,
+    [filetype="gz"]::before {
+      content: $al-ico-zip;
+      color: #615555;
+    }
+
+    [filetype="pkl"]::before {
+      content: $al-ico-pkl;
+      color: #48507f;
+    }
+
+    [filetype="py"]::before {
+      content: $al-ico-py;
+      color: #d1902e;
+    }
+
+    [filetype="html"]::before,
+    [filetype="yaml"]::before,
+    [filetype="json"]::before {
+      content: $al-ico-code-file;
+      color: #a35151;
+    }
+  }
+}
+
+.action-tooltip {
+  max-width: 400px;
+  background: var(--color-surface-container-highest);
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  font-size: 11px;
+  margin: -4px 0;
+
+  div, p {
+    color: var(--color-inverse-on-surface);
+
+    &.command {
+      background-color: var(--color-inverse-surface);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  }
+
+  div.copy-button {
+    color: var(--color-on-surface-variant);
+  }
+
+  .copy-button {
+    &:hover {
+      color: var(--color-on-surface);
+      text-decoration: underline;
+    }
+  }
+
+  .al-ico-success {
+    background-color: var(--color-neon-surface);
+    color:var(--color-on-neon-surface);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 200ms;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+}
+

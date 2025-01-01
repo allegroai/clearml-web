@@ -24,7 +24,6 @@ export class SelectableListComponent {
   list = input<SelectableListItem[]>([]);
   checkedList = input<string[]>();
   checkIcon = input<string[]>(['al-ico-show', 'al-ico-hide']);
-  theme = input<'light' | 'dark'>('light');
   onItemSelect = output<string>();
   onItemCheck = output<string>();
 

@@ -14,13 +14,13 @@ import {FormControl} from '@angular/forms';
 import {setExperimentSettings, setSelectedExperiments} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
-import {trackById} from '@common/shared/utils/forms-track-by';
 import {mkConfig, download, generateCsv} from 'export-to-csv';
 import {setExportTable} from '@common/experiments-compare/actions/compare-header.actions';
 import {Table} from 'primeng/table';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {GroupedList} from '@common/tasks/tasks.model';
 import {sortMetricsList} from '@common/tasks/tasks.utils';
+import {PlotData} from 'plotly.js';
 
 interface ValueMode {
   key: string;
@@ -28,20 +28,20 @@ interface ValueMode {
 }
 
 interface ValueModes {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   min_values: ValueMode,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   max_values: ValueMode,
   values: ValueMode,
 }
 
 const VALUE_MODES: ValueModes = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   min_values: {
     key: 'min_value',
     name: 'Min Value'
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   max_values: {
     key: 'max_value',
     name: 'Max Value'
@@ -59,7 +59,7 @@ interface tableRow {
   metric: string;
   variant: string;
   firstMetricRow: boolean;
-  values: { [expId: string]: Task['last_metrics'] };
+  values: Record<string, Task['last_metrics']>;
 }
 
 interface ExtTask extends Task {
@@ -73,13 +73,11 @@ interface ExtTask extends Task {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy {
-  protected readonly trackById = trackById;
-
-  public experiments: Array<ExtTask> = [];
+  public experiments: ExtTask[] = [];
   public taskIds: string[];
   public valuesMode: ValueMode;
   private entityType: EntityTypeEnum;
-  private comparedTasks$: Observable<Array<Task>>;
+  private comparedTasks$: Observable<Task[]>;
   public dataTable: tableRow[];
   public dataTableFiltered: tableRow[];
   public variantFilter = new FormControl('');
@@ -87,7 +85,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   public listSearchTerm: string;
   public metricVariantList: GroupedList;
   public filterOpen: boolean;
-  public experimentsColor: { [name: string]: string };
+  public experimentsColor: Record<string, string>;
 
   private subs = new Subscription();
   private selectExportTable$: Observable<boolean>;
@@ -162,7 +160,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
           this.experimentsColor = experiments.reduce((acc, exp) => {
             acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.name}-${exp.id}`));
             return acc;
-          }, {} as { [name: string]: string });
+          }, {} as Record<string, string>);
         })
       )
       .subscribe(experiments => {
@@ -190,13 +188,15 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         this.experimentsColor = this.experiments?.reduce((acc, exp) => {
           acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.orgName ?? exp.name}-${exp.id}`));
           return acc;
-        }, {} as { [name: string]: string });
+        }, {} as Record<string, string>);
         this.changeDetection.detectChanges();
       }));
 
     this.subs.add(this.selectExportTable$
       .subscribe(() => {
-        this.dataTableFiltered.length && this.exportToCSV();
+        if (this.dataTableFiltered.length) {
+          this.exportToCSV();
+        }
         this.store.dispatch(setExportTable({export: false}));
       }));
 
@@ -243,9 +243,9 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
             }
             if (metric) {
               if (this.metricVariantList[metric]) {
-                this.metricVariantList[metric][variant] = {};
+                this.metricVariantList[metric][variant] = {} as PlotData;
               } else {
-                this.metricVariantList[metric] = {[variant]: {}};
+                this.metricVariantList[metric] = {[variant]: {} as PlotData};
               }
             }
             return {
@@ -256,7 +256,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
               min: acc.min ? Math.min(acc.min, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.min) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key],
               max: acc.max ? Math.max(acc.max, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.max) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key]
             };
-          }, {values: {}} as { metric, variant, firstMetricRow: boolean, min: number, max: number, values: { [expId: string]: Task['last_metrics'] } })
+          }, {values: {}} as { metric, variant, firstMetricRow: boolean, min: number, max: number, values: Record<string, Task['last_metrics']> })
         };
       })).flat(1);
 
@@ -297,7 +297,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     });
   };
 
-  private getExperimentIdsParams(experiments: Array<{ id?: string }>): string {
+  private getExperimentIdsParams(experiments: { id?: string }[]): string {
     return experiments ? experiments.map(e => e.id).toString() : '';
   }
 

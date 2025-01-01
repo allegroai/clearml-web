@@ -35,6 +35,8 @@ import {cloneItemIntoDummy} from '@common/shared/utils/shared-utils';
 import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {selectArchive, selectProjectsFeature} from '@common/layout/layout.selectors';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 export enum CrumbTypeEnum {
   Workspace = 'Workspace',
@@ -86,8 +88,10 @@ export interface IBreadcrumbsOptions {
     RouterLink,
     ClickStopPropagationDirective,
     TagListComponent,
-    IdBadgeComponent
-],
+    IdBadgeComponent,
+    MatIcon,
+    MatIconButton
+  ],
   standalone: true
 })
 export class BreadcrumbsComponent {

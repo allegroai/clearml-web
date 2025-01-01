@@ -3,8 +3,10 @@ import {ActiveDataPoint, ChartData, ChartEvent, ChartOptions, ChartType} from 'c
 import {BaseChartDirective} from 'ng2-charts';
 
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {fromEvent} from 'rxjs';
+import {toObservable} from '@angular/core/rxjs-interop';
+import {combineLatest, fromEvent, of} from 'rxjs';
+import {delay, startWith, switchMap} from 'rxjs/operators';
+import {PushPipe} from '@ngrx/component';
 
 export interface DonutChartData {
   name: string;
@@ -22,13 +24,12 @@ export interface DonutChartData {
   standalone: true,
   imports: [
     BaseChartDirective,
-    ChooseColorModule
+    ChooseColorModule,
+    PushPipe
   ],
 })
 export class DonutComponent {
   public doughnutChartType: ChartType = 'doughnut';
-  private windowResize = toSignal(fromEvent(window, 'resize'));
-  protected resizing = signal(false);
   private chart = viewChild(BaseChartDirective);
 
   highlight = signal<number>(null);
@@ -68,19 +69,16 @@ export class DonutComponent {
       return null;
     }
   });
+  resizing$ = combineLatest([
+    fromEvent(window, 'resize').pipe(startWith(null)),
+    toObservable(this.resize)
+  ])
+    .pipe(
+      switchMap(() => of(of(true), of(false).pipe(delay(100)))),
+      switchMap(v => v)
+    );
 
   constructor() {
-    let setTimer = 0;
-    effect(() => {
-      this.windowResize();
-      this.resize();
-      this.resizing.set(true);
-      window.clearTimeout(setTimer);
-      setTimer = window.setTimeout(() => {
-        this.resizing.set(false);
-      }, 100);
-    }, {allowSignalWrites: true});
-
     effect(() => {
       if (this.chart()) {
         window.setTimeout(() => this.chart().update(), 50)

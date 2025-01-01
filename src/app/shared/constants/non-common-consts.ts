@@ -2,13 +2,13 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 
 export enum EntityTypeEnum {
-  experiment = 'experiment',
+  experiment = 'task',
   model = 'model',
   project = 'project',
   pipeline = 'pipeline',
   controller = 'pipeline run',
   dataset = 'version',
-  simpleDataset = 'dataset',
+  openDataset = 'dataset',
   report = 'report',
   endpoint = 'endpoint',
   endpointsContainer = 'endpoints container'
@@ -20,6 +20,7 @@ export enum CircleTypeEnum {
   pending = 'pending',
   failed = 'failed',
   empty = 'empty',
+  total = 'total',
   published = 'published',
   'model-labels' = 'model-labels'
 }

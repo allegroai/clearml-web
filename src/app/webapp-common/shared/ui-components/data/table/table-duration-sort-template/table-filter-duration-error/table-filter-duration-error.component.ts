@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input } from '@angular/core';
 
 @Component({
   selector: 'sm-table-filter-duration-error',
@@ -8,6 +8,6 @@ import {Component, Input} from '@angular/core';
 })
 export class TableFilterDurationErrorComponent {
 
-  @Input() hasError: boolean;
-  @Input() isFullWidth;
+  hasError = input<boolean>();
+  fullWidth = input<boolean>();
 }

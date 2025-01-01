@@ -1,6 +1,5 @@
-@import "variables";
 
-.fas.fa-arrows {
+.al-ico-drag {
   cursor: move;
 }
 
@@ -12,33 +11,21 @@
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.cdk-drop-list-dragging sm-card2:not(.cdk-drag-placeholder) {
-  //transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
 .actions-container {
   position: absolute;
   right: 10px;
-  top: 0;
+  top: -10px;
   width: 0;
   padding-left: 100px;
 
   .actions {
-    font-size: 16px;
     display: flex;
+    align-items: center;
     flex-direction: row-reverse;
+    gap: 4px;
 
-    i {
-      margin-right: 16px;
-      opacity: 0.8;
-
-      &:hover {
-        opacity: 1;
-      }
-
-      &:first-of-type {
-        margin-right: 0;
-      }
+    .drag {
+      cursor: move;
     }
   }
 }
@@ -51,13 +38,12 @@
   min-height: 60px;
   display: flex;
   flex-direction: row;
-  background: white;
   align-content: flex-end;
 
   al-drawer {
     height: calc(100% - 16px);
     align-self: flex-start;
-    background: white;
+    background:  var(--color-surface-container-lowest);
     font-size: 14px;
     margin-right: 4px;
     width: 100%;
@@ -75,7 +61,7 @@
          text-align: center;
 
          i {
-           color: $info-color
+           color: var(--color-secondary);
          }
        }
      }

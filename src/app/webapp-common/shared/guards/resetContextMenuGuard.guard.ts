@@ -10,7 +10,7 @@ export const resetContextMenuGuard: CanDeactivateFn<any> = (component,
                                                             nextState) => {
   const store = inject(Store);
   if (!(nextState.url.includes('projects') && (PROJECTS_FEATURES.some((ent)=> nextState.url.includes(ent))))){
-    store.dispatch(headerActions.setTabs({contextMenu: null}));
+    store.dispatch(headerActions.reset());
   }
   return true;
 };

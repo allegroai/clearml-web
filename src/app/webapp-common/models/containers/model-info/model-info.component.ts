@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, model } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
@@ -12,18 +12,18 @@ import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {toggleMetricValuesView, toggleSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {groupByCharts, GroupByCharts, setExperimentSettings, toggleMetricValuesView, toggleSettings} from '@common/experiments/actions/common-experiment-output.actions';
 import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {getCompanyTags, setBreadcrumbsOptions, setSelectedProject} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {Project} from '~/business-logic/model/projects/project';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {ModelsInfoEffects} from '@common/models/effects/models-info.effects';
 import {headerActions} from '@common/core/actions/router.actions';
-import {selectMetricValuesView} from '@common/experiments/reducers';
-
+import {selectMetricValuesView, selectModelSettingsGroupBy, selectModelSettingsSmoothType, selectModelSettingsSmoothWeight, selectModelSettingsXAxisType, selectSelectedSettingsGroupBy, selectSelectedSettingsSmoothType, selectSelectedSettingsSmoothWeight, selectSelectedSettingsxAxisType} from '@common/experiments/reducers';
+import { SmoothTypeEnum } from '@common/shared/single-graph/single-graph.utils';
+import { ScalarKeyEnum } from '~/business-logic/model/events/scalarKeyEnum';
 
 @Component({
   selector: 'sm-model-info',
@@ -31,49 +31,70 @@ import {selectMetricValuesView} from '@common/experiments/reducers';
   styleUrls: ['./model-info.component.scss']
 })
 export class ModelInfoComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private store = inject(Store);
+  private route = inject(ActivatedRoute);
+  private refresh = inject(RefreshService);
+  private cdr = inject(ChangeDetectorRef);
+  private modelInfoEffect = inject(ModelsInfoEffects);
   public minimized: boolean;
 
   public selectedModel: SelectedModel;
   private sub = new Subscription();
-  public selectedModel$: Observable<SelectedModel | null>;
   public isExample: boolean;
-  public backdropActive$: Observable<boolean>;
-  public selectedTableModel$: Observable<SelectedModel>;
-  public scalars$: Observable<boolean>;
-  public splitSize$: Observable<number>;
+  public smoothWeight$: Observable<number>;
+  public smoothType$: Observable<SmoothTypeEnum>;
+  public xAxisType$: Observable<ScalarKeyEnum>;
+  public groupBy$: Observable<GroupByCharts>;
+
+  groupByOptions = [
+    {
+      name: 'Metric',
+      value: groupByCharts.metric
+    },
+    {
+      name: 'None',
+      value: groupByCharts.none
+    }
+  ];
+
+
   links = [
     {name: 'general', url: ['general']},
     {name: 'network', url: ['network']},
     {name: 'labels', url: ['labels']},
     {name: 'metadata', url: ['metadata']},
-    {name: 'lineage', url: ['experiments']},
+    {name: 'lineage', url: ['tasks']},
     {name: 'scalars', url: ['scalars']},
     {name: 'plots', url: ['plots']},
   ] as Link[];
-  public isSharedAndNotOwner$: Observable<boolean>;
   public toMaximize: boolean;
-  private isModelInEditMode$: Observable<boolean>;
-  private selectedProject$: Observable<Project>;
   private modelsFeature: boolean;
-  public routerConfig$: Observable<string[]>;
-  public metricValuesView$: Observable<boolean>;
+
+  protected scalars$ = this.store.select(selectRouterConfig)
+    .pipe(
+      filter(c => !!c),
+      distinctUntilChanged(),
+      map((config: string[]) => config.includes('scalars'))
+    );
+  protected selectedModel$ = this.store.select(selectSelectedModel)
+    .pipe(filter(model => !!model));
+  protected routerConfig$ = this.store.select(selectRouterConfig)
+  protected backdropActive$ = this.store.select(selectBackdropActive);
+  protected selectedTableModel$ = this.store.select(selectSelectedTableModel);
+  protected splitSize$ = this.store.select(selectSplitSize);
+  protected isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
+  protected isModelInEditMode$ = this.store.select(selectIsModelInEditMode);
+  protected selectedProject$ = this.store.select(selectSelectedProject);
+  protected metricValuesView$ = this.store.select(selectMetricValuesView);
 
   constructor(
-    private router: Router,
-    private store: Store,
-    private route: ActivatedRoute,
-    private refresh: RefreshService,
-    private cdr: ChangeDetectorRef,
-    private modelInfoEffect: ModelsInfoEffects
   ) {
-    this.routerConfig$ =this.store.select(selectRouterConfig)
-    this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
-    this.splitSize$ = this.store.select(selectSplitSize);
-    this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
-    this.isModelInEditMode$ = this.store.select(selectIsModelInEditMode);
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-    this.metricValuesView$ = this.store.select(selectMetricValuesView);
+
+    this.smoothWeight$ = this.store.select(selectModelSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
+    this.smoothType$ = this.store.select(selectModelSettingsSmoothType);
+    this.xAxisType$ = this.store.select(selectModelSettingsXAxisType);
+    this.groupBy$ = this.store.select(selectModelSettingsGroupBy);
 
     this.modelsFeature = this.route.snapshot.data?.setAllProject;
     if (this.modelsFeature) {
@@ -87,13 +108,6 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.scalars$ = this.store.select(selectRouterConfig)
-      .pipe(
-        filter(c => !!c),
-        distinctUntilChanged(),
-        map((config: string[]) => config.includes('scalars'))
-      );
-
     this.sub.add(this.store.select(selectSelectedModel)
       .subscribe(model => {
         this.selectedModel = model;
@@ -125,8 +139,6 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.selectedModel$ = this.store.select(selectSelectedModel)
-      .pipe(filter(model => !!model));
   }
 
   ngOnDestroy(): void {
@@ -164,7 +176,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
 
   maximize() {
     const last = this.route.snapshot.firstChild.url[0].path;
-    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
+    this.store.dispatch(headerActions.reset());
     return this.router.navigate(['output', last], {relativeTo: this.route, queryParamsHandling: 'preserve'});
   }
 
@@ -211,5 +223,23 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   toggleTableView() {
     this.store.dispatch(toggleMetricValuesView());
   }
+
+  changeSmoothness($event: number) {
+    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {smoothWeight: $event}}));
+  }
+
+  changeSmoothType($event: SmoothTypeEnum) {
+    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {smoothType: $event}}));
+  }
+
+  changeXAxisType($event: ScalarKeyEnum) {
+    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {xAxisType: $event}}));
+  }
+
+  changeGroupBy($event: GroupByCharts) {
+    this.store.dispatch(setExperimentSettings({id: this.selectedModel.id, changes: {groupBy: $event}}));
+  }
+
+
 }
 

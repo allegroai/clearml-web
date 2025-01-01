@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, TrackByFunction} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output, computed} from '@angular/core';
 import {Params} from '@angular/router';
 
 @Component({
@@ -13,29 +13,14 @@ export class ExperimentHyperParamsNavbarComponent {
     properties: 'User Properties',
     design: 'General'
   };
-  @Input() hyperParams: { [key: string]: any};
-  @Input() configuration: { [key: string]: any};
-  @Input() selectedObject;
-  public activeSection: string;
+  hyperParams = input<Record<string, any>>();
+  configuration = input<Record<string, any>>();
+  selectedObject = input();
+  routerConfig = input<string>();
+  disableAdd = input(true);
+  routerParams = input<Params>();
+  artifactSelected = output();
 
-  @Input() set routerConfig(routerConfig: string) {
-    this.activeSection = routerConfig;
-    this.changeDetection.detectChanges();
-  }
-  @Input() disableAdd = true;
-
-  public selectedHyperParam: string;
-
-  @Input() set routerParams(routerParams: Params) {
-    this.selectedHyperParam = routerParams?.hyperParamId || null;
-    this.selectedObject = decodeURIComponent(routerParams?.configObject);
-    this.changeDetection.detectChanges();
-  };
-
-  @Output() artifactSelected = new EventEmitter();
-
-  constructor(private changeDetection: ChangeDetectorRef,) {
-  }
-
-  trackByFn: TrackByFunction<{key: string; value: any}> = (index: number, item: {key: string; value: any}) => item['key'];
+  protected selectedHyperParam = computed(() => this.routerParams()?.hyperParamId || null);
+  protected selected = computed(() => this.routerParams() ? decodeURIComponent(this.routerParams()?.configObject) : this.selectedObject());
 }

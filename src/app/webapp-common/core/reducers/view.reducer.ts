@@ -12,9 +12,10 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {activeFeatureToProjectType, routeConfToProjectType} from '~/features/projects/projects-page.utils';
+import {setHideEnterpriseFeatures} from '../actions/layout.actions';
 
 export interface ViewState {
-  loading: { [endpoint: string]: boolean };
+  loading: Record<string, boolean>;
   dialog: boolean;
   notification: { title: string; message: string };
   loggedOut: boolean;
@@ -29,17 +30,23 @@ export interface ViewState {
   neverShowChangesAgain: string;
   plotlyReady: boolean;
   aceReady: boolean;
-  aceCaretPosition: { [key: string]: Ace.Point };
+  aceCaretPosition: Record<string, Ace.Point>;
   preferencesReady: boolean;
   showUserFocus: boolean;
   redactedArguments: { key: string }[];
   hideRedactedArguments: boolean;
   showEmbedReportMenu: { show: boolean; position: { x: number; y: number } };
   breadcrumbs: IBreadcrumbsLink[][];
-  contextMenu: HeaderNavbarTabConfig[];
-  tableCardsCollapsed: {[entity: string]: boolean};
-  contextMenuActiveFeature: string;
+  headerMenu: HeaderNavbarTabConfig[];
+  headerMenuActiveFeature: string;
+  tableCardsCollapsed: Record<string, boolean>;
   workspaceNeutral: boolean;
+  theme: 'light' | 'dark' | 'system';
+  systemTheme: 'light' | 'dark';
+  defaultTheme: 'light' | 'dark';
+  forcedTheme: 'light' | 'dark';
+  themeColors: Record<string, string>;
+  hideEnterpriseFeatures: boolean;
 }
 
 export const initViewState: ViewState = {
@@ -69,9 +76,15 @@ export const initViewState: ViewState = {
   showEmbedReportMenu: {show: null, position: null},
   breadcrumbs: [[{}]],
   tableCardsCollapsed: {},
-  contextMenu: null,
-  contextMenuActiveFeature: null,
+  headerMenu: null,
+  headerMenuActiveFeature: null,
   workspaceNeutral: false,
+  theme: null,
+  systemTheme: null,
+  defaultTheme: null,
+  forcedTheme: null,
+  themeColors: null,
+  hideEnterpriseFeatures: false,
 };
 
 export const views = state => state.views as ViewState;
@@ -87,6 +100,14 @@ export const selectLoggedOut = createSelector(views, state => state.loggedOut);
 export const selectAutoRefresh = createSelector(views, state => state?.autoRefresh);
 export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
 export const selectAppVisible = createSelector(views, state => state?.applicationVisible);
+export const selectUserTheme = createSelector(views, state => state?.theme ?? state?.defaultTheme ?? 'system');
+export const selectSystemTheme = createSelector(views, state => state?.systemTheme?? 'dark');
+export const selectDefaultTheme = createSelector(views, state => state?.defaultTheme);
+export const selectForcedTheme = createSelector(views, state => state?.forcedTheme);
+export const selectThemeColors = createSelector(views, state => state.themeColors);
+export const selectThemeMode = createSelector(selectUserTheme, selectSystemTheme, selectForcedTheme,
+  (user, system, forced) => forced ?? (user === 'system' ? system : user));
+export const selectDarkTheme = createSelector(selectThemeMode, mode => mode === 'dark');
 export const selectScaleFactor = createSelector(views, state => state?.scaleFactor);
 export const selectFirstLogin = createSelector(views, state => state.firstLogin);
 export const selectFirstLoginAt = createSelector(views, state => state.firstLoginAt);
@@ -102,85 +123,104 @@ export const selectHideRedactedArguments = createSelector(views, (state): {
 export const selectShowEmbedReportMenu = createSelector(views, state => state.showEmbedReportMenu);
 export const selectBreadcrumbs = createSelector(views, state => state && state.breadcrumbs);
 export const selectTableCardsCollapsed = (entityType: EntityTypeEnum) => createSelector(views, state => state.tableCardsCollapsed[entityType]);
-export const selectContextMenu = createSelector(views, state => state && state.contextMenu);
-export const selectActiveFeature = createSelector(views, state => state && state.contextMenuActiveFeature);
+export const selectHeaderMenu = createSelector(views, state => state?.headerMenu);
+export const selectActiveFeature = createSelector(views, state => state && state.headerMenuActiveFeature);
+export const selectHeaderMenuIndex = createSelector(selectHeaderMenu, selectActiveFeature,
+  (contextMenu, active) => contextMenu?.findIndex(item =>
+    item.featureName ?
+      item.featureName === active :
+      item.link ?
+        (Array.isArray(item.link) ? item.link.at(-1) : item.link) === active :
+        item.header === active
+  )
+);
 export const selectWorkspaceNeutral= createSelector(views, state => state?.workspaceNeutral);
 export const selectProjectType = createSelector(selectRouterConfig, selectActiveFeature,
   (config, activeFeature) => (config && routeConfToProjectType(config)) ?? activeFeatureToProjectType(activeFeature));
+export const selectHideEnterpriseFeatures = createSelector(views, state => state.hideEnterpriseFeatures);
 
 
 export const viewReducers = [
-  on(requestFailed, (state, action) => {
+  on(requestFailed, (state, action): ViewState => {
     const isLoggedOut = action.err && action.err.status === 401;
     return {...state, loggedOut: isLoggedOut};
   }),
-  on(layoutActions.deactivateLoader, (state, action) => {
+  on(layoutActions.deactivateLoader, (state, action): ViewState => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {[action.endpoint]: removed, ...loading} = state.loading;
     return {...state, loading};
   }),
-  on(layoutActions.activeLoader, (state, action) => ({
+  on(layoutActions.activeLoader, (state, action): ViewState => ({
     ...state,
     loading: {...state.loading, [action.endpoint]: true}
   })),
-  on(layoutActions.visibilityChanged, (state, action) => ({...state, applicationVisible: action.visible})),
-  on(layoutActions.setScaleFactor, (state, action) => ({...state, scaleFactor: action.scale})),
-  on(layoutActions.firstLogin, (state, action) => ({
+  on(layoutActions.visibilityChanged, (state, action): ViewState => ({...state, applicationVisible: action.visible})),
+  on(layoutActions.userThemeChanged, (state, action): ViewState => ({...state, theme: action.theme})),
+  on(layoutActions.systemThemeChanged, (state, action): ViewState => ({...state, systemTheme: action.theme})),
+  on(layoutActions.setForcedTheme, (state, action): ViewState => ({...state, forcedTheme: action.theme, defaultTheme: action.theme})),
+  on(layoutActions.setThemeColors, (state, action): ViewState => ({...state, themeColors: action.colors})),
+  on(layoutActions.setScaleFactor, (state, action): ViewState => ({...state, scaleFactor: action.scale})),
+  on(layoutActions.firstLogin, (state, action): ViewState => ({
     ...state,
     firstLogin: action.first,
     firstLoginAt: new Date().getTime()
   })),
-  on(layoutActions.plotlyReady, (state) => ({...state, plotlyReady: true})),
-  on(layoutActions.aceReady, (state) => ({...state, aceReady: true})),
-  on(layoutActions.saveAceCaretPosition, (state, action) => ({
+  on(layoutActions.plotlyReady, (state): ViewState => ({...state, plotlyReady: true})),
+  on(layoutActions.aceReady, (state): ViewState => ({...state, aceReady: true})),
+  on(layoutActions.saveAceCaretPosition, (state, action): ViewState => ({
     ...state,
     aceCaretPosition: {...state.aceCaretPosition, [action.id]: action.position}
   })),
   on(layoutActions.resetAceCaretsPositions, state => ({...state, aceCaretPosition: {}})),
-  on(layoutActions.resetLoader, (state) => ({...state, loading: {}})),
-  on(layoutActions.setRedactedArguments, (state, action) => ({...state, redactedArguments: action.redactedArguments})),
-  on(layoutActions.setHideRedactedArguments, (state, action) => ({...state, hideRedactedArguments: action.hide})),
-  on(apiRequest, (state, action) => ({
+  on(layoutActions.resetLoader, (state): ViewState => ({...state, loading: {}})),
+  on(layoutActions.setRedactedArguments, (state, action): ViewState => ({...state, redactedArguments: action.redactedArguments})),
+  on(layoutActions.setHideRedactedArguments, (state, action): ViewState => ({...state, hideRedactedArguments: action.hide})),
+  on(apiRequest, (state, action): ViewState => ({
     ...state,
     loading: {...state.loading, [action?.endpoint || 'default']: true}
   })),
-  on(layoutActions.setNotificationDialog, (state, action) => ({...state, notification: action.notification})),
-  on(layoutActions.setBackdrop, (state, action) => ({...state, backdropActive: action.active})),
-  on(layoutActions.setAutoRefresh, (state, action) => ({...state, autoRefresh: action.autoRefresh})),
-  on(layoutActions.toggleCardsCollapsed, (state, action) => ({
+  on(layoutActions.setNotificationDialog, (state, action): ViewState => ({...state, notification: action.notification})),
+  on(layoutActions.setBackdrop, (state, action): ViewState => ({...state, backdropActive: action.active})),
+  on(layoutActions.setAutoRefresh, (state, action): ViewState => ({...state, autoRefresh: action.autoRefresh})),
+  on(layoutActions.toggleCardsCollapsed, (state, action): ViewState => ({
     ...state,
     tableCardsCollapsed: {
       ...state.tableCardsCollapsed,
       [action.entityType]: ! state.tableCardsCollapsed[action.entityType]
     }
   })),
-  on(layoutActions.setCompareAutoRefresh, (state, action) => ({...state, compareAutoRefresh: action.autoRefresh})),
-  on(layoutActions.showEmbedReportMenu, (state, action) => ({
+  on(layoutActions.setCompareAutoRefresh, (state, action): ViewState => ({...state, compareAutoRefresh: action.autoRefresh})),
+  on(layoutActions.showEmbedReportMenu, (state, action): ViewState => ({
     ...state,
     showEmbedReportMenu: {show: action.show, position: action.position}
   })),
-  on(layoutActions.neverShowPopupAgain, (state, action) => ({
+  on(layoutActions.neverShowPopupAgain, (state, action): ViewState => ({
     ...state,
     neverShowPopupAgain: action.reset ? state.neverShowPopupAgain.filter(popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))
   })),
-  on(layoutActions.neverShowChangesAgain, (state, action) => ({
+  on(layoutActions.neverShowChangesAgain, (state, action): ViewState => ({
     ...state,
     neverShowChangesAgain:  action.version
   })),
   on(setBreadcrumbs, (state, action): ViewState => ({
     ...state, breadcrumbs: action.breadcrumbs, ...(action.workspaceNeutral !== undefined && {workspaceNeutral: action.workspaceNeutral})
   })),
-  on(headerActions.setTabs, (state, action) => ({
-    ...state, contextMenu: action.contextMenu
+  on(headerActions.reset, (state): ViewState => ({
+    ...state, headerMenuActiveFeature: initViewState.headerMenuActiveFeature, headerMenu: initViewState.headerMenu
   })),
-  on(headerActions.setActiveTab, (state, action) => ({
-    ...state, contextMenuActiveFeature: action.activeFeature
+  on(headerActions.setTabs, (state, action): ViewState => ({
+    ...state, headerMenu: action.contextMenu, headerMenuActiveFeature: action.active
   })),
-  on(setTypeBreadcrumbs, (state, action) => ({
+  on(headerActions.setActiveTab, (state, action): ViewState => ({
+    ...state, headerMenuActiveFeature: action.activeFeature
+  })),
+  on(setTypeBreadcrumbs, (state, action): ViewState => ({
     ...state,
     breadcrumbs: [...state.breadcrumbs?.map(breadcrumbGroup => [...breadcrumbGroup?.map(breadcrumb => breadcrumb.type === action.type ? action.breadcrumb : breadcrumb) ?? []
     ]) ?? []]
   })),
+  on(setHideEnterpriseFeatures, (state, action): ViewState =>
+    ({...state, hideEnterpriseFeatures: action.hide})),
 ] as ReducerTypes<ViewState, ActionCreator[]>[];
 
 export const viewReducer = createReducer(

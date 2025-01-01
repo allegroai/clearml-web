@@ -1,7 +1,6 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Queue} from '../../../../business-logic/model/queues/queue';
-import {ICONS} from '../../../constants';
+import {Component, inject, output, input } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 @Component({
   selector: 'sm-queues-menu',
@@ -9,17 +8,14 @@ import {ActivatedRoute} from '@angular/router';
   styleUrls: ['./queues-menu.component.scss']
 })
 export class QueuesMenuComponent  {
-  public queuesManager: boolean;
-  readonly ICONS = ICONS;
+  private route = inject(ActivatedRoute);
 
-  @Input() menuOpen: boolean;
-  @Input() selectedQueue: Queue;
-  @Input() menuPosition;
-  @Output() deleteQueue = new EventEmitter();
-  @Output() renameQueue = new EventEmitter();
-  @Output() clearQueue = new EventEmitter();
-  constructor(private route: ActivatedRoute) {
-    this.queuesManager = route.snapshot.data.queuesManager;
+  protected queuesManager = this.route.snapshot.data.queuesManager;
 
-  }
+  menuOpen = input<boolean>();
+  selectedQueue = input<Queue>();
+  menuPosition = input<{x: number; y: number}>();
+  deleteQueue = output<Queue>();
+  renameQueue = output<Queue>();
+  clearQueue = output<Queue>();
 }

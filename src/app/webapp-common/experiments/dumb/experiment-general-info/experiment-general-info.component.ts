@@ -1,11 +1,10 @@
-import {Component, ElementRef, EventEmitter, Input, Output, viewChild, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, input, Input, viewChild, output } from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
 import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
-import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
@@ -16,21 +15,18 @@ export const EXPERIMENT_COMMENT = 'ExperimentComment';
   styleUrls: ['./experiment-general-info.component.scss']
 })
 export class ExperimentGeneralInfoComponent {
-  private table: TableComponent<{ id: string }>;
-
-  constructor(private store: Store) {
-  }
+  private store = inject(Store);
 
   commentControl = new UntypedFormControl();
   experimentCommentText: string;
   experimentCommentOriginal: string;
 
-  @ViewChild('experimentDescriptionSection') experimentDescriptionSection: EditableSectionComponent;
+  experimentDescriptionSection = viewChild<EditableSectionComponent>('experimentDescriptionSection');
   descriptionElement = viewChild<ElementRef<HTMLTextAreaElement>>('description');
 
-  @Input() experiment: IExperimentInfo;
-  @Input() editable: boolean;
-  @Input() isExample: boolean;
+  experiment = input<IExperimentInfo>();
+  editable = input<boolean>();
+  isExample = input<boolean>();
 
   @Input() set experimentComment(experimentComment: string) {
     this.experimentCommentText = experimentComment;
@@ -38,7 +34,7 @@ export class ExperimentGeneralInfoComponent {
     this.rebuildCommentControl(experimentComment);
   }
 
-  @Output() commentChanged = new EventEmitter<string>();
+  commentChanged = output<string>();
   timeFormatString = TIME_FORMAT_STRING;
 
 

@@ -1,0 +1,68 @@
+@import "variables";
+
+:host {
+  .filter-sort-container {
+    ::ng-deep .menu-button {
+      color: var(--color-on-surface-variant);
+      font-weight: 500;
+
+      &.active {
+        color: var(--color-on-surface);
+      }
+    }
+    .cell{
+      display: flex;
+    }
+
+
+    .sort-icon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+.filter{
+  font-size: 14px;
+  font-weight: 500;
+
+  &::placeholder {
+    font-size: 14px;
+  }
+}
+
+.filter-type {
+  padding: 4px 14px;
+  text-align: right;
+
+  .link {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-outline);
+    cursor: pointer;
+
+    &.selected {
+      color: var(--color-on-surface);
+      pointer-events: none;
+      cursor: initial;
+    }
+  }
+}
+
+.results.scroll {
+  height: 60vh;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.clear-all {
+  padding-left: 32px;
+}
+
+.column-explanation {
+  padding: 5px;
+  font-size: 10px;
+}

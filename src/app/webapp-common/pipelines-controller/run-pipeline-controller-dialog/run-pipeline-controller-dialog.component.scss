@@ -1,23 +1,10 @@
-@import "variables";
-
 :host {
-  .section-title{
-    color: $blue-500;
+  .section-title {
+    color: var(--color-on-surface-variant);
     font-size: 14px;
     margin-top: 14px;
   }
 
-  .buttons {
-    margin-top: 32px;
-    display: flex;
-    justify-content: center;
-
-    button {
-      &:first-of-type {
-        margin-right: 16px;
-      }
-    }
-  }
   .param-line{
     margin-top: 24px;
     display: flex;
@@ -37,6 +24,6 @@
   }
 
   .error {
-    color: $error-color
+    color: var(--color-error);
   }
 }

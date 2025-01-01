@@ -1,7 +1,7 @@
 import {Task} from '~/business-logic/model/tasks/task';
 import {cloneDeep, isEqual, sortBy} from 'lodash-es';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
-import plotly, {Config, Layout} from 'plotly.js';
+import plotly, {Config, Layout, PlotData} from 'plotly.js';
 import {ExtData, ExtFrame, ExtLayout} from '../shared/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '../../business-logic/model/events/models';
 import {KeyValue} from '@angular/common';
@@ -12,19 +12,13 @@ import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info
 import {ReportsApiMultiplotsResponse} from '@common/constants';
 
 export interface ExtMetricsPlotEvent extends MetricsPlotEvent {
-  variants?: Array<string>;
+  variants?: string[];
 }
 
-export interface IMultiplot {
-  [key: string]: { // i.e ROC
-    [key: number]: { // Iteration number
-      [key: string]: { // experimentId
+export type IMultiplot = Record<string, Record<number, Record<string, { // experimentId
         name: string;
         plots: ExtFrame[];
-      };
-    };
-  };
-}
+      }>>>;
 
 export const mergeTasks = (tableTask, task) => {
   task.project = tableTask.project;
@@ -35,7 +29,7 @@ export const mergeTasks = (tableTask, task) => {
 
 export const allowedMergedTypes = ['scatter', 'scattergl', 'bar', 'scatter3d', 'box', 'histogram'];
 
-export const _mergeVariants = (base: Array<any>, variant) => base.slice().concat(variant);
+export const _mergeVariants = (base: any[], variant) => base.slice().concat(variant);
 
 export const _mergePlotsData = (base: any, toMerge: any) =>
   JSON.stringify({...base, data: _mergeVariants(base.data, toMerge.data)});
@@ -98,7 +92,7 @@ export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string): { p
   return {plot: prepareGraph(json.data, json.layout, json.config, graph), hadError};
 };
 
-export const convertPlots = ({plots, id}: { plots: { [title: string]: MetricsPlotEvent[] }; id: string }): { graphs: { [title: string]: ExtFrame[] }; parsingError } => {
+export const convertPlots = ({plots, id}: { plots: Record<string, MetricsPlotEvent[]>; id: string }): { graphs: Record<string, ExtFrame[]>; parsingError } => {
   let parsingError: boolean;
   return {
     graphs: Object.entries(plots).reduce((acc, [key, graphs]) => {
@@ -113,46 +107,67 @@ export const convertPlots = ({plots, id}: { plots: { [title: string]: MetricsPlo
   };
 };
 
-export const convertScalars = (scalars: GroupedList, experimentId: string): { [key: string]: ExtFrame[] } =>
-  Object.entries(scalars).reduce((acc, graphGroup) => {
-    const key = graphGroup[0];
-    const graph = graphGroup[1];
+export const convertSplitScalars = (scalars: GroupedList, experimentId: string): Record<string, ExtFrame[]> =>
+  Object.entries(scalars).reduce((acc, [key, graph]) => {
+
+    const tickformat = getAxisFormat(graph);
+    acc[key] = Object.entries(graph).sort((a, b) => a[0] > b[0] ? 1 : -1)
+      .map(([variant, data]: [string, ExtData]) => prepareGraph(
+        [{
+          task: experimentId,
+          ...data,
+          line: {width: 1, ...data.line},
+          type: 'scatter'
+        }],
+        {type: 'scalar', title: variant, xaxis: {title: 'Iterations'}, yaxis: {tickformat}},
+        {},
+        {metric: key, type: 'scalar', variant, variants: Object.keys(graph)}
+      ))
+
+    return acc;
+  }, {});
+
+export const convertScalars = (scalars: GroupedList, experimentId: string): Record<string, ExtFrame[]> =>
+  Object.entries(scalars).reduce((acc, [key, graph]) => {
 
     const chartData = Object.entries(graph).sort((a, b) => a[0] > b[0] ? 1 : -1)
-      .map(([, data]: [string, any]) => ({
+      .map(([, data]: [string, Partial<PlotData>]) => ({
         task: experimentId,
         ...data,
         line: {width: 1, ...data.line},
         type: 'scatter'
-      }));
+      }) as ExtData);
 
-    const yValues = chartData?.map((trace: ExtData) => (trace.y as number[])).flat() ?? [0];
-    const maxY = maxInArray(yValues);
-    const tickformat = maxY >= 1e9 || (maxY < 1e-5 && maxY > 0) ? '.1e' : undefined;
     acc[key] = [prepareGraph(
       chartData,
-      {type: 'scalar', title: key, xaxis: {title: 'Iterations'}, yaxis: {tickformat}},
+      {type: 'scalar', title: key, xaxis: {title: 'Iterations'}, yaxis: {tickformat: getAxisFormat(graph)}},
       {},
       {metric: key, type: 'scalar', variants: Object.keys(graph)}
     )];
     return acc;
   }, {});
 
-function onlySdkFields(parsePlots: { data: any; layout: any; config?: any; metric: string }[]): {[metrics: string]: boolean} {
+const getAxisFormat = (chartData: Record<string, PlotData>): '.1e' | undefined => {
+  const yValues = Object.values(chartData)?.map((trace: ExtData) => (trace.y as number[])).flat() ?? [0];
+  const maxY = maxInArray(yValues);
+  return maxY >= 1e9 || (maxY < 1e-5 && maxY > 0) ? '.1e' : undefined;
+}
+
+function onlySdkFields(parsePlots: { data: any; layout: any; config?: any; metric: string }[]): Record<string, boolean> {
   const sdkFields = ['mode', 'name', 'text', 'type', 'x', 'y'];
   const onlySdk = {};
   parsePlots.forEach(plot => onlySdk[plot.metric] = plot.data.every(data => Object.keys(data).every(field => sdkFields.includes(field))));
   return onlySdk;
 }
 
-export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: ExtMetricsPlotEvent[] } => {
+export const groupIterations = (plots: MetricsPlotEvent[]): Record<string, ExtMetricsPlotEvent[]> => {
   if (!plots.length) {
     return {};
   }
 
   const sortedPlots = sortBy(plots, 'iter');
   const parsePlots = sortedPlots.map((plot, i) => ({...tryParseJson(plot.plot_str), metric: sortedPlots[i].metric}));
-  const onlySdk = onlySdkFields(parsePlots)
+  const onlySdk = onlySdkFields(parsePlots);
   const shouldMerge = shouldBeMerged(parsePlots);
   let previousPlotIsMergable = true;
   return sortedPlots
@@ -176,16 +191,10 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: E
     }, {});
 };
 
-export const prepareScalarList = (metricsScalar): GroupedList =>
-  Object.keys(metricsScalar || []).reduce((acc, curr) => {
-    acc[curr] = {};
-    return acc;
-  }, {});
-
 export const sortMetricsList = (list: string[]) =>
   list ? sortBy(list, item => item.replace(':', '~').toLowerCase()) : list;
 
-export const preparePlotsList = (groupedPlots: Map<string, any[]>): Array<SelectableListItem> => {
+export const preparePlotsList = (groupedPlots: Map<string, any[]>): SelectableListItem[] => {
   const list = groupedPlots ? Object.keys(groupedPlots) : [];
   const sortedList = sortMetricsList(list);
   return sortedList.map((item) => ({name: item, value: item}));
@@ -203,7 +212,7 @@ export const compareByFieldFunc = (field) =>
     a[field].replace(':', '~').toLowerCase() >
     b[field].replace(':', '~').toLowerCase() ? 1 : -1;
 
-export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
+export const mergeMultiMetrics = (metrics): Record<string, ExtFrame[]> => {
   const graphsMap = {};
   Object.keys(metrics ?? {}).forEach(metric => {
     Object.keys(metrics[metric]).forEach(variant => {
@@ -218,9 +227,9 @@ export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
   return graphsMap;
 };
 
-export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFrame[] } => {
+export const mergeMultiMetricsGroupedVariant = (metrics): Record<string, ExtFrame[]> => {
   const graphsMap = {};
-  const onlyOneGraph = Object.keys(metrics).length === 1 && Object.values(metrics).length === 1
+  const onlyOneGraph = Object.keys(metrics).length === 1 && Object.values(metrics).length === 1;
   Object.keys(metrics).forEach(metric => {
 
     //Search for duplicates names across all metrics and variants
@@ -228,7 +237,7 @@ export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFr
       const experimentName = legendItem.name;
       acc[experimentName] = acc[experimentName] !== undefined;
       return acc;
-    }, {} as { [name: string]: boolean });
+    }, {} as Record<string, boolean>);
 
     const chartData = [];
     Object.keys(metrics[metric]).forEach(variant => {
@@ -237,7 +246,7 @@ export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFr
           ...data,
           type: 'scatter',
           task: taskId,
-          colorKey: `${onlyOneGraph ? '' : variant + '.' || ''}${data.name}.${taskId.substring(0, 6)}`,
+          colorKey: `${onlyOneGraph ? '' : variant + ' - ' || ''}${data.name}.${taskId.substring(0, 6)}`,
           name: `${variant || '[no name]'} - ${data.name}${duplicateNamesObject[data.name] ? '.' + taskId.substring(0, 6) : ''}`
         }))
       );
@@ -247,7 +256,7 @@ export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFr
   return graphsMap;
 };
 
-export const convertMultiPlots = (plots: { [metric: string]: { [variant: string]: Partial<ExtFrame> } }, tagsLists?: { [id: string]: string[] }): { [key: string]: ExtFrame[] } =>
+export const convertMultiPlots = (plots: Record<string, Record<string, Partial<ExtFrame>>>, tagsLists?: Record<string, string[]>): Record<string, ExtFrame[]> =>
   Object.entries(plots).reduce((acc, graphGroup) => {
     const key = graphGroup[0];
     const graphs = graphGroup[1];
@@ -304,7 +313,7 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experimentName
         variantPlot.seriesName = variantPlot.name;
       }
       const iterationString = showIterationInName ? `(iteration ${iteration})` : '';
-      variantPlot.name = allWithoutName ? `${experiment} ${iterationString}${i? ' ' + i : ''}` : `${experiment}${iterationString ? ' ' + iterationString : ''}`;
+      variantPlot.name = allWithoutName ? `${experiment} ${iterationString}${i ? ' ' + i : ''}` : `${experiment}${iterationString ? ' ' + iterationString : ''}`;
       variantPlot.colorKey = `${experimentName}-${experimentId}`;
       variantPlot.task = experimentId;
     } else if (variantPlot.type === 'table') {
@@ -324,7 +333,7 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experimentName
       charts[metricName][fullName].data = [variantPlot];
     } else {
       charts[metricName][fullName].data = _mergeVariants(charts[metricName][fullName].data.slice(), variantPlot);
-      charts[metricName][fullName].data?.forEach( (dat, i) =>
+      charts[metricName][fullName].data?.forEach((dat, i) =>
         //we don't need to show all occurrences of same legend - show only first
         dat.showlegend = charts[metricName][fullName].data.findIndex(p => p.task === dat.task) === i);
       isMultipleTasks = true;
@@ -341,18 +350,18 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experimentName
     charts[metricName][fullName].iter = isMultipleTasks ? null : charts[metricName][fullName].iter ?? parseInt(iteration);
     charts[metricName][fullName].task = charts[metricName][fullName].task ?? experimentId;
     if (isMultipleTasks && charts[metricName][fullName].layout?.legend?.title) {
-      charts[metricName][fullName].layout.legend.title =  '';
+      charts[metricName][fullName].layout.legend.title = '';
     }
   }
   return charts;
 };
 
-function shouldBeMergedObj(experimentsPlots: { [expId: string]: { data: ExtData[], layout: ExtLayout, config?: plotly.Config } }) {
+function shouldBeMergedObj(experimentsPlots: Record<string, { data: ExtData[], layout: ExtLayout, config?: plotly.Config }>) {
   const values = Object.values(experimentsPlots).map(plot => ({...plot, metric: ''}));
   return shouldBeMerged(values);
 }
 
-function shouldBeMerged(experimentsPlots: { data: ExtData[], layout: ExtLayout, config?: plotly.Config; metric: string }[]): {[metric: string]: boolean} {
+function shouldBeMerged(experimentsPlots: { data: ExtData[], layout: ExtLayout, config?: plotly.Config; metric: string }[]): Record<string, boolean> {
   const shouldMerge = {};
   experimentsPlots.forEach((plot) => shouldMerge[plot.metric] = plot.data.length > 0 && plot.data.every(data => allowedMergedTypes.includes(data.type)));
   experimentsPlots.forEach((plot) => {
@@ -363,7 +372,7 @@ function shouldBeMerged(experimentsPlots: { data: ExtData[], layout: ExtLayout, 
   return shouldMerge;
 }
 
-export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients, duplicateNamesObject: { [name: string]: boolean }): { charts: IMultiplot; parsingError: boolean } => {
+export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients, duplicateNamesObject: Record<string, boolean>): { charts: IMultiplot; parsingError: boolean } => {
   let charts = {};
   let parsingError: boolean;
   const values = Object.values(mixedPlot);
@@ -379,7 +388,7 @@ export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVari
       const plot = iteration.plots[0];
       acc[experimentId] = tryParseJson(plot.plot_str);
       return acc;
-    }, {} as { [expId: string]: { data: ExtData[], layout: ExtLayout, config?: plotly.Config } });
+    }, {} as Record<string, { data: ExtData[], layout: ExtLayout, config?: plotly.Config }>);
     Object.entries(variant).map(([experimentId, experimentData]) => {
       const shortExpId = experimentId.substring(0, 6);
 
@@ -436,7 +445,7 @@ export const prepareMultiPlots = (multiPlots: ReportsApiMultiplotsResponse, glob
   }
 
   const experimentsIds = globalLegend.map(g => g.id);
-  const newMultiPlots = removeRedundantExperiments(multiPlots, experimentsIds)
+  const newMultiPlots = removeRedundantExperiments(multiPlots, experimentsIds);
 
   const idToName = {};
   const duplicateNamesObject = globalLegend.reduce((acc, legendItem) => {
@@ -444,7 +453,7 @@ export const prepareMultiPlots = (multiPlots: ReportsApiMultiplotsResponse, glob
     acc[experimentName] = acc[experimentName] !== undefined;
     idToName[legendItem.id] = experimentName;
     return acc;
-  }, {} as { [name: string]: boolean });
+  }, {} as Record<string, boolean>);
 
   const merged = Object.entries(newMultiPlots).reduce((acc, graph) => {
     if (!graph[1]) {
@@ -487,7 +496,7 @@ function addMissingExperimentsToPlots(charts, idToName) {
             x: [null],
             y: [null],
             z: plot.data[0]?.type === 'scatter3d' ? [null] : undefined
-          })
+          });
         }
       });
     }

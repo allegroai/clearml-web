@@ -7,7 +7,6 @@ import {ApiQueuesService} from '~/business-logic/api-services/queues.service';
 import {QueuesGetQueueMetricsRequest} from '~/business-logic/model/queues/queuesGetQueueMetricsRequest';
 import {QueuesGetQueueMetricsResponse} from '~/business-logic/model/queues/queuesGetQueueMetricsResponse';
 import {
-  selectQueues,
   selectQueuesStatsTimeFrame,
   selectQueuesTableSortFields,
   selectQueueStats,
@@ -21,9 +20,8 @@ import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {cloneDeep, escape} from 'lodash-es';
 import {addFullRangeMarkers, addStats, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions';
-import {encodeOrder} from '../../shared/utils/tableParamEncode';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
-import {sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
+import {calculateQueuesCaption, sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {MatDialog} from '@angular/material/dialog';
@@ -39,133 +37,129 @@ export class QueuesEffect {
   ) {
   }
 
-  activeLoader = createEffect(() => this.actions.pipe(
-    ofType(queueActions.getQueues, queueActions.refreshSelectedQueue, queueActions.clearQueue),
-    filter(action => !(action as ReturnType<typeof queueActions.refreshSelectedQueue>)?.autoRefresh),
-    map(action => activeLoader(action.type))
-  ));
+  activeLoader = createEffect(() => {
+    return this.actions.pipe(
+      ofType(queueActions.getQueues, queueActions.refreshSelectedQueue, queueActions.clearQueue),
+      filter(action => !(action as ReturnType<typeof queueActions.refreshSelectedQueue>)?.autoRefresh),
+      map(action => activeLoader(action.type))
+    )
+  });
 
-  getQueues = createEffect(() => this.actions.pipe(
-    ofType(queueActions.getQueues),
-    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
-      filter(ready => ready),
-      map(() => action))),
-    concatLatestFrom(
-      () => this.store.select(selectQueuesTableSortFields)),
-    switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({
+  getQueues = createEffect(() => {
+    return this.actions.pipe(
+      ofType(queueActions.getQueues),
+      switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+        filter(ready => ready),
+        map(() => action))),
+      concatLatestFrom(
+        () => this.store.select(selectQueuesTableSortFields)),
+      switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({only_fields: ['*', 'entries.task.name']})
+        .pipe(
+          mergeMap(res => [queueActions.setQueues({queues: sortTable(orderFields, calculateQueuesCaption(res.queues) as any[])}), deactivateLoader(action.type)]),
+          catchError(err => [deactivateLoader(action.type), requestFailed(err)])
+        ))
+    )
+  });
 
-      only_fields: ['*', 'entries.task.name'],
-      order_by: encodeOrder(orderFields)
-
-    }).pipe(
-      mergeMap(res => [queueActions.setQueues({queues: sortTable(orderFields, res.queues)}), deactivateLoader(action.type)]),
-      catchError(err => [deactivateLoader(action.type), requestFailed(err)])
-    ))
-  ));
-
-  setQueuesSort = createEffect(() => this.actions.pipe(
-    ofType(queueActions.queuesTableSetSort),
-    concatLatestFrom(() => [
-      this.store.select(selectQueuesTableSortFields),
-      this.store.select(selectQueues)
-    ]),
-    switchMap(([action, orderFields, queues]) =>
-      [queueActions.setQueues({queues: sortTable(orderFields, queues)}), deactivateLoader(action.type)]
-    ),
-    catchError(err => [deactivateLoader(queueActions.queuesTableSetSort.type), requestFailed(err)])
-  ));
-
-  getSelectedQueue = createEffect(() => this.actions.pipe(
-    ofType(queueActions.setSelectedQueue),
-    filter(action => !!action.queue),
-    tap(action => this.store.dispatch(activeLoader(action.type))),
-    switchMap(action => this.queuesApi.queuesGetAllEx({
-        id: [action.queue.id],
-
-        only_fields: ['*', 'entries.task.name']
-      }).pipe(
-        mergeMap(res => [
-          queueActions.setSelectedQueueFromServer({queue: res.queues[0]}),
-          deactivateLoader(action.type)]),
-        catchError(err => [deactivateLoader(action.type), requestFailed(err)])
+  getSelectedQueue = createEffect(() => {
+    return this.actions.pipe(
+      ofType(queueActions.setSelectedQueue),
+      filter(action => !!action.queue),
+      tap(action => this.store.dispatch(activeLoader(action.type))),
+      switchMap(action =>
+        this.queuesApi.queuesGetAllEx({id: [action.queue.id], only_fields: ['*', 'entries.task.name']})
+          .pipe(
+            mergeMap(res => [
+              queueActions.setSelectedQueueFromServer({queue: calculateQueuesCaption([res.queues[0]])[0] as any}),
+              deactivateLoader(action.type)]),
+            catchError(err => [deactivateLoader(action.type), requestFailed(err)])
+          )
       )
     )
-  ));
+  });
 
-  refreshSelectedQueue = createEffect(() => this.actions.pipe(
-    ofType(queueActions.refreshSelectedQueue),
-    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
-    filter(([, queue]) => !!queue),
-    switchMap(([action, queue]) => this.queuesApi.queuesGetAllEx({
-      id: [queue.id],
+  refreshSelectedQueue = createEffect(() => {
+    return this.actions.pipe(
+      ofType(queueActions.refreshSelectedQueue),
+      concatLatestFrom(() => this.store.select(selectSelectedQueue)),
+      filter(([, queue]) => !!queue),
+      switchMap(([action, queue]) =>
+        this.queuesApi.queuesGetAllEx({
+          id: [queue.id],
+          only_fields: ['*', 'entries.task.name']
+        }).pipe(
+          mergeMap(res => [
+            queueActions.setSelectedQueueFromServer({queue: calculateQueuesCaption(res.queues)[0] as any}),
+            deactivateLoader(action.type)]),
+          catchError(err => [deactivateLoader(action.type), requestFailed(err)])
+        ))
+    )
+  });
 
-      only_fields: ['*', 'entries.task.name']
-    }).pipe(
-      mergeMap(res => [
-        queueActions.setSelectedQueueFromServer({queue: res.queues[0]}),
-        deactivateLoader(action.type)]),
-      catchError(err => [deactivateLoader(action.type), requestFailed(err)])
-    ))
-  ));
+  deleteQueues = createEffect(() => {
+    return this.actions.pipe(
+      ofType(queueActions.deleteQueue),
+      switchMap(action => this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, boolean>(
+        ConfirmDialogComponent,
+        {
+          data: {
+            title: 'Delete Queue',
+            body: `Are you sure you would like to delete the "<b>${escape(action.queue.caption)}</b>" queue?`,
+            centerText: true,
+            yes: 'Delete',
+            no: 'Cancel',
+            iconClass: 'al-ico-trash'
+          }
+        }).afterClosed().pipe(
+        filter(response => response),
+        map(() => action)
+      )),
+      switchMap(action => this.queuesApi.queuesDelete({queue: action.queue.id})),
+      mergeMap(() => [queueActions.getQueues({}), queueActions.setSelectedQueue({})]),
+      catchError(err => [
+        deactivateLoader(queueActions.deleteQueue.type),
+        requestFailed(err),
+        addMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')
+      ])
+    );
+  });
 
-  deleteQueues = createEffect(() => this.actions.pipe(
-    ofType(queueActions.deleteQueue),
-    switchMap(action => this.dialog.open<ConfirmDialogComponent, ConfirmDialogConfig, boolean>(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Delete Queue',
-          body: `Are you sure you would like to delete the "<b>${escape(action.queue.name)}</b>" queue?`,
-          centerText: true,
-          yes: 'Delete',
-          no: 'Cancel',
-          iconClass: 'al-ico-trash'
-        }
-      }).afterClosed().pipe(
-      filter(response => response),
-      map(() => action)
-    )),
-    switchMap(action => this.queuesApi.queuesDelete({queue: action.queue.id})),
-    mergeMap(() => [queueActions.getQueues(), queueActions.setSelectedQueue({})]),
-    catchError(err => [
-      deactivateLoader(queueActions.deleteQueue.type),
-      requestFailed(err),
-      addMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')
-    ])
-  ));
-
-  clearQueue = createEffect(() => this.actions.pipe(
+  clearQueue = createEffect(() => {
+    return this.actions.pipe(
     ofType(queueActions.clearQueue),
     switchMap(action => this.queuesApi.queuesClearQueue({
       queue: action.queue.id
     }).pipe(
       concatLatestFrom(() => [this.store.select(selectSelectedQueue)]),
       mergeMap(([, selectedQueue]) => [
-        queueActions.getQueues(),
+        queueActions.getQueues({}),
           ...(selectedQueue ? [queueActions.refreshSelectedQueue({})] : []),
-        deactivateLoader(action.type)
-      ]),
-      catchError(err => [
-        deactivateLoader(action.type),
-        requestFailed(err),
-        addMessage(MESSAGES_SEVERITY.ERROR, 'Clear queue failed')])
-    ))
-  ));
+          deactivateLoader(action.type)
+        ]),
+        catchError(err => [
+          deactivateLoader(action.type),
+          requestFailed(err),
+          addMessage(MESSAGES_SEVERITY.ERROR, 'Clear queue failed')])
+      ))
+    );
+  });
 
-  moveExperimentToTopOfQueue = createEffect(() => this.actions.pipe(
-    ofType(queueActions.moveExperimentToTopOfQueue),
-    concatLatestFrom(() => this.store.select(selectSelectedQueue)),
-    switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToFront({
-      queue: queue.id,
-      task: action.task
-    }).pipe(
-      map(() => queueActions.refreshSelectedQueue({})),
-      catchError(err => [
-        deactivateLoader(action.type),
-        requestFailed(err),
-        addMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
-    ))
-  ));
+  moveExperimentToTopOfQueue = createEffect(() => {
+    return this.actions.pipe(
+      ofType(queueActions.moveExperimentToTopOfQueue),
+      concatLatestFrom(() => this.store.select(selectSelectedQueue)),
+      switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToFront({
+        queue: queue.id,
+        task: action.task
+      }).pipe(
+        map(() => queueActions.refreshSelectedQueue({})),
+        catchError(err => [
+          deactivateLoader(action.type),
+          requestFailed(err),
+          addMessage(MESSAGES_SEVERITY.ERROR, 'Move Task failed')])
+      ))
+    )
+  });
 
   moveExperimentToBottomOfQueue = createEffect(() => this.actions.pipe(
     ofType(queueActions.moveExperimentToBottomOfQueue),
@@ -177,7 +171,7 @@ export class QueuesEffect {
       map(() => queueActions.refreshSelectedQueue({})),
       catchError(err => [deactivateLoader(action.type),
         requestFailed(err),
-        addMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
+        addMessage(MESSAGES_SEVERITY.ERROR, 'Move Task failed')])
     ))
   ));
 
@@ -231,11 +225,11 @@ export class QueuesEffect {
       map((res)=> {return {...action, queueId: res.id}})
     )),
     switchMap((action) => this.queuesApi.queuesAddTask({queue: action.queueId, task: action.task}).pipe(
-        mergeMap(() => [queueActions.refreshSelectedQueue({}), queueActions.getQueues()]),
+        mergeMap(() => [queueActions.refreshSelectedQueue({}), queueActions.getQueues({})]),
         catchError(err => [
           deactivateLoader(action.type),
           requestFailed(err),
-          addMessage(MESSAGES_SEVERITY.ERROR, 'Add experiment to queue failed')])
+          addMessage(MESSAGES_SEVERITY.ERROR, 'Add Task to queue failed')])
       )
     )
   ));
@@ -315,8 +309,6 @@ export class QueuesEffect {
           return [
             deactivateLoader(action.type),
             queueActions.setStats({data: newStats}),
-            queueActions.getQueues(),
-            queueActions.refreshSelectedQueue({autoRefresh: true}),
             hideNoStatsNotice()
           ];
         }),

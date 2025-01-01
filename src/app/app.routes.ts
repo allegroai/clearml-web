@@ -13,8 +13,8 @@ export const routes: Routes = [
   },
   {
     path: 'projects',
-    loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule),
     data: {search: true},
+    loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule),
   },
   {path: 'login', loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule)},
   {
@@ -22,7 +22,6 @@ export const routes: Routes = [
     loadChildren: () => import('./features/settings/settings.module').then(m => m.SettingsModule),
     data: {search: false, workspaceNeutral: false, },
   },
-
   {
     path: 'projects',
     data: {search: true},
@@ -33,15 +32,15 @@ export const routes: Routes = [
         data: {search: true},
         children: [
           {path: '', pathMatch: 'full', children: [], canActivate: [projectRedirectGuardGuard]},
-          {path: '', redirectTo: '*', pathMatch: 'full'},
           {
             path: 'overview',
             loadChildren: () => import('./webapp-common/project-info/project-info.module').then(m => m.ProjectInfoModule),
             canDeactivate: [resetContextMenuGuard]
           },
           {path: 'projects', loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule)},
+          {path: 'experiments', redirectTo: 'tasks'},
           {
-            path: 'experiments',
+            path: 'tasks',
             loadChildren: () => import('./features/experiments/experiments.module').then(m => m.ExperimentsModule),
             canDeactivate: [resetContextMenuGuard]
           },
@@ -50,10 +49,12 @@ export const routes: Routes = [
             loadChildren: () => import('./webapp-common/models/models.module').then(m => m.ModelsModule),
             canDeactivate: [resetContextMenuGuard]
           },
+          {path: 'compare-experiments', redirectTo: 'compare-tasks'},
           {
-            path: 'compare-experiments',
-            loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule),
+            path: 'compare-tasks',
             data: {entityType: EntityTypeEnum.experiment},
+            loadChildren: () =>
+              import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },
           {
             path: 'compare-models',
@@ -76,16 +77,27 @@ export const routes: Routes = [
       {
         path: ':projectId',
         children: [
-          {path: 'pipelines',  loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule)},
-          {path: 'projects',  loadComponent: () => import('@common/pipelines/nested-pipeline-page/nested-pipeline-page.component')
-              .then(m => m.NestedPipelinePageComponent)},
           {
-            path: 'experiments', loadChildren: () => import('@common/pipelines-controller/pipelines-controller.module').then(m => m.PipelinesControllerModule)
+            path: 'pipelines',
+            loadChildren: () =>
+              import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule)},
+          {
+            path: 'projects',
+            loadComponent: () =>
+              import('@common/pipelines/nested-pipeline-page/nested-pipeline-page.component').then(m => m.NestedPipelinePageComponent)
           },
+          {path: 'experiments', redirectTo: 'tasks'},
           {
-            path: 'compare-experiments',
+            path: 'tasks',
+            loadChildren: () =>
+              import('@common/pipelines-controller/pipelines-controller.module').then(m => m.PipelinesControllerModule)
+          },
+          {path: 'compare-experiments', redirectTo: 'compare-tasks'},
+          {
+            path: 'compare-tasks',
             data: {entityType: EntityTypeEnum.controller},
-            loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
+            loadChildren: () =>
+              import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },
         ]
       },
@@ -105,6 +117,11 @@ export const routes: Routes = [
     path: 'endpoints',
     loadChildren: () => import('./webapp-common/serving/serving.module').then(m => m.ServingModule),
     canDeactivate: [resetContextMenuGuard]
+  },
+  {
+    path: 'enterprise',
+    loadChildren: () => import('@common/enterprise-visibility/enterprise.routes').then(r => r.routes),
+    canDeactivate: [resetContextMenuGuard],
   },
   {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
   {path: '**', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},

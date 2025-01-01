@@ -91,7 +91,7 @@ export class DeleteDialogEffectsBase {
             })));
       case EntityTypeEnum.dataset:
       case EntityTypeEnum.experiment:
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         return (resetMode ? this.tasksApi.tasksResetMany({
           ids,
           delete_external_artifacts: deleteArtifacts,
@@ -120,8 +120,8 @@ export class DeleteDialogEffectsBase {
           })));
       case EntityTypeEnum.project:
       case EntityTypeEnum.pipeline:
-      case EntityTypeEnum.simpleDataset:
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+      case EntityTypeEnum.openDataset:
+
         return this.projectsApi.projectsDelete({
           project: entities[0].id,
           delete_contents: true,
@@ -144,7 +144,7 @@ export class DeleteDialogEffectsBase {
         return selectSelectedExperiments;
       case EntityTypeEnum.model:
         return selectSelectedModels;
-      case EntityTypeEnum.simpleDataset:
+      case EntityTypeEnum.openDataset:
       case EntityTypeEnum.pipeline:
       case EntityTypeEnum.project:
         return selectProjectForDelete;
@@ -256,7 +256,7 @@ export class DeleteDialogEffectsBase {
         }
         acc[bucket].push(fileSrc);
         return acc;
-      }, {} as { [bucket: string]: string[] });
+      }, {} as Record<string, string[]>);
       return Object.entries(filesPerBucket);
     }),
     mergeMap(([[, files]]) => this.adminService.deleteS3Files(files, false)),
@@ -311,8 +311,9 @@ export class DeleteDialogEffectsBase {
       data: {
         title: 'Delete Pipeline',
         body: 'Deleting the last run of a pipeline will also delete the pipeline',
-        iconClass: 'i-alert',
-        yes: 'Delete',
+        iconClass: 'al-ico-alert',
+        iconColor: 'var(--color-warning)',
+        yes: 'DELETE',
         no: 'Cancel'
       } as ConfirmDialogConfig
     }).afterClosed()

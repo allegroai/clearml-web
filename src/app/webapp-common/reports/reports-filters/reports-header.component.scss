@@ -6,7 +6,7 @@
   }
   .sm-card-list-header.archive-mode::after {
     content: "";
-    background: #333746;
+    background: var(--color-surface-variant);
     position: absolute;
     z-index: -1;
     top: 0;

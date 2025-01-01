@@ -1,11 +1,14 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {MatSlideToggle, MatSlideToggleChange} from '@angular/material/slide-toggle';
-import {neverShowPopupAgain, setHideRedactedArguments} from '@common/core/actions/layout.actions';
+import {neverShowPopupAgain, setHideEnterpriseFeatures, setHideRedactedArguments} from '@common/core/actions/layout.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {Store} from '@ngrx/store';
 import {popupId, TipsService} from '@common/shared/services/tips.service';
-import {selectHideRedactedArguments, selectNeverShowPopups} from '@common/core/reducers/view.reducer';
-import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
+import {
+  selectHideEnterpriseFeatures,
+  selectHideRedactedArguments,
+  selectNeverShowPopups
+} from '@common/core/reducers/view.reducer';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
 import {MatDialog} from '@angular/material/dialog';
@@ -15,6 +18,8 @@ import {setBlockUserScript, setHideExamples, setShowHidden} from '@common/core/a
 import RoleEnum = AuthEditUserRequest.RoleEnum;
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-stats/usage-stats.component';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-profile-preferences',
@@ -24,7 +29,9 @@ import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-st
   imports: [
     MatSlideToggle,
     TooltipDirective,
-    UsageStatsComponent
+    UsageStatsComponent,
+    MatButton,
+    MatIcon
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -34,17 +41,17 @@ export class ProfilePreferencesComponent {
   private dialog = inject(MatDialog);
   protected config = inject(ConfigurationService);
   protected tipsService = inject(TipsService);
-  public featuresEnum = FeaturesEnum;
-  public supportReScaling = window['chrome'] || window['safari'];
-  public disableHidpiChanged: boolean = false;
-  public popupId = popupId;
-  public disableHidpi = window.localStorage.getItem('disableHidpi') === 'true';
-  public neverShowTipsAgain = this.store.selectSignal(selectNeverShowPopups);
-  public blockUserScripts = this.store.selectSignal(selectBlockUserScript);
-  public show = this.store.selectSignal(selectShowHiddenUserSelection);
-  public admin = computed(() => this.currentUser()?.role === RoleEnum.Admin);
-  public hideRedactedArguments = this.store.selectSignal(selectHideRedactedArguments);
-  public hideExamples= this.store.selectSignal(selectHideExamples);
+  protected supportReScaling = window['chrome'] || window['safari'];
+  protected disableHidpiChanged= false;
+  protected popupId = popupId;
+  protected disableHidpi = window.localStorage.getItem('disableHidpi') === 'true';
+  protected neverShowTipsAgain = this.store.selectSignal(selectNeverShowPopups);
+  protected blockUserScripts = this.store.selectSignal(selectBlockUserScript);
+  protected hideEnterpriseFeatures = this.store.selectSignal(selectHideEnterpriseFeatures);
+  protected show = this.store.selectSignal(selectShowHiddenUserSelection);
+  protected admin = computed(() => this.currentUser()?.role === RoleEnum.Admin);
+  protected hideRedactedArguments = this.store.selectSignal(selectHideRedactedArguments);
+  protected hideExamples= this.store.selectSignal(selectHideExamples);
   private currentUser= this.store.selectSignal(selectCurrentUser);
 
   hidpiChange(event: MatSlideToggleChange) {
@@ -82,5 +89,9 @@ export class ProfilePreferencesComponent {
 
   toggleBlockUserScript(toggle: MatSlideToggleChange) {
     this.store.dispatch(setBlockUserScript({block: toggle.checked}));
+  }
+
+  toggleEnterpriseFeatures(hide: boolean) {
+    this.store.dispatch(setHideEnterpriseFeatures({hide}));
   }
 }

@@ -14,7 +14,7 @@ import {DeviceDetectorService} from 'ngx-device-detector';
 import {default as semverGte} from 'semver/functions/gte';
 import {default as semverGt} from 'semver/functions/gt';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
-import {ChangesModalData, VersionChangesModalComponent} from '@common/layout/version-chnages-modal/version-changes-modal.component';
+import {ChangesModalData, VersionChangesModalComponent} from '@common/layout/version-changes-modal/version-changes-modal.component';
 
 export interface Change {
   version: string;
@@ -58,8 +58,8 @@ export class ChangesService {
         takeUntilDestroyed(),
         debounceTime(1000),
         filter(([, user, firstLogin, tos, isAdmin]) =>
-          isAdmin && !this.mobile && !firstLogin && !!user && !tos.accept_required && !this.neverShowAgainForVersion && this.matDialog.openDialogs.length === 0),
-        distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
+          isAdmin && !this.mobile && !firstLogin && !!user && !tos?.accept_required && !this.neverShowAgainForVersion && this.matDialog.openDialogs.length === 0),
+        distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr?.[curr.length - 1]))
       .subscribe(() => {
         if (this.shouldDisplayChanges() && this.changesConfig()?.length > 0) {
           this.showChangesModal();

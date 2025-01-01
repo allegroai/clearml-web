@@ -1,55 +1,35 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import {Component, DestroyRef, inject} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {ActivatedRoute} from '@angular/router';
-import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
-import {ContextMenuService} from '@common/shared/services/context-menu.service';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
-import {Observable, Subscription} from 'rxjs';
 import {ORCHESTRATION_ROUTES} from '~/features/workers-and-queues/workers-and-queues.consts';
 import {headerActions} from '@common/core/actions/router.actions';
+import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'sm-orchestration',
   templateUrl: './orchestration.component.html',
   styleUrls: ['./orchestration.component.scss']
 })
-export class OrchestrationComponent implements OnInit, OnDestroy {
-  public queuesManager: boolean;
-  featuresEnum = FeaturesEnum;
-  private routeConfig$: Observable<string[]>;
-  private subs = new Subscription();
-  private hasResourceDashboard$: Observable<boolean>;
-  private hasApplications$: Observable<boolean>;
+export class OrchestrationComponent {
+  private store = inject(Store);
+  private destroyRef = inject(DestroyRef);
 
-  constructor(private dialog: MatDialog, private store: Store, private route: ActivatedRoute, protected contextMenuService: ContextMenuService) {
-    this.queuesManager = route.snapshot.data.queuesManager;
-    this.routeConfig$ = this.store.select(selectRouterConfig);
-  }
-
-
-  ngOnInit(): void {
-    this.subs.add(this.routeConfig$
-      .subscribe((conf) => {
-        this.setupOrchestrationContextMenu(conf[1]);
-      }));
-  }
-
-  setupOrchestrationContextMenu(entitiesType,) {
-    const contextMenu = ORCHESTRATION_ROUTES
-      .map(route => {
-        return {
-          ...route,
-          link: route.header === entitiesType ? undefined : `workers-and-queues/${route.header}`,
-          isActive: route.header === entitiesType
-        };
+  constructor() {
+    this.store.select(selectRouterConfig)
+      .pipe(
+        takeUntilDestroyed(),
+        debounceTime(100),
+        map(conf => conf?.[1]),
+        filter(feature => !!feature),
+        distinctUntilChanged(),
+      )
+      .subscribe((feature) => {
+        this.store.dispatch(headerActions.setTabs({contextMenu: ORCHESTRATION_ROUTES, active: feature}))
       });
-    this.store.dispatch(headerActions.setTabs({contextMenu}));
-  }
 
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
-    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
+    this.destroyRef.onDestroy(() => {
+      this.store.dispatch(headerActions.reset());
+    })
   }
-
 }

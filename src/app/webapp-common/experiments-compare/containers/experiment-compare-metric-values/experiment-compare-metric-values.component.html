@@ -1,7 +1,9 @@
 <mat-drawer-container autosize class="h-100">
   <mat-drawer #drawer [opened]="filterOpen" mode="over" (closedStart)="filterOpen = false; filterValue = ''" class="mat-elevation-z0">
     <div class="head">
-      <i class="close al-icon al-ico-dialog-x" (click)="drawer.close(); filterValue = ''" data-id="closeToggleGraph"></i>
+      <button mat-icon-button (click)="drawer.close(); filterValue = ''" data-id="closeToggleGraph" class="close">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
     </div>
     <div class="list-container">
       @if (settings) {
@@ -20,7 +22,7 @@
 
     @if (dataTable?.length === 0) {
       <div class="no-output">
-        <i class="i-no-table-data"></i>
+        <mat-icon fontSet="al" fontIcon="al-ico-no-data-table" class="xxxl"></mat-icon>
         <h4>NO METRICS</h4>
       </div>
     }
@@ -45,14 +47,18 @@
         <tr>
           <th class="filter-header-cell" [class.freeze-divider]="scrolled" pFrozenColumn [colSpan]="2">
             <div class="filter-header">
-              <button class="btn btn-icon" [class.is-filtered]="dataTable?.length > dataTableFiltered?.length">
-                <i [class]="'al-icon pointer ' + (dataTable?.length > dataTableFiltered?.length ? 'al-ico-filter-on':'al-ico-filter-off')"
+              <button mat-icon-button
+                      [class.is-filtered]="dataTable?.length > dataTableFiltered?.length"
+                      (click)="filterOpen = !filterOpen"
+              >
+                <mat-icon fontSet="al"
+                  [fontIcon]="dataTable?.length > dataTableFiltered?.length ? 'al-ico-filter-on' : 'al-ico-filter-off'"
                   [smTooltip]="dataTableFiltered?.length + '/' + dataTable?.length + ' filtered'"
                   [matTooltipDisabled]="dataTableFiltered?.length === dataTable?.length"
                   [showTooltip]="showFilterTooltip"
-                  (click)="filterOpen = !filterOpen">
+                >
                   <span class="path1"></span><span class="path2"></span>
-                </i>
+                </mat-icon>
               </button>
               <mat-form-field appearance="outline" class="light-theme mat-light no-bottom">
                 <input #filterRef
@@ -61,9 +67,13 @@
                   placeholder="Search metric"
                   matInput
                   autocomplete="off">
-                <i matSuffix class="al-icon sm-md search-icon me-2" [class]="variantFilter.value? 'al-ico-dialog-x pointer' : 'al-ico-search'"
-                  (click)="variantFilter.value && clear(); filterRef.focus()"
-                smClickStopPropagation></i>
+                @if (variantFilter.value) {
+                  <button matSuffix mat-icon-button (click)="clear(); filterRef.focus()">
+                    <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+                  </button>
+                } @else {
+                  <mat-icon matIconSuffix fontSet="al" fontIcon="al-ico-search"></mat-icon>
+                }
               </mat-form-field>
             </div>
           </th>
@@ -93,9 +103,8 @@
             <div class="variant-cell">
               <span class="ellipsis variant-name" [smTooltip]="metricVariant.variant" smShowTooltipIfEllipsis>{{ metricVariant.variant }}</span>
               @if (metricVariant.min === metricVariant.max) {
-                <i
-                  class="al-icon al-ico-equal-outline sm row-info-icon"
-                smTooltip="All scalars have the same value in this row"></i>
+                <mat-icon fontSet="al" fontIcon="al-ico-equal-outline" class="sm row-info-icon"
+                          smTooltip="All scalars have the same value in this row"></mat-icon>
               }
             </div>
           </td>

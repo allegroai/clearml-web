@@ -128,7 +128,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         const metrics = metricsWrapped.metrics || {};
 
         if (singleValues) {
-          const visibles = this.graphsComponent?.singleValueGraph.first?.chart.data.reduce((curr, data) => {
+          const visibles = this.graphsComponent?.singleValueGraph().at(0)?.chart.data.reduce((curr, data) => {
             curr[data.task] = data.visible;
             return curr;
           }, {}) ?? {};

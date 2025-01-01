@@ -1,6 +1,6 @@
 <sm-dialog-template
-  header="{{data.retryMode ? 'Retry' : 'Enqueue'}} Experiment"
-  iconClass="al-color blue-300 {{data.retryMode ? 'al-ico-retry' : 'al-ico-enqueue'}}"
+  header="{{data.retryMode ? 'Retry' : 'Enqueue'}} Task"
+  iconClass="{{data.retryMode ? 'al-ico-retry' : 'al-ico-enqueue'}}"
   [closeOnX]="false"
   (xClicked)="closeDialog(false)"
 >
@@ -19,7 +19,7 @@
 
     @if (enqueueWarning$ | ngrxPush) {
       <p class="mt-4 mb-4 text-danger enqueue-warning">
-        <b>Note: Some experiments seems to not contain any executable code.
+        <b>Note: Some tasks seems to not contain any executable code.
           <br>If enqueued to run, they might produce no results.</b>
       </p>
     }
@@ -42,19 +42,22 @@
         [displayWith]="displayFn"
         #auto="matAutocomplete"
       >
-        @if ((userAllowedToCreateQueue$ | ngrxPush) && queueControl.value && !(displayFn(queueControl.value) | stringIncludedInArray: queuesNames)) {
+        @if ((userAllowedToCreateQueue$ | ngrxPush) && queueControl.value &&
+          !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesNames) &&
+          !(($any(queueControl.value)?.name ?? queueControl.value) | stringIncludedInArray: queuesDisplays)
+        ) {
           <mat-option
             class="item"
-            [value]="{name:queueControl.value}"
+            [value]="{name: $any(queueControl.value)?.name ?? queueControl.value}"
           >"{{ displayFn(queueControl.value) }}"<span class="new">(Create New)</span></mat-option>
         }
         @for (option of filteredOptions$ | ngrxPush; track option.id) {
           <mat-option
             [value]="option"
-            [smTooltip]="option.name"
+            [smTooltip]="option.display_name ? option.display_name + ' (' + option.name + ')' : option.name"
             smShowTooltipIfEllipsis
           >
-            @for (part of (text.value ? split(option.name, text.value) : [[option.name, text.value]]); track part; let last = $last) {
+            @for (part of (text.value ? split(option.caption, text.value) : [[option.caption, text.value]]); track part; let last = $last) {
               <span class="pointer-events-none"
               >{{ part[0] }}@if (!last) {
                 <b>{{ part[1] }}</b>
@@ -73,10 +76,10 @@
 
   </form>
   <div class="buttons">
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id="CancelButton">
+    <button mat-stroked-button (click)="closeDialog(false)" data-id="CancelButton">
       CANCEL
     </button>
-    <button (click)="closeDialog(true)" class="btn btn-neon yes-button" [disabled]="!queueControl.valid" data-id="EnqueueButton">
+    <button mat-flat-button (click)="closeDialog(true)" [disabled]="!queueControl.valid" data-id="EnqueueButton">
       ENQUEUE
     </button>
   </div>

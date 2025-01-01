@@ -1,13 +1,11 @@
 import {GenericFooterItem} from './generic-footer-item';
-import {IFooterState} from './footer-items.models';
-import {IconNames} from '../../../constants';
+import {ItemState} from './footer-items.models';
 
 export class DividerFooterItem extends GenericFooterItem {
-  constructor() {
-    super({className: 'divider'});
-  }
+  override divider = true;
 
-  override getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+  override getItemState(): ItemState
+  {
     return {};
   }
 }

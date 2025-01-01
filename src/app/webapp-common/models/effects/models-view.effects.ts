@@ -72,7 +72,7 @@ export class ModelsViewEffects {
   /* eslint-disable @typescript-eslint/naming-convention */
 
   activeLoader = createEffect(() => this.actions$.pipe(
-    ofType(actions.getNextModels, actions.globalFilterChanged, actions.fetchModelsRequested),
+    ofType(actions.getNextModels, actions.globalFilterChanged, actions.fetchModelsRequested, actions.selectAllModels),
     filter((action) => !(action as ReturnType<typeof actions.refreshModels>).hideLoader),
     map(() => activeLoader('Fetch Models'))
   ));

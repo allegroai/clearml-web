@@ -2,19 +2,15 @@
 
 :host {
   display: flex;
+  position: relative;
   flex-direction: column;
   height: 100%;
-
-  a[href]:hover {
-    color: white;
-    text-decoration: none;
-  }
 
   .worker-info-container {
     display: grid;
     grid-template-columns: minmax(100px, 2fr) minmax(100px, 1fr);
     gap: 12px;
-    padding: 12px;
+    padding: 12px 24px;
   }
 
   .queues-table-container {
@@ -24,11 +20,12 @@
 
   ::ng-deep .table-row {
     height: 40px;
-    background-color: $blue-800 !important;
-    border-bottom: 1px solid $dark-border;
+    border-bottom: 1px solid var(--color-outline-variant);
     padding: 0 !important;
     display: flex;
-    &:last-of-type {border-bottom-color: $dark-border !important;}
+    &:last-of-type {
+      border-bottom-color: var(--color-outline-variant) !important
+    };
   }
 
   ::ng-deep {
@@ -36,8 +33,7 @@
       height: 39px;
       align-items: center;
       line-height: normal !important;
-      border-bottom: 1px solid $dark-border !important;
-      color: $blue-300;
+      border-bottom: 1px solid var(--color-outline-variant) !important;
     }
   }
 
@@ -50,27 +46,11 @@
     line-height: 40px;
   }
 
-  .tabs-container {
-    position: relative;
-    height: 41px;
-    background-color: $blue-700;
-    border-bottom: 1px solid $dark-border;
-
-    ::ng-deep .navbar-item {
-      height: 100%;
-      padding: 0 15px;
-      margin: 0 1px;
-    }
-  }
-
   .close {
     position: absolute;
-    right: 24px;
-    top: 12px;
-    color: $blue-300;
-    &:hover {
-      color: $blue-200;
-    }
+    right: 12px;
+    top: 6px;
+    z-index: 5;
   }
 
   .id-cell {

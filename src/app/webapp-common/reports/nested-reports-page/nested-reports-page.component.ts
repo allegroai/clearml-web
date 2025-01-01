@@ -1,8 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {AsyncPipe, NgIf} from '@angular/common';
 import {ReportsPageComponent} from '@common/reports/reports-page/reports-page.component';
 import {getAllProjectsPageProjects, resetProjects, setProjectsOrderBy} from '@common/projects/common-projects.actions';
 import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
@@ -11,6 +10,8 @@ import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, skip} from 'rxjs/operators';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {PushPipe} from '@ngrx/component';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-nested-reports-page',
@@ -18,14 +19,14 @@ import {PushPipe} from '@ngrx/component';
   styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
   imports: [
     ProjectsSharedModule,
-    AsyncPipe,
-    NgIf,
     CircleCounterComponent,
     PushPipe,
-  ],
+    MatButton,
+    MatIcon
+],
   standalone: true
 })
-export class NestedReportsPageComponent extends ReportsPageComponent {
+export class NestedReportsPageComponent extends ReportsPageComponent implements OnInit, OnDestroy {
   entityTypeEnum = ProjectTypeEnum;
   circleTypeEnum = CircleTypeEnum;
   hideMenu = false;
@@ -48,7 +49,7 @@ export class NestedReportsPageComponent extends ReportsPageComponent {
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   override orderByChanged(sortByFieldName: string) {
     this.store.dispatch(setProjectsOrderBy({orderBy: sortByFieldName}));
   }

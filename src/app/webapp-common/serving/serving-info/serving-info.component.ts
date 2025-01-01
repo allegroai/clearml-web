@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
@@ -17,7 +17,8 @@ import {ServingActions} from '@common/serving/serving.actions';
 @Component({
   selector: 'sm-serving-info',
   templateUrl: './serving-info.component.html',
-  styleUrls: ['./serving-info.component.scss']
+  styleUrls: ['./serving-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServingInfoComponent implements OnInit, OnDestroy {
   public minimized: boolean;

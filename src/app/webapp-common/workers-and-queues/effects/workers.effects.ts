@@ -22,13 +22,13 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 const prepareStatsQuery = (entitie: string, keys: { key: string }[], range: number, granularity: number): WorkersGetStatsRequest => {
   const now = Math.floor((new Date()).getTime() / 1000);
   return {
-    /* eslint-disable @typescript-eslint/naming-convention */
+
     from_date: now - range,
     to_date: now,
     worker_ids: entitie ? [entitie] : null,
     items: castArray(keys),
     interval: granularity
-    /* eslint-enable @typescript-eslint/naming-convention */
+
   };
 };
 
@@ -77,7 +77,7 @@ export class WorkersEffects {
   ));
 
   getStats$ = createEffect(() => this.actions.pipe(
-    ofType(workersActions.getWorkers),
+    ofType(workersActions.getWorkerStats),
     concatLatestFrom(() => [
       this.store.select(selectStats),
       this.store.select(selectStatsTimeFrame),
@@ -112,11 +112,11 @@ export class WorkersEffects {
         );
       } else {
         const req: WorkersGetActivityReportRequest = {
-          /* eslint-disable @typescript-eslint/naming-convention */
+
           from_date: now - timeFrame,
           to_date: now,
           interval: granularity
-          /* eslint-enable @typescript-eslint/naming-convention */
+
         };
 
         return this.workersApi.workersGetActivityReport(req).pipe(

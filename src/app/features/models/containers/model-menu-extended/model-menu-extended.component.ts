@@ -1,5 +1,5 @@
-import { Component} from '@angular/core';
-import {ModelMenuComponent} from '@common/models/containers/model-menu/model-menu.component';
+import {Component, signal} from '@angular/core';
+import {ModelMenuComponent} from '../../../../webapp-common/models/containers/model-menu/model-menu.component';
 
 @Component({
   selector: 'sm-model-menu-extended',
@@ -7,7 +7,6 @@ import {ModelMenuComponent} from '@common/models/containers/model-menu/model-men
   styleUrls: ['../../../../webapp-common/models/containers/model-menu/model-menu.component.scss']
 })
 export class ModelMenuExtendedComponent extends ModelMenuComponent {
-  get contextMenu() {
-    return this;
-  }
+
+  contextMenu = signal(this);
 }

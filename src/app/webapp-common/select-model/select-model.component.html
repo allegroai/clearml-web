@@ -32,7 +32,7 @@
       [tableSortFields]="(tableSortFields$ | ngrxPush)"
       [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
       [tableFilters]="(tableFilters$ | ngrxPush)"
-      [selectedModels]="selectedModels$ | ngrxPush"
+      [checkedModels]="selectedModels$ | ngrxPush"
       [onlyPublished]="data.selectionMode === 'single'"
       [columnResizeMode]="'fit'"
       (modelsSelectionChanged)="modelsSelectionChanged($event)"
@@ -44,14 +44,14 @@
     >
     </sm-models-table>
     <div class="buttons">
-      <button (click)="closeDialog(null)" class="btn btn-outline-neon" data-id ="CancelButton">
+      <button mat-stroked-button (click)="closeDialog(null)" data-id ="CancelButton">
         CANCEL
       </button>
-      <button type="submit" *ngIf="data.selectionMode === 'multiple'"
-              (click)="closeDialogMultiple()"
-              class="btn btn-neon yes-button" data-id="ApplyButton">
-        APPLY
-      </button>
+      @if (data.selectionMode === 'multiple') {
+        <button mat-flat-button type="submit" (click)="closeDialogMultiple()" data-id="ApplyButton">
+          APPLY
+        </button>
+      }
     </div>
   </div>
 </sm-dialog-template>

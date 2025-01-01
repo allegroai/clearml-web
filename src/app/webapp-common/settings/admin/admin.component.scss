@@ -1,5 +1,4 @@
 @import "variables";
-@import "../../shared/ui-components/styles/mixins/lines";
 
 $tab-width: 15vw;
 
@@ -9,7 +8,7 @@ $tab-width: 15vw;
   //width: 100%;
   overflow: auto;
   // padding-top: 20px;
- // background-color: $blue-700;
+ // background-color: var(--color-surface-container-low);
 
 
   header {
@@ -33,7 +32,7 @@ $tab-width: 15vw;
     margin: 6px 0 0;
     padding: 16px;
     border-radius: 4px;
-    border: solid 1px $blue-500;
+    border: solid 1px var(--color-surface-container-high);
     display: flex;
     justify-content: space-between;
     .edit-button{
@@ -43,7 +42,7 @@ $tab-width: 15vw;
   }
 
   .toggle-title {
-    --mdc-theme-text-primary-on-background: #{$blue-200};
+    --mdc-theme-text-primary-on-background: var(--color-on-surface-variant);
     margin-bottom: 8px;
   }
 
@@ -53,39 +52,42 @@ $tab-width: 15vw;
   }
 
   .read-only-section {
+    display: flex;
+    flex-direction: column;
     border-radius: 4px;
-    border: solid 1px $blue-500;
-    background-color: $blue-650;
+    border: solid 1px var(--color-surface-container-high);
+    background-color: var(--color-surface-container);
     margin-bottom: 24px;
     padding: 16px;
 
     .read-only-title {
-      color: $blue-200;
+      color: var(--color-on-surface-variant);
       font-weight: 500;
-      margin-bottom: 12px;
     }
-  }
 
-  .vault-group {
-    display: block;
-    color: $blue-280;
-    margin-bottom: 6px;
-
-    &:hover {
-      color: white;
-      text-decoration: underline;
+    ul {
+      padding: 0 12px;
+    }
+    li {
+      margin-bottom: 6px;
+      list-style-type: none;
+      a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
     }
   }
 
   .title {
     display: flex;
     align-items: center;
-    color: $white;
+    color: var(--color-on-surface);
     font-size: 16px;
     i {
-      color: $blue-300;
+      color: var(--color-outline);
       &:hover {
-        color: $blue-200;
+        color: var(--color-on-surface-variant);
       }
     }
   }
@@ -101,10 +103,10 @@ $tab-width: 15vw;
     display: flex;
     align-items: center;
     margin-left: 12px;
-    color: $blue-300;
+    color: var(--color-outline);
 
     &:hover {
-      color: $purple;
+      color: var(--color-primary);
     }
   }
 

@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Out
 import {MatTreeFlatDataSource, MatTreeFlattener, MatTreeModule} from '@angular/material/tree';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatButtonModule} from '@angular/material/button';
-import {NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
 import {orderJson} from '@common/shared/utils/shared-utils';
 
 export interface Segment {
@@ -31,11 +31,9 @@ interface JsonChild {
   imports: [
     MatButtonModule,
     MatTreeModule,
-    NgIf,
     NgClass,
-    NgTemplateOutlet,
-    NgForOf,
-  ],
+    NgTemplateOutlet
+],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JsonViewerComponent {

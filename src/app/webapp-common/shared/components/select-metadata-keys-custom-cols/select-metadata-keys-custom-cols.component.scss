@@ -19,10 +19,10 @@
     gap: 6px;
     align-items: center;
     text-align: center;
-    border-bottom: 1px solid $blue-200;
+    border-bottom: 1px solid var(--color-outline-variant);
     min-height: 48px;
     h3 {
-      color: $blue-400;
+      color: var(--color-primary);
       font-size: 14px;
       font-weight: normal;
       margin: 0;
@@ -47,7 +47,7 @@
 .empty-state {
   text-align: center;
   margin: auto;
-  color: $blue-300;
+  color: var(--color-on-surface-variant);
   font-size: 14px;
 }
 
@@ -56,18 +56,4 @@
 }
 
 
-:host-context(.dark) {
-  .head {
-    border-bottom-color: $blue-500;
-    h3 {
-      color: $blue-200;
-    }
-    .al-icon {
-      color: $blue-300;
-      &:hover {
-        color: $blue-200;
-      }
-    }
-  }
-}
 

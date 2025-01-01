@@ -2,26 +2,31 @@ import {Component} from '@angular/core';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {AsyncPipe, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
 import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
   selector: 'sm-nested-datasets-page',
   templateUrl: './nested-datasets-page.component.html',
   styleUrls: [
     '../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss',
-    '../../../webapp-common/datasets/simple-datasets/simple-datasets.component.scss'
+    '../../../webapp-common/datasets/open-datasets/open-datasets.component.scss'
   ],
   imports: [
     ProjectsSharedModule,
     AsyncPipe,
-    NgIf,
     CircleCounterComponent,
-    TagListComponent
-  ],
+    TagListComponent,
+    MatButton,
+    MatIcon,
+    ClickStopPropagationDirective
+],
   standalone: true
 })
 export class NestedDatasetsPageComponent extends CommonProjectsPageComponent {

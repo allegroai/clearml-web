@@ -1,29 +1,40 @@
 <ng-content select="[empty-state]"></ng-content>
-<div *ngIf="!showSpinner && !editable && lines?.length" class="diff-container h-100">
-  <div class="floating-buttons">
-    <ng-content select="[extra-buttons]"></ng-content>
-    <sm-copy-clipboard *ngIf="formData" [clipboardText]="formData" label="" class="copy-textarea" tooltipText='Copy to clipboard' theme="text-area" data-id="copy to clipboard"></sm-copy-clipboard>
-    <sm-search
-      class="dark-theme text-area"
-      [value]="search"
-      [minimumChars]="minimumChars"
-      [expandOnHover]="true"
-      [enableNavigation]="true"
-      [searchResultsCount]="searchResultsCount"
-      [searchCounterIndex]="index"
-      (valueChanged)="onFindNextResult($event)"
-    ></sm-search>
+@if (!showSpinner() && !editable() && formData()?.length && !forceEmpty()) {
+  <div class="diff-container h-100">
+    <div class="floating-buttons">
+      <ng-content select="[extra-buttons]"></ng-content>
+      @if (formData()) {
+        <sm-copy-clipboard [clipboardText]="formData()" label="" class="copy-textarea" tooltipText='Copy to clipboard' data-id="copy to clipboard"></sm-copy-clipboard>
+      }
+      <sm-search
+        class="outline"
+        [value]="search"
+        [minimumChars]="minimumChars"
+        [expandOnHover]="true"
+        [enableNavigation]="true"
+        [searchResultsCount]="searchResultsCount"
+        [searchCounterIndex]="index"
+        (valueChanged)="onFindNextResult($event)"
+      ></sm-search>
+    </div>
+    <cdk-virtual-scroll-viewport itemSize="19" minBufferPx = 400, maxBufferPx = 600
+      class="viewport"
+      [style.min-height]="minHeight()"
+      [class.disabled]="disabled()"
+      [class.isReadonly]="!editable()">
+      <div *cdkVirtualFor="let line of lines(); let lineIndex=index" class="line">@for (part of (search ? split(line, search) : [[line, search]]); track part; let last = $last) {
+        <span
+          >{{part[0]}}@if (!last) {
+          <span class="found" [class.current]="indexes[index] === lineIndex"
+          >{{part[1]}}</span>
+        }</span>
+      }</div>
+    </cdk-virtual-scroll-viewport>
   </div>
-  <cdk-virtual-scroll-viewport #scroll itemSize="19" minBufferPx = 400, maxBufferPx = 600
-                               class="viewport"
-                               [style.min-height]="minHeight"
-                               [class.disabled]="disabled"
-                               [class.isReadonly]="!editable">
-    <div *cdkVirtualFor="let line of lines; let lineIndex=index" class="line"><span
-      *ngFor="let part of (search ? split(line, search) : [[line, search]]); let last=last"
-      >{{part[0]}}<span class="found" [class.current]="indexes[index] === lineIndex" *ngIf="!last"
-        >{{part[1]}}</span></span></div>
-  </cdk-virtual-scroll-viewport>
-</div>
-<span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">{{emptyMessage}}</span>
-<mat-spinner *ngIf="showSpinner" class="mx-auto mt-3" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+}
+@if ((forceEmpty() || (!showSpinner() && !formData()?.length)) && !editable()) {
+  <span class="no-changes">{{emptyMessage()}}</span>
+}
+@if (showSpinner()) {
+  <mat-spinner class="mx-auto mt-3" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+}

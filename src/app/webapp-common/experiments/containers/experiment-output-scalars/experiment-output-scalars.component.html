@@ -3,23 +3,23 @@
 } @else {
   <mat-drawer-container autosize class="light-theme">
     <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized">
-      <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()" data-id="closeToggleGraph"></i>
       <div class="list-container">
-        <sm-graph-settings-bar
-          class="drawer-settings-bar"
-          *ngIf="!minimized"
-          [verticalLayout]="true"
-          [smoothWeight]="smoothWeight$ | ngrxPush"
-          [smoothType]="smoothType$ | ngrxPush"
-          [xAxisType]="xAxisType$ | ngrxPush"
-          [groupBy]="groupBy"
-          [groupByOptions]="groupByOptions"
-          (changeWeight)="changeSmoothness($event)"
-          (toggleSettings)="toggleSettingsBar()"
-          (changeXAxisType)="changeXAxisType($event)"
-          (changeGroupBy)="changeGroupBy($event)"
-          (changeSmoothType)="changeSmoothType($event)"
-        ></sm-graph-settings-bar>
+        @if (!minimized) {
+          <sm-graph-settings-bar
+            class="drawer-settings-bar"
+            [verticalLayout]="true"
+            [smoothWeight]="smoothWeight$ | ngrxPush"
+            [smoothType]="smoothType$ | ngrxPush"
+            [xAxisType]="xAxisType$ | ngrxPush"
+            [groupBy]="groupBy"
+            [groupByOptions]="groupByOptions"
+            (changeWeight)="changeSmoothness($event)"
+            (toggleSettings)="toggleSettingsBar()"
+            (changeXAxisType)="changeXAxisType($event)"
+            (changeGroupBy)="changeGroupBy($event)"
+            (changeSmoothType)="changeSmoothType($event)"
+          ></sm-graph-settings-bar>
+        }
 
         <sm-selectable-grouped-filter-list
           [list]="scalarList"
@@ -29,41 +29,26 @@
           (hiddenChanged)="hiddenListChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
         ></sm-selectable-grouped-filter-list>
+        @if (minimized) {
+          <button mat-icon-button class="close sm" (click)="drawer.close()" data-id="closeToggleGraph">
+            <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+          </button>
+        }
       </div>
     </mat-drawer>
     <mat-drawer-content class="overflow-hidden">
-      <sm-graph-settings-bar
-        class="ribbon-setting-bar"
-        [class.with-settings]="!!(showSettingsBar$ | async) && minimized"
-        [smoothWeight]="smoothWeight$ | ngrxPush"
-        [smoothType]="smoothType$ | ngrxPush"
-        [xAxisType]="xAxisType$ | ngrxPush"
-        [groupBy]="groupBy"
-        [groupByOptions]="groupByOptions"
-        [splitSize]="splitSize$ | ngrxPush"
-        (changeWeight)="changeSmoothness($event)"
-        (toggleSettings)="toggleSettingsBar()"
-        (changeXAxisType)="changeXAxisType($event)"
-        (changeGroupBy)="changeGroupBy($event)"
-        (changeSmoothType)="changeSmoothType($event)"
-      ></sm-graph-settings-bar>
       <div class="graphs-container" [class.maximized]="!minimized">
         @if ((metricValuesView$ | async) === false && minimized) {
           <div class="hover-button">
-            <button
-              class="btn btn-secondary"
-              (click)="drawer.open()"
-              smTooltip="Toggle Graphs"
-            >
-              <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
+            <button mat-flat-button class="icon-only" (click)="drawer.open()" smTooltip="Toggle Graphs">
+              <mat-icon fontSet="al" fontIcon="al-ico-eye-outline"></mat-icon>
             </button>
           </div>
         }
-
         <sm-experiment-graphs
           [class.with-settings]="!!(showSettingsBar$ | async) && minimized"
           #experimentGraphs
-          [isGroupGraphs]="false"
+          [isGroupGraphs]="groupBy === 'none'"
           [metrics]="graphs"
           [singleValueData]="singleValueData$ | ngrxPush"
           [experimentName]="experimentName"

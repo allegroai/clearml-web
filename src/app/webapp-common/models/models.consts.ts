@@ -40,7 +40,6 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     headerStyleClass: 'selected-col-header',
     style           : {width: '70px', maxWidth: '70px'},
     disableDrag     : true,
-    disablePointerEvents: true,
   },
   {
     id            : MODELS_TABLE_COL_FIELDS.ID,

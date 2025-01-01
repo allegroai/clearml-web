@@ -1,9 +1,13 @@
-@import "variables";
+@import "mixins/link";
+
 :host-context(.normal-size){
   display: block;
   height: 480px;
 }
 :host {
+  @include link();
+
+
   display: block;
   height: 640px;
   max-height: calc(100vh - 120px);
@@ -17,10 +21,10 @@
   gap: 6px;
   align-items: center;
   text-align: center;
-  border-bottom: 1px solid $blue-200;
+  border-bottom: 1px solid var(--color-outline-variant);
   min-height: 48px;
   h3 {
-    color: $blue-400;
+    color: var(--color-primary);
     font-size: 14px;
     font-weight: normal;
     margin: 0;

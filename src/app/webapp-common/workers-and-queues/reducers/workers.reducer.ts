@@ -1,5 +1,5 @@
 import {createReducer, on} from '@ngrx/store';
-import {WorkerExt, setWorkers, workersTableSetSort, getSelectedWorker, setSelectedWorker, setStats, setStatsParams}
+import {WorkerExt, setWorkers, workersTableSetSort, getSelectedWorker, setSelectedWorker, setStats, setStatsParams, resetWorkers}
   from '../actions/workers.actions';
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {TIME_INTERVALS} from '../workers-and-queues.consts';
@@ -30,6 +30,7 @@ export const workersReducer = createReducer(
   on(setSelectedWorker, getSelectedWorker, (state, action): WorkersState => ({...state, selectedWorker: action.worker})),
   on(workersTableSetSort, (state, action): WorkersState => ({...state, tableSortFields: action.orders})),
   on(setStats, (state, action): WorkersState => ({...state, stats: action.data})),
+  on(resetWorkers, (): WorkersState => ({...initWorkersStore})),
   on(setStatsParams, (state, action): WorkersState => ({
     ...state,
     selectedStatsTimeFrame: action.timeFrame,

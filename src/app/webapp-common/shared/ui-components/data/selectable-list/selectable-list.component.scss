@@ -1,9 +1,9 @@
 @import "variables";
 
 
-.gray {
-  color: gray;
-}
+//.gray {
+//  color: gray;
+//}
 
 i.icon {
   font-size: 15px;
@@ -13,7 +13,7 @@ i.icon {
 
 .list {
   height: 100%;
-  padding: 0 10px 0 0;
+  padding: 0 10px 20px 0;
   overflow-y: auto;
   overflow-x: hidden;
 
@@ -32,7 +32,7 @@ i.icon {
     }
 
     &:hover {
-      background-color: $blue-50;
+      background-color: var(--color-surface-container-highest);
       transition: background-color 0.2s;
       .al-ico-hide {
         visibility: visible;
@@ -40,11 +40,6 @@ i.icon {
     }
   }
 
-  &.dark {
-    .item:hover {
-      background-color: $blue-600;
-    }
-  }
 }
 
 .unchecked {

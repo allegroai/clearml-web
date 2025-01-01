@@ -1,6 +1,9 @@
 @import "../../../layout/layout.scss";
 
 :host {
+  display: block;
+  height: inherit;
+  background-color: var(--color-surface-container-lowest);
 
   sm-model-info-header {
     display: block;
@@ -24,13 +27,13 @@
   }
 
   .model-info-body {
-    height: calc(100% - 108px);
+    height: calc(100% - 116px);
   }
 
   .tab-nav {
     display: grid;
     grid-template-columns: 110px 1fr 110px;
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--color-surface-container-high);
 
     &.minimized {
       display: flex;
@@ -57,7 +60,7 @@
     padding-top: 6px;
   }
 
-  .refresh-position {
+  .close-button {
     display: flex;
     align-items: center;
     margin-right: 24px;
@@ -80,10 +83,7 @@
   }
 
   .table-graph-toggle {
-    height: 28px;
-
     &.maximized {
-      height: 32px;
       align-items: center;
       display: flex;
       margin-right: 14px;

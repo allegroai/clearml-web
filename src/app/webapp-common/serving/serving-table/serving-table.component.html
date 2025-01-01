@@ -32,7 +32,7 @@
     (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
   >
     <ng-template let-col pTemplate="cardFilter">
-      <sm-table-card-filter-template
+      <sm-table-card-filter
         [options]="filtersOptions"
         [value]="filtersValues"
         [columns]="initialColumns"
@@ -43,13 +43,13 @@
         (menuOpened)="columnFilterOpened($event)"
         (menuClosed)="columnFilterClosed($event)"
         (clearAll)="clearAllFilters.emit(tableFilters)"
-      ></sm-table-card-filter-template>
+      ></sm-table-card-filter>
     </ng-template>
 
     <!--SORT FILTER TEMPLATE-->
 
     <ng-template let-col pTemplate="sort-filter">
-      <sm-table-filter-sort-template
+      <sm-table-filter-sort
         [column]="col"
         [value]="filtersValues[col.id]"
         [searchValue]="searchValues[col.id]"
@@ -62,8 +62,7 @@
         (searchValueChanged)="searchValueChanged($event, col.id, col.asyncFilter)"
         (menuOpened)="columnFilterOpened(col)"
         (menuClosed)="columnFilterClosed(col)"
-      >
-      </sm-table-filter-sort-template>
+      ></sm-table-filter-sort>
     </ng-template>
 
     <!--BODY TEMPLATE-->
@@ -152,7 +151,7 @@
         [cardName]="endpoint.endpoint"
         [columns]="tableCols"
         [rowData]="endpoint"
-        [checked]="isRowSelected(endpoint)"
+        [checked]="endpoints | isRowSelected:endpoint"
         [activeContextRow]="contextEndpoint"
         [contextMenuOpen]="contextMenuActive"
         [compactColDataTemplate]="compactCol"
@@ -166,7 +165,7 @@
       </sm-table-card>
       <ng-template #compactCol>
         @if (!cardsCollapsed) {
-          <span class="model-name" [@inOutAnimation]>{{ endpoint.model }}</span>
+          <span class="model-name" [class.selected]="selected" [@inOutAnimation]>{{ endpoint.model }}</span>
         }
 
       </ng-template>

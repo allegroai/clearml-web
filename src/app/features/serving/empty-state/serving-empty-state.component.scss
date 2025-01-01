@@ -1,4 +1,6 @@
-@import "variables";
+a[href]:hover {
+  text-decoration: underline;
+}
 
 .no-data-center {
   display: flex;
@@ -7,25 +9,17 @@
   gap: 24px;
   align-items: center;
 }
+
 .al-icon {
-  color: $blue-600;
+  color: var(--color-tint-14);
 }
 
 .message {
   font-size: 20px;
   font-weight: 500;
-  color: $blue-100;
 }
 
 .sub-message {
-  color: $blue-250;
+  color: var(--color-on-surface);
 }
 
-a[href] {
-  color: $neon-yellow;
-
-  &:hover {
-    color: $neon-yellow;
-  }
-
-}

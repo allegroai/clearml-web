@@ -1,7 +1,7 @@
-@import "variables";
-.sub-header{
-  color: $blue-500;
+.sub-header {
+  color: var(--color-secondary);
 }
+
 .al-ico-info-circle {
   display: flex;
   align-items: center;

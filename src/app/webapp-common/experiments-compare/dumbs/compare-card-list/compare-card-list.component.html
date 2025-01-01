@@ -26,26 +26,21 @@
         </div>
         <div headerButtons class="actions-container">
           <div class="actions" [class]="{'invisible': ! hovered[i]}">
-            <!--<div class="actions">-->
-            @if (experiments.length > 1) {
-              <i class="fas fa-minus-circle pointer"
-                (click)="experimentRemoved(experiment)"
-              smTooltip="Remove from comparison" data-id="removeComparision"></i>
-            }
+            <button mat-icon-button cdkDragHandle smTooltip="Click and drag to reposition the task"
+                    data-id="dragAndDropButton" class="drag" [class]="{'invisible': experiments.length === 1}"
+            >
+              <mat-icon fontSet="al" fontIcon="al-ico-drag"></mat-icon>
+            </button>
             @if (baseExperiment.id !== experiment.id) {
-              <i
-                class="fas fa-adjust pointer"
-                (click)="setAsBase(experiment)"
-                smTooltip="Set as baseline" data-id="setBaselineButton">
-              </i>
+              <button class="sm" mat-icon-button (click)="setAsBase(experiment)" smTooltip="Set as baseline" data-id="setBaselineButton">
+                <mat-icon fontSet="al" fontIcon="al-ico-arrow-from-right"></mat-icon>
+              </button>
             }
-            <i class="fas fa-arrows-alt"
-              cdkDragHandle
-              smTooltip="Click and drag to reposition the experiment"
-              data-id="dragAndDropButton"
-              [class]="{'invisible': experiments.length === 1}"
-              >
-            </i>
+            @if (experiments.length > 1) {
+              <button class="sm" mat-icon-button (click)="experimentRemoved(experiment)" smTooltip="Remove from comparison" data-id="removeComparision">
+                <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+              </button>
+            }
           </div>
         </div>
         <div header-content>
@@ -60,7 +55,7 @@
   @if (tasksLimitExceeded) {
     <div class="limit-message-container">
       <div class="limit-message" data-id="limitMessageText">
-        <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 experiments are available for this view...
+        <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 tasks are available for this view...
       </div>
     </div>
   }

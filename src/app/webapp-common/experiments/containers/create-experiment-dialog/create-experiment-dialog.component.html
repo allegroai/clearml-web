@@ -1,165 +1,214 @@
 <sm-dialog-template
   class="wrapper"
-  header="Create Experiment"
+  header="Create Task"
   iconClass="al-ico-training"
+  [displayX]="!editMode()"
   [closeOnX]="true"
 >
-  <mat-stepper [linear]="false" color="accent">
-    <mat-step [stepControl]="codeFormGroup" label="Code">
-      <form [formGroup]="codeFormGroup">
-        <mat-form-field appearance="outline">
-          <mat-label>Experiment Name</mat-label>
-          <input matInput placeholder="my task" formControlName="name">
-          @if (codeFormGroup.controls.name.invalid) {
-            <mat-error>
-            @if (codeFormGroup.controls.name.errors?.minlength) {
-              Name should be at least 3 characters long
-            }
-            @else if (codeFormGroup.controls.name.errors?.required) {
-              Name is required
-            }
-            </mat-error>
-          }
-        </mat-form-field>
-        <h5>Git</h5>
-        <section>
-          <mat-form-field appearance="outline">
-            <mat-label>Repository URL</mat-label>
-            <input matInput placeholder="git@github.com:allegroai/clearml.git" formControlName="repo">
-          </mat-form-field>
-          <div class="d-flex git">
-            <mat-form-field appearance="outline" class="me-3">
-              <mat-label>Type</mat-label>
-              <mat-select formControlName="type" panelClass="light-theme" (selectionChange)="typeChange($event.value, gitTypes)">
-                @for (gitType of gitTypes; track gitType) {
-                  <mat-option [value]="gitType">{{gitType[0].toUpperCase()}}{{gitType.slice(1)}}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-            @switch (codeFormGroup.controls?.type.value) {
-              @case (gitTypes[0]) {
-                <mat-form-field appearance="outline">
-                  <mat-label>Branch</mat-label>
-                  <input matInput placeholder="main" formControlName="branch">
-                </mat-form-field>
-              }
-              @case (gitTypes[1]) {
-                <mat-form-field appearance="outline">
-                  <mat-label>Commit</mat-label>
-                  <input matInput placeholder="d4f9424589f320ec503db873799f451582174d90" formControlName="commit">
-                </mat-form-field>
-              }
-              @case (gitTypes[2]) {
-                <mat-form-field appearance="outline">
-                  <mat-label>Tag</mat-label>
-                  <input matInput placeholder="version-1" formControlName="tag">
-                </mat-form-field>
-              }
-            }
-          </div>
-        </section>
-        <h5>Entry Point</h5>
-        <section>
-          <mat-form-field appearance="outline">
-            <mat-label>Working Directory</mat-label>
-            <input matInput placeholder="src" formControlName="directory">
-          </mat-form-field>
-          <div class="d-flex git">
-            <mat-form-field appearance="outline" class="me-3">
-              <mat-label>Type</mat-label>
-              <mat-select formControlName="scriptType" panelClass="light-theme" (selectionChange)="typeChange($event.value, scriptTypes)">
-                @for (scriptType of scriptTypes; track scriptType) {
-                  <mat-option [value]="scriptType">{{scriptType[0].toUpperCase()}}{{scriptType.slice(1)}}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-            @switch (codeFormGroup.controls?.scriptType.value) {
-              @case (scriptTypes[0]) {
-                <mat-form-field appearance="outline" class="">
-                  <mat-label>Script</mat-label>
-                  <input matInput placeholder="entry_point.py" formControlName="script">
-                </mat-form-field>
-              }
-              @case (scriptTypes[1]) {
-                <mat-form-field appearance="outline">
-                  <mat-label>Module</mat-label>
-                  <input matInput placeholder="cmd" formControlName="module">
-                </mat-form-field>
-              }
-            }
-          </div>
-  <!--        <div class="checkbox">-->
-  <!--          <mat-checkbox formControlName="existing">Existing Code Base (docker only)</mat-checkbox>-->
-  <!--        </div>-->
-          <div class="checkbox">
-            <mat-checkbox formControlName="taskInit" (change)="checkDocker()">Add <code>Task.init</code> call</mat-checkbox>
-          </div>
-        </section>
-      </form>
-      <div class="buttons">
-        <button class="btn btn-outline-neon" matStepperNext>NEXT</button>
-        <ng-container *ngTemplateOutlet="saveButton"></ng-container>
-        <button class="btn btn-neon" [disabled]="codeFormGroup.invalid || dockerFormGroup.invalid" (click)="runStep.select()">RUN</button>
+  @if (editMode()) {
+    <div class="edit-section">
+      <sm-code-editor #editor
+        [code]="codeFormGroup.controls.uncommited.value"
+        [mode]="shell() ? 'sh' : 'python'"
+      ></sm-code-editor>
+      <div class="buttons justify-content-center">
+        <button mat-flat-button (click)="updateScript(editor.aceCode)">OK</button>
+        <button mat-stroked-button (click)="this.editMode.set(false)">CANCEL</button>
       </div>
-      <mat-step [stepControl]="argsFormGroup" [formGroup]="argsFormGroup" label="Arguments">
-        <form formArrayName="args">
-          <h5>Configuration Hyperparameters Args</h5>
+    </div>
+  } @else {
+    <mat-stepper [linear]="false" color="accent">
+      <mat-step [stepControl]="codeFormGroup" label="Code">
+        <form #codeForm [formGroup]="codeFormGroup">
+          <mat-form-field appearance="outline">
+            <mat-label>Task Name</mat-label>
+            <input matInput placeholder="my task" formControlName="name">
+            @if (codeFormGroup.controls.name.invalid) {
+              <mat-error>
+                @if (codeFormGroup.controls.name.errors?.minlength) {
+                  Name should be at least 3 characters long
+                }
+                @else if (codeFormGroup.controls.name.errors?.required) {
+                  Name is required
+                }
+              </mat-error>
+            }
+          </mat-form-field>
+          <mat-expansion-panel class="mt-3">
+            <mat-expansion-panel-header>Git</mat-expansion-panel-header>
+            <section>
+              <mat-form-field appearance="outline">
+                <mat-label>Repository URL</mat-label>
+                <input
+                  matInput placeholder="git@github.com:allegroai/clearml.git" formControlName="repo"
+                  (focusout)="typeChange(codeFormGroup.controls.type.value)"
+                >
+              </mat-form-field>
+              <div class="d-flex git">
+                <mat-form-field appearance="outline" class="me-3">
+                  <mat-label>Type</mat-label>
+                  <mat-select formControlName="type" (selectionChange)="typeChange($event.value)">
+                    @for (gitType of gitTypes; track gitType) {
+                      <mat-option [value]="gitType">{{gitType[0].toUpperCase()}}{{gitType.slice(1)}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @switch (codeFormGroup.controls?.type.value) {
+                  @case (gitTypes[0]) {
+                    <mat-form-field appearance="outline">
+                      <mat-label>Branch</mat-label>
+                      <input matInput placeholder="main" formControlName="branch">
+                    </mat-form-field>
+                  }
+                  @case (gitTypes[1]) {
+                    <mat-form-field appearance="outline">
+                      <mat-label>Commit</mat-label>
+                      <input matInput placeholder="d4f9424589f320ec503db873799f451582174d90" formControlName="commit">
+                    </mat-form-field>
+                  }
+                  @case (gitTypes[2]) {
+                    <mat-form-field appearance="outline">
+                      <mat-label>Tag</mat-label>
+                      <input matInput placeholder="version-1" formControlName="tag">
+                    </mat-form-field>
+                  }
+                }
+              </div>
+            </section>
+          </mat-expansion-panel>
+          <h5>Entry Point</h5>
           <section>
-            @for (pair of args.controls; track $index) {
-              <div [formGroupName]="$index" class="args-inputs">
-                <mat-form-field appearance="outline">
-                  <mat-label>Key</mat-label>
-                  <input matInput (keydown.enter)="$event.preventDefault()" formControlName="key" required>
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Value</mat-label>
-                  <input (keydown.enter)="$event.preventDefault()" matInput formControlName="value">
-                </mat-form-field>
-                <button class="btn btn-icon" (click)="$event.preventDefault(); removeArg($index)"><i class="al-icon al-ico-trash"></i></button>
+            <mat-form-field appearance="outline">
+              <mat-label>Working Directory</mat-label>
+              <input matInput placeholder="src" formControlName="directory">
+            </mat-form-field>
+            <mat-radio-group aria-label="Select Binary Type" formControlName="binaryType" class="d-block mt-4">
+              <mat-radio-button value="python">Python</mat-radio-button>
+              <mat-radio-button value="shell">Shell</mat-radio-button>
+            </mat-radio-group>
+            <mat-form-field appearance="outline">
+              <mat-label>Binary</mat-label>
+              <input matInput [placeholder]="shell() ? '/bin/bash' : 'python3'" formControlName="binary">
+              @if (codeFormGroup.controls.binary.errors?.shellBinary) {
+                <mat-error>Please specify a valid shell binary</mat-error>
+              }
+            </mat-form-field>
+            <div class="d-flex git">
+              <mat-form-field appearance="outline" class="me-3">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="scriptType" panelClass="light-theme">
+                  @for (scriptType of scriptTypes(); track scriptType) {
+                    <mat-option [value]="scriptType">{{scriptType[0].toUpperCase()}}{{scriptType.slice(1).replace('_', ' ')}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              @switch (codeFormGroup.controls?.scriptType.value) {
+                @case ('script') {
+                  <mat-form-field appearance="outline">
+                    <mat-label>Script</mat-label>
+                    <input matInput [placeholder]="shell() ? 'entry_point.sh' : 'entry_point.py'" formControlName="script">
+                  </mat-form-field>
+                }
+                @case ('module') {
+                  <mat-form-field appearance="outline">
+                    <mat-label>Module</mat-label>
+                    <input matInput placeholder="cmd" formControlName="script">
+                  </mat-form-field>
+                }
+                @case ('custom_code') {
+                  <div class="w-100">
+                    <mat-form-field appearance="outline">
+                      <mat-label>File name</mat-label>
+                      <input matInput formControlName="script">
+                      @if (!codeFormGroup.controls.uncommited.value) {
+                        <button matSuffix mat-button (click)="fileInput.click()">UPLOAD</button>
+                      } @else {
+                        <button matSuffix mat-button (click)="clearFile()">CLEAR</button>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Content</mat-label>
+                      <input matInput formControlName="uncommited" [readonly]="true">
+                      <input class="hidden" #fileInput type="file" [accept]="shell() ? '.sh,.zsh,.bash' : '.py'" (change)="updateEntryFromFile($event)">
+                      <button matSuffix mat-button (click)="editScript()">EDIT</button>
+                    </mat-form-field>
+                  </div>
+                }
+              }
+            </div>
+            <!--        <div class="checkbox">-->
+            <!--          <mat-checkbox formControlName="existing">Existing Code Base (docker only)</mat-checkbox>-->
+            <!--        </div>-->
+            @if (!shell()) {
+              <div class="checkbox">
+                <mat-checkbox formControlName="taskInit">Add <code>Task.init</code> call</mat-checkbox>
               </div>
             }
           </section>
-          <div>
-            <span class="add-argument" (click)="$event.preventDefault(); addArg()" type="button">
-              <i class="al-icon sm al-ico-plus"></i>
-              <a href="#">
-                Add argument
-              </a>
-            </span>
-          </div>
         </form>
         <div class="buttons">
-          <button class="btn btn-outline-neon" matStepperPrevious>BACK</button>
-          <button class="btn btn-outline-neon" matStepperNext>NEXT</button>
+          <button mat-stroked-button matStepperNext>NEXT</button>
           <ng-container *ngTemplateOutlet="saveButton"></ng-container>
+          <button mat-flat-button class="tertiary-button"
+                  [disabled]="codeFormGroup.invalid || dockerFormGroup.invalid"
+                  (click)="runStep.select()"
+          >RUN</button>
         </div>
+        <mat-step [stepControl]="argsFormGroup" [formGroup]="argsFormGroup" label="Arguments">
+          <form formArrayName="args">
+            <h5>Configuration Hyperparameters Args</h5>
+            <section>
+              @for (pair of args.controls; track $index) {
+                <div [formGroupName]="$index" class="args-inputs">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Key</mat-label>
+                    <input matInput (keydown.enter)="$event.preventDefault()" formControlName="key" required>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Value</mat-label>
+                    <input (keydown.enter)="$event.preventDefault()" matInput formControlName="value">
+                  </mat-form-field>
+                  <button mat-icon-button (click)="$event.preventDefault(); removeArg($index)">
+                    <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+                  </button>
+                </div>
+              }
+            </section>
+            <button mat-button (click)="$event.preventDefault(); addArg()">
+              <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+              Add argument
+            </button>
+          </form>
+          <div class="buttons">
+            <button mat-stroked-button matStepperPrevious>BACK</button>
+            <button mat-stroked-button matStepperNext>NEXT</button>
+            <ng-container *ngTemplateOutlet="saveButton"></ng-container>
+          </div>
+        </mat-step>
       </mat-step>
-    </mat-step>
-    <mat-step [stepControl]="envFormGroup" label="Environment">
-      <form [formGroup]="envFormGroup" class="d-flex flex-column pe-4">
-        <div class="checkbox">
-          <mat-checkbox formControlName="poetry" (change)="togglePoetry($event.checked); checkDocker()">Use Poetry (docker only)</mat-checkbox>
-        </div>
-        <div class="d-flex gap">
-          <mat-form-field appearance="outline">
-            <mat-label>Python Binary</mat-label>
-            <input matInput placeholder="python3" formControlName="binary">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Preinstalled venv (docker only)</mat-label>
-            <input matInput placeholder="clearml" formControlName="venv" (change)="checkDocker()">
-          </mat-form-field>
-        </div>
+      <mat-step [stepControl]="envFormGroup" label="Environment">
+        <form [formGroup]="envFormGroup">
+          <h5>Python</h5>
+          <section>
+            <div class="checkbox">
+              <mat-checkbox formControlName="poetry" (change)="togglePoetry($event.checked)">Use Poetry</mat-checkbox>
+            </div>
+            <div class="d-flex gap-3 mb-3">
+              <mat-form-field appearance="outline">
+                <mat-label>Preinstalled venv</mat-label>
+                <input matInput placeholder="clearml" formControlName="venv">
+              </mat-form-field>
+            </div>
 
-        <mat-radio-group aria-label="Select Requirements Type" formControlName="requirements" class="mt-4" (change)="checkDocker()">
-          <mat-radio-button value="skip">Skip (docker only)</mat-radio-button>
-          <mat-radio-button value="text">Use <code>requirements.txt</code></mat-radio-button>
-          <mat-radio-button value="manual">Specify packages</mat-radio-button>
-        </mat-radio-group>
-        @if (envFormGroup.controls.requirements.value === 'manual') {
-          <mat-form-field appearance="outline">
-            <mat-label>Requirements</mat-label>
-            <textarea matInput formControlName="pip" class="terminal" rows="8" placeholder="bokeh>=1.4.0
+            <mat-radio-group aria-label="Select Requirements Type" formControlName="requirements" class="mt-4">
+              <mat-radio-button value="skip">Skip</mat-radio-button>
+              <mat-radio-button value="text">Use <code>requirements.txt</code></mat-radio-button>
+              <mat-radio-button value="manual">Specify packages</mat-radio-button>
+            </mat-radio-group>
+            @if (envFormGroup.controls.requirements.value === 'manual') {
+              <mat-form-field appearance="outline">
+                <mat-label>Requirements</mat-label>
+                <textarea matInput formControlName="pip" class="terminal" rows="8" placeholder="bokeh>=1.4.0
 clearml
 matplotlib >= 3.1.1 ; python_version >= '3.6'
 matplotlib >= 2.2.4 ; python_version < '3.6'
@@ -169,73 +218,102 @@ pillow>=4.0
 plotly
 seaborn
 six"></textarea>
-          </mat-form-field>
-        }
-      </form>
-      <div class="buttons">
-        <button class="btn btn-outline-neon" matStepperPrevious>BACK</button>
-        <button class="btn btn-outline-neon" matStepperNext>NEXT</button>
-        <ng-container *ngTemplateOutlet="saveButton"></ng-container>
-      </div>
-    </mat-step>
-    <mat-step [stepControl]="dockerFormGroup" label="Docker">
-      <form [formGroup]="dockerFormGroup" class="d-flex flex-column pe-4">
-        <mat-form-field appearance="outline">
-          <mat-label>Image</mat-label>
-          <input matInput formControlName="image">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Arguments</mat-label>
-          <input matInput placeholder="-e env1=true" formControlName="args">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Startup Script</mat-label>
-          <textarea matInput formControlName="script" class="terminal" rows="8"></textarea>
-        </mat-form-field>
-      </form>
-      <div class="buttons">
-        <button class="btn btn-outline-neon" matStepperPrevious>BACK</button>
-        <button class="btn btn-outline-neon" matStepperNext>NEXT</button>
-        <ng-container *ngTemplateOutlet="saveButton"></ng-container>
-      </div>
-    </mat-step>
-    <mat-step #runStep label="Run">
-      <form [formGroup]="queueFormGroup" class="d-flex flex-column">
-        <h5>Enqueue experiment to</h5>
-        <section>
-          <sm-paginated-entity-selector
-            #selector
-            formControlName="queue"
-            label="Queue"
-            [data]="queues() | filter: queueVal(): 'name'"
-            [isRequired]="true"
-            (loadMore)="loadMoreQueues()"
-          ></sm-paginated-entity-selector>
-        </section>
-        <h5>Output</h5>
-        <section>
+              </mat-form-field>
+            }
+          </section>
+          <h5>Environment Variables</h5>
+          <section formArrayName="vars">
+            @for (pair of vars.controls; track $index) {
+              <div [formGroupName]="$index" class="args-inputs">
+                <mat-form-field appearance="outline">
+                  <mat-label>Variable</mat-label>
+                  <input matInput (keydown.enter)="$event.preventDefault()" formControlName="key" required>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Value</mat-label>
+                  <input (keydown.enter)="$event.preventDefault()" matInput formControlName="value">
+                </mat-form-field>
+                <button mat-icon-button (click)="$event.preventDefault(); vars.removeAt($index)">
+                  <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+                </button>
+              </div>
+            }
+          </section>
+          <button mat-button (click)="addVar()">
+            <mat-icon fontSet="al" fontIcon="al-ico-plus"></mat-icon>
+            Add Variable
+          </button>
+        </form>
+        <div class="buttons">
+          <button mat-stroked-button matStepperPrevious>BACK</button>
+          <button mat-stroked-button matStepperNext>NEXT</button>
+          <ng-container *ngTemplateOutlet="saveButton"></ng-container>
+        </div>
+      </mat-step>
+      <mat-step [stepControl]="dockerFormGroup" label="Container">
+        <form [formGroup]="dockerFormGroup" class="d-flex flex-column pe-4">
           <mat-form-field appearance="outline">
-            <mat-label>Destination</mat-label>
-            <input matInput formControlName="output" placeHolder="s3://my_bucket/my_folder">
+            <mat-label>Image</mat-label>
+            <input matInput formControlName="image">
           </mat-form-field>
-        </section>
-      </form>
-      <div class="buttons">
-        <button class="btn btn-outline-neon" matStepperPrevious>BACK</button>
-        <ng-container *ngTemplateOutlet="saveButton"></ng-container>
-        <button
-          class="btn btn-neon"
-          [disabled]="codeFormGroup.invalid || dockerFormGroup.invalid || queueFormGroup.invalid"
-          (click)="close('run')"
-        >RUN</button>
-      </div>
-    </mat-step>
-    <ng-template matStepperIcon="edit">
-      <i class="al-icon al-ico-success sm"></i>
-    </ng-template>
-  </mat-stepper>
+          <mat-form-field appearance="outline">
+            <mat-label>Arguments</mat-label>
+            <input matInput placeholder="-e env1=true" formControlName="args">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Startup Script</mat-label>
+            <textarea matInput formControlName="script" class="terminal" rows="8"></textarea>
+          </mat-form-field>
+        </form>
+        <div class="buttons">
+          <button mat-stroked-button matStepperPrevious>BACK</button>
+          <button mat-stroked-button matStepperNext>NEXT</button>
+          <ng-container *ngTemplateOutlet="saveButton"></ng-container>
+        </div>
+      </mat-step>
+      <mat-step #runStep label="Run">
+        <form [formGroup]="queueFormGroup" class="d-flex flex-column">
+          <h5>Enqueue task to</h5>
+          <section>
+            <sm-paginated-entity-selector
+              #selector
+              formControlName="queue"
+              label="Queue"
+              [data]="filteredQueues()"
+              displayField="caption"
+              [isRequired]="true"
+              (loadMore)="loadMoreQueues()"
+            ></sm-paginated-entity-selector>
+          </section>
+          <h5>Output</h5>
+          <section>
+            <mat-form-field appearance="outline">
+              <mat-label>Destination</mat-label>
+              <input matInput formControlName="output" placeHolder="s3://my_bucket/my_folder">
+            </mat-form-field>
+          </section>
+        </form>
+        <div class="buttons">
+          <button mat-stroked-button matStepperPrevious>BACK</button>
+          <ng-container *ngTemplateOutlet="saveButton"></ng-container>
+          <button
+            mat-flat-button
+            class="tertiary-button"
+            [disabled]="codeFormGroup.invalid || dockerFormGroup.invalid || queueFormGroup.invalid"
+            (click)="close('run')"
+          >RUN</button>
+        </div>
+      </mat-step>
+      <ng-template matStepperIcon="edit">
+        <i class="al-icon al-ico-success sm"></i>
+      </ng-template>
+    </mat-stepper>
+  }
 </sm-dialog-template>
 
 <ng-template #saveButton>
-  <button class="btn btn-neon" [disabled]="codeFormGroup.invalid || dockerFormGroup.invalid" (click)="close('save')">SAVE AS DRAFT</button>
+  <button mat-flat-button
+          [disabled]="codeFormGroup.invalid || dockerFormGroup.invalid"
+          (click)="close('save')"
+  >SAVE AS DRAFT</button>
 </ng-template>

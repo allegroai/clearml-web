@@ -1,60 +1,44 @@
 <div class="logo">
-  <img src="assets/c-logo.svg?v=1" class="logo-a" alt="logo" width="64" height="64">
+  <img
+    [ngSrc]="darkTheme() ? environment().branding.logoSmall : environment().branding.logoSmall.replace('-white', '')"
+    [priority]="true" alt="clearML" class="logo-a" width="64" height="64">
 </div>
 
 @if (currentUser()) {
   <div #container class="items-container" [class.on-scrolling]="scrolling()">
-    <a class="item al-ico-home"
-       routerLink="/dashboard"
+    <a class="item al-ico-queues"
+       routerLink="/workers-and-queues"
        routerLinkActive="active"
-       (click)="resetSearch()"
-       smTooltip="DASHBOARD"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-    </a>
-    <a class="item al-ico-projects"
-       smTooltip="PROJECTS"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right"
-       routerLink="/projects"
-       routerLinkActive="active">
-    </a>
-    <a class="item al-ico-datasets"
-       [routerLink]="defaultNestedModeForFeature()?.['datasets']? '/datasets/simple/*/projects' : '/datasets'"
-       [class.active]="baseRouteConfig() ==='datasets'"
-       smTooltip="DATASETS"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-    </a>
-    <a class="item al-ico-pipelines"
-       [routerLink]="defaultNestedModeForFeature()?.['pipelines']? '/pipelines/*/projects' : '/pipelines'"
-       [class.active]="baseRouteConfig() ==='pipelines'"
-       smTooltip="PIPELINES"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-    </a>
+       smTooltip="WORKERS & QUEUES"
+    ></a>
     <a class="item al-ico-model-endpoints"
        [routerLink]="'/endpoints/active'"
        [class.active]="baseRouteConfig() ==='endpoints'"
        smTooltip="MODEL ENDPOINTS"
        data-id="modelEndpointsIcon"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-    </a>
-    <a class="item al-ico-reports"
-       [routerLink]="defaultNestedModeForFeature()?.['reports']? '/reports/*/projects' : '/reports'"
-       [class.active]="baseRouteConfig() ==='reports'"
-       smTooltip="REPORTS"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-    </a>
-    <a class="item al-ico-queues"
-       routerLink="/workers-and-queues"
-       routerLinkActive="active"
-       smTooltip="WORKERS & QUEUES"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-    </a>
+    ></a>
+    <a class="item al-ico-datasets"
+       [routerLink]="defaultNestedModeForFeature()?.['datasets']? '/datasets/simple/*/projects' : '/datasets'"
+       [class.active]="baseRouteConfig() ==='datasets'"
+       smTooltip="DATASETS"
+    ></a>
+    <a class="item al-ico-projects"
+       smTooltip="PROJECTS"
+       routerLink="/dashboard"
+       [class.active]="['dashboard','reports', 'projects'].includes(baseRouteConfig())"
+    ></a>
+    <a class="item al-ico-pipelines"
+       [routerLink]="defaultNestedModeForFeature()?.['pipelines']? '/pipelines/*/projects' : '/pipelines'"
+       [class.active]="baseRouteConfig() ==='pipelines'"
+       smTooltip="PIPELINES"
+    ></a>
+    @if (!hideEnterpriseFeatures()) {
+      <a class="item al-ico-enterprise-rocket lm"
+         routerLink="enterprise"
+         routerLinkActive="active"
+         smTooltip="EXPLORE CLEARML ENTERPRISE"
+      ></a>
+    }
   </div>
 }
 @if (currentUser()) {
@@ -62,7 +46,8 @@
     @if (environment().slackLink) {
       <a class="item" [href]="environment().slackLink"
          target="_blank"
-         smTooltip="Community support on Slack" [matTooltipShowDelay]="0" matTooltipPosition="right">
+         smTooltip="Community support on Slack"
+      >
         <i class="i-slack-mark-color"></i>
       </a>
     }

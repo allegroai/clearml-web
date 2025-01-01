@@ -1,32 +1,47 @@
-<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title"
-                    (xClicked)="closeDialog(undefined)" [closeOnX]="false"
-                    [iconClass]="iconClass" [iconData]="iconData">
-  <div *ngIf="reference" class="reference">{{reference}}</div>
-  <div *ngIf="body; else templateBody" class="body" [class.text-center]="centerText" [innerHTML]="body | purify"></div>
-  <ng-template #templateBody>
+<sm-dialog-template [displayX]="displayX() && !dialogRef.disableClose" [header]="title"
+  (xClicked)="closeDialog(undefined)" [closeOnX]="false"
+  [iconClass]="iconClass" [iconData]="iconData"
+  [style.--dialog-icon-color]="data.iconColor"
+  >
+  @if (reference) {
+    <div class="reference">{{reference}}</div>
+  }
+  @if (body) {
+    <div class="body" [class.text-center]="centerText" [innerHTML]="body | purify"></div>
+  } @else {
     <ng-container *ngTemplateOutlet="template; context: templateContext"></ng-container>
-  </ng-template>
+  }
   <ng-content></ng-content>
 
 
-  <div *ngIf="showNeverShowAgain" class="body mt-4" >
-    <mat-checkbox [(ngModel)]="neverShowAgain">
-      <span class="chkbx-label">Don't show this message again</span>
-    </mat-checkbox>
-  </div>
+  @if (showNeverShowAgain) {
+    <div class="body mt-4" >
+      <mat-checkbox [(ngModel)]="neverShowAgain">
+        <span class="chkbx-label">Don't show this message again</span>
+      </mat-checkbox>
+    </div>
+  }
 
-  <div class="buttons" *ngIf="no || yes">
-    <button *ngIf="no" (click)="closeDialog(false)" id={{no}} class="btn btn-outline-neon yes-button">
-      {{no}}
-    </button>
-    <button *ngIf="yes"
-            id={{yes}}
-            class="btn"
-            [class.btn-delete]="yes === 'DELETE'"
-            [class.btn-neon]="yes !== 'DELETE'"
-            (click)="closeDialog(true)">
-      {{yes}}
-    </button>
-  </div>
+  @if (no || yes) {
+    <div class="buttons">
+      @if (no) {
+        <button
+          mat-stroked-button
+          class="yes-button"
+          (click)="closeDialog(false)"
+          [id]="no"
+        >{{no}}</button>
+      }
+      @if (yes) {
+        <button
+          mat-flat-button
+          [id]="yes"
+          [class.delete-button]="yes === 'DELETE'"
+          (click)="closeDialog(true)">
+          {{yes}}
+        </button>
+      }
+    </div>
+  }
 
 </sm-dialog-template>

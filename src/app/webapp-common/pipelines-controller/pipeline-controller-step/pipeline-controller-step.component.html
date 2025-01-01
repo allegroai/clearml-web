@@ -1,17 +1,51 @@
-<div [id]="stepWithStatus().stepId" class="step-container pointer"
-  [class.selected]="selected()" data-id="stepContainer">
-  <div class="step-part step-title" [class]="stepWithStatus().data.status">
-    <sm-experiment-type-icon-label [type]="stepWithStatus().data?.job_type" [showLabel]="false"></sm-experiment-type-icon-label>
-    <div class="title" smShowTooltipIfEllipsis [smTooltip]="stepWithStatus().name" >{{stepWithStatus().name}}</div>
-    <i tabindex="1" class="al-icon sm-md al-ico-console" (click)="openConsole.emit()" (keyup)="openConsole.emit()" data-id="stepResultButton"></i>
-  </div>
-  <div class="step-part step-footer" [class]="stepWithStatus().data.status" data-id="stepFooter">
-    @if (stepWithStatus().data.status !== 'pending') {
-      <i class="al-icon sm-md" [class]="'al-ico-status-' + stepWithStatus().data.status" data-id="stepStatusIcon"></i>
+<div [id]="stepWithStatus().stepId"
+     class="step-container pointer"
+     [class.selected]="selected()"
+     [@openClose]="enlarged? 'open': 'closed'"
+     (@openClose.done)="expandG($event)"
+     [style.--status-color]="'var(--color-' + stepWithStatus().data.status + '-container)'"
+     data-id="stepContainer"
+>
+  <div class="step-part step-title" [class.stage-step]="stepWithStatus().data?.isStage">
+    @if (stepWithStatus().data.isStage) {
+      <mat-icon fontSet="al" fontIcon="al-ico-grid-view"></mat-icon>
+    } @else {
+      <sm-experiment-type-icon-label [type]="stepWithStatus().data?.job_type" [showLabel]="false"></sm-experiment-type-icon-label>
     }
-    @if (stepWithStatus().data?.job_started) {
-      <div>
-        {{runTime() | duration}}
+    <div class="title" smShowTooltipIfEllipsis [smTooltip]="stepWithStatus().name"
+    >{{ stepWithStatus().name }}
+    </div>
+    @if (stepWithStatus().data?.isStage) {
+      <button mat-icon-button (click)="toggleEnlarge()" data-id="openStage" smTooltip="Expand stage">
+        <mat-icon fontSet="al" fontIcon="al-ico-zoom-to-fit"></mat-icon>
+      </button>
+    } @else {
+      <button class="console-button" mat-icon-button (click)="openConsole.emit()" data-id="stepResultButton">
+        <mat-icon fontSet="al" fontIcon="al-ico-console"></mat-icon>
+      </button>
+    }
+
+  </div>
+  <div class="step-part step-footer" data-id="stepFooter" [class.stage-step]="stepWithStatus().data?.isStage">
+    @if (stepWithStatus().data.isStage) {
+      {{ stepWithStatus().data.numberOfStepsInStage }} Step@if(stepWithStatus().data.numberOfStepsInStage > 1){s}
+    } @else {
+      <div class="footer-container">
+        <div class="justify-content-start">
+          @if (stepWithStatus().data.status !== 'pending') {
+            <mat-icon fontSet="al" [fontIcon]="'al-ico-status-' + stepWithStatus().data.status" data-id="stepStatusIcon"></mat-icon>
+          }
+        </div>
+        <div class="justify-content-center">
+          @if (stepWithStatus().data.stage) {
+            {{ stepWithStatus().data.stage }}
+          }
+        </div>
+        <div class="justify-content-end">
+          @if (stepWithStatus().data?.job_started) {
+            {{ runTime$ | ngrxPush | duration }}
+          }
+        </div>
       </div>
     }
   </div>

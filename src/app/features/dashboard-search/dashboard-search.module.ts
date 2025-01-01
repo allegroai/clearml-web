@@ -16,6 +16,7 @@ import {DashboardSearchComponent} from '~/features/dashboard-search/containers/d
 import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
 import {ReportCardComponent} from '@common/reports/report-card/report-card.component';
 import {DashboardSearchRoutingModule} from '~/features/dashboard-search/dashboard-search-routing.module';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
 
 @NgModule({
   imports: [
@@ -31,6 +32,8 @@ import {DashboardSearchRoutingModule} from '~/features/dashboard-search/dashboar
     PipelineCardComponent,
     DatasetsSharedModule,
     ReportCardComponent,
+    MatTabGroup,
+    MatTab,
   ],
   declarations:[
     SearchResultsPageComponent, DashboardSearchComponent

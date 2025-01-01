@@ -1,8 +1,4 @@
-@import "variables";
-@import "mixins/link";
-
 :host {
-  @include link();
   form.editable, .table-container {
     height: 100%;
     padding-bottom: 6px;
@@ -17,9 +13,9 @@
     overflow: auto;
 
     input.highlight-text {
-      background: $neon-yellow;
+      background-color: var(--color-tertiary-container);
       &.current-match {
-        background: #f5d655;
+        background-color: var(--color-tertiary);
       }
     }
   }
@@ -57,8 +53,14 @@
     }
   }
 
+  .highlight-text {
+    background-color: var(--color-tertiary-container);
+    color: var(--color-on-tertiary-container);
+  }
+
   .current-match .highlight-text{
-    background-color: #f5d655;
+    background-color: var(--color-tertiary);
+    color: var(--color-on-tertiary);
   }
 
   .name {
@@ -68,13 +70,6 @@
   .allow-multi-space {
     white-space: pre;
 
-  }
-
-  .add-parameter {
-    border: 1px solid $grey-purple;
-    background-color: #ffffff;
-    color: $grey-purple;
-    transition: all ease-in-out 0.15s, border ease-in-out 0.15s;
   }
 
   ::ng-deep .table-container {

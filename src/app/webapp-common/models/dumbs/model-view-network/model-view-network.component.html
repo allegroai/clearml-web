@@ -1,29 +1,30 @@
 <sm-editable-section
-  #prototext
-  [editable]="!model?.ready && model?.company?.id && !isSharedAndNotOwner"
-  [saving]="saving"
-  [hideEditButton]="!!design"
+  [editable]="!model()?.ready && model()?.company?.id && !isSharedAndNotOwner()"
+  [saving]="saving()"
+  [hideEditButton]="!!design()"
   [disableInEditMode]="true"
-  (activateEditClicked)="activateEdit(); editPrototext()"
+  (activateEditClicked)="activateEdit(); editProtoText()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
->
+  >
   <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
   <sm-scroll-textarea
     class="flex-grow-1"
-    [editable]="inEditMode && prototext.inEditMode"
-    [formData]="design ?? ''"
+    [editable]="inEditMode() && protoTextSection().inEditMode()"
+    [formData]="design() ?? ''"
     [showSpinner]="false"
-  >
-    <button extra-buttons
-      *ngIf="!model?.ready && model?.company?.id && !isSharedAndNotOwner"
-      class="btn btn-dark-fill terminal flex-1"
-      (click)="prototext.editModeChanged(true)"
-    >EDIT</button>
-    <button extra-buttons
-            *ngIf="!model?.ready && model?.company?.id && !isSharedAndNotOwner && design"
-            class="btn btn-dark-fill terminal flex-1"
-            (click)="clearPrototext()"
-    ><i class="p-1 fa fa-trash"></i>CLEAR</button>
-  </sm-scroll-textarea>
-</sm-editable-section>
+    >
+    @if (!model()?.ready && model()?.company?.id && !isSharedAndNotOwner()) {
+      <button extra-buttons mat-flat-button
+        class="terminal flex-1"
+        (click)="protoTextSection().editModeChanged(true)"
+      >EDIT</button>
+    }
+    @if (!model()?.ready && model()?.company?.id && !isSharedAndNotOwner() && design()) {
+      <button extra-buttons mat-stroked-button
+              class="terminal flex-1"
+              (click)="clearProtoText()"
+      ><mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>CLEAR</button>
+    }
+    </sm-scroll-textarea>
+  </sm-editable-section>

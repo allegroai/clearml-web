@@ -8,7 +8,7 @@
     [tableFilters]="tableFilters$ | ngrxPush"
     [metadataKeys]="metadataKeys$ | ngrxPush"
     [metricVariants]="metricVariants$ | ngrxPush"
-    [tableMode]="firstModel ? (tableMode$ | ngrxPush) : 'table'"
+    [tableMode]="firstModel ? tableMode() : 'table'"
     [hideNavigation]="modelsPage$| ngrxPush"
     [rippleEffect]="tableModeAwareness$ | ngrxPush"
     [noData]="!((models$ | ngrxPush)?.length > 0)"
@@ -27,7 +27,7 @@
   ></sm-model-header>
 </div>
 <div class="models-body"
-     [class.footer-visible]="(selectedModels$ | ngrxPush)?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)">
+     [class.footer-visible]="(checkedModels$ | ngrxPush)?.length > 1|| (showAllSelectedIsActive$ |ngrxPush)">
   <as-split #split
             [gutterSize]=1
             [useTransition]="true"
@@ -64,9 +64,9 @@
         [tableSortOrder]="(tableSortOrder$ | ngrxPush)"
         [tableFilters]="(tableFilters$ | ngrxPush)"
         [colsOrder]="(tableColsOrder$ | ngrxPush)"
-        [selectedModels]="selectedModels$ | ngrxPush"
+        [checkedModels]="checkedModels$ | ngrxPush"
         [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | ngrxPush"
-        [selectedModel]="selectedModel$ | ngrxPush"
+        [selectedModel]="selectionState().highlited()"
         [split]="selectSplitSize$ | ngrxPush"
         [enableMultiSelect]="true"
         [entityType]="entityTypeEnum.model"

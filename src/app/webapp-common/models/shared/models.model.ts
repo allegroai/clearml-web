@@ -13,6 +13,7 @@ export interface SelectedModel extends Omit<Model, 'id' | 'user' | 'task' | 'pro
   task?: Task;
   project?: Project;
   readOnly?: boolean;
+  design?: any;
 }
 
 export interface TableModel {

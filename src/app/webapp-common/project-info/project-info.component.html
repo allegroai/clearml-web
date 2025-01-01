@@ -1,39 +1,33 @@
-<div class="w-100 model-header">
-  <div class="d-flex justify-content-between header-container align-items-center">
-    <div class="archive"></div>
-    <div class="d-flex justify-content-end align-items-center right-buttons"></div>
-  </div>
-</div>
-
-<div class="info-content">
-  <div class="metric-panel" [class.open]="panelOpen">
-    <mat-expansion-panel (opened)="setMetricsPanel(true)" (closed)="setMetricsPanel(false)" [expanded]="panelOpen">
+<div class="info-content" [class.h-100]="editor.editMode">
+  <div class="metric-panel" [class.open]="panelOpen()">
+    <mat-expansion-panel (opened)="setMetricsPanel(true)" (closed)="setMetricsPanel(false)" [expanded]="panelOpen()">
       <mat-expansion-panel-header expandedHeight="48px" collapsedHeight="48px">
         <mat-panel-title>
           Metric Snapshot
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <sm-project-stats [project]="project"></sm-project-stats>
+        <sm-project-stats [project]="project()"></sm-project-stats>
       </ng-template>
     </mat-expansion-panel>
   </div>
 
-  <sm-markdown-editor
-    #editor
-    *ngIf="!loading"
-    [class.editor]="editor.editMode"
-    [data]="info"
-    [readOnly]="example"
-    [blockUserScripts]="blockUserScripts$ | ngrxPush"
-    (saveInfo)="saveInfo($event)"
-  >
-    <div no-data class="flex-middle overview-placeholder" *ngIf="!example">
-      <i class="icon i-markdown xxl"></i>
-      <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
-      <button (click)="editor.editClicked()" class="no-data-button btn btn-neon">
-        <span>ADD PROJECT OVERVIEW</span>
-      </button>
-    </div>
-  </sm-markdown-editor>
+    <sm-markdown-editor
+      #editor
+      [class.editor]="editor.editMode"
+      [data]="info()"
+      [readOnly]="example()"
+      [blockUserScripts]="blockUserScripts$ | ngrxPush"
+      (saveInfo)="saveInfo($event)"
+      >
+      @if (!example()) {
+        <div no-data class="flex-middle overview-placeholder">
+          <i class="icon i-markdown xxl"></i>
+          <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
+          <button mat-flat-button (click)="editor.editClicked()">
+            <span>ADD PROJECT OVERVIEW</span>
+          </button>
+        </div>
+      }
+    </sm-markdown-editor>
 </div>

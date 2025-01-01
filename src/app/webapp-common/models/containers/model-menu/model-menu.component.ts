@@ -82,7 +82,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
 <br><br>Published models are read-only and cannot be reset.`,
         yes: 'Publish',
         no: 'Cancel',
-        iconClass: 'd-block fas fa-cloud-upload-alt fa-7x w-auto',
+        iconClass: 'al-ico-upload',
       }
     });
 

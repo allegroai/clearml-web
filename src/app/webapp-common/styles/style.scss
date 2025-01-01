@@ -1,0 +1,27 @@
+@use '@angular/material' as mat;
+
+@import "../assets/fonts/trains-icons.scss";
+@import "reboot";
+@import "minimal-bootstrap";
+@import "layout";
+@import "utilities";
+@import "customizations";
+@import "icons"; //needs a clean from sass vars
+@import "themes";
+@import "../angular-notifier/styles/core";
+@import "../angular-notifier/styles/types/type-default";
+@import "../angular-notifier/styles/themes/theme-material.scss";
+@import "notifications";
+
+
+:root {
+  @include mat.all-component-themes($theme);
+  @include components($theme);
+
+  &.dark-mode {
+    @include mat.all-component-colors($dark-theme);
+    @include components($dark-theme);
+  }
+}
+
+@import "src/app/shared/custom-styles";

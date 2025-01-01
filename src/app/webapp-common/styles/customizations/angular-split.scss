@@ -1,0 +1,122 @@
+as-split {
+  &.as-dragging {
+    .as-split-area {
+      transition: opacity 0.5s;
+    }
+    .as-split-gutter-icon {
+      display: none;
+    }
+  }
+
+  .as-split-area {
+    transition: flex-basis .5s;
+  }
+
+  &.as-horizontal {
+    & > .as-split-gutter {
+      --_as-gutter-background-color: var(--color-surface-container-high);
+      position: relative;
+
+      &::before {
+        // splitter vertical line
+        content: "";
+        display: block;
+        width: 2px;
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        bottom: 0;
+        left: -1px;
+        background-color: transparent;
+      }
+      &:hover::before {
+        background-color: var(--color-primary);
+        transition: background-color 0.2s ease 0.2s;
+      }
+
+      &::after {
+        // splitter area handle
+        content: "";
+        position: absolute;
+        z-index: 101;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+      }
+
+      .as-split-gutter-icon {
+        // arrow circle icon
+        display: none;
+        position: absolute;
+        z-index: 101;
+        width: 20px !important;
+        height: 20px !important;
+        background-image: none !important;
+        border: none !important;
+        border-radius: 20px;
+        &::after {
+          // arrow
+          content: "";
+          display: inline-block;
+          padding: 2px;
+          position: absolute;
+          top: 8px;
+          border: solid var(--color-primary-container);
+        }
+      }
+    }
+  }
+
+  &.closed.as-horizontal {
+    > .as-split-gutter {
+      .as-split-gutter-icon {
+        display: block;
+        left: -10px;
+        background: var(--color-primary) !important;
+        &::after {
+          // arrow direction right
+          left: 6px;
+          border-width: 0 2px 2px 0;
+          transform: rotate(-45deg);
+        }
+      }
+    }
+    > .as-split-area:nth-child(1) {
+      opacity: 0;
+    }
+  }
+  &.opened.as-horizontal {
+    > .as-split-gutter {
+      &:hover::before {
+        left: auto;
+        right: -1px;
+      }
+      .as-split-gutter-icon {
+        display: block;
+        right: -10px;
+        background: var(--color-primary) !important;
+        &::after {
+          // arrow direction left
+          left: 8px;
+          border-width: 0 2px 2px 0;
+          transform: rotate(135deg);
+        }
+      }
+    }
+    > .as-split-area:nth-child(2) {
+      opacity: 0;
+    }
+  }
+
+}
+
+// splitter shown on light background
+as-split.as-horizontal:not(.closed, .opened) as-split-area.light-theme + .as-split-gutter {
+  &::before {
+    left: 1px;
+    width: 3px;
+  }
+  &::after {
+    left: 0;
+  }
+}

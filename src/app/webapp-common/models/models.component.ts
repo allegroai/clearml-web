@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, computed, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
 import {combineLatest, Observable} from 'rxjs';
@@ -11,7 +11,7 @@ import {
   setDeep, setSelectedProject
 } from '../core/actions/projects.actions';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
-import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
+import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {
   selectCompanyTags,
@@ -22,7 +22,6 @@ import {
   selectSelectedProjectId,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
-import {selectAppVisible} from '../core/reducers/view.reducer';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
@@ -42,11 +41,10 @@ import {
   selectMetadataKeys,
   selectMetricVariants,
   selectModelsFrameworks,
-  selectModelsTags,
+  selectModelsTags, selectSelectedTableModel,
   selectTableMode
 } from './reducers';
 import {SelectedModel, TableModel} from './shared/models.model';
-import {SortMeta} from 'primeng/api';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ShowItemsFooterSelected} from '../shared/entity-page/footer-items/show-items-footer-selected';
@@ -61,12 +59,13 @@ import {PublishFooterItem} from '../shared/entity-page/footer-items/publish-foot
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import {SelectedTagsFooterItem} from '../shared/entity-page/footer-items/selected-tags-footer-item';
 import {CompareFooterItem} from '@common/shared/entity-page/footer-items/compare-footer-item';
-import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {
   SelectionEvent
 } from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
+import {computedPrevious} from 'ngxtension/computed-previous';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -79,77 +78,55 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public entityTypeEnum = EntityTypeEnum;
   protected override entityType = EntityTypeEnum.model;
   public models$: Observable<TableModel[]>;
-  public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
-  public selectedModels$: Observable<TableModel[]>;
-  public selectedModel$: Observable<SelectedModel>;
-  public searchValue$: Observable<SearchState['searchQuery']>;
-  public isArchived$: Observable<boolean>;
-  public tableFilters$: Observable<{ [s: string]: FilterMetadata }>;
-  public noMoreModels$: Observable<boolean>;
   public showInfo$: Observable<boolean>;
-  public activeSectionEdit$: Observable<boolean>;
-  public selectedProjectId$: Observable<string>;
-  public tableColsOrder$: Observable<string[]>;
-  public tags$: Observable<string[]>;
-  public tableMode$: Observable<'table' | 'info'>;
-  public systemTags$: Observable<string[]>;
   public tableCols$: Observable<ISmCol[]>;
-  public frameworks$: Observable<string[]>;
-  public isSharedAndNotOwner$: Observable<boolean>;
-  public selectedModelsDisableAvailable$: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
-  public metadataKeys$: Observable<string[]>;
-  public filteredTableCols$: Observable<ISmCol[]>;
   public firstModel: TableModel;
-  public metadataColsOptions$: Observable<Record<ISmCol['id'], string[]>>;
-  public metricVariants$: Observable<MetricVariantResult[]>;
-  public modelsPage$: Observable<boolean>;
-  protected inEditMode$: Observable<boolean>;
   protected override addTag = addTag;
   protected override setSplitSizeAction = modelsActions.setSplitSize;
   protected setTableModeAction = modelsActions.setTableMode;
-  private selectedModels: TableModel[];
-  private searchQuery$: Observable<SearchState['searchQuery']>;
-  private isAppVisible$: Observable<boolean>;
-  private readonly tagsFilterByProject$: Observable<boolean>;
-  private readonly projectTags$: Observable<string[]>;
-  private readonly companyTags$: Observable<string[]>;
+  private checkedModels: TableModel[];
+  protected override selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
+  protected tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
+  protected checkedModels$ = this.store.select(modelsSelectors.selectSelectedModels);
+  protected selectedModelsDisableAvailable$ = this.store.select(modelsSelectors.selectSelectedModelsDisableAvailable);
+  protected tableFilters$ = this.store.select(modelsSelectors.selectTableFilters);
+  protected searchValue$ = this.store.select(modelsSelectors.selectGlobalFilter);
+  protected isArchived$ = this.store.select(selectIsArchivedMode);
+  protected noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
+  protected isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
+  protected metadataColsOptions$ = this.store.select(selectMetadataColsOptions);
+  protected metricVariants$ = this.store.select(selectMetricVariants);
+  protected modelsPage$ = this.store.select(modelsSelectors.selectModesPage);
+
+  protected override showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
+  protected searchQuery$ = this.store.select(selectSearchQuery);
+  protected inEditMode$ = this.store.select(modelsSelectors.selectIsModelInEditMode);
+  protected tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
+  protected tags$ = this.store.select(selectModelsTags);
+  protected metadataKeys$ = this.store.select(selectMetadataKeys);
+  protected tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+  protected projectTags$ = this.store.select(selectProjectTags);
+  protected companyTags$ = this.store.select(selectCompanyTags);
+  protected systemTags$ = this.store.select(selectProjectSystemTags);
+  protected frameworks$ = this.store.select(selectModelsFrameworks);
+  protected tableMode = this.store.selectSignal(selectTableMode);
+  protected filteredTableCols$ = this.store.select(selectFilteredTableCols);
+
+  protected selectedTableModel = toSignal(this.store.select(selectSelectedTableModel)
+    .pipe(distinctUntilChanged((a, b) => a?.id === b?.id)));
+  private previousTableModel = computedPrevious(this.selectedTableModel);
+  protected selectionState = computed(() => ({
+    prevExperiment: this.previousTableModel(),
+    highlited: signal(this.selectedTableModel() ?? this.previousTableModel())
+  }));
+
 
   @ViewChild('modelsTable') private table: ModelsTableComponent;
   private modelsFeature = false;
 
   constructor() {
     super();
-    this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
-    this.tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
-    this.selectedModel$ = this.store.select(modelsSelectors.selectSelectedTableModel);
-    this.selectedModels$ = this.store.select(modelsSelectors.selectSelectedModels);
-    this.selectedModelsDisableAvailable$ = this.store.select(modelsSelectors.selectSelectedModelsDisableAvailable);
-    this.tableFilters$ = this.store.select(modelsSelectors.selectTableFilters);
-    this.searchValue$ = this.store.select(modelsSelectors.selectGlobalFilter);
-    this.isArchived$ = this.store.select(selectIsArchivedMode);
-    this.noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
-    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
-    this.metadataColsOptions$ = this.store.select(selectMetadataColsOptions);
-    this.metricVariants$ = this.store.select(selectMetricVariants);
-    this.modelsPage$ = this.store.select(modelsSelectors.selectModesPage);
-
-    this.showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
-    this.searchQuery$ = this.store.select(selectSearchQuery);
-    this.isAppVisible$ = this.store.select(selectAppVisible);
-    this.activeSectionEdit$ = this.store.select(modelsSelectors.selectActiveSectionEdit);
-    this.inEditMode$ = this.store.select(modelsSelectors.selectIsModelInEditMode);
-    this.tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
-    this.selectedProjectId$ = this.store.select(modelsSelectors.selectProjectId);
-    this.tags$ = this.store.select(selectModelsTags);
-    this.metadataKeys$ = this.store.select(selectMetadataKeys);
-    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-    this.projectTags$ = this.store.select(selectProjectTags);
-    this.companyTags$ = this.store.select(selectCompanyTags);
-    this.systemTags$ = this.store.select(selectProjectSystemTags);
-    this.frameworks$ = this.store.select(selectModelsFrameworks);
-    this.tableMode$ = this.store.select(selectTableMode);
-    this.filteredTableCols$ = this.store.select(selectFilteredTableCols);
     let child = this.route.snapshot;
     while (child.firstChild && !child.data.setAllProject) {
       child = child.firstChild;
@@ -242,7 +219,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
     this.createFooterItems({
       entitiesType: EntityTypeEnum.model,
-      selected$: this.selectedModels$,
+      selected$: this.checkedModels$,
       showAllSelectedIsActive$: this.showAllSelectedIsActive$,
       tags$: this.tags$,
       data$: this.selectedModelsDisableAvailable$,
@@ -253,7 +230,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       )),
     });
 
-    this.sub.add(this.selectedModels$.subscribe(selectedModels => this.selectedModels = selectedModels));
+    this.sub.add(this.checkedModels$.subscribe(selectedModels => this.checkedModels = selectedModels));
 
     this.selectModelFromUrl();
     this.store.dispatch(modelsActions.getFrameworks());
@@ -273,7 +250,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   getSelectedEntities() {
-    return this.selectedModels;
+    return this.checkedModels;
   }
 
   stopSyncSearch() {
@@ -327,11 +304,17 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
-  modelSelectionChanged(event: { model: SelectedModel; openInfo?: boolean }) {
-    (this.minimizedView || event.openInfo) && event.model && this.store.dispatch(modelsActions.modelSelectionChanged({
-      model: event.model,
-      project: this.projectId
-    }));
+  modelSelectionChanged({model, openInfo, origin}: {model: SelectedModel; openInfo?: boolean; origin: 'row' | 'table'}) {
+    if(model) {
+      if (this.minimizedView || openInfo) {
+        this.store.dispatch(modelsActions.modelSelectionChanged({
+          model: model,
+          project: this.projectId
+        }));
+      } else if (origin === 'row') {
+        this.selectionState().highlited.update(current => current?.id === model.id ? null : model);
+      }
+    }
   }
 
   modelsSelectionChanged(models: SelectedModel[]) {
@@ -378,7 +361,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
-  selectedTableColsChanged(col) {
+  selectedTableColsChanged(col: ISmCol) {
     this.store.dispatch(modelsActions.toggleColHidden({columnId: col.id, projectId: this.projectId}));
   }
 
@@ -435,16 +418,16 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
           this.compareExperiments();
           break;
         case MenuItems.archive:
-          this.table.contextMenuExtended.contextMenu.archiveClicked();
+          this.table.contextMenuExtended.contextMenu().archiveClicked();
           break;
         case MenuItems.delete:
-          this.table.contextMenuExtended.contextMenu.deleteModelPopup();
+          this.table.contextMenuExtended.contextMenu().deleteModelPopup();
           break;
         case MenuItems.moveTo:
-          this.table.contextMenuExtended.contextMenu.moveToProjectPopup();
+          this.table.contextMenuExtended.contextMenu().moveToProjectPopup();
           break;
         case MenuItems.publish:
-          this.table.contextMenuExtended.contextMenu.publishPopup();
+          this.table.contextMenuExtended.contextMenu().publishPopup();
           break;
       }
     });
@@ -454,13 +437,13 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.router.navigate(
       [
         `compare-models`,
-        {ids: this.selectedModels.map(experiment => experiment.id).join(',')},
+        {ids: this.checkedModels.map(experiment => experiment.id).join(',')},
         'models-details'
       ],
       {relativeTo: this.route.parent.parent});
   }
 
-  clearTableFiltersHandler(tableFilters: { [s: string]: FilterMetadata }) {
+  clearTableFiltersHandler(tableFilters: Record<string, FilterMetadata>) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
     this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId}));
   }
@@ -493,10 +476,12 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   modeChanged(mode: 'table' | 'info' | 'compare') {
     if (mode === 'info') {
       this.store.dispatch(modelsActions.setTableMode({mode}));
-      this.firstModel && this.store.dispatch(modelsActions.modelSelectionChanged({
-        model: this.selectedModels?.[0] || this.firstModel,
-        project: this.projectId
-      }));
+      if (this.firstModel) {
+        this.store.dispatch(modelsActions.modelSelectionChanged({
+          model: this.selectionState().highlited() || this.checkedModels?.[0] || this.firstModel,
+          project: this.projectId
+        }));
+      }
       return Promise.resolve()
     } else {
       return this.closePanel();

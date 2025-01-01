@@ -23,7 +23,7 @@ import {Output} from '~/business-logic/model/tasks/output';
  * an extended object of task that includes projection, will come from the server as an api response.
  */
 export interface ISelectedExperiment {
-  id?: string;
+  id: string;
   name?: string;
   user?: User;
   company?: GetCurrentUserResponseUserObjectCompany;

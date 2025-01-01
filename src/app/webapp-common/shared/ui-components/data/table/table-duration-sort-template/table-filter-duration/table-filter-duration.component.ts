@@ -14,7 +14,6 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {
   KeydownStopPropagationDirective
 } from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @Component({
   selector: 'sm-table-filter-duration',
@@ -29,8 +28,7 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
     FormsModule,
     DividerComponent,
     ClickStopPropagationDirective,
-    KeydownStopPropagationDirective,
-    LabeledFormFieldDirective
+    KeydownStopPropagationDirective
 ]
 })
 export class TableFilterDurationComponent extends TableDurationSortBaseComponent {

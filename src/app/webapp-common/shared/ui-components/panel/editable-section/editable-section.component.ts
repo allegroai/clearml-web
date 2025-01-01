@@ -1,11 +1,8 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
-  OnDestroy,
-  Output
+  OnDestroy, input, output, inject, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {setBackdrop} from '@common/core/actions/layout.actions';
@@ -13,65 +10,66 @@ import {MatDialog} from '@angular/material/dialog';
 import {fromEvent, Subscription} from 'rxjs';
 import {tap, throttleTime} from 'rxjs/operators';
 import {LoadingButtonComponent} from '@common/shared/ui-components/buttons/loading-button/loading-button.component';
-import {NgIf} from '@angular/common';
+
+import {MatButton} from '@angular/material/button';
+import {computedPrevious} from 'ngxtension/computed-previous';
 
 @Component({
   selector: 'sm-editable-section',
   templateUrl: './editable-section.component.html',
   styleUrls: ['./editable-section.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     LoadingButtonComponent,
-    NgIf
+    MatButton
   ]
 })
 export class EditableSectionComponent implements OnDestroy {
-  public inEditMode = false;
-  @Input() editable;
-  @Input() disableEditable = false;
-  @Input() disableSave = false;
-  @Input() disableInEditMode = false;
-  @Input() hideSaveButton = false;
-  @Input() containerClass = '';
-  @Input() hideEditButton = false;
-  @Input() isDarkTheme = false;
-  @Input() forceButtons = false;
-  @Input() scrollToSection = true;
+  private store = inject(Store);
+  private matDialog = inject(MatDialog);
+  public elementRef = inject(ElementRef);
 
-  private _saving = false;
   private scrollSub: Subscription;
-  @Input() set saving(saving) {
-    if (this._saving && !saving) {
-      this.inEditMode = false;
-    }
-    this._saving = saving;
+
+  editable = input();
+  disableEditable = input(false);
+  disableSave = input(false);
+  disableInEditMode = input(false);
+  hideSaveButton = input(false);
+  containerClass = input('');
+  hideEditButton = input(false);
+  isDarkTheme = input(false);
+  forceButtons = input(false);
+  scrollToSection = input(true);
+  saving = input<boolean>();
+  previousSaving = computedPrevious(this.saving);
+  private state = computed(() => ({
+    saving: this.saving(),
+    inEditMode: signal(false)
+  }));
+  get inEditMode () {
+    return this.state().inEditMode;
   }
 
-  get saving(): boolean {
-    return this._saving;
-  }
-
-  @Output() saveClicked = new EventEmitter();
-  @Output() cancelClicked = new EventEmitter();
-  @Output() activateEditClicked = new EventEmitter();
+  saveClicked = output();
+  cancelClicked = output();
+  activateEditClicked = output<boolean>();
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
-    if (this.inEditMode && this.matDialog.openDialogs.length === 0) {
+    if (this.inEditMode() && this.matDialog.openDialogs.length === 0) {
       if ((e.key == 'Escape')) {
         this.cancelClickedEvent();
       }
-      if ((e.key == 'Enter') && e.ctrlKey === true && !this.disableSave) {
+      if ((e.key == 'Enter') && e.ctrlKey === true && !this.disableSave()) {
         this.saveSection();
       }
     }
   }
 
-  constructor(private store: Store, private matDialog: MatDialog, public elementRef: ElementRef) {
-  }
-
-  editModeChanged(editMode) {
-    this.inEditMode = editMode;
+  editModeChanged(editMode: boolean) {
+    this.inEditMode.set(editMode);
     this.activateEditClicked.emit(editMode);
     this.store.dispatch(setBackdrop({active: editMode}));
     if (editMode) {
@@ -84,7 +82,7 @@ export class EditableSectionComponent implements OnDestroy {
   }
 
   cancelClickedEvent() {
-    this.inEditMode = false;
+    this.inEditMode.set(false);
     this.store.dispatch(setBackdrop({active: false}));
     this.cancelClicked.emit();
     this.unsubscribeToEventListener();
@@ -109,13 +107,13 @@ export class EditableSectionComponent implements OnDestroy {
   }
   ngOnDestroy(): void {
     this.unsubscribeToEventListener();
-    if (this.inEditMode) {
+    if (this.inEditMode()) {
       this.cancelClickedEvent();
     }
   }
 
   private listenScrollEvent() {
-    if (!this.scrollToSection) {
+    if (!this.scrollToSection()) {
       return;
     }
 

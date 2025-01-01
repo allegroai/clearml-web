@@ -1,5 +1,11 @@
 import {Action, createReducer, createSelector, on} from '@ngrx/store';
-import {addUpdateColorPreferences, ColorPickerProps, ColorPreference, showColorPicker} from './choose-color.actions';
+import {
+  addUpdateColorPreferences,
+  closeColorPicker,
+  ColorPickerProps,
+  ColorPreference,
+  showColorPicker
+} from './choose-color.actions';
 
 export interface ColorPreferenceState {
   colorPreferences: ColorPreference;
@@ -18,7 +24,8 @@ export const selectColorPickerProps = createSelector(colors, state => state.pick
 const reducer = createReducer(
   initialState,
   on(addUpdateColorPreferences, (state, action) => ({...state, colorPreferences: {...state.colorPreferences, ...action}})),
-  on(showColorPicker, (state , action) => ({...state, pickerProps: action}))
+  on(showColorPicker, (state , action) => ({...state, pickerProps: action})),
+  on(closeColorPicker, (state , action) => ({...state, pickerProps: null}))
 );
 
 export const colorPreferenceReducer = (state: ColorPreferenceState | undefined, action: Action) => reducer(state, action);

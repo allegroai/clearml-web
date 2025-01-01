@@ -1,38 +1,39 @@
 <sm-overlay [backdropActive]="backdropActive$|ngrxPush"></sm-overlay>
-<sm-editable-section #parameterSection
-                     class="light-theme"
-                     *ngIf="(selectedSectionHyperParams$| ngrxPush).length>0 || propSection"
-                     [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection)"
-                     [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
-                     [saving]="saving$ | ngrxPush"
-                     [forceButtons]="!!searchedText"
-                     (cancelClicked)="cancelHyperParametersChange(); executionParamsForm.cancel()"
-                     (saveClicked)="sectionSaved()"
-                     (activateEditClicked)="activateEditChanged('hyperparams')">
-  <sm-section-header [label]="(selectedSection | replaceViaMapPipe:sectionReplaceMap) | uppercase "></sm-section-header>
-  <sm-search search-button
-             #search
-             class="table-search"
-             [value]="searchedText"
-             [enableNavigation]="true"
-             [minimumChars]="1"
-             [debounceTime]="0"
-             [expandOnHover]="true"
-             [searchResultsCount]="searchResultsCount"
-             [searchCounterIndex]="executionParamsForm.matchIndex"
-             (valueChanged)="searchTable($event)"
-  ></sm-search>
-  <sm-experiment-execution-parameters
-    #executionParamsForm
-    class="form-section"
-    [searchedText]="searchedText"
-    [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection) && parameterSection.inEditMode"
-    [section]="selectedSection"
-    [formData]="(selectedSectionHyperParams$ | ngrxPush) | sort:'name'"
-    [size]="size$ | ngrxPush"
-    (formDataChanged)="onFormValuesChanged($event)"
-    (searchCounterChanged)="searchCounterChanged($event)"
-    (resetSearch)="search.clear(false)"
-    (scrollToResultCounterReset)="scrollIndexCounterReset()"
-  ></sm-experiment-execution-parameters>
-</sm-editable-section>
+@if ((selectedSectionHyperParams$| ngrxPush).length>0 || propSection()) {
+  <sm-editable-section #parameterSection
+    class="light-theme"
+    [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection())"
+    [disableSave]="!executionParamsForm?.hyperParameters()?.form?.valid"
+    [saving]="saving$ | ngrxPush"
+    [forceButtons]="!!searchedText"
+    (cancelClicked)="cancelHyperParametersChange(); executionParamsForm.cancel()"
+    (saveClicked)="sectionSaved()"
+    (activateEditClicked)="activateEditChanged('hyperparams')">
+    <sm-section-header [label]="(selectedSection() | replaceViaMapPipe:sectionReplaceMap) | uppercase "></sm-section-header>
+    <sm-search search-button
+      #search
+      class="outline"
+      [value]="searchedText"
+      [enableNavigation]="true"
+      [minimumChars]="1"
+      [debounceTime]="0"
+      [expandOnHover]="true"
+      [searchResultsCount]="searchResultsCount"
+      [searchCounterIndex]="executionParamsForm.matchIndex"
+      (valueChanged)="searchTable($event)"
+    ></sm-search>
+    <sm-experiment-execution-parameters
+      #executionParamsForm
+      class="form-section"
+      [searchedText]="searchedText"
+      [editable]="(isExample$ | ngrxPush) !== true && ((editable$ | ngrxPush) || propSection()) && parameterSection.inEditMode()"
+      [section]="selectedSection()"
+      [formData]="(selectedSectionHyperParams$ | ngrxPush) | sort:'name'"
+      [size]="size$ | ngrxPush"
+      (formDataChanged)="onFormValuesChanged($event)"
+      (searchCounterChanged)="searchCounterChanged($event)"
+      (resetSearch)="search.clear(false)"
+      (scrollToResultCounterReset)="scrollIndexCounterReset()"
+    ></sm-experiment-execution-parameters>
+  </sm-editable-section>
+}

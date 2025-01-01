@@ -4,16 +4,12 @@
       <div>This will abort the execution of {{experiments.length > 1 ? experiments.length : 'the '}}
         @if (experiments.length === 1) {
           <b>{{experiments[0]?.name ? '"' + experiments[0]?.name + '"' : ''}} </b>
-          } pipeline run{{experiments.length > 1 ? 's' : ''}}
-        </div>
+        } pipeline run{{experiments.length > 1 ? 's' : ''}}
       </div>
-    }
-    <div class="buttons">
-      <button (click)="closeDialog(true)" data-id ="AbortButton" class="btn btn-neon yes-button" >
-        ABORT
-      </button>
-      <button (click)="closeDialog(false)" data-id ="CancelButton" class="btn btn-outline-neon" >
-        CANCEL
-      </button>
     </div>
-  </sm-dialog-template>
+  }
+</sm-dialog-template>
+<div mat-dialog-actions>
+  <button mat-stroked-button mat-dialog-close data-id ="CancelButton">CANCEL</button>
+  <button mat-flat-button [mat-dialog-close]="{shouldBeAbortedTasks}" data-id ="AbortButton">ABORT</button>
+</div>

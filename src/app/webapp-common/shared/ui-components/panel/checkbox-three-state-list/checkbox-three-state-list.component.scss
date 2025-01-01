@@ -3,6 +3,18 @@
 :host {
   width: 100%;
 
+  &:has(.empty) {
+    height: 100%;
+  }
+
+  .list-container {
+    width: 100%;
+
+    &.empty {
+      height: 100%;
+    }
+  }
+
   mat-checkbox {
     width: 100%;
     height: 40px;

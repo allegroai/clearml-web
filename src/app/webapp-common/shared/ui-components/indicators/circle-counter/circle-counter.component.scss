@@ -3,8 +3,9 @@
 
 $reqWidth: 56px;
 $font-size: 18px;
+
 .model-labels {
-  background-color: $orangada;
+  background-color: var(--color-warning);
 }
 
 .dataview-versions {
@@ -12,7 +13,7 @@ $font-size: 18px;
 }
 
 .dataview-enumeration {
-  background-color: $orangada;
+  background-color: var(--color-warning);
 }
 
 .counter-container {
@@ -25,10 +26,10 @@ $font-size: 18px;
     height: $reqWidth;
     border-radius: 50%;
     margin-bottom: 8px;
-    background-color: $blue-600;
+    background-color: var(--color-inverse-primary);
 
     .counter-tags {
-      background-color: $blue-900;
+      background-color: var(--color-surface-dim);
       border-radius: 30px;
       display: flex;
       padding: 0 28px;
@@ -48,45 +49,41 @@ $font-size: 18px;
       .sub-counter {
         font-size: 16px;
         font-weight: bold;
-        color: $white;
-
-        &.no-value {
-          color: $blue-400;
-        }
+        color: var(--color-on-primary-container);
       }
 
       .sub-label {
         font-size: 10px;
-        color: $blue-300;
+        color: var(--color-on-surface-variant);
       }
     }
 
-    &.completed {
-      background-color: $completed-blue;
-    }
-
-    &.published {
-      background-color: $neon-yellow;
-
-      .counter {
-        color: $blue-600;
-      }
-    }
-
-    &.pending {
-      background-color: $pending-gray;
+    &.total {
+      background-color: var(--color-total);
     }
 
     &.empty {
-      background-color: $empty-grey;
+      background-color: var(--color-tint-14);
+    }
+
+    &.completed {
+      background-color: var(--color-completed-container);
+    }
+
+    &.published {
+      background-color: var(--color-published-container);
+    }
+
+    &.pending {
+      background-color: var(--color-pending-container);
     }
 
     &.running {
-      background-color: $running-green;
+      background-color: var(--color-running-container);
     }
 
     &.failed {
-      background-color: $failed-red;
+      background-color: var(--color-error-container);
     }
 
     .counter {
@@ -97,9 +94,10 @@ $font-size: 18px;
 
   .counter-label {
     @include counter-label();
-  }
-}
 
-.leave-space {
-  min-height: 17px;
+    &.leave-space {
+      min-height: 17px;
+      color: var(--color-outline);
+    }
+  }
 }

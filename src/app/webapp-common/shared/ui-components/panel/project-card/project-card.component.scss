@@ -1,5 +1,4 @@
 @import "mixins/common";
-@import "variables";
 
 hr {
   margin: 0 !important;
@@ -12,7 +11,7 @@ hr {
 
 .project-tag {
   @include card-header-tag();
-  color: $neon-yellow;
+  color: var(--color-tertiary);
 }
 
 .tag {
@@ -34,11 +33,14 @@ hr {
   padding: 6px 0;
 
   a {
-    color: $blue-200;
-    padding: 0 24px;
+    color: var(--color-on-primary-container);
+    display: flex;
+    align-items: center;
+    margin: 0 12px;
+    padding: 0 12px;
+    border-radius: 3px;
     line-height: 30px;
     text-decoration: none;
-    display: flex;
 
     ::ng-deep .sub-path {
       overflow: hidden;
@@ -51,13 +53,9 @@ hr {
     }
 
     &:hover {
-      background-color: $blue-400;
+      background-color: var(--color-primary-container);
     }
   }
-}
-
-.title {
-  @include card-title();
 }
 
 ::ng-deep .project-card {
@@ -66,19 +64,9 @@ hr {
   overflow: hidden;
 }
 
-::ng-deep .project-card {
-
-  .project-name {
-    max-width: 280px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  :host {
-    ::ng-deep .mat-mdc-menu-content {
-      background-color: $blue-600;
-    }
-  }
+.project-name {
+  max-width: 280px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
-

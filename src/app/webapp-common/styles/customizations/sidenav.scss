@@ -1,0 +1,7 @@
+@use '@angular/material' as mat;
+
+.mat-drawer-container {
+  --mat-sidenav-content-background-color: transparent;
+  --mat-sidenav-container-background-color: color-mix(in srgb, var(--color-surface-container-high), var(--color-on-surface) transparent 80%);
+  --mat-sidenav-container-shape: 0;
+}

@@ -1,5 +1,5 @@
-import {Action, createAction, props} from '@ngrx/store';
-import {SelectedModel, TableModel} from '../models/shared/models.model';
+import {createAction, props} from '@ngrx/store';
+import {TableModel} from '../models/shared/models.model';
 import {ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {ModelsViewModesEnum} from '../models/models.consts';
 import {SortMeta} from 'primeng/api';
@@ -9,12 +9,12 @@ const SELECT_MODEL_PREFIX = '[select model]';
 export const getNextModels = createAction(`${SELECT_MODEL_PREFIX} get next models`);
 export const getSelectedModels = createAction(`${SELECT_MODEL_PREFIX} get selected models`, props<{selectedIds: string[]}>());
 
-export const setModels = createAction(`${SELECT_MODEL_PREFIX} set models`, props<{ models: Array<TableModel> }>());
-export const setSelectedModelsList = createAction(`${SELECT_MODEL_PREFIX} set selected models list`, props<{ models: Array<TableModel> }>());
+export const setModels = createAction(`${SELECT_MODEL_PREFIX} set models`, props<{ models: TableModel[] }>());
+export const setSelectedModelsList = createAction(`${SELECT_MODEL_PREFIX} set selected models list`, props<{ models: TableModel[] }>());
 
 export const setNoMoreModels = createAction(`${SELECT_MODEL_PREFIX} set no more models`, props<{ noMore: boolean }>());
 
-export const addModels = createAction(`${SELECT_MODEL_PREFIX} add many models`, props<{ models: Array<TableModel> }>());
+export const addModels = createAction(`${SELECT_MODEL_PREFIX} add many models`, props<{ models: TableModel[] }>());
 
 export const removeModels = createAction(`${SELECT_MODEL_PREFIX} remove many models`, props<{ models: string[] }>());
 

@@ -1,27 +1,26 @@
-<span class="queue-name"><b>{{queue.name }}</b> - {{queue.id}}</span>
+<span class="queue-name"><b>{{queue.caption }}</b> - {{queue.id}}</span>
 <sm-table
-    [rowHeight]="20"
-    [tableData]="tasks"
-    [columns]="cols"
-    [rowsNumber]="5"
-    (rowClicked)="onRowClicked($event)"
-    [reorderableColumns]="false"
-    [resizableColumns]="false"
->
+  [rowHeight]="20"
+  [tableData]="tasks"
+  [columns]="cols"
+  [rowsNumber]="5"
+  (rowClicked)="onRowClicked($event)"
+  [reorderableColumns]="false"
+  [resizableColumns]="false"
+  >
   <ng-template let-col
-               let-task="rowData"
-               pTemplate="body">
-    <ng-container [ngSwitch]="col.id">
-      <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.USER">
+    let-task="rowData"
+    pTemplate="body">
+    @switch (col.id) {
+      @case (QUEUES_TABLE_COL_FIELDS.USER) {
         {{task.user.name}}
-      </ng-container>
-      <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.QUEUED">
+      }
+      @case (QUEUES_TABLE_COL_FIELDS.QUEUED) {
         <span [smTooltip]="task[col.id] | date : TIME_FORMAT_STRING">{{task[col.id] | timeAgo}}</span>
-      </ng-container>
-      <ng-container *ngSwitchDefault>
+      }
+      @default {
         {{task[col.id]}}
-      </ng-container>
-    </ng-container>
+      }
+    }
   </ng-template>
-
 </sm-table>

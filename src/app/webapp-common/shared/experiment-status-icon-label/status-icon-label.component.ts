@@ -1,7 +1,8 @@
-import {ChangeDetectionStrategy, Component, ElementRef, inject, Input, Renderer2} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-status-icon-label',
@@ -9,50 +10,49 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
   styleUrls: ['./status-icon-label.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIcon
   ],
   standalone: true
 })
 export class StatusIconLabelComponent {
-  public showSpinner: boolean;
-  public experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
-  private _status: string;
-  private _showLabel: boolean = true;
-  private _enableSpinner: boolean;
+  protected readonly experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
 
-  @Input() set showLabel(showLabel: boolean) {
-    this._showLabel = showLabel;
-    !showLabel === false && this.renderer.addClass(this.ref.nativeElement, 'hide-label');
-  }
+  showLabel = input(true);
+  showIcon = input(true);
+  enableSpinner = input(false);
+  status = input<string>();
+  type = input();
+  progress = input();
+  inline = input(true);
 
-  get showLabel() {
-    return this._showLabel;
-  }
-  @Input() showIcon                = true;
-  @Input() set enableSpinner(enableSpinner: boolean){
-    this._enableSpinner = enableSpinner;
-    enableSpinner && this.renderer.addClass(this.ref.nativeElement, 'show-spinner');
-  }
+  protected showSpinner = computed(() => [
+    TASKS_STATUS.IN_PROGRESS,
+    TASKS_STATUS.FAILED,
+    TASKS_STATUS.STOPPED
+  ].includes(this.status()));
 
-  get enableSpinner() {
-    return this._enableSpinner;
-  }
-  @Input() set status(status) {
-    this.renderer.removeClass(this.ref.nativeElement, this._status);
-    this._status = status;
-    this.renderer.addClass(this.ref.nativeElement, status);
-    this.showSpinner = [
-      TASKS_STATUS.IN_PROGRESS,
-      TASKS_STATUS.FAILED,
-      TASKS_STATUS.STOPPED
-    ].includes(status);
-  }
-  get status() {
-    return this._status;
-  }
-  @Input() type;
-  @Input() progress;
-
-  private renderer = inject(Renderer2);
-  private ref = inject(ElementRef);
+  statusIcon = computed(() => {
+    switch (this.status()) {
+      case 'created':
+        return 'al-ico-status-draft';
+      case 'completed':
+      case 'stopped':
+      case 'closed':
+      case 'Final':
+        return 'al-ico-completed';
+      case 'in_progress':
+      case 'Uploading':
+        return 'al-ico-running';
+      case 'failed':
+        return 'al-ico-dialog-x';
+      case 'queued':
+        return 'al-ico-pending';
+      case 'published':
+      case 'publishing':
+        return 'al-ico-published';
+      default:
+        return '';
+    }
+  });
 }

@@ -1,12 +1,13 @@
-@for (option of options; track trackByValFn(i, option); let i = $index) {
-  <span mat-menu-item>
+<div class="list-container" [class.empty]="options?.length === 0">
+  @for (option of options; track trackByValFn(i, option); let i = $index) {
+    <span mat-menu-item>
     <mat-checkbox
       class="w-100 d-flex"
       [value]="option.value"
       [checked]="checkedList?.includes(option.value) || indeterminateState[option.value] === checkboxState.exclude"
       [indeterminate]="indeterminateState[option.value] === checkboxState.exclude"
       (change)="onFilterChanged($event)"
-      >
+    >
       <span
         [smTooltip]="option.tooltip || option.label"
         smShowTooltipIfEllipsis
@@ -14,15 +15,16 @@
         matTooltipPosition="above"
         data-id="FilterOption"
         class="ellipsis label"
-      >{{option.label}}</span>
+      >{{ option.label }}</span>
     </mat-checkbox>
   </span>
-}
-@if (options?.length === 0) {
-  <div class="empty-menu flex-middle">No item found</div>
-}
-@if (options === null) {
-  <div class="flex-middle mt-5">
-    <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
-  </div>
-}
+  }
+  @if (options?.length === 0) {
+    <div class="empty-menu flex-middle">No item found</div>
+  }
+  @if (options === null) {
+    <div class="flex-middle mt-5">
+      <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+    </div>
+  }
+</div>

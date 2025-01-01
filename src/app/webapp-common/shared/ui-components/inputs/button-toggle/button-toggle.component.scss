@@ -1,50 +1,10 @@
-@import "../../styles/mixins/button-toggle-group";
-
 :host {
-  @include generate-button-toggle-group();
-
-  ::ng-deep .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
-    height: 32px;
-    display: flex;
-    align-items: center;
-  }
-
-  .no-background {
-    .mat-button-toggle-appearance-standard {
-      background: none !important;
-      border-radius: 4px !important;
-      margin: 1px;
-
-      &.mat-button-toggle-checked {
-        background-color: $blue-600 !important;
-      }
-
-      ::ng-deep .mat-button-toggle-button {
-        .mat-button-toggle-label-content {
-          padding: 6px;
-
-          &:hover {
-            color: $blue-100;
-          }
-        }
-      }
-    }
-  }
-
+  --mat-standard-button-toggle-height: 34px;
+  --mat-standard-button-toggle-label-text-line-height: 32px;
 
   .label {
     font-size: 12px;
     font-weight: 500;
     text-transform: uppercase;
-  }
-
-  mat-button-toggle {
-    &:first-child {
-      border-radius: 4px 0 0 4px;
-    }
-
-    &:last-child {
-      border-radius: 0 4px 4px 0;
-    }
   }
 }

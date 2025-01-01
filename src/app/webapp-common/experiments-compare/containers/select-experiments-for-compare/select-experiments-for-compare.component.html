@@ -1,10 +1,9 @@
 <sm-dialog-template [header]="'Select compared '+ data.entityType + 's'">
   <div class="select-experiments-container light-theme" (click)="closeSearch()">
     <div class="search-experiment-for-compare d-flex justify-content-between mb-3">
-      <mat-form-field appearance="outline" class="no-bottom" style="width: 450px" smClickStopPropagation>
+      <mat-form-field appearance="outline" class="no-bottom thin" style="width: 450px" smClickStopPropagation>
         <input
           #searchExperiments
-
           matInput
           name="search-experiments"
           autocomplete="off"
@@ -36,7 +35,7 @@
         [tableCols]="tableCols$| ngrxPush"
         [users]="users$ | ngrxPush"
         [projects]="projects$ | ngrxPush"
-        [selectedExperiments]="selectedExperimentsIds | idToObjectsArray"
+        [checkedExperiments]="selectedExperimentsIds | idToObjectsArray"
         [experiments]="experiments$ | ngrxPush"
         [experimentTypes]="types$ | ngrxPush"
         [tableFilters]="(tableFilters$ | ngrxPush)"
@@ -61,12 +60,17 @@
     </div>
   </div>
   <div class="buttons">
-    <button type="submit"
+    <button
+      mat-flat-button
+      [disabled]="selectedExperimentsIds.length===0"
+      type="submit"
             (click)="applyChanges()"
-            class="btn btn-neon yes-button" data-id="ApplyButton">
+            class="yes-button" data-id="ApplyButton">
       APPLY
     </button>
-    <button (click)="closeDialog()" class="btn btn-outline-neon" data-id ="CancelButton">
+    <button
+      mat-stroked-button
+      (click)="closeDialog()" data-id ="CancelButton">
       CANCEL
     </button>
   </div>

@@ -1,5 +1,5 @@
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {createAction, props} from '@ngrx/store';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {Task} from '~/business-logic/model/tasks/task';
 
 export const SELECT_QUEUE_PREFIX = 'SELECT_QUEUE_';

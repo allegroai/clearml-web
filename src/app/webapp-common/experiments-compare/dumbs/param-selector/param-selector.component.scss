@@ -1,22 +1,29 @@
-@import "variables";
 
 :host {
   display: flex;
   flex-direction: column;
+  --mat-text-button-state-layer-color: none;
 
   .no-data {
     text-align: center;
-    color: $blue-300;
+    color: var(--color-outline);
   }
 
-  .btn.btn-outline {
-    color: $blue-500;
-    border: 1px solid $cloudy-blue;
-    font-size: 14px;
-    font-weight: normal;
+  .like-select {
+    border: solid 1px var(--color-outline-variant);
+    border-radius: 5px;
+    padding: 6px 12px;
 
     &:hover {
-      border-color: $blue-250;
+      border-color: var(--color-outline);
+    }
+  }
+
+  .selected-parameter {
+    color: var(--color-on-surface-variant);
+
+    &:hover {
+      background-color: var(--color-surface-container-low);
     }
   }
 
@@ -33,6 +40,8 @@
 .filtered-list {
   padding: 6px;
   height: 480px;
+  margin: 0 12px;
+
 
   ::ng-deep .actions {
     padding-top: 10px;
@@ -47,10 +56,6 @@
   padding: 4px 8px;
   border-radius: 4px;
   background-color: transparent;
-
-  &:hover {
-    background-color: $blue-50;
-  }
 
   span {
     max-width: 280px;
@@ -69,22 +74,24 @@
 
 .title-container {
   margin-bottom: 12px;
-  border-bottom: 1px solid $cloudy-blue;
+  border-bottom: 1px solid var(--color-surface-container-high);
   padding: 6px 12px 6px 0;
 
   &:hover {
-    border-color: $blue-250;
+    border-color: var(--color-outline-variant);
     cursor: pointer;
   }
 
   .param-selector-title {
-    color: $blue-500;
+    color: var(--color-on-surface-variant);
     font-size: 14px;
   }
 
   sm-menu {
     margin-left: auto;
   }
+
+
 
 
 }

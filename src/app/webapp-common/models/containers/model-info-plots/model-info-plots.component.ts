@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, Observable, Subject, Subscription} from 'rxjs';
+import {combineLatest, Subject, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
@@ -26,37 +26,29 @@ import {setExperimentSettings} from '@common/experiments/actions/common-experime
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
-  public graphs: { [key: string]: any[] };
-  public plotsList$ = new Subject<Array<SelectableListItem>>();
-  public plotsList: Array<SelectableListItem>;
+  private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
+  private activeRoute = inject(ActivatedRoute);
+  private reportEmbed = inject(ReportCodeEmbedService);
+  private route = inject(ActivatedRoute);
+
+  public graphs: Record<string, any[]>;
+  public plotsList$ = new Subject<SelectableListItem[]>();
+  public plotsList: SelectableListItem[];
   public searchTerm: string;
   public minimized = true;
   public dark = false;
-  public splitSize$: Observable<number>;
-  public modelsFeature = false;
   private sub = new Subscription();
   private refreshDisabled: boolean;
   private modelId: string;
-
-  @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
-  public listOfHidden$: Observable<any>;
-  private plots$: Observable<MetricsPlotEvent[]>;
   public selectedMetrics: string[];
+  protected splitSize$ = this.store.select(selectSplitSize);
+  protected modelsFeature = !!this.route.snapshot?.parent?.parent?.data?.setAllProject;
+  protected plots$ = this.store.select(selectModelPlots);
+  protected listOfHidden$ = this.store.select(selectModelSettingsHiddenPlot)
+    .pipe(distinctUntilChanged(isEqual));
 
-  constructor(
-    private store: Store,
-    private cdr: ChangeDetectorRef,
-    private activeRoute: ActivatedRoute,
-    private reportEmbed: ReportCodeEmbedService,
-    private route: ActivatedRoute
-    ) {
-    // this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
-    this.splitSize$ = this.store.select(selectSplitSize);
-    this.modelsFeature = !!this.route.snapshot?.parent?.parent?.data?.setAllProject;
-    this.plots$ = this.store.select(selectModelPlots);
-    this.listOfHidden$ = this.store.select(selectModelSettingsHiddenPlot)
-      .pipe(distinctUntilChanged(isEqual));
-  }
+  graphsComponent = viewChild(ExperimentGraphsComponent);
 
   ngOnInit(): void {
     this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
@@ -114,7 +106,7 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
     );
   }
 
-  private preparePlotsList(groupedPlots: { [title: string]: MetricsPlotEvent[] }): Array<SelectableListItem> {
+  private preparePlotsList(groupedPlots: Record<string, MetricsPlotEvent[]>): SelectableListItem[] {
     const list = groupedPlots ? Object.keys(groupedPlots) : [];
     const sortedList = sortMetricsList(list);
     return sortedList.map((item) => ({name: item, value: item}));
@@ -128,7 +120,7 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   }
 
   metricSelected(id: string) {
-    this.graphsComponent?.scrollToGraph(id);
+    this.graphsComponent()?.scrollToGraph(id);
   }
 
   hiddenListChanged(hiddenList: string[]) {

@@ -11,8 +11,16 @@ export interface WorkerExt extends Omit<Worker, 'id'> {
   originalName: string;
 }
 
+export const resetWorkers = createAction(
+  workersPrefix + '[reset workers]'
+);
+
 export const getWorkers = createAction(
-  workersPrefix + '[get workers and stats]',
+  workersPrefix + '[get workers]'
+);
+
+export const getWorkerStats = createAction(
+  workersPrefix + '[get stats]',
   props<{maxPoints: number}>()
 );
 
@@ -49,5 +57,5 @@ export const setStats = createAction(
 
 export const setStatsParams = createAction(
   workersPrefix + '[set stats parameters]',
-  props<{ timeFrame: string; param: string }>()
+  props<{ timeFrame: string; param: string; maxPoints: number }>()
 );

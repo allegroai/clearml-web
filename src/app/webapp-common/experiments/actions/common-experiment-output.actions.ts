@@ -46,7 +46,7 @@ export const experimentPlotsRequested = createAction(
 
 export const experimentScalarRequested  = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'EXPERIMENT_SCALAR_REQUESTED',
-  props<{experimentId: string; model?: boolean}>()
+  props<{experimentId: string; model?: boolean, refresh?: boolean}>()
 );
 
 export const setHistogram = createAction(

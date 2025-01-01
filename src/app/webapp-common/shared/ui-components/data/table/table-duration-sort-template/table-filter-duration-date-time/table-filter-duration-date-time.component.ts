@@ -22,6 +22,9 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
 import {
   TableFilterDurationErrorComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
+import {MatFormField, MatInput} from '@angular/material/input';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -92,13 +95,14 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
     TableFilterDurationErrorComponent,
     MatDatepickerInput,
     MatDatepickerToggle,
-    MatDatepicker
+    MatDatepicker,
+    MatInput,
+    MatFormField,
+    MatIconButton,
+    MatIcon
   ]
 })
 export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent {
-  _selectedDate: Date;
-  _selectedTimeInSeconds: number;
-
   _lessThan = {
     date: undefined,
     time: 0

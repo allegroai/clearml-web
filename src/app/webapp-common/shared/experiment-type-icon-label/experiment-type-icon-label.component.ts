@@ -1,7 +1,8 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
-import {NgIf, TitleCasePipe} from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
 
 
 @Component({
@@ -13,8 +14,8 @@ import {NgIf, TitleCasePipe} from '@angular/common';
   imports: [
     NoUnderscorePipe,
     TitleCasePipe,
-    NgIf
-  ]
+    MatIcon
+]
 })
 export class ExperimentTypeIconLabelComponent{
   @Input() type: TaskTypeEnum;

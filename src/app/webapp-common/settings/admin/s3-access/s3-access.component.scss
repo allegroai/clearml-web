@@ -1,14 +1,29 @@
 @import "variables";
+@import "mixins/link";
 
+@include link();
 ::ng-deep body sm-s3-access .editable {
   padding: 0;
-  background-color: #ffffff;
+  background-color: var(--color-on-surface);
+}
+
+.form-container {
+  display: grid;
+  grid-template-rows: 32px auto 36px;
+  gap: 8px;
+  padding-right: 24px;
+}
+
+.credentials-container {
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .s3-row {
   display: grid;
   grid-gap: 6px;
-  grid-template-columns: minmax(60px, 20%) minmax(40px, 15%) minmax(60px, 20%) minmax(40px, 10%) minmax(40px, 10%) minmax(60px, 20%) 50px;
+  grid-template-columns: minmax(60px, 20%) minmax(40px, 15%) minmax(60px, 20%) minmax(40px, 10%) minmax(75px, 10%) minmax(70px, 20%) minmax(60px, 5%);
   padding: 6px 0;
 
   &:last-child {
@@ -24,16 +39,11 @@
 }
 
 .header {
-  border-bottom: solid 1px;
+  border-bottom: solid 1px var(--color-outline-variant);
   padding-bottom: 6px;
-  margin-bottom: 10px;
   text-transform: uppercase;
   font-weight: 500;
   font-size: 12px;
-
-  & > div {
-    padding-left: 6px;
-  }
 }
 
 .delete-button {
@@ -44,10 +54,12 @@
 .alert-icon {
   display: flex;
   align-items: center;
+
   .al-icon {
-    color: $error-dark;
+    color: var(--color-error);
+
     &:hover {
-      color: $pipeline-failed;
+      color: var(--color-failed);
     }
   }
 }
@@ -56,43 +68,9 @@
   display: inline-block;
   margin: 12px 0 24px;
 
+
   .al-icon {
-   vertical-align: middle;
+    vertical-align: middle;
   }
 }
 
-:host.dark-theme {
-  .s3-row {
-    border-bottom: $blue-500 solid 1px;
-
-    input {
-      color: $blue-100;
-    }
-
-    .value {
-      background-color: $black;
-      border-color: $blue-500;
-    }
-  }
-
-  .header {
-    color: $blue-400;
-  }
-
-  .delete-button {
-    .al-icon {
-      color: $blue-300;
-      &:hover {
-        color: $blue-200;
-      }
-    }
-  }
-
-  .add-button {
-    color: $blue-280;
-
-    &:hover {
-      color: $white;
-    }
-  }
-}

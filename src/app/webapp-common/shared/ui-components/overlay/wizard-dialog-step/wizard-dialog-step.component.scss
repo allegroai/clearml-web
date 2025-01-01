@@ -27,9 +27,6 @@
   }
 }
 
-.step {
-}
-
 .icon-image {
   opacity: 1;
   padding-top: 5vh;
@@ -46,13 +43,12 @@
 .label {
   font-size: 28px;
   font-weight: 300;
-  color: $blue-800;
 }
 
 .sub-label {
   font-size: 14px;
   line-height: 1.29;
-  color: $blue-450;
+  color: var(--color-on-surface-variant);
   white-space: pre-line;
   padding: 2vh;
 }
@@ -61,7 +57,7 @@
   margin-top: 2vh;
   font-size: 10vh;
   font-weight: 900;
-  color: #e7e9f0;
+  color: color-mix(in srgb, var(--color-secondary), transparent 50%);
   animation: show-step $transition-slow;
   animation-fill-mode: forwards;
   &.hide-step {
@@ -74,11 +70,10 @@
   padding: 24px;
   width: 100%;
   height: 2px;
-  border-bottom: solid 2px $blue-50;
+  border-bottom: solid 2px var(--color-outline);
 }
 
 .step-icon {
-
   margin-top: 4vh;
   margin-bottom: 4vh;
   width: 10vh;
@@ -86,21 +81,6 @@
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
-  &.dataset {
-    background-image: url('../../../../assets/icons/first-experiment/annotator.svg');
-  }
-  &.model{
-    background-image: url('../../../../assets/icons/first-experiment/annotator.svg');
-  }
-  &.monitor{
-    background-image: url('../../../../assets/icons/first-experiment/monitor-88.svg');
-  }
-  &.filters{
-    background-image: url('../../../../assets/icons/first-experiment/filters-icon.svg');
-  }
-  &.iteration{
-    background-image: url('../../../../assets/icons/first-experiment/iterations-icon.svg');
-  }
   &.hide-step {
     animation: hide-step $transition-slow;
     animation-fill-mode: forwards;

@@ -8,12 +8,13 @@ import {ProjectDialogModule} from '../shared/project-dialog/project-dialog.modul
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {ProjectsEffects} from '~/features/projects/projects.effect';
 import {CommonProjectsEffects} from './common-projects.effects';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
 import {StoreModule} from '@ngrx/store';
 import {projectsReducer} from '~/features/projects/projects.reducer';
 import {PushPipe} from '@ngrx/component';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 @NgModule({
@@ -25,10 +26,11 @@ import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dot
     ProjectsSharedModule,
     StoreModule.forFeature('projects', projectsReducer),
     EffectsModule.forFeature([ProjectsEffects, CommonProjectsEffects]),
-    LabeledFormFieldDirective,
     ProjectCardComponent,
     PushPipe,
     DotsLoadMoreComponent,
+    MatButton,
+    MatIcon,
   ],
   declarations: [CommonProjectsPageComponent, ProjectsListComponent],
   exports: [CommonProjectsPageComponent, ProjectsListComponent]

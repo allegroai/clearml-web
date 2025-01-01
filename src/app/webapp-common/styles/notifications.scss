@@ -1,0 +1,43 @@
+
+.notifier__notification {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-container-lowest);
+
+  .notifier__notification-message {
+    width: 380px;
+    font-size: 12px;
+    margin: 9px 0;
+  }
+}
+
+.notification-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.notifier__icon-type {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  height: 36px;
+  .al-ico-info-circle {
+    color: var(--color-completed);
+  }
+  .al-ico-success {
+    color: var(--color-running);
+  }
+  .al-ico-alert {
+    color: var(--color-warning);
+  }
+  .al-ico-dialog-x {
+    color: var(--color-failed);
+  } 
+}
+
+
+// Dark panel color
+.dark-mode .notifier__notification {
+  background-color: var(--color-surface-container-high);
+}

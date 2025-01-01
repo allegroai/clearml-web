@@ -1,9 +1,9 @@
-@import "../../shared/ui-components/styles/variables";
+@import "../../styles/variables";
 @import "./variables";
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?h2mp1v') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?rh580d') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,36 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-enterprise-rocket {
+  &:before {
+    content: $al-ico-enterprise-rocket; 
+  }
+}
+.al-ico-no-data-table {
+  &:before {
+    content: $al-ico-no-data-table; 
+  }
+}
+.al-ico-palette {
+  &:before {
+    content: $al-ico-palette;
+  }
+}
+.al-ico-log {
+  &:before {
+    content: $al-ico-log;
+  }
+}
+.al-ico-debug-samples {
+  &:before {
+    content: $al-ico-debug-samples;
+  }
+}
+.al-ico-artifacts {
+  &:before {
+    content: $al-ico-artifacts;
+  }
+}
 .al-ico-close-circle {
   &:before {
     content: $al-ico-close-circle;
@@ -761,9 +791,9 @@
     content: $al-ico-pending;
   }
 }
-.al-ico-aborted {
+.al-ico-sqr-empty {
   &:before {
-    content: $al-ico-aborted;
+    content: $al-ico-sqr-empty; 
   }
 }
 .al-ico-success {
@@ -924,7 +954,7 @@
 .al-ico-filter-on .path1 {
   &:before {
     content: $al-ico-filter-on-path1;
-    color: $neon-yellow; // don't overwrite
+    color: var(--color-tertiary); // don't overwrite
     // color: rgb(211, 255, 0);
   }
 }
@@ -932,45 +962,46 @@
   &:before {
     content: $al-ico-filter-on-path2;
     margin-left: -1em;
-    color: $blue-300; // don't overwrite
+    color: var(--color-on-surface); // don't overwrite
+
   }
 }
 .al-ico-filter-off {
   &:before {
     content: $al-ico-filter-off;
-    color: $blue-400; // don't overwrite
+    color: var(--color-outline); // don't overwrite
   }
 }
 .al-ico-sort-off {
   &:before {
     content: $al-ico-sort-off;
-    color: $blue-400; // don't overwrite
+    //color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-down .path1 {
   &:before {
     content: $al-ico-sort-on-down-path1;
-    color: $blue-400; // don't overwrite
+    //color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-down .path2 {
   &:before {
     content: $al-ico-sort-on-down-path2;
     margin-left: -1em;
-    color: $blue-200; // don't overwrite
+    //color: $blue-200; // don't overwrite
   }
 }
 .al-ico-sort-on-up .path1 {
   &:before {
     content: $al-ico-sort-on-up-path1;
-    color: $blue-400; // don't overwrite
+    //color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-up .path2 {
   &:before {
     content: $al-ico-sort-on-up-path2;
     margin-left: -1em;
-    color: $blue-200; // don't overwrite
+    //color: $blue-200; // don't overwrite
   }
 }
 .al-ico-arrow-left {
@@ -1191,27 +1222,27 @@
 .al-ico-auto-refresh-play .path1 {
   &:before {
     content: $al-ico-auto-refresh-play-path1;
-    color: $blue-300; // don't overwrite
+    //color: $blue-300; // don't overwrite
   }
 }
 .al-ico-auto-refresh-play .path2 {
   &:before {
     content: $al-ico-auto-refresh-play-path2;
     margin-left: -1em;
-    color: $neon-yellow; // don't overwrite
+    color: var(--color-tertiary); // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path1 {
   &:before {
     content: $al-ico-auto-refresh-pause-path1;
-    color: $blue-300; // don't overwrite
+    //color: $blue-300; // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path2 {
   &:before {
     content: $al-ico-auto-refresh-pause-path2;
     margin-left: -1em;
-    color: $neon-yellow; // don't overwrite
+    color: var(--color-tertiary); // don't overwrite
     // color: rgb(211, 253, 0);
   }
 }
@@ -1268,7 +1299,7 @@
 .al-ico-filter-reset .path1 {
   &:before {
     content: $al-ico-filter-reset-path1;
-    color: $blue-300; // don't overwrite
+    color: var(--color-primary); // don't overwrite
   }
 }
 .al-ico-filter-reset .path2 {
@@ -1312,14 +1343,13 @@
 .al-ico-settings-alert .path1 {
   &:before {
     content: $al-ico-settings-alert-path1;
-    color: $black; // don't overwrite
   }
 }
 .al-ico-settings-alert .path2 {
   &:before {
     content: $al-ico-settings-alert-path2;
     margin-left: -1em;
-    color: $neon-yellow; // don't overwrite
+    color: var(--color-tertiary); // don't overwrite
     // color: rgb(211, 255, 0);
   }
 }

@@ -24,7 +24,6 @@ export const appConfig: ApplicationConfig = {
     ...extCoreConfig,
     provideAnimations(),
     provideHttpClient(),
-    provideExperimentalZonelessChangeDetection(),
     BaseAdminService,
     ApiEventsService,
     SmApiRequestsService,

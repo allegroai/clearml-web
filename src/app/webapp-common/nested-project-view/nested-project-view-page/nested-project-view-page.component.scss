@@ -1,5 +1,5 @@
 @import "variables";
-@import "empty";
+@import "mixins/empty";
 
 :host {
   display: block;
@@ -11,12 +11,6 @@
 
   .tags-list-counter {
     width: 140px;
-    &.empty-tags{
-      background-image: url('../../assets/icons/tags-empty-state.svg');
-      height: 100%;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
   }
 
   .sm-card-list-layout {
@@ -29,7 +23,6 @@
   .footer-tags {
     display: flex;
     min-height: 38px;
-    background-color: $blue-600;
     padding: 0 16px;
     align-items: center;
     flex-wrap: wrap;
@@ -41,7 +34,7 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    background-color: $blue-800;
+    background-color: var(--color-surface);
     margin-bottom: -12px;
   }
 
@@ -60,17 +53,6 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-
-    a {
-      color: $purple;
-      &.dark {
-        color: white;
-      }
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
 
     sm-code-editor {
       display: block;

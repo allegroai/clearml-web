@@ -3,10 +3,10 @@
   [model]="contextModel"
   [tableMode]="!minimizedView"
   [selectedModel]="selectedModel"
-  [selectedModels]="singleRowContext ? (selectedModel? [selectedModel] : undefined ): selectedModels"
+  [selectedModels]="singleRowContext ? (selectedModel? [selectedModel] : undefined ): checkedModels"
   [selectedDisableAvailableIsMultiple]="!singleRowContext"
   [selectedDisableAvailable]="singleRowContext ? getSingleSelectedModelsDisableAvailable(selectedModel? selectedModel: contextModel) : selectedModelsDisableAvailable"
-  [numSelected]="singleRowContext ? 1 : selectedModels.length"
+  [numSelected]="singleRowContext ? 1 : checkedModels.length"
   [tagsFilterByProject]="tagsFilterByProject$ | ngrxPush"
   [projectTags]="projectTags$ | ngrxPush"
   [companyTags]="companyTags$ | ngrxPush"
@@ -33,7 +33,7 @@
     [lazyLoading]="true"
     [columnResizeMode]="columnResizeMode"
     [selection]="selectedModel"
-    [checkedItems]="selectedModels"
+    [checkedItems]="checkedModels"
     [activeContextRow]="contextModel"
     [contextMenuOpen]="contextMenuActive"
     [minimizedView]="minimizedView"
@@ -44,41 +44,44 @@
     (colReordered)="columnsReordered.emit($event)"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
     (rowClicked)="tableRowClicked($event)"
-    (rowDoubleClicked)="modelSelectionChanged.emit({model: $event.data, openInfo: true})"
+    (rowDoubleClicked)="modelSelectionChanged.emit({model: $event.data, openInfo: true, origin: 'table'})"
     (loadMoreClicked)="onLoadMoreClicked()"
     (rowRightClick)="openContextMenu($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
     (columnResized)="columnResized.emit($event)"
     (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
-  >
+    >
     <ng-template let-col pTemplate="cardFilter">
-      <sm-table-card-filter-template [options]="filtersOptions"
-                                     [value]="filtersValues"
-                                     [subValue]="filtersSubValues[modelsTableColFields.TAGS]"
-                                     [columns]="initialColumns"
-                                     [filterMatch]="filtersMatch"
-                                     fixedOptionsSubheader="System tags"
-                                     (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
-                                     (filterChanged)="tableAllFiltersChanged($event)"
-                                     (menuOpened)="columnFilterOpened($event)"
-                                     (menuClosed)="columnFilterClosed($event)"
-                                     (clearAll)="clearAllFilters.emit(tableFilters)"
-      ></sm-table-card-filter-template>
+      <sm-table-card-filter [options]="filtersOptions"
+        [value]="filtersValues"
+        [subValue]="filtersSubValues[modelsTableColFields.TAGS]"
+        [columns]="initialColumns"
+        [filterMatch]="filtersMatch"
+        fixedOptionsSubheader="System tags"
+        (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
+        (filterChanged)="tableAllFiltersChanged($event)"
+        (menuOpened)="columnFilterOpened($event)"
+        (menuClosed)="columnFilterClosed($event)"
+        (clearAll)="clearAllFilters.emit(tableFilters)"
+      ></sm-table-card-filter>
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
     <ng-template let-col pTemplate="checkbox">
-      <div *ngIf="!hideSelectAll" class="d-flex align-items-center">
-        <sm-checkbox-control
-          *ngIf="col.id === modelsTableColFields.SELECTED"
-          class="checkbox-col header"
-          [class.minimised]="minimizedView"
-          fieldName="selected"
-          [formData]="selectionState"
-          (formDataChanged)="headerCheckboxClicked()"
-          inputClassName="table-check-box select-col-checkbox">
-        </sm-checkbox-control>
-        <div class="al-icon al-ico-dropdown-arrow drop-down" data-id="Checkbox Dropdown" [matMenuTriggerFor]="selectionMenu"></div>
-      </div>
+<!--      @if (!hideSelectAll) {-->
+        <div class="d-flex align-items-center">
+          @if (col.id === modelsTableColFields.SELECTED) {
+            <mat-checkbox
+                          class="header-checkbox"
+                          [formControl]="selectionChecked"
+                          [indeterminate]="selectionIndeterminate"
+                          [disableRipple]="true"
+                          smClickStopPropagation
+                          (change)="headerCheckboxClicked()">
+            </mat-checkbox>
+          }
+          <div class="al-icon al-ico-dropdown-arrow drop-down" data-id="Checkbox Dropdown" [matMenuTriggerFor]="selectionMenu"></div>
+        </div>
+<!--      }-->
       <mat-menu class="light-theme" #selectionMenu="matMenu">
         <div class="menu-title">Select from project</div>
         <button mat-menu-item data-id="All Option" (click)="selectAll()">All</button>
@@ -90,7 +93,7 @@
     <!--SORT FILTER TEMPLATE-->
 
     <ng-template let-col pTemplate="sort-filter">
-      <sm-table-filter-sort-template
+      <sm-table-filter-sort
         [column]="col"
         [value]="filtersValues[col.id]"
         [searchValue]="searchValues[col.id]"
@@ -103,70 +106,74 @@
         (searchValueChanged)="searchValueChanged($event, col.id, col.asyncFilter)"
         (menuOpened)="columnFilterOpened(col)"
         (menuClosed)="columnFilterClosed(col)"
-      >
-      </sm-table-filter-sort-template>
+        >
+      </sm-table-filter-sort>
     </ng-template>
 
     <!--BODY TEMPLATE-->
 
     <ng-template let-col
-                 let-model="rowData"
-                 pTemplate="body">
-      <ng-container [ngSwitch]="col.id">
-        <ng-container *ngSwitchCase="modelsTableColFields.NAME">
+      let-model="rowData"
+      pTemplate="body">
+      @switch (col.id) {
+        @case (modelsTableColFields.NAME) {
           <div class="d-flex flex-row flex-nowrap ellipsis">
             <div class="model-name" [smTooltip]="model.name" smShowTooltipIfEllipsis>{{model.name}}</div>
-            <i *ngIf="model?.system_tags?.includes('shared')" class="al-icon al-ico-link sm ms-2"></i>
+            @if (model?.system_tags?.includes('shared')) {
+              <i class="al-icon al-ico-link sm ms-2"></i>
+            }
           </div>
-        </ng-container>
-        <ng-container *ngSwitchCase="modelsTableColFields.TAGS">
+        }
+        @case (modelsTableColFields.TAGS) {
           <sm-tag-list [tags]="model.tags" [sysTags]="getSysTags(model)"></sm-tag-list>
-        </ng-container>
-        <ng-container *ngSwitchCase="modelsTableColFields.USER">
+        }
+        @case (modelsTableColFields.USER) {
           <span class="ellipsis" [smTooltip]="model.user?.name ? model.user?.name : 'Unknown User'"
-                smShowTooltipIfEllipsis>{{model.user?.name ? model.user?.name : 'Unknown User'}}</span>
-        </ng-container>
-        <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="model?.project?.name"
-              *ngSwitchCase="modelsTableColFields.PROJECT">
-          {{model?.project?.name}}
-        </span>
-        <span *ngSwitchCase="modelsTableColFields.TASK" class="ellipsis" [smTooltip]="model.task?.name"
-              smShowTooltipIfEllipsis>
-          {{model.task?.name}}
-        </span>
-        <ng-container *ngSwitchCase="modelsTableColFields.READY">
+          smShowTooltipIfEllipsis>{{model.user?.name ? model.user?.name : 'Unknown User'}}</span>
+        }
+        @case (modelsTableColFields.PROJECT) {
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="model?.project?.name"
+            >
+            {{model?.project?.name}}
+          </span>
+        }
+        @case (modelsTableColFields.TASK) {
+          <span class="ellipsis" [smTooltip]="model.task?.name"
+            smShowTooltipIfEllipsis>
+            {{model.task?.name}}
+          </span>
+        }
+        @case (modelsTableColFields.READY) {
           <sm-status-icon-label
-            [status]="model?.ready? 'published': 'created'"></sm-status-icon-label>
-        </ng-container>
-        <ng-container *ngSwitchCase="modelsTableColFields.LAST_UPDATE">
+          [status]="model?.ready? 'published': 'created'"></sm-status-icon-label>
+        }
+        @case (modelsTableColFields.LAST_UPDATE) {
           <span class="ellipsis"
-                [smTooltip]="model.last_update | date : timeFormatString">{{model.last_update | timeAgo}}</span>
-        </ng-container>
-
-        <sm-checkbox-control
-          *ngSwitchCase="modelsTableColFields.SELECTED"
-          smClickStopPropagation
-          class="checkbox-col"
-          fieldName="selected"
-          [formData]="isRowSelected(model)"
-          (formDataChanged)="rowSelectedChanged($event, model)"
-          inputClassName="table-check-box table-body">
-        </sm-checkbox-control>
-        <ng-container *ngSwitchCase="modelsTableColFields.COMMENT">
+          [smTooltip]="model.last_update | date : timeFormatString">{{model.last_update | timeAgo}}</span>
+        }
+        @case (modelsTableColFields.SELECTED) {
+          <mat-checkbox #cb
+                        smClickStopPropagation
+                        [checked]="checkedModels | isRowSelected:model"
+                        (click)="rowSelectedChanged({ value: cb.checked, event: $event}, model)">
+          </mat-checkbox>
+        }
+        @case (modelsTableColFields.COMMENT) {
           <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="model.comment">{{model.comment}}</span>
-        </ng-container>
-        <ng-container *ngSwitchDefault>
-          <span *ngIf="col.type==='metadata'; else regular " smShowTooltipIfEllipsis
-                [smTooltip]="model | colGetter: col">{{model | colGetter: col}}</span>
-          <ng-template #regular>
+        }
+        @default {
+          @if (col.type==='metadata') {
+            <span smShowTooltipIfEllipsis
+            [smTooltip]="model | colGetter: col">{{model | colGetter: col}}</span>
+          } @else {
             <sm-hyper-param-metric-column [roundedMetricValue]="roundedMetricValues[col.id]"
-                                          [col]="col"
-                                          [experiment]="model"
-                                          (expandClicked)="columnsWidthChanged($event)">
+              [col]="col"
+              [experiment]="model"
+              (expandClicked)="columnsWidthChanged($event)">
             </sm-hyper-param-metric-column>
-          </ng-template>
-        </ng-container>
-      </ng-container>
+          }
+        }
+      }
     </ng-template>
 
     <ng-template let-model="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
@@ -175,7 +182,7 @@
         [cardName]="model.name"
         [columns]="tableCols"
         [rowData]="model"
-        [checked]="isRowSelected(model)"
+        [checked]="models | isRowSelected:model"
         [activeContextRow]="contextModel"
         [contextMenuOpen]="contextMenuActive"
         [entityType]="entityType"
@@ -183,24 +190,46 @@
         [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSysTags(model).length === 0 && model?.tags.length === 0"
         (click)="selected && cardClicked($event, model)"
-      >
-        <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i>
-        </div>
-        <sm-status-icon-label
-          [status]="model?.ready? 'published': 'created'"></sm-status-icon-label>
-        <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(model)"
-                             (formDataChanged)="rowSelectedChanged($event, model)"
-                             inputClassName="table-check-box table-body"></sm-checkbox-control>
-      </sm-table-card>
-      <ng-template #tagList>
-        <sm-tag-list [@inOutAnimation] *ngIf="!cardsCollapsed" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
-      </ng-template>
-      <ng-template #compactCol>
-        <div [@inOutAnimation] *ngIf="!cardsCollapsed" class="ellipsis compact-columns-data">
-          Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}
-          <ng-container *ngIf="model.task"><span class="dot">●</span>{{model.task.name}}</ng-container>
-        </div>
-      </ng-template>
+        >
+        <div sm-name-icon>@if (model?.system_tags.includes('shared')) {
+          <i class="al-icon al-ico-link sm-md ms-2"></i>
+        }
+      </div>
+        @if (cardsCollapsed && model?.tags?.length > 0) {
+          <div sm-mini-tags class="d-flex align-items-center mini-tags-container">
+            <sm-mini-tags-list class="d-flex align-items-center" [tags]="model.tags?.slice(0,10)">
+            </sm-mini-tags-list>
+            @if (model?.tags?.length > 10) {
+              <span>+{{ model.tags?.length - 10 }}</span>
+            }
+          </div>
+        }
+      <sm-status-icon-label
+        [status]="model?.ready? 'published': 'created'"
+        [showLabel]="!cardsCollapsed">
+      </sm-status-icon-label>
+        <mat-checkbox #cb
+                      smClickStopPropagation
+                      [checked]="checkedModels | isRowSelected:model"
+                      [disableRipple]="true"
+                      (click)="rowSelectedChanged({value: cb.checked, event: $event}, model)">
+        </mat-checkbox>
+    </sm-table-card>
+    <ng-template #tagList>
+      @if (!cardsCollapsed) {
+        <sm-tag-list [@inOutAnimation] [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
+      }
     </ng-template>
-  </sm-table>
+    <ng-template #compactCol>
+      @if (!cardsCollapsed) {
+        <div [@inOutAnimation] class="ellipsis compact-columns-data" [class.selected]="selected">
+          Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}
+          @if (model.task) {
+            <span class="dot">●</span>{{model.task.name}}
+          }
+        </div>
+      }
+    </ng-template>
+  </ng-template>
+</sm-table>
 </div>

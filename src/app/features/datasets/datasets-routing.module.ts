@@ -1,14 +1,14 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {SimpleDatasetsComponent} from '@common/datasets/simple-datasets/simple-datasets.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {NestedSimpleDatasetsPageComponent} from '@common/datasets/nested-simple-datasets-page/nested-simple-datasets-page.component';
+import {OpenDatasetsComponent} from '@common/datasets/open-datasets/open-datasets.component';
+import {NestedOpenDatasetsPageComponent} from '@common/datasets/nested-open-datasets-page/nested-open-datasets-page.component';
 
 const routes: Routes = [
   {
     path     : '',
-    component: SimpleDatasetsComponent,
+    component: OpenDatasetsComponent,
     data: {search: true, staticBreadcrumb:[[{
         name: 'DATASETS',
         type: CrumbTypeEnum.Feature
@@ -20,21 +20,22 @@ const routes: Routes = [
     children: [
       {
         path: 'datasets',
-        component: SimpleDatasetsComponent,
+        component: OpenDatasetsComponent,
         data: {search: true}
       },
       {
         path: 'projects',
-        component: NestedSimpleDatasetsPageComponent,
+        component: NestedOpenDatasetsPageComponent,
         data: {search: true}
       },
+      {path: 'experiments', redirectTo: 'tasks'},
       {
-        path: 'experiments',
+        path: 'tasks',
         loadChildren: () => import('@common/dataset-version/dataset-version.module')
           .then(m => m.DatasetVersionModule)
       },
       {
-        path: 'compare-experiments',
+        path: 'compare-tasks',
         data: {entityType: EntityTypeEnum.dataset},
         loadChildren: () => import('@common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
       },

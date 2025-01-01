@@ -1,20 +1,11 @@
-@import "variables";
-
 :host {
   i {
     display: inline;
-    line-height: 36px;
 
     &.disabled {
       .path2:before, .path1:before {
-        color: lighten($blue-600, 5%);
+        color: color-mix(in srgb, var(--color-surface), var(--color-on-surface) 40%);
       }
-    }
-  }
-
-  :host-context(.light-theme) {
-    i.disabled {
-      opacity: 0.3;
     }
   }
 }

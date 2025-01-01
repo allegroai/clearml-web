@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output } from '@angular/core';
 
 @Component({
   selector   : 'sm-experiment-settings',
@@ -7,13 +7,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 })
 export class ExperimentSettingsComponent {
 
-  @Input() disabled                  = false;
-  @Input() showSettings              = false;
-  @Input() tableView              = false;
-  @Output() toggleSettings           = new EventEmitter();
-
-
-
-
+  disabled = input(false);
+  showSettings = input(false);
+  tableView = input(false);
+  toggleSettings = output();
 }
 

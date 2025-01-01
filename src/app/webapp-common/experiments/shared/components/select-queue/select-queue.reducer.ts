@@ -1,10 +1,10 @@
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {setQueuesForEnqueue, setTaskForEnqueue} from './select-queue.actions';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {Task} from '~/business-logic/model/tasks/task';
 
 export interface ISelectQueueState {
-  queues: Array<Queue>;
+  queues: Queue[];
   tasks: Task[];
 }
 

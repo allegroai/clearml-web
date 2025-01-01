@@ -1,0 +1,16 @@
+@import "customizations/colors";
+@import "customizations/form-fields";
+@import "customizations/dialogs";
+@import "customizations/scrollbar";
+@import "customizations/tooltip";
+@import "customizations/slide-toggle";
+
+body {
+  color: var(--color-on-surface-variant);
+}
+
+@mixin components($theme) {
+  @include generate-colors($theme);
+  @include form-fields($theme);
+  @include dialogs($theme);
+}

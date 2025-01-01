@@ -1,6 +1,7 @@
-import {ChangeDetectionStrategy, Component, Input, Output, EventEmitter} from '@angular/core';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-clear-filters-button',
@@ -9,15 +10,13 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    TooltipDirective
+    TooltipDirective,
+    MatIconButton,
+    MatIcon
   ]
 })
 export class ClearFiltersButtonComponent {
-
-  @Input() set tableFilters(tableFilters: { [s: string]: FilterMetadata }) {
-    this.isTableFiltered = Object.values(tableFilters ?? {}).some(({value}) => value?.length > 0);
-  };
-  @Output() clearTableFilters = new EventEmitter<null>();
-
-  public isTableFiltered: boolean;
+  tableFilters = input();
+  clearTableFilters = output();
+  protected isTableFiltered = computed(() => Object.values(this.tableFilters() ?? {}).some(({value}) => value?.length > 0));
 }

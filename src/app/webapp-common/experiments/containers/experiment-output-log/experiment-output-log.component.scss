@@ -8,4 +8,13 @@
       height: calc(100%);
     }
   }
+
+  .no-output {
+    h4 {
+      font-weight: 500;
+    }
+    .al-icon {
+      color: var(--color-tint-14);
+    }
+  }
 }

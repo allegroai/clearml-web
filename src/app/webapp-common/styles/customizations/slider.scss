@@ -1,0 +1,32 @@
+
+:root {
+
+  .mdc-slider {
+    $size: 36px;
+
+    height: $size;
+    margin: 0 4px;
+    &__thumb {
+      left: #{$size * -0.5 - 2};
+      height: $size;
+      width: $size;
+    }
+    &__thumb-knob {
+      --mdc-slider-handle-width: #{$size * 0.5 - 2};
+      --mdc-slider-handle-height: #{$size * 0.5 - 2};
+    }
+    &__input {
+      height: $size;
+      top: 0;
+    }
+
+    --mdc-slider-inactive-track-color: var(--color-outline);
+    --mdc-slider-active-track-color: var(--color-outline);
+  }
+
+  .mat-mdc-slider-visual-thumb .mat-ripple {
+    border-radius: var(--mdc-slider-handle-shape);
+  }
+}
+
+

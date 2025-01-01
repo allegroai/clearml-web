@@ -30,10 +30,12 @@ import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor
 import {MatMenuModule} from '@angular/material/menu';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
-import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
 import {SaferPipe} from '@common/shared/pipes/safe.pipe';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {MatTab, MatTabGroup} from '@angular/material/tabs';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 const _declarations = [
   ProjectCardMenuExtendedComponent,
@@ -70,9 +72,12 @@ const _declarations = [
     MatMenuModule,
     TooltipDirective,
     ButtonToggleComponent,
-    NavbarItemComponent,
     ShowTooltipIfEllipsisDirective,
-    DotsLoadMoreComponent
+    DotsLoadMoreComponent,
+    MatTabGroup,
+    MatTab,
+    MatIcon,
+    MatIconButton
   ],
   declarations: [..._declarations, PipelinesEmptyStateComponent],
   exports: [..._declarations, PipelinesEmptyStateComponent]

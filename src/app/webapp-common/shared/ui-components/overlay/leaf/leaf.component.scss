@@ -1,7 +1,8 @@
-@import "../../styles/mixins";
+@import "mixins/wizard-template";
 
 .choose-container {
   @include choose-leaf;
+  padding: 0 24px;
 }
 
 .code-select{

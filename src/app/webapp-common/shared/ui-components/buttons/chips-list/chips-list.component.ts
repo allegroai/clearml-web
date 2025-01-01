@@ -1,9 +1,18 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, QueryList, Renderer2, ViewChildren} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  input,
+  inject,
+  viewChildren,
+  computed,
+  signal, effect
+} from '@angular/core';
 import {ChipsComponent} from '@common/shared/ui-components/buttons/chips/chips.component';
-import {trackByIndex} from '@common/shared/utils/forms-track-by';
-import {Subscription} from 'rxjs';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-
+import {interval} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {filter, take} from 'rxjs/operators';
 
 @Component({
   selector: 'sm-chips-list',
@@ -14,61 +23,56 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
   imports: [
     ChipsComponent,
     TooltipDirective
-]
+  ]
 })
-export class ChipsListComponent implements AfterViewInit, OnDestroy {
+export class ChipsListComponent {
+  private host = inject(ElementRef);
 
-  private sub = new Subscription();
-  private chipsWidth = {};
-  public hiddenLabels: string[] = [];
-  public trackByIndex = trackByIndex;
+  items = input<string[]>();
+  overflowTrigger = input<number>();
 
-  @Input() items: string[];
+  private chips = viewChildren(ChipsComponent);
 
-  @ViewChildren(ChipsComponent) chips: QueryList<ChipsComponent>;
+  protected readyState = computed(() => ({
+    resize: this.overflowTrigger(),
+    ready: signal(false)
+  }));
+  private chipsWidth = computed(() => {
+    if (!this.readyState().ready()) {
+      return [];
+    }
+    return this.chips().map(chip => chip.elRef.nativeElement.offsetWidth);
+  });
 
-  @Input() set overflowTrigger(name) {
-    this.hideChips();
-  }
+  protected visibleLabelsLen = computed(() => {
+    if(!this.readyState().ready()) {
+      return this.chips().length;
+    }
+    const containerWidth =  this.overflowTrigger() || this.host.nativeElement.clientWidth;
+    let totalWidth = 32;
+    let len = 0
+    while (totalWidth < containerWidth) {
+      totalWidth += this.chipsWidth()[len];
+      len++;
+    }
+    return len - 2;
+  });
 
-  constructor(private host: ElementRef, private cdr: ChangeDetectorRef, private renderer: Renderer2) {
-  }
+  protected hiddenLabels = computed(() => this.chips()
+    .filter((chip, index) => index > this.visibleLabelsLen())
+    .map(chip => chip.label)
+  );
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.calcChipsWidth(this.chips);
-      this.sub.add(this.chips.changes.subscribe((chips) => {
-        this.calcChipsWidth(chips);
-        this.hideChips();
-      }));
-      this.hideChips();
-    }, 100)
-  }
-
-  hideChips() {
-    let totalWidth = 0;
-    this.hiddenLabels = [];
-    this.chips?.forEach(chip => {
-      if (totalWidth + this.chipsWidth[chip.label] > this.host.nativeElement.clientWidth - 40) {
-        this.hiddenLabels.push(chip.label);
-        this.renderer.addClass(chip.elRef.nativeElement, 'hidden');
-      } else {
-        totalWidth += this.chipsWidth[chip.label];
-        this.renderer.removeClass(chip.elRef.nativeElement, 'hidden');
-      }
+  constructor() {
+    effect(() => {
+      this.overflowTrigger();
+      interval(10)
+        .pipe(
+          take(50),
+          filter(() => this.chips()?.at(-1)?.elRef.nativeElement.offsetWidth > 0),
+          take(1)
+        )
+        .subscribe(() => this.readyState().ready.set(true));
     });
-    // if (totalWidth === 0) {
-    //   this.hiddenLabels.pop();
-    //   this.renderer.removeClass(this.chips.last.elRef.nativeElement, 'hidden');
-    // }
-    this.cdr.detectChanges();
-  }
-
-  calcChipsWidth(chips) {
-    chips.forEach(chip => this.chipsWidth[chip.label] = this.chipsWidth[chip.label] || chip.elRef.nativeElement.offsetWidth);
-  }
-
-  ngOnDestroy() {
-    this.sub.unsubscribe();
   }
 }

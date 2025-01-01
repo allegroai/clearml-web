@@ -1,0 +1,15 @@
+@use '@angular/material' as mat;
+
+@mixin tabs($theme) {
+  --mat-tab-header-active-label-text-color: #{mat.get-theme-color($theme, primary)};
+  --mat-tab-header-inactive-label-text-color: #{mat.get-theme-color($theme, outline)};
+  --mat-tab-header-active-hover-label-text-color: #{mat.get-theme-color($theme, primary)};
+  --mat-tab-header-active-focus-label-text-color: #{mat.get-theme-color($theme, primary)};
+  --mat-tab-header-inactive-focus-label-text-color: #{mat.get-theme-color($theme, primary)};
+  --mat-tab-header-inactive-hover-label-text-color: #{mat.get-theme-color($theme, primary)};
+  --mat-tab-header-active-ripple-color: transparent;
+  --mat-tab-header-inactive-ripple-color: transparent;
+
+  --mat-tab-header-divider-height: 0;
+}
+

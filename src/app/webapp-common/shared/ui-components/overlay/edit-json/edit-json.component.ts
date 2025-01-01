@@ -1,16 +1,14 @@
-import {AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, ViewChild} from '@angular/core';
+import {Component, HostListener, inject, viewChild, computed} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {JsonPipe, NgIf} from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import {Store} from '@ngrx/store';
 import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
-import {Ace} from 'ace-builds';
 import {selectAceCaretPosition} from '@common/core/reducers/view.reducer';
-import {filter, Observable} from 'rxjs';
-import {map, take} from 'rxjs/operators';
 import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 import {orderJson} from '@common/shared/utils/shared-utils';
+import {MatButton} from '@angular/material/button';
+import {CodeEditorComponent} from '@common/shared/ui-components/data/code-editor/code-editor.component';
 
-declare const ace;
 export interface EditJsonData {
   textData?: string | object;
   readOnly?: boolean;
@@ -28,23 +26,29 @@ export interface EditJsonData {
   standalone: true,
   imports: [
     DialogTemplateComponent,
-    NgIf
+    MatButton,
+    CodeEditorComponent
   ]
 })
-export class EditJsonComponent implements AfterViewInit{
-  public errors: Map<string, boolean>;
-  public textData: string;
-  public showErrors: boolean;
+export class EditJsonComponent {
+  protected data = inject<EditJsonData>(MAT_DIALOG_DATA);
+  private dialogRef = inject<MatDialogRef<EditJsonComponent, string | null>>(MatDialogRef<EditJsonComponent, string | null>);
+  private jsonPipe = inject(JsonPipe);
+  private store = inject(Store);
+  protected errors: Map<string, boolean>;
+  protected textData: string;
+  protected showErrors: boolean;
 
   private _readOnly: boolean;
-  public placeHolder: string;
-  public title: string;
-  readonly typeJson: boolean;
-  @ViewChild('aceEditor') private aceEditorElement: ElementRef;
-  private aceEditor: Ace.Editor;
-  private $aceCaretPosition: Observable<{ [key: string]: Ace.Point }>;
-  private readonly defaultPlaceHolder: string;
+  protected placeHolder: string;
+  protected title: string;
+  protected readonly typeJson: boolean;
   private readonly format?: 'json' | 'yaml' | 'hocon';
+  protected mode: string;
+
+  protected editor = viewChild(CodeEditorComponent);
+  protected aceCaretPosition = this.store.selectSignal(selectAceCaretPosition);
+  protected position = computed(() => this.aceCaretPosition?.[this.title] ?? null)
 
   set readOnly(readOnly: boolean) {
     this._readOnly = readOnly;
@@ -61,111 +65,62 @@ export class EditJsonComponent implements AfterViewInit{
     }
   }
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: EditJsonData,
-    private dialogRef: MatDialogRef<EditJsonComponent, string | null>,
-    private jsonPipe: JsonPipe,
-    private store: Store,
-    private zone: NgZone,
-  ) {
-    this.format = data.format;
-    this.typeJson = data.format === 'json';
+  constructor() {
+    this.format = this.data.format;
+    this.typeJson = this.data.format === 'json';
+    let defaultPlaceHolder: string;
     if (this.typeJson) {
-      this.defaultPlaceHolder = `e.g.:
+      defaultPlaceHolder = `e.g.:
 
 {
   "location" : "london",
   "date" : "2019-01-31 22:41:03"
 }`;
     } else {
-      this.defaultPlaceHolder = '';
+      defaultPlaceHolder = '';
     }
-    this.placeHolder = data.placeHolder;
-    if(!data.textData) {
+    this.placeHolder = this.data.placeHolder ?? defaultPlaceHolder;
+    if(!this.data.textData) {
       this.textData = undefined;
-    } else if (this.typeJson && typeof data.textData !== 'string') {
-      if (data.reorder) {
-        this.textData = this.jsonPipe.transform(orderJson(data.textData));
+    } else if (this.typeJson && typeof this.data.textData !== 'string') {
+      if (this.data.reorder) {
+        this.textData = this.jsonPipe.transform(orderJson(this.data.textData));
       } else {
-        this.textData = this.jsonPipe.transform(data.textData);
+        this.textData = this.jsonPipe.transform(this.data.textData);
       }
     } else {
-      this.textData = data.textData as string;
+      this.textData = this.data.textData as string;
     }
-    this.readOnly = data.readOnly;
-    this.title = data.title;
-    this.$aceCaretPosition = this.store.select(selectAceCaretPosition);
-  }
+    this.readOnly = this.data.readOnly;
+    this.title = this.data.title;
 
-  ngAfterViewInit() {
-    window.setTimeout(() => this.initAceEditor(), 200);
+    switch (this.format) {
+      case 'hocon':
+        this.mode = 'ini';
+        break;
+      case 'json':
+        this.mode = 'json';
+        break;
+      case 'yaml':
+        this.mode = 'yaml';
+        break;
+      default:
+        this.mode = 'text';
+    }
   }
 
   closeDialog(isConfirmed) {
-    this.store.dispatch(saveAceCaretPosition({id: this.title, position: this.aceEditor.selection.getCursor()}));
+    this.store.dispatch(saveAceCaretPosition({id: this.title, position: this.editor().getEditor().selection.getCursor()}));
     if (isConfirmed) {
       try {
-        const text = this.aceEditor.getValue();
+        const text = this.editor().aceCode;
         this.dialogRef.close(text ? (this.typeJson ? JSON.parse(text) : text) : '');
-      } catch
-        (e) {
+      } catch {
         this.store.dispatch(addMessage('warn', 'Not a valid JSON'));
         // this.showErrors = true; // shows warning message bellow texterea
       }
     } else {
       this.dialogRef.close();
     }
-  }
-
-  // we can make this to ace wrapper later on
-  private initAceEditor() {
-    this.zone.runOutsideAngular(() => {
-      const aceEditor = ace.edit(this.aceEditorElement.nativeElement) as Ace.Editor;
-      aceEditor.setOptions({
-        readOnly: this.readOnly,
-        showLineNumbers: false,
-        showGutter: false,
-        fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        fontSize: 13,
-        highlightActiveLine: false,
-        highlightSelectedWord: false,
-        showPrintMargin: false,
-        placeholder: this.placeHolder || this.defaultPlaceHolder,
-      } as Partial<Ace.VirtualRendererOptions>);
-
-
-      aceEditor.renderer.setScrollMargin(12, 12, 0, 12);
-      aceEditor.renderer.setPadding(12);
-      (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
-
-      aceEditor.setTheme('ace/theme/monokai');
-      switch (this.format) {
-        case 'hocon':
-          aceEditor.session.setMode('ace/mode/ini');
-          break;
-        case 'json':
-          aceEditor.session.setMode('ace/mode/json');
-          break;
-        case 'yaml':
-          aceEditor.session.setMode('ace/mode/yaml');
-          break;
-        default:
-          aceEditor.session.setMode('ace/mode/text');
-      }
-      aceEditor.getSession().setValue(this.textData || '');
-      this.aceEditor = aceEditor;
-    });
-
-    this.$aceCaretPosition
-      .pipe(
-        take(1),
-        map(positions => positions[this.title]),
-        filter(position => !!position)
-      )
-      .subscribe((position) => {
-      this.aceEditor.moveCursorTo(position?.row || 0, position?.column || 0);
-      this.aceEditor.scrollToLine(position?.row || 0, true, false, () => {
-      });
-    });
   }
 }

@@ -18,13 +18,13 @@
   </div>
   <div [class.mt-4]="serviceUserMode">
     @if (!serviceUserMode) {
-    <nav class="config-nav" >
-      <sm-navbar-item header="LOCAL PYTHON" [active]="!isJupyter" class="small-nav" (click)="setIsJupyter(false)"></sm-navbar-item>
-      <sm-navbar-item header="JUPYTER NOTEBOOK" [active]="isJupyter" class="small-nav" (click)="setIsJupyter(true)"></sm-navbar-item>
-    </nav>
+      <mat-tab-group [(selectedIndex)]="selectedIndex" >
+        <mat-tab label="LOCAL PYTHON" ></mat-tab>
+        <mat-tab label="JUPYTER NOTEBOOK" ></mat-tab>
+      </mat-tab-group>
     }
-    <div class="code-container" [class.jupyter]="isJupyter">
-      @if (!isJupyter) {
+    <div class="code-container" [class.jupyter]="isJupyter()">
+      @if (!isJupyter()) {
         @if (serviceUserMode){
           <div class="instructions mt-2 mb-2">Copy the below configuration to the ClearML Agents clearml.conf file</div>
         } @else {
@@ -70,9 +70,7 @@
           </div>
       @if (newCredential?.secret_key) {
         <sm-copy-clipboard
-          [hideBackground]="true"
           [label]="''"
-          [copyIcon]="'far fa-lg fa-copy'"
           [clipboardText]="getCopyContent()"
         ></sm-copy-clipboard>
       }
@@ -103,10 +101,7 @@
         </div>
       </div>
       <sm-copy-clipboard
-        [hideBackground]="false"
         [label]="''"
-        [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
-        theme="text-area"
       [clipboardText]="getJupiterCode()"></sm-copy-clipboard>
     </div>
   }
@@ -116,10 +111,8 @@
   <div class="code">
     <div class="content" #jupyterCodeEl>{{jupyterCode}}</div>
     <sm-copy-clipboard
-      [hideBackground]="false"
       [label]="''"
       [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
-      theme="text-area"
     [clipboardText]="jupyterCodeEl.innerHTML"></sm-copy-clipboard>
   </div>
 </ng-template>
@@ -130,6 +123,6 @@
     <mat-form-field appearance="outline" class="label-input no-bottom">
       <input matInput [(ngModel)]="label" placeholder="Credentials label" name="credentials" [value]="newCredential?.label || ''">
     </mat-form-field>
-    <button class="btn btn-neon label-button" type="submit" [disabled]="label === newCredential?.label">UPDATE LABEL</button>
+    <button mat-stroked-button class="label-button" type="submit" [disabled]="label === newCredential?.label">UPDATE LABEL</button>
   </form>
 }

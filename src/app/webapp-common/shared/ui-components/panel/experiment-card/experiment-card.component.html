@@ -1,19 +1,19 @@
-<sm-card class="experiment-card high-card" (click)="experimentClicked()" [isExample]=" ! experiment?.company?.id" [height]="264" >
+<sm-card class="experiment-card high-card" (click)="experimentClicked()" [isExample]=" ! experiment()?.company?.id" [height]="264" >
   <div header-content>
     <div class="d-flex justify-content-between">
-      <div class="title me-auto" [smTooltip]="experiment?.name" smShowTooltipIfEllipsis>{{experiment?.name }}</div>
+      <div class="title me-auto" [smTooltip]="experiment()?.name" smShowTooltipIfEllipsis>{{experiment()?.name }}</div>
     </div>
-    <div style="padding-top: 5px">
+    <div class="pt-2">
       <div class="d-flex align-items-center justify-content-start">
-        <span class="sub-title">ID:  {{ experiment?.id}} </span>
-        <sm-copy-clipboard [clipboardText]="experiment?.id" [label]="''" [hideBackground]="true"></sm-copy-clipboard>
+        <span class="sub-title">ID:  {{ experiment()?.id}} </span>
+        <sm-copy-clipboard [clipboardText]="experiment()?.id" [label]="''"></sm-copy-clipboard>
       </div>
     </div>
   </div>
 
   <div class="d-flex justify-content-around w-100">
-    <sm-circle-status [type]="experiment?.type"></sm-circle-status>
-    <sm-circle-status [status]="experiment?.status"></sm-circle-status>
+    <sm-circle-status [type]="experiment()?.type"></sm-circle-status>
+    <sm-circle-status [status]="experiment()?.status"></sm-circle-status>
   </div>
 
 
@@ -21,11 +21,11 @@
   <div footer class="brio-footer">
     <div  class="experiment-footer">
     <div class="top-labels ellipsis">INITIAL INPUT MODEL:
-      {{experiment?.execution?.model?.name}}
+      {{experiment()?.execution?.model?.name}}
     </div>
     <div class="top-labels d-flex justify-content-between">
-      <span [smTooltip]="experiment.created | date : TIME_FORMAT_STRING">Created {{experiment.created | timeAgo}}</span>
-      <span>{{experiment.user.name}}</span>
+      <span [smTooltip]="experiment().created | date : TIME_FORMAT_STRING">Created {{experiment().created | timeAgo}}</span>
+      <span>{{experiment().user.name}}</span>
     </div>
     </div>
   </div>

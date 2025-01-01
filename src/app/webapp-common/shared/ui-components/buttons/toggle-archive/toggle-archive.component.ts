@@ -1,6 +1,8 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output } from '@angular/core';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgIf} from '@angular/common';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+
 
 @Component({
   selector: 'sm-toggle-archive',
@@ -9,11 +11,12 @@ import {NgIf} from '@angular/common';
   standalone: true,
   imports: [
     TooltipDirective,
-    NgIf
+    MatButton,
+    MatIcon
   ]
 })
 export class ToggleArchiveComponent {
-  @Input() showArchived: boolean;
-  @Input() minimize: boolean;
-  @Output() toggleArchived = new EventEmitter<boolean>();
+  showArchived = input<boolean>();
+  minimize = input<boolean>();
+  toggleArchived = output<boolean>();
 }

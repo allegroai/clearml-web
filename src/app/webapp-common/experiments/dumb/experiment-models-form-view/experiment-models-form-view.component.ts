@@ -1,11 +1,9 @@
-import {Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
+import {Component, OnDestroy, inject, input, output, computed} from '@angular/core';
 import {IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {MatDialog} from '@angular/material/dialog';
 import {filter} from 'rxjs/operators';
 import {Model} from '~/business-logic/model/models/model';
-import {SelectModelComponent} from '@common/select-model/select-model.component';
-import {AdminService} from '~/shared/services/admin.service';
-import {Store} from '@ngrx/store';
+import {SelectModelComponent, SelectModelData} from '@common/select-model/select-model.component';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
@@ -18,43 +16,28 @@ import {resetSelectModelState} from '@common/select-model/select-model.actions';
   styleUrls: ['./experiment-models-form-view.component.scss']
 })
 export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComponent implements OnDestroy{
+  private dialog = inject(MatDialog);
 
-  public isLocalFile: boolean;
-  private _model: IModelInfo;
-  @Input() projectId: string;
-  @Input() editable: boolean;
-  @Input() networkDesign: string;
-  @Input() modelLabels: Model['labels'];
-  @Input() source: IModelInfoSource;
-  @Input() experimentName: string;
-  @Input() showCreatedExperiment: boolean = true;
+  projectId = input<string>();
+  editable = input<boolean>();
+  networkDesign = input<string>();
+  modelLabels = input<Model['labels']>();
+  source = input<IModelInfoSource>();
+  experimentName = input<string>();
+  showCreatedExperiment = input(true);
+  model = input<IModelInfo>();
+  protected isLocalFile = computed(() => this.model() && this.model().uri && this.adminService.isLocalFile(this.model().uri));
 
-  @Input() set model(model: IModelInfo) {
-    this._model = model;
-    this.isLocalFile = model && model.uri && this.adminService.isLocalFile(model.uri);
-  }
-
-  get model(): IModelInfo {
-    return this._model;
-  }
-
-  @Output() modelSelectedId = new EventEmitter<string>();
-
-  constructor(private dialog: MatDialog) {
-    super();
-  }
+  modelSelectedId = output<string>();
 
   public chooseModel() {
-    const chooseModelDialog = this.dialog.open(SelectModelComponent, {
+    this.dialog.open<SelectModelComponent, SelectModelData, string>(SelectModelComponent, {
       data: {
         header: 'Select a published model',
         hideShowArchived: true
       },
-      width: '98%',
-      height: '94vh',
-      maxWidth: '100%',
-    });
-    chooseModelDialog.afterClosed()
+      panelClass: 'full-screen',
+    }).afterClosed()
       .pipe(filter(model => !!model))
       .subscribe((selectedModelId: string) => {
         this.modelSelectedId.emit(selectedModelId);

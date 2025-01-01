@@ -14,17 +14,17 @@ $credentialBaseHeight: 252px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-bottom: 1px solid $blue-100;
+    border-bottom: 1px solid var(--color-outline-variant);
 
     .label {
       display: inline-block;
       width: 155px;
       padding: 6px 0;
-      color: #71758a;
+      color: var(--color-outline);
     }
 
     .value {
-      color: $blue-400;
+      color: var(--color-on-surface-variant);
     }
   }
 
@@ -48,18 +48,14 @@ $credentialBaseHeight: 252px;
       height: 36px;
       margin-top: 24px;
       display: flex;
-      border-bottom: 1px solid $blue-100;
+      border-bottom: 1px solid var(--color-outline-variant);
       justify-content: center;
-
-      sm-navbar-item {
-        height: 100%;
-      }
     }
   }
 
   .instructions {
     line-height: 1.3;
-    color: $blue-500;
+    color:var(--color-on-surface-variant);
   }
 
   .code {
@@ -67,8 +63,8 @@ $credentialBaseHeight: 252px;
     line-height: 1.5;
     padding: 16px 16px;
     margin-bottom: 24px;
-    color: $blue-100;
-    background-color: $blue-700;
+    color: var(--color-on-surface-variant);
+    background-color: var(--color-shadow);
     border-radius: 4px;
 
     &:hover {
@@ -81,6 +77,7 @@ $credentialBaseHeight: 252px;
       width: 100%;
       font-family: monospace;
       font-size: 12px;
+      color: $blue-100;
     }
 
     .operation {
@@ -96,7 +93,7 @@ $credentialBaseHeight: 252px;
     }
 
     .comment {
-      color: $blue-500;
+      color: #384161;
     }
 
     sm-copy-clipboard {
@@ -135,9 +132,3 @@ form {
   flex: 1 0 152px;
 }
 
-//.indent {
-//  margin-left: 30px;
-//}
-//.indent2 {
-//  margin-left: 60px;
-//}

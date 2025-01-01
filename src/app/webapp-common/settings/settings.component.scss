@@ -3,15 +3,13 @@
 :host {
 
   .settings-container mat-nav-list {
-    --mat-expansion-header-text-color: #{$blue-200};
-    --mdc-list-list-item-label-text-color: #{$blue-200};
+    --mat-expansion-header-text-color: var(--color-on-surface-variant);
+    --mdc-list-list-item-label-text-color: var(--color-on-surface-variant);
 
     .mat-expansion-panel {
+      box-shadow: none;
       margin: 0 12px 2px;
       border-radius: 4px;
-      &.mat-expanded {
-        margin-bottom: 12px;
-      }
     }
 
     .mat-expansion-panel-header {
@@ -19,7 +17,7 @@
       font-weight: 400;
       padding: 0 16px 0 12px;
       &:hover {
-        background-color: $blue-650;
+        background-color: var(--color-surface-container);
       }
     }
 
@@ -33,7 +31,7 @@
     }
 
     .mat-divider {
-      --mat-divider-color: #{$blue-500};
+      --mat-divider-color: var(--color-surface-container-high);
       --mat-divider-width: 1px;
       margin-top: 12px;
     }
@@ -43,7 +41,8 @@
     height: 100%;
 
     mat-drawer {
-      border-right: 1px solid $blue-500;
+      background: color-mix(in srgb, var(--color-surface-container-lowest) 40%, transparent);
+      border-right: 1px solid var(--color-surface-container-high);
       width: 265px;
     }
 
@@ -52,19 +51,20 @@
       margin: 0 12px 2px;
       padding: 0 10px;
       border-radius: 4px;
-      --mdc-list-list-item-label-text-color: #{$blue-200};
-      --mdc-theme-text-primary-on-background: #{$blue-200};
+      --mdc-list-list-item-one-line-container-height: 40px;
+      --mdc-list-list-item-label-text-color: var(--color-on-surface-variant);
+      --mdc-theme-text-primary-on-background: var(--color-on-surface-variant);
 
       &:hover {
-        background-color: $blue-650;
+        background-color: var(--color-surface-container-high);
       }
 
       &.active {
-        --mdc-list-list-item-label-text-color: #{$blue-50};
-        --mdc-list-list-item-container-color: #{$blue-500};
+        --mdc-list-list-item-label-text-color: var(--color-on-surface);
+        --mdc-list-list-item-container-color: var(--color-surface-container-high);
 
         &:hover {
-          background-color: $blue-500;
+          background-color: var(--color-surface-container-highest);
         }
       }
 
@@ -79,6 +79,7 @@
       display: flex;
       flex-direction: column;
       height: 100%;
+      background-color: var(--color-surface-container-lowest);
 
       .section {
         padding: 0;
@@ -95,9 +96,9 @@
 
   .mat-expanded,
   .mat-expanded .expanded {
-    color: white;
+    color: var(--color-on-surface);
     ::ng-deep .mat-expansion-indicator {
-      --mat-expansion-header-indicator-color: white;
+      --mat-expansion-header-indicator-color: var(--color-on-surface);
     }
   }
 }
@@ -105,7 +106,7 @@
 .title {
   font-size: 11px;
   font-weight: 500;
-  color: $blue-300;
+  color: var(--color-outline);
   margin: 12px 0 6px 24px;
   &:not(:first-child) {
     margin-top: 24px;
@@ -121,11 +122,11 @@
     flex-grow: 1;
   }
   &__badge {
-    background-color: $purple;
-    color: white;
+    color: var(--color-on-tertiary-fixed);
+    background-color: var(--color-tertiary-fixed-dim);
     padding: 3px 6px;
     border-radius: 3px;
     font-size: 11px;
-      line-height: normal;
+    line-height: normal;
   }
 }

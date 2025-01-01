@@ -57,15 +57,14 @@
     width: 24px;
     padding: 0 1px 0 0;
     border: 1px solid;
-    background-color: $blue-200;
-    border-color: rgba(44, 50, 70, 0.2);
-    color: $blue-400;
-    box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, .1);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: var(--color-surface-container-high);
+    border-color: var(--color-outline-variant);
+    color: var(--color-outline);
+    //transition: background-color 0.3s ease, color 0.3s ease;
 
     &:hover {
-      background-color: $grey-purple;
-      color: #ffffff;
+      background-color: var(--color-surface-container-highest);
+      color: var(--color-outline);
     }
 
     .label {
@@ -76,6 +75,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: var(--color-primary);
     }
   }
 
@@ -84,13 +84,25 @@
   }
 
   .display-on-hover {
-    transition: opacity 0.3s ease-in-out;
+    //transition: opacity 0.3s ease-in-out;
     opacity: 0;
   }
 
   &:hover {
     .display-on-hover {
       opacity: 1;
+    }
+  }
+  &.cdk-drag-preview {
+    .display-on-hover {
+      opacity: 1;
+      button {
+        border: 1px solid var(--color-outline-variant);
+        border-left: none;
+        background: transparent;
+        mat-icon {visibility: hidden;}
+      }
+
     }
   }
 }

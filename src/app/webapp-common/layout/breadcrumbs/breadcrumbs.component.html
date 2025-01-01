@@ -62,7 +62,7 @@
             [routerLink]="breadcrumb.url!=='projects/*/projects'? breadcrumb.url: 'projects/*'"
             >
             @if (breadcrumb.hidden) {
-              <i matMenuItemIcon class="al-icon al-ico-ghost sm me-1"></i>
+              <mat-icon fontSet="al" fontIcon="al-ico-ghost"></mat-icon>
             }
             {{breadcrumb.name}}
             </span>
@@ -77,15 +77,16 @@
         (menuOpened)="openShareModal()"
         >
         @if (showShareButton && !isCommunity()) {
-          <i class="fa fa-share-alt share pointer" smTooltip="Share"></i>
+          <mat-icon fontSet="al" fontIcon="al-ico-shared-item" class="share pointer" smTooltip="Share"></mat-icon>
         }
       </div>
       <mat-menu #shareModal="matMenu">
         <div class="share-menu-container" smClickStopPropagation>
           <div class="d-flex align-items-center justify-content-between top">
             <div class="share-title">SHARE VIEW</div>
-            <i class="pointer al-icon al-ico-dialog-x al-color blue-300 sm-md close-dialog"
-            (click)="menuTrigger.closeMenu()" smClickStopPropagation></i>
+            <button mat-icon-button (click)="menuTrigger.closeMenu()" smClickStopPropagation>
+              <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+            </button>
           </div>
           <div class="copy-title">Copy the following URL to share this view with others</div>
 
@@ -97,7 +98,7 @@
               [cbContent]="currentUrl"
               class="copy pointer"
               (cbOnSuccess)="copyToClipboardSuccess(); menuTrigger.closeMenu()">
-              <i class="fas fa-copy "></i>
+              <mat-icon fontSet="al" fontIcon="al-ico-copy-to-clipboard"></mat-icon>
             </div>
           </div>
         </div>

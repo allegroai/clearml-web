@@ -1,4 +1,13 @@
-@import "variables";
+
+.al-danger {
+  background-color: var(--color-diff-line);
+  &:hover {
+    background-color: var(--color-diff-line-hover);
+  }
+  &:active {
+    background-color: var(--color-diff-line-active);
+  }
+}
 
 sm-compare-card-list {
   display: block;
@@ -16,17 +25,12 @@ sm-compare-card-list {
     margin-bottom: 1px;
     margin-top: 1px;
 
-    &.parent {
-      .fas {
-        margin-left: 6px;
-        font-size: 11px;
-        width: 16px;
-        height: 28px;
-        display: inline-flex;
-        line-height: 28px;
-        align-items: center;
-        justify-content: center;
-      }
+    .al-ico-ico-chevron-down {
+      margin-right: 4px;
+      transition: transform 0.3s;
+    }
+    .al-ico-ico-chevron-down.rotate-right {
+      transform: rotate(-90deg);
     }
   }
 
@@ -43,7 +47,7 @@ sm-compare-card-list {
   }
 
   &.sub-header {
-    color: $blue-400;
+    color: var(--color-secondary-fixed-dim);
     text-transform: capitalize;
   }
 }
@@ -65,7 +69,7 @@ $extra-header-min-height: 50px;
     min-width: 100%;
     overflow: hidden;
     text-align: left;
-    color: $blue-800;
+    color: var(--color-on-surface-variant);
 
     .virtual-scroll-container {
       height: 100% !important;
@@ -75,20 +79,18 @@ $extra-header-min-height: 50px;
         align-items: center;
 
         &.al-empty-collapse {
-          color: #384161c7;
+          opacity: 0.8;
           pointer-events: none;
           cursor: default;
-
-          .fas {
-            width: 6px;
+          mat-icon {
             visibility: hidden;
           }
 
           &.hide-field {
-            background-color: #f8f9fa !important;
+            background-color: var(--color-surface-container-low) !important;
 
             &.al-danger {
-              border-left: 1px #ff9898 solid;
+              border-left: 1px var(--color-error-container) solid;
             }
 
             > * {
@@ -104,6 +106,7 @@ $extra-header-min-height: 50px;
       margin-top: 0;
       padding-right: 30px;
       padding-left: 6px;
+      font-size: 12px;
 
       .extend-toggle {
         visibility: hidden;
@@ -111,12 +114,11 @@ $extra-header-min-height: 50px;
         position: absolute;
         right: 6px;
         top: 6px;
-        color: $blue-500;
+        color: var(--color-inverse-surface);
       }
     }
 
     .node-item-container {
-      //margin-bottom: 1px;
       height: 28px;
 
       .full-width {
@@ -137,28 +139,28 @@ $extra-header-min-height: 50px;
       }
 
       &.not-existing-on-compared {
-        background-color: #f8f9fa !important;
+        background-color: var(--color-surface) !important;
       }
 
       &.not-existing-on-origin.not-existing-on-compared.equal-row {
-        background-color: #f8f9fa;
+        background-color: var(--color-surface);
       }
 
       &.hovered {
-        box-shadow: 0 0 0 1px $blue-250 inset;
+        box-shadow: 0 0 0 1px var(--color-outline-variant) inset;
 
         &.diff-row {
-          box-shadow: 0 0 0 1px lighten($strong-red, 20%) inset, 0 0 0 2px white inset;
+          box-shadow: 0 0 0 1px var(--color-diff-line-active) inset, 0 0 0 2px var(--color-on-diff) inset;
         }
       }
 
       &.selected-diff {
-        background-color: $faint-gray;
+        background-color: var(--color-surface-container-low);
         position: relative;
 
         &:before {
           content: ' ';
-          background: $purple;
+          background: var(--color-primary);
           display: block;
           width: 8px;
           position: absolute;
@@ -174,15 +176,8 @@ $extra-header-min-height: 50px;
 
     .node-icon {
       width: 24px;
-      margin-left: auto;
-      cursor: pointer;
-      color: $blue-300;
-
-      &:hover {
-        color: $blue-400;
-      }
+      margin: 0 8px 0 auto;
     }
-
   }
 
 
@@ -197,7 +192,7 @@ $extra-header-min-height: 50px;
     .content {
       font-family: "Heebo", sans-serif;
       font-weight: 500;
-      color: $blue-500;
+      color: var(--color-inverse-surface);
       white-space: nowrap;
       cursor: pointer;
 
@@ -206,20 +201,20 @@ $extra-header-min-height: 50px;
       }
 
       &.hovered {
-        box-shadow: 0 0 0 1px $blue-250 inset;
+        box-shadow: 0 0 0 1px var(--color-outline-variant) inset;
 
         &.al-danger {
-          box-shadow: 0 0 0 1px lighten($strong-red, 20%) inset, 0 0 0 2px white inset;
+          box-shadow: 0 0 0 1px var(--color-diff-line-active) inset, 0 0 0 2px var(--color-on-diff) inset;
         }
       }
 
       &.selected-diff {
-        background-color: $faint-gray;
+        background-color: var(--color-surface-container-highest);
         position: relative;
 
         &:before {
           content: ' ';
-          background: $purple;
+          background: var(--color-primary);
           display: block;
           width: 8px;
           position: absolute;
@@ -237,7 +232,7 @@ $extra-header-min-height: 50px;
   .is-not-origin {
     .content.selected-diff {
       &:before {
-        background: #ff9898;
+        background: var(--color-diff-line-hover);
       }
     }
 
@@ -247,10 +242,10 @@ $extra-header-min-height: 50px;
       //}
 
       &.diff-row {
-        background-color: #FFDCDC;
+        background-color: var(--color-diff-line);
 
         &:hover {
-          background-color: #ffb4b4;
+          background-color: var(--color-diff-line-hover);
         }
       }
 
@@ -269,19 +264,19 @@ $extra-header-min-height: 50px;
       &.not-existing-on-compared {
         position: relative;
         width: 100%;
-        background-color: #f8f9fa !important;
-        border-left: 1px #ff9898 solid;
+        background-color: var(--color-surface) !important;
+        border-left: 1px var(--color-error-container) solid;
 
         .tab-forward {
           padding-left: 0;
         }
 
         .border-placeholder {
-          background-color: #f8f9fa;
+          background-color: var(--color-surface);
           position: relative;
           width: 100%;
           height: 100%;
-          border-left: 1px #ff9898 solid;
+          border-left: 1px var(--color-error-container) solid;
           padding-left: 0;
         }
 
@@ -292,7 +287,7 @@ $extra-header-min-height: 50px;
 
       &.selected-diff {
         &:before {
-          background: #ff9898;
+          background: var(--color-diff-line-selected);
         }
       }
 
@@ -300,7 +295,7 @@ $extra-header-min-height: 50px;
 
     .hide-identical-mode.equal-row {
       pre {
-        color: #ced1db;
+        color: var(--color-surface-container-low);
       }
     }
   }

@@ -3,7 +3,7 @@
 $search-font-size: 14px;
 
 :host {
-  background: none !important;
+  // background: none !important;
 
   .search-input-container {
     position: relative;
@@ -12,7 +12,7 @@ $search-font-size: 14px;
     min-width: 32px;
     width: 32px;
     overflow: hidden;
-    transition: width 0.3s ease;
+    transition: width 0.4s ease;
     border-radius: 4px 4px 0 0;
 
     &.active {
@@ -21,6 +21,7 @@ $search-font-size: 14px;
       &.with-counter {
         width: 300px;
       }
+
       &.with-results {
         width: auto;
       }
@@ -42,20 +43,23 @@ $search-font-size: 14px;
         width: 180px;
         display: none;
         border-radius: 4px 4px 0 0;
+        border: none;
+        background: none;
+        color: var(--color-on-surface);
 
         &.active {
           display: flex;
         }
+      }
 
-        //&::placeholder {
-        //  color: $blue-200;
-        //}
+      button.active {
+        margin-right: 4px;
       }
 
       .separator {
         width: 1px;
         height: 32px;
-        background: $blue-250;
+        background: var(--color-outline-variant);
       }
 
       .icon-button {
@@ -68,17 +72,7 @@ $search-font-size: 14px;
 
         &.disabled {
           pointer-events: none;
-          color: $blue-300;
           opacity: 0.4;
-        }
-      }
-
-      i.al-icon {
-        min-width: 32px;
-
-        &.al-ico-search, &.al-ico-dialog-x {
-          font-size: 20px;
-          width: 20px;
         }
       }
 
@@ -88,7 +82,6 @@ $search-font-size: 14px;
         .jump-button {
           background: transparent;
           border: none;
-          color: #FFFFFF;
         }
       }
 
@@ -113,41 +106,16 @@ $search-font-size: 14px;
 
 }
 
-:host.text-area {
-  .search-input-container {
-    .search-input {
-      input {
-        color: $white;
-      }
-    }
-  }
+:host.outline {
+  display: block;
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 18px;
+  --mdc-icon-button-state-layer-size: 34px;
+  background-color: var(--color-surface-container-lowest);
 }
 
-:host.table-search {
-  .search-input-container {
-    border-radius: 4px;
-
-    .search-input {
-      color: #FFFFFF;
-
-      i.icon-button.al-icon {
-        color: #FFFFFF;
-      }
-    }
-
-    background-color: #7786b5;
-
-    .search-input {
-      input {
-        color: #FFFFFF;
-      }
-    }
-
-    .match {
-      color: #FFFFFF;
-    }
-  }
-}
 
 :host.search-header {
   .search-input-container {
@@ -159,95 +127,37 @@ $search-font-size: 14px;
       border-radius: 4px 4px 0 0;
 
       input {
-        background-color: $blue-700;
+        background-color: var(--color-surface-container-high);
         border-bottom: 2px solid;
-        border-color: $blue-300;
-        color: $blue-280;
+        border-color: var(--color-primary);
         font-weight: 400;
-        padding-right: 28px;
+        padding-right: 40px;
+        height: 36px;
       }
     }
+  }
+
+  &.regex-error .search-input-container .search-input input {
+    padding-right: 74px;
+    border-color: var(--color-error) !important;
   }
 }
 
 :host.underline-search {
   .search-input-container {
     height: inherit;
+
     .search-input {
-      input {padding-left:0;}
-      i.al-icon {
-        color: $blue-480;
+      input {
+        padding-left: 0;
       }
     }
 
-    color: #5a658e;
-
-    &.focused {
-      color: $blue-480;
-    }
-
-    border-bottom: 2px solid;
+    border-bottom: 1px solid var(--color-outline);
     width: 100%;
   }
 }
 
-
-:host.light-theme {
-  .search-input-container {
-    color: $blue-400;
-
-    border: 1px solid $blue-200;
-    border-radius: 4px;
-
-    .search-input {
-      color: $blue-400;
-      border-color: $blue-200;
-
-      &:focus {
-        border-color: $blue-480;
-      }
-
-      &::placeholder {
-        color: $blue-250;
-      }
-
-      input {
-        color: $blue-400;
-      }
-      .separator {
-        background: $blue-200;
-      }
-    }
-  }
-}
-
-:host.dark-theme {
-  .search-input-container {
-
-    .search-input {
-      color: $blue-280;
-      border-color: $blue-300;
-
-      &:focus {
-        border-color: $blue-500;
-      }
-
-      &::placeholder {
-        color: $blue-280;
-      }
-
-      .separator {
-        background: $blue-900;
-      }
-    }
-
-    .icon-button {
-      &:hover:not(.disabled):not(.al-ico-search) {
-        color: $white;
-      }
-    }
-  }
-}
 
 :host-context(.hyper-params-custom-col) {
   .search-input-container {

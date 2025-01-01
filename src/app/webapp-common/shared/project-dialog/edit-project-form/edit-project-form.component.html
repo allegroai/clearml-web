@@ -56,8 +56,8 @@
     }
   </mat-form-field>
     <div class="actions">
-      <button (click)="cancelClicked.emit()" class="btn btn-outline-neon" data-id="Cancel">CANCEL</button>
-      <button [disabled]="projectForm.invalid" (click)="send()" data-id="Save" class="btn btn-neon">
+      <button mat-stroked-button (click)="cancelClicked.emit()" data-id="Cancel">CANCEL</button>
+      <button mat-flat-button [disabled]="projectForm.invalid" (click)="send()" data-id="Save">
         SAVE
       </button>
     </div>

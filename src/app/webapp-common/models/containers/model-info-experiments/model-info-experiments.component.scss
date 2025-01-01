@@ -4,6 +4,10 @@
   .lineage-container{
     height: 100%;
     padding: 24px;
+    header {
+      border-bottom: 1px solid var(--color-outline-variant);
+      margin-bottom: 12px;
+    }
   }
   @include link();
 }

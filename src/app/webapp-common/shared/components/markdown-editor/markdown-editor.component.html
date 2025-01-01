@@ -1,87 +1,112 @@
-<div *ngIf="data || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
-  <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty" [class.editor-hidden]="editorVisible">
-    <div class="actions">
-      <div class="actions-buttons ">
-        <button *ngIf="!editMode && editModeChanged.observed"
-                class="btn btn-cml-primary btn-icon btn-expand-view  md-button me-2"
-                [smTooltip]="isExpand? 'Minimize view' : 'Expand view'"
-                matTooltipPosition="below"
-                (click)="expandClicked()">
-          <i class="al-icon sm-md" [class]="isExpand ? 'al-ico-hor-minimize' : 'al-ico-hor-expand'"></i>
-        </button>
-        <button *ngIf="!readOnly && !editMode" class="btn btn-cml-primary md-button" (click)="editClicked()">EDIT
-        </button>
-      </div>
-    </div>
-    <button *ngIf="editMode" class="btn btn-cml-primary btn-preview-toggle" (click)="togglePreview()">
-      {{ editorVisible ? 'EDIT' : 'PREVIEW' }}
-    </button>
-    <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
-    <md-editor #editorComponent
-               name="Content"
-               height="100%"
-               [class.scripts-blocked]="blockUserScripts && editMode"
-               [(ngModel)]="data"
-               [mode]="editMode ? 'editor' : 'preview'"
-               [options]="options"
-               [postRender]="postRender"
-               [upload]="handleUpload"
-               (onEditorLoaded)="editorReady($event)"
-               (onPreviewDomChanged)="domFixes()"
-               (ngModelChange)="checkDirty()"
-    >
-      <div *ngIf="handleUpload" custom-btns class="extra-buttons">
-        <input #imgInput type="file" accept=".jpg,.jpeg,.png,.webm" multiple="multiple" style="display: none" (change)="uploadImg($event)" />
-        <mat-menu
-          #imageActions=matMenu
-          smClickStopPropagation
-          class="action-menu dark"
-        >
-          <button mat-menu-item class="action" (click)="imgInput.click()">
-            <i class="al-icon al-ico-upload sm-md pointer"></i>Upload Image
-          </button>
-          <hr class="dark"/>
-          <ng-container *ngIf="resources?.length > 0; else: noResources">
+@if (data() || editMode) {
+  <div class="md-editor-preview" [class.editor]="editMode">
+    <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty" [class.editor-hidden]="editorVisible">
+      <div class="actions">
+        @if (!editMode) {
+        <div class="actions-buttons">
+          @if (editModeChanged.observed) {
             <button
-              *ngFor="let resource of resources; trackBy: trackByUrl"
-              mat-menu-item class="action" (click)="insertImage(resource.url)">
-                <i class="al-icon sm-md" [class]="resource.unused ? 'al-ico-broken-file' : 'al-ico-image'"></i>
-                <span class="ellipsis">{{resource.url | baseName}}</span>
-                <i class="al-icon al-ico-trash sm-md me-3" (click)="$event.stopPropagation(); $event.preventDefault(); deleteResource.emit(resource.url)"></i>
+              mat-stroked-button
+              class="btn-expand-view me-2 icon-only"
+              [smTooltip]="isExpand ? 'Minimize view' : 'Expand view'"
+              matTooltipPosition="below"
+              (click)="expandClicked()"
+            >
+              <mat-icon fontSet="al" [fontIcon]="isExpand ? 'al-ico-hor-minimize' : 'al-ico-hor-expand'"></mat-icon>
             </button>
-          </ng-container>
-          <ng-template #noResources><div class="action src-empty">No uploads yet</div></ng-template>
-        </mat-menu>
-
-        <button
-          [matMenuTriggerFor]="imageActions"
-          (menuOpened)="imageMenuOpened.emit(data)"
-          type="button"
-          class="btn btn-default btn-img-menu"
-          smTooltip="Image resources"
-        ><i class="ms-2 al-icon al-ico-image sm-md"></i><i class="al-icon al-ico-dropdown-arrow"></i></button>
+          }
+          @if (!readOnly()) {
+            <button mat-stroked-button class="outline" (click)="editClicked()">EDIT</button>
+          }
+        </div>
+        }
       </div>
-    </md-editor>
-  </div>
-
-  <div class="md-footer">
-    <i class="al-icon al-ico-markdown" (click)="openMDCCheatSheet()" smTooltip="Markdown cheat sheet"></i>
-    <div [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">
-      <span *ngIf="duplicateNames">* You have duplicate names on different iframes</span>
-      <span *ngIf="!duplicateNames">* You have unsaved changes</span>
+      @if (editMode) {
+        <button mat-button class="preview-toggle" (click)="togglePreview()">
+          {{ editorVisible ? 'EDIT' : 'PREVIEW' }}
+        </button>
+      }
+      @if (editMode && !editorVisible) {
+        <span class="preview-header">PREVIEW</span>
+      }
+      <md-editor #editorComponent
+        name="Content"
+        height="100%"
+        [class.scripts-blocked]="blockUserScripts() && editMode"
+        [(ngModel)]="getData"
+        [mode]="editMode ? 'editor' : 'preview'"
+        [options]="options"
+        [postRender]="postRender"
+        [upload]="handleUpload()"
+        (onEditorLoaded)="editorReady($event)"
+        (onPreviewDomChanged)="domFixes()"
+        (ngModelChange)="checkDirty()"
+        >
+        @if (handleUpload()) {
+          <div custom-btns class="extra-buttons">
+            <input #imgInput type="file" accept=".jpg,.jpeg,.png,.webm" multiple="multiple" style="display: none" (change)="uploadImg($event)" />
+            <mat-menu
+              #imageActions=matMenu
+              smClickStopPropagation
+              class="action-menu dark"
+              >
+              <button mat-menu-item class="action" (click)="imgInput.click()">
+                <mat-icon fontSet="al" fontIcon="al-ico-upload"></mat-icon>
+                Upload Image
+              </button>
+              <hr class="dark"/>
+              @if (resources()?.length > 0) {
+                @for (resource of resources(); track resource.url) {
+                  <button
+                    mat-menu-item class="action" (click)="insertImage(resource.url)"
+                  >
+                    <mat-icon fontSet="al" [fontIcon]="resource.unused ? 'al-ico-broken-file' : 'al-ico-image'"></mat-icon>
+                    <div class="d-flex align-items-center">
+                      <span class="ellipsis">{{resource.url | baseName}}</span>
+                      <button mat-icon-button (click)="$event.stopPropagation(); $event.preventDefault(); deleteResource.emit(resource.url)">
+                        <mat-icon fontSet="al" fontIcon="al-ico-trash"></mat-icon>
+                      </button>
+                    </div>
+                  </button>
+                }
+              } @else {
+                <div class="action src-empty">No uploads yet</div>
+              }
+            </mat-menu>
+            <button
+              mat-button
+              [matMenuTriggerFor]="imageActions"
+              (menuOpened)="imageMenuOpened.emit(getData())"
+              type="button"
+              smTooltip="Image resources"
+            >
+              <mat-icon fontSet="al" fontIcon="al-ico-image" class="me-1"></mat-icon>
+              <mat-icon fontSet="al" fontIcon="al-ico-dropdown-arrow" class="me-0"></mat-icon>
+            </button>
+            </div>
+          }
+        </md-editor>
+      </div>
+      <div class="md-footer">
+        <button mat-icon-button class="help" (click)="openMDCCheatSheet()" smTooltip="Markdown cheat sheet">
+          <mat-icon fontSet="al" fontIcon="al-ico-markdown"></mat-icon>
+        </button>
+        <div [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">
+          @if (duplicateNames) {
+            <span>* You have duplicate names on different iframes</span>
+          }
+          @if (!duplicateNames) {
+            <span>* You have unsaved changes</span>
+          }
+        </div>
+        @if (editMode) {
+          <div class="right-buttons">
+            <button mat-stroked-button (click)="cancelClicked()">CANCEL</button>
+            <button mat-flat-button [disabled]="!isDirty || duplicateNames" (click)="save()">SAVE</button>
+          </div>
+        }
+      </div>
     </div>
-    <div *ngIf="editMode" class="right-buttons">
-      <button class="btn btn-cml-primary btn-outline"
-              (click)="cancelClicked()">CANCEL
-      </button>
-      <button class="btn btn-cml-primary"
-              [disabled]="!isDirty || duplicateNames"
-              (click)="save()">SAVE
-      </button>
-    </div>
-  </div>
-
-</div>
-<ng-template #noData>
-  <ng-content select="[no-data]"></ng-content>
-</ng-template>
+  } @else {
+    <ng-content select="[no-data]"></ng-content>
+  }

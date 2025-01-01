@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between header-container align-items-center"
-  [class.archive-mode]="isArchived()">
+     [class.archive-mode]="isArchived()">
   <div class="d-flex-center">
     <ng-container *ngTemplateOutlet="addButtonTemplate(); context: {smallScreen: (isSmallScreen$ | ngrxPush).matches}">
     </ng-container>
@@ -10,16 +10,16 @@
       (toggleArchived)="isArchivedChanged.emit($event)"
     ></sm-toggle-archive>
     <sm-button-toggle
-      [disabled]="!tableMode() || noData"
+      [disabled]="!tableMode() || noData()"
       class="ms-3"
-      [options]="toggleButtons"
-      [value]="!noData && tableMode()"
+      [options]="toggleButtons()"
+      [value]="!noData() && tableMode()"
       [rippleEffect]="rippleEffect()"
-      (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
+      (valueChanged)="tableModeChanged.emit($any($event))"></sm-button-toggle>
   </div>
 
 
-  <div class="d-flex justify-content-end align-items-center right-buttons">
+  <div class="d-flex justify-content-end align-items-center right-buttons gap-3">
     @if (!minimizedView()) {
       <sm-clear-filters-button
         [tableFilters]="tableFilters()"
@@ -27,23 +27,26 @@
       ></sm-clear-filters-button>
     }
     @if (tableMode() !== 'compare') {
-      <sm-menu
-        class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
-        [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
-        <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
-        <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
-        [itemLabel]="'Download first '+ (maxDownloadItems$ | ngrxPush) +' items'"></sm-menu-item>
-      </sm-menu>
+      <div smTooltip="Download table as CSV">
+        <sm-menu
+          iconClass="al-ico-download"
+          [disabled]="noData()"
+          data-id="downloadCSV"
+        >
+          <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
+          <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
+                        [itemLabel]="'Download first '+ (maxDownloadItems$ | ngrxPush) +' items'"></sm-menu-item>
+        </sm-menu>
+      </div>
     }
 
     @if (tableMode() === 'compare') {
-      <mat-form-field appearance="outline" class="dark-outline compare-view-select no-bottom">
+      <mat-form-field appearance="outline" class="compare-view-select no-bottom">
         <mat-select
           name="compareView"
-          panelClass="dark-outline"
           [ngModel]="compareView()"
           (selectionChange)="compareViewChanged.emit($event.value)"
-          >
+        >
           <mat-option value="scalars">Scalars</mat-option>
           <mat-option value="plots">Plots</mat-option>
         </mat-select>
@@ -51,9 +54,9 @@
     }
 
     @if (tableMode() === 'compare' && compareView() === 'scalars') {
-      <i class="al-icon al-ico-tune sm-md"
-        [class.active]="showCompareScalarSettings()"
-      (click)="toggleShowCompareSettings.emit()"></i>
+      <button mat-icon-button (click)="toggleShowCompareSettings.emit()">
+        <mat-icon fontSet="al" fontIcon="al-ico-tune" [class.active]="showCompareScalarSettings()"></mat-icon>
+      </button>
     }
 
     @if (!minimizedView() || tableMode() === 'compare') {

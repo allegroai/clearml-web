@@ -1,4 +1,4 @@
-import {Component, computed} from '@angular/core';
+import {Component, computed, Signal} from '@angular/core';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 
 @Component({

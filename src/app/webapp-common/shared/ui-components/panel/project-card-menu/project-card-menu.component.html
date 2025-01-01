@@ -1,20 +1,20 @@
-<sm-menu buttonClass="al-ico-bars-menu al-icon" [showCart]="false" panelClasses="light-theme">
+<sm-menu iconClass="al-ico-bars-menu">
   <sm-menu-item itemLabel="Edit"
                 data-id="Edit"
-                iconClass="al-icon al-color blue-800 al-ico-edit"
-                [disabled]="!project.company?.id"
-                (itemClicked)="projectEditClicked.emit(project)"></sm-menu-item>
+                iconClass="al-ico-edit"
+                [disabled]="!project().company?.id"
+                (itemClicked)="projectEditClicked.emit(project())"></sm-menu-item>
   <sm-menu-item itemLabel="New Project"
                 data-id="New Project"
-                iconClass="al-icon al-color blue-800 al-ico-add"
-                (itemClicked)="newProjectClicked.emit(project)"></sm-menu-item>
+                iconClass="al-ico-add"
+                (itemClicked)="newProjectClicked.emit(project())"></sm-menu-item>
   <sm-menu-item itemLabel="Move to"
                 data-id="Move To"
-                iconClass="al-icon al-color blue-800 al-ico-move-to"
-                (itemClicked)="moveToClicked.emit(project)"></sm-menu-item>
+                iconClass="al-ico-move-to"
+                (itemClicked)="moveToClicked.emit(project())"></sm-menu-item>
   <sm-menu-item itemLabel="Delete"
                 data-id="Delete"
-                iconClass="al-icon al-color blue-800 al-ico-trash"
-                (itemClicked)="deleteProjectClicked.emit(project)"></sm-menu-item>
+                iconClass="al-ico-trash"
+                (itemClicked)="deleteProjectClicked.emit(project())"></sm-menu-item>
   <ng-content select="[extendedCardMenu]"></ng-content>
 </sm-menu>

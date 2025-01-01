@@ -1,17 +1,24 @@
 @import "variables";
 
 :host {
+  display: grid;
+  grid-template-rows: 70px minmax(0, 1fr);
+  max-height: 100%;
+
   .title {
-    color: $white;
+    color: var(--color-on-surface);
     font-size: 16px;
     text-transform: uppercase;
-    margin: 55px 0 12px 0;
+    margin: 32px 0 12px 0;
     .al-icon {
-      color: $blue-300;
+      color: var(--color-outline);
       &:hover {
-        color: $blue-200;
+        color: var(--color-on-surface-variant);
       }
     }
+  }
+  sm-s3-access {
+    max-height: 100%;
   }
 
   .section {

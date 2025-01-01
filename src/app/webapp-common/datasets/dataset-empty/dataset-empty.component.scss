@@ -1,5 +1,3 @@
-@import "variables";
-
 .content {
   width: 100%;
   display: flex;
@@ -8,27 +6,14 @@
   padding-bottom: 24px;
 
   .navbar{
-    height: 42px;
     display: flex;
     justify-content: center;
-    gap: 1px;
   }
   .code {
     min-width: 400px;
     display: flex;
     flex: 1;
     flex-direction: column;
-
-    a {
-      color: $purple;
-      &.dark {
-        color: white;
-      }
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
 
     sm-code-editor {
       display: block;

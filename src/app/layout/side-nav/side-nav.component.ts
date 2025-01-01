@@ -7,12 +7,20 @@ import {searchDeactivate} from '@common/dashboard-search/dashboard-search.action
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {selectFirstRouterConfig} from '@common/core/reducers/router-reducer';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {selectDarkTheme, selectHideEnterpriseFeatures} from '@common/core/reducers/view.reducer';
+import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
 
 @Component({
   selector: 'sm-side-nav',
   templateUrl: './side-nav.component.html',
-  styleUrls: ['./side-nav.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./side-nav.component.scss', '../../webapp-common/layout/side-navbar/side-navbar.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
+      useValue: {showDelay: 0, position: 'right'} as MatTooltipDefaultOptions
+    },
+  ]
 })
 export class SideNavComponent {
   public store = inject(Store);
@@ -23,6 +31,9 @@ export class SideNavComponent {
   protected environment = this.configService.configuration;
   protected defaultNestedModeForFeature = this.store.selectSignal(selectDefaultNestedModeForFeature);
   protected currentUser = this.store.selectSignal(selectCurrentUser);
+  protected hideEnterpriseFeatures = this.store.selectSignal(selectHideEnterpriseFeatures);
+  protected darkTheme = this.store.selectSignal(selectDarkTheme);
+
   private resize = toSignal(fromEvent(window, 'resize'));
   protected scrolling = computed(() => {
     this.resize();

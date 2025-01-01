@@ -91,7 +91,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   public tagsFilterByProject$: Observable<boolean>;
   public projectTags$: Observable<string[]>;
   public companyTags$: Observable<string[]>;
-  private _selectedModels: TableModel[];
+  private _checkedModels: TableModel[];
   private _models: SelectedModel[];
   public getSysTags = getSysTags;
   public filtersMatch: Record<string, string> = {};
@@ -143,13 +143,13 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     this.sortOptionsList(MODELS_TABLE_COL_FIELDS.PROJECT);
   }
 
-  @Input() set selectedModels(selection) {
-    this._selectedModels = selection;
+  @Input() set checkedModels(selection) {
+    this._checkedModels = selection;
     this.updateSelectionState();
   }
 
-  get selectedModels() {
-    return this._selectedModels;
+  get checkedModels() {
+    return this._checkedModels;
   }
 
   @Input() selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {};
@@ -243,7 +243,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   }
 
   @Output() modelsSelectionChanged = new EventEmitter<SelectedModel[]>();
-  @Output() modelSelectionChanged = new EventEmitter<{ model: SelectedModel; openInfo?: boolean }>();
+  @Output() modelSelectionChanged = new EventEmitter<{model: SelectedModel; openInfo?: boolean; origin: 'row' | 'table'}>();
   @Output() loadMoreModels = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
@@ -267,7 +267,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     this.projectTags$ = this.store.select(selectProjectTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
     this.entitiesKey = 'models';
-    this.selectedEntitiesKey = 'selectedModels';
+    this.selectedEntitiesKey = 'checkedModels';
 
   }
 
@@ -284,7 +284,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
 
 
   onRowSelectionChanged(event) {
-    this.modelSelectionChanged.emit({model: event.data});
+    this.modelSelectionChanged.emit({model: event.data, origin: 'table'});
   }
 
 
@@ -305,13 +305,13 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     return this.tableCols?.find(col => colId === col.id)?.header;
   }
 
-  rowSelectedChanged(change: { field: string; value: boolean; event: Event }, model: TableModel) {
+  rowSelectedChanged(change: { value: boolean; event: Event }, model: TableModel) {
     if (change.value) {
       const addList = this.getSelectionRange<TableModel>(change, model);
-      this.modelsSelectionChanged.emit([...this.selectedModels, ...addList]);
+      this.modelsSelectionChanged.emit([...this.checkedModels, ...addList]);
     } else {
       const removeList = this.getDeselectionRange(change, model);
-      this.modelsSelectionChanged.emit(this.selectedModels.filter((selectedModel) =>
+      this.modelsSelectionChanged.emit(this.checkedModels.filter((selectedModel) =>
         !removeList.includes(selectedModel.id)));
     }
   }
@@ -328,14 +328,17 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
   addTag(tag: string) {
     this.store.dispatch(addTag({
       tag,
-      models: this.selectedModels.length > 1 ? this.selectedModels : [this.contextModel]
+      models: this.checkedModels.length > 1 ? this.checkedModels : [this.contextModel]
     }));
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = [];
   }
 
-  tableRowClicked(event: { e: Event; data: SelectedModel }) {
-    if (this._selectedModels.some(exp => exp.id === event.data.id)) {
-      this.openContextMenu({e: event.e, rowData: event.data, backdrop: true});
+  tableRowClicked({e, data}: { e: Event; data: SelectedModel }) {
+    if (this.selectionMode === 'single') {
+      this.modelSelectionChanged.emit({model: data, origin: 'row'});
+    }
+    if (this._checkedModels.some(exp => exp.id === data.id)) {
+      this.openContextMenu({e: e, rowData: data, backdrop: true});
     }
   }
 
@@ -347,7 +350,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     this.menuBackdrop = !!data?.backdrop;
     if (!data?.single) {
       this.contextModel = this.models.find(model => model.id === data.rowData.id);
-      if (!this.selectedModels.map(model => model.id).includes(this.contextModel.id)) {
+      if (!this.checkedModels.map(model => model.id).includes(this.contextModel.id)) {
         this.prevSelected = this.contextModel.id;
         this.emitSelection([this.contextModel]);
       }
@@ -357,7 +360,7 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
 
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.contextMenuExtended?.contextMenu.openMenu({x: event.clientX, y: event.clientY});
+    this.contextMenuExtended?.contextMenu().openMenu({x: event.clientX, y: event.clientY});
   }
 
   columnFilterOpened(col: ISmCol) {
@@ -387,4 +390,5 @@ export class ModelsTableComponent extends BaseTableView implements OnChanges {
     const delta = width - parseInt(this.tableCols[colIndex].style.width, 10);
     this.table?.updateColumnsWidth(columnId, width, delta);
   }
+
 }

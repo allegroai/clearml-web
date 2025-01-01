@@ -18,23 +18,22 @@ export class DashboardSearchEffects {
   ) {}
 
   getResultsCount = createEffect(() => this.actions.pipe(
-    ofType(getResultsCount),
-    withLatestFrom(
-      this.store.select(selectShowOnlyUserWork),
-      this.store.select(selectCurrentUser),
-      this.store.select(selectShowHidden),
-      this.store.select(selectHideExamples),
-    ),
-    switchMap(([action, userFocus, user, hidden, hideExamples]) => this.organizationApi.organizationGetEntitiesCount({
-      /* eslint-disable @typescript-eslint/naming-convention */
-      ...(userFocus && {active_users: [user.id]}),
-      ...(hidden && {search_hidden: true}),
-      ...(hideExamples && {allow_public: false}),
-      ...getEntityStatQuery(action, hidden)
-      /* eslint-enable @typescript-eslint/naming-convention */
-    })),
-    map(({tasks: experiments, ...rest}) =>
-      setResultsCount({counts: {...rest, experiments}}))
-  ));
-
+      ofType(getResultsCount),
+      withLatestFrom(
+        this.store.select(selectShowOnlyUserWork),
+        this.store.select(selectCurrentUser),
+        this.store.select(selectShowHidden),
+        this.store.select(selectHideExamples),
+      ),
+      switchMap(([action, userFocus, user, hidden, hideExamples]) => this.organizationApi.organizationGetEntitiesCount({
+        /* eslint-disable @typescript-eslint/naming-convention */
+        ...(userFocus && {active_users: [user.id]}),
+        ...(hidden && {search_hidden: true}),
+        ...(hideExamples && {allow_public: false}),
+        ...getEntityStatQuery(action, hidden)
+        /* eslint-enable @typescript-eslint/naming-convention */
+      })),
+      map(res => setResultsCount({counts: res}))
+    )
+  );
 }

@@ -2,10 +2,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  Input,
   OnDestroy,
-  OnInit,
-  ViewChild
+  inject, viewChild, input, effect
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {getCustomMetrics} from '@common/experiments/actions/common-experiments-view.actions';
@@ -38,8 +36,11 @@ import {selectMetricVariants} from '@common/experiments/reducers';
   styleUrls: ['./project-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectStatsComponent implements OnInit, OnDestroy {
-  private _project: Project;
+export class ProjectStatsComponent implements OnDestroy {
+  private store = inject(Store);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
 
   public selectedVariants: ISmCol[];
   public colors: string[];
@@ -47,7 +48,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
   public graphData = null as ScatterPlotSeries[];
   public loading = true;
   public gotOptions;
-  public variantDisplay: string = 'Select Metric & Variant';
+  public variantDisplay = 'Select Metric & Variant';
   private sub = new Subscription();
   states = [
     {label: 'Completed or Stopped', type: TaskStatusEnum.Completed},
@@ -56,22 +57,16 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     {label: 'Running', type: TaskStatusEnum.InProgress}
   ] as {label: string; type: string; color?: string}[];
 
-  @Input() set project(proj: Project) {
-    if (proj) {
-      this._project = proj;
-      this.gotOptions = undefined;
-    }
-  }
-  get project() {
-    return this._project;
-  }
+  project = input<Project>();
+  plot = viewChild(ScatterPlotComponent);
 
-  constructor(private store: Store, private router: Router, private dialog: MatDialog, private cdr: ChangeDetectorRef) {
-  }
+  constructor() {
+    effect(() => {
+      if (this.project()) {
+        this.gotOptions = undefined;
+      }
+    });
 
-  @ViewChild(ScatterPlotComponent) plot: ScatterPlotComponent;
-
-  ngOnInit(): void {
     this.sub.add(this.store.select(selectSelectedMetricVariantForCurrProject)
       .pipe(concatLatestFrom(() => this.store.select(selectSelectedProjectId)))
       .subscribe(([cols, projectId]) => {
@@ -93,60 +88,60 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     );
 
     this.sub.add(this.store.select(selectGraphData)
-        .pipe(
-          debounceTime(0),
-          filter((values) => !!values)
-        )
-        .subscribe(values => {
-          let grouped: {[group: string]: ScatterPlotPoint[]};
-          if (this.selectedVariants.length > 1) {
-            grouped = values.reduce((acc, point) => {
-              this.selectedVariants.find(v => v.id === point.variant);
-              if(acc[point.variant]) {
-                acc[point.variant].push(point);
-              } else {
-                acc[point.variant] = [point];
-              }
-              return acc;
-            }, {});
-          } else {
-            grouped = values.reduce((acc, point) => {
-              const status = [TaskStatusEnum.Stopped, TaskStatusEnum.Completed].includes(point.status as TaskStatusEnum) ? 'Completed or Stopped' : point.status;
-              if(acc[status]) {
-                acc[status].push(point);
-              } else {
-                acc[status] = [point];
-              }
-              return acc;
-            }, {});
-          }
-          this.loading = false;
-          this.graphData = Object.entries(grouped).map(([group, points]) => ({
-            ...(this.selectedVariants.length > 1 ? {
-              label: this.selectedVariants.find(v => v.id === group).header,
-              backgroundColor: this.variantToColor(group)
-            } : {
-              label: group,
-              backgroundColor: this.statusToColor(group),
-            }),
-            data: points.map(point => ({
-              x: point.x,
-              y: point.y,
-              id: point.id,
-              name: point.name,
-              description: `Created By ${point.user}, Finished ${new Date(point.x).toLocaleString()}`,
-            })),
-          } as ScatterPlotSeries));
-          this.cdr.markForCheck();
-        })
+      .pipe(
+        debounceTime(0),
+        filter((values) => !!values)
+      )
+      .subscribe(values => {
+        let grouped: Record<string, ScatterPlotPoint[]>;
+        if (this.selectedVariants.length > 1) {
+          grouped = values.reduce((acc, point) => {
+            this.selectedVariants.find(v => v.id === point.variant);
+            if(acc[point.variant]) {
+              acc[point.variant].push(point);
+            } else {
+              acc[point.variant] = [point];
+            }
+            return acc;
+          }, {});
+        } else {
+          grouped = values.reduce((acc, point) => {
+            const status = [TaskStatusEnum.Stopped, TaskStatusEnum.Completed].includes(point.status as TaskStatusEnum) ? 'Completed or Stopped' : point.status;
+            if(acc[status]) {
+              acc[status].push(point);
+            } else {
+              acc[status] = [point];
+            }
+            return acc;
+          }, {});
+        }
+        this.loading = false;
+        this.graphData = Object.entries(grouped).map(([group, points]) => ({
+          ...(this.selectedVariants.length > 1 ? {
+            label: this.selectedVariants.find(v => v.id === group).header,
+            backgroundColor: this.variantToColor(group)
+          } : {
+            label: group,
+            backgroundColor: this.statusToColor(group),
+          }),
+          data: points.map(point => ({
+            x: point.x,
+            y: point.y,
+            id: point.id,
+            name: point.name,
+            description: `Created By ${point.user}, Finished ${new Date(point.x).toLocaleString()}`,
+          })),
+        } as ScatterPlotSeries));
+        this.cdr.markForCheck();
+      })
     );
   }
 
   selectedMetricToShow(selection: ISmCol[]) {
     if (selection === null || selection?.length === 0) {
-      this.store.dispatch(setMetricVariant({projectId: this.project.id, cols: null}));
+      this.store.dispatch(setMetricVariant({projectId: this.project().id, cols: null}));
     } else {
-      this.store.dispatch(setMetricVariant({projectId: this.project.id, cols: selection}));
+      this.store.dispatch(setMetricVariant({projectId: this.project().id, cols: selection}));
     }
   }
 
@@ -165,7 +160,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
             { data: {
                 variants,
                 metricVariantSelection: this.metricVariantSelection,
-                projectId: this.project.id
+                projectId: this.project().id
               }}
           ).afterClosed()
         ),
@@ -207,7 +202,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
   }
 
   experimentClicked(experimentId: string) {
-    this.router.navigateByUrl(`/projects/${this.project.id}/experiments/${experimentId}`);
+    this.router.navigateByUrl(`/projects/${this.project().id}/tasks/${experimentId}`);
   }
 
   getValueName(valueType: string) {

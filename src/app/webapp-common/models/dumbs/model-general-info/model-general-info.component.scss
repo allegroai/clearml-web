@@ -7,7 +7,12 @@
   @include link();
 
   .preserve-spaces {
-    white-space: pre-wrap;
+    display: flex;
+    align-items: center;
+
+    &.value {
+      white-space: pre-wrap;
+    }
   }
 
   ::ng-deep .editable-div .form-control {

@@ -1,6 +1,6 @@
-@if (showSettings) {
-  <div smTooltip="Settings" (click)="toggleSettings.emit()" class="settings">
-    <i class="al-icon al-ico-settings pointer" data-id="scalar settings"></i>
-  </div>
+@if (showSettings()) {
+  <button mat-icon-button smTooltip="Settings" (click)="toggleSettings.emit()" class="settings" data-id="scalar settings">
+    <mat-icon fontSet="al" fontIcon="al-ico-settings"></mat-icon>
+  </button>
 }
 

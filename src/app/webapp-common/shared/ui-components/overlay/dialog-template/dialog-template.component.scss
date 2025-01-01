@@ -1,6 +1,5 @@
-@import 'variables';
+$z-index-modal: 1050;
 
-$generic-font-size: 11px;
 :host {
   height: 100%;
 
@@ -14,11 +13,11 @@ $generic-font-size: 11px;
   .create-title {
     margin: 10px 10px 18px;
     font-size: 24px;
-    font-weight: 300;
+    font-weight: 400;
     width: 100%;
     height: 35px;
     text-align: center;
-    color: $blue-800;
+    color: var(--color-primary);
     text-transform: uppercase;
 
     &.no-uppercase {
@@ -28,12 +27,18 @@ $generic-font-size: 11px;
 
   .sub-header {
     font-size: 14px;
+    line-height: 20px;
     text-align: center;
-    color: $blue-400;
+    color: var(--color-on-surface-variant);
   }
 
   .icon {
     margin: 10px;
+  }
+
+  .icon-image {
+    margin: 10px auto;
+    color: var(--dialog-icon-color, var(--color-primary));
   }
 
   .app-icon-image {
@@ -47,12 +52,10 @@ $generic-font-size: 11px;
 
   .generic-container {
     overflow: hidden;
-    background-color: $white;
-    z-index: $zindex-modal;
+    z-index: $z-index-modal;
     border-radius: 4px;
     padding: 32px 64px;
     overflow-y: auto;
-    min-width: 430px;
     height: 100%;
     max-height: 94vh;
   }
@@ -60,7 +63,7 @@ $generic-font-size: 11px;
   .include-banner {
     height: calc(100vh - 220px);
     .generic-container {
-      border-radius: 4px 4px 0 0px;
+      border-radius: 4px 4px 0 0;
     }
   }
   ::ng-deep .background-transparent {

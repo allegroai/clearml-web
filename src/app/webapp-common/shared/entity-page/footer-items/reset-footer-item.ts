@@ -1,8 +1,8 @@
 import {ItemFooterModel, IFooterState} from './footer-items.models';
-import {IconNames, ICONS} from '../../../constants';
 import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
 import {MenuItems} from '../items.utils';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {IconNames, ICONS} from '@common/constants';
 
 export class ResetFooterItem<T extends {status: TaskStatusEnum}> extends ItemFooterModel {
 

@@ -1,0 +1,18 @@
+@mixin ace-style($theme) {
+  @if mat.get-theme-type($theme) == light {
+    .ace-editor.ace_editor {
+      background: color-mix(in srgb, var(--color-surface-container-low), transparent 60%);
+      .ace_gutter {
+        background: color-mix(in srgb, var(--color-surface-container-high), transparent 50%);
+      }
+    }
+  } @else {
+    .ace-editor.ace_editor {
+      background-color: var(--color-surface-container-low);
+      color: var(--color-on-surface-variant);
+      .ace_gutter {
+        background: color-mix(in srgb, var(--color-surface-container-high), transparent 50%);
+      }
+    }
+  }
+}

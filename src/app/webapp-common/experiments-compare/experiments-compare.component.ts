@@ -22,7 +22,7 @@ import {
   SelectExperimentsForCompareComponent
 } from '@common/experiments-compare/containers/select-experiments-for-compare/select-experiments-for-compare.component';
 import {MatDialog} from '@angular/material/dialog';
-import {ContextMenuService} from '@common/shared/services/context-menu.service';
+import {HeaderMenuService} from '@common/shared/services/header-menu.service';
 import {
   EXPERIMENTS_COMPARE_ROUTES,
   MODELS_COMPARE_ROUTES
@@ -57,9 +57,9 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
     id: string,
     project: { id: string }
   }[]>;
-  public experimentsColor: { [p: string]: string };
+  public experimentsColor: Record<string, string>;
   private ids: string[];
-  public duplicateNamesObject: { [name: string]: boolean };
+  public duplicateNamesObject: Record<string, boolean>;
   private routeConfig$: Observable<string[]>;
   private titleCasePipe = new TitleCasePipe();
 
@@ -69,7 +69,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
               private colorHash: ColorHashService,
               private dialog: MatDialog,
               private cdr: ChangeDetectorRef,
-              private contextMenuService: ContextMenuService
+              private contextMenuService: HeaderMenuService
   ) {
     // updating URL with store query params
     this.selectedProject$ = this.store.select(selectSelectedProject);
@@ -87,7 +87,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
     this.store.dispatch(resetSelectCompareHeader({fullReset: true}));
     this.store.dispatch(setGlobalLegendData({data: null}));
-    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
+    this.store.dispatch(headerActions.reset());
     this.store.dispatch(resetSelectModelState({fullReset: true}));
   }
 
@@ -118,13 +118,13 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
       this.experimentsColor = entities?.reduce((acc, exp) => {
         acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.name}-${exp.id}`));
         return acc;
-      }, {} as { [id: string]: string });
+      }, {} as Record<string, string>);
 
       this.duplicateNamesObject = entities.reduce((acc, legendItem) => {
         const experimentName = legendItem.name;
         acc[experimentName] = acc[experimentName] !== undefined;
         return acc;
-      }, {} as { [name: string]: boolean });
+      }, {} as Record<string, boolean>);
       this.cdr.detectChanges();
     }));
 
@@ -201,16 +201,12 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
           selectedModels: selectedIds,
           header: 'Select compared model'
         },
-        height: '94vh',
-        width: '98%',
-        maxWidth: '100%'
+        panelClass: 'full-screen',
       }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
     } else {
       this.dialog.open(SelectExperimentsForCompareComponent, {
         data: {entityType: this.entityType},
-        height: '94vh',
-        width: '98%',
-        maxWidth: '100%'
+        panelClass: 'full-screen',
       }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
     }
   }
@@ -236,9 +232,8 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
       return {
         ...route,
         link: route.header === entitiesType ? undefined : [base === 'datasets' ? 'datasets/simple': base === 'pipelines'? 'pipelines' : 'projects', projectId, `compare-${comparedEntity}s`, {ids: experiments}, route.featureLink ?? route.header],
-        isActive: ((route.featureLink ?? route.header) === entitiesType)
       };
     });
-    this.store.dispatch(headerActions.setTabs({contextMenu}));
+    this.store.dispatch(headerActions.setTabs({contextMenu, active: entitiesType}));
   }
 }

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked} from '@angular/core';
 import {compareByFieldFunc} from '@common/tasks/tasks.utils';
 import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -74,11 +74,14 @@ export class GroupedCheckedFilterListComponent {
   selectionLimitReached = computed(() =>
     this.selectedItemsList() && (Object.values(this.selectedItemsList())).flat().length >= this.limitSelection());
 
-  itemsObjectListFilteredEffect = effect(() => {
-    if (this.itemsObjectList()) {
-      this.searchQ(this.searchText(), 0);
-    }
-  }, {allowSignalWrites: true});
+  constructor() {
+    effect(() => {
+      if (this.itemsObjectList()) {
+        const text = this.searchText();
+        untracked(() => this.searchQ(text, 0));
+      }
+    });
+  }
 
   private getItemsObjectList = (itemsList: Record<string, HyperParams<{ checked: boolean; value: string }>>) =>
     Object.entries(itemsList).reduce((acc, [section, params]) => {

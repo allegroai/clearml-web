@@ -1,16 +1,15 @@
-@import '../../styles/variables';
-
 .labeled-row {
+  min-height: 36px;
   display: flex;
   align-items: center;
   padding: 6px 6px 6px 0;
-  align-content: flex-start;
+  border-bottom: 1px solid var(--color-surface-container-high);
 
   .label-container {
     width: 155px;
     flex: 0 0 155px;
     font-weight: 500;
-    color: #71758A;
+    color: color-mix(in srgb, var(--color-on-surface-variant), transparent 20%);
     font-size: 11px;
     padding-right: 24px;
     text-overflow: ellipsis;
@@ -20,20 +19,5 @@
   .content {
     flex: 1;
     word-break: break-word;
-  }
-}
-
-:host-context(.dark-theme) {
-  .labeled-row {
-    border-bottom: 1px solid $blue-500;
-  }
-  .label-container {
-    color: $blue-300;
-  }
-}
-
-:host-context(.light-theme) {
-  .labeled-row {
-    border-bottom: 1px solid $blue-100;
   }
 }

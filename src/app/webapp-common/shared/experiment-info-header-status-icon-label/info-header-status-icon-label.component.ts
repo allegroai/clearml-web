@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input } from '@angular/core';
 import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 import { UpperCasePipe } from '@angular/common';
 
@@ -8,14 +8,12 @@ import { UpperCasePipe } from '@angular/common';
   styleUrls: ['./info-header-status-icon-label.component.scss'],
   imports: [
     UpperCasePipe
-],
+  ],
   standalone: true
 })
 export class InfoHeaderStatusIconLabelComponent {
-  @Input() showLabel               = true;
-  @Input() status                  = '';
+  showLabel = input(true);
+  status = input('');
 
-  public experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
-
-  constructor() {}
+  protected readonly experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
 }

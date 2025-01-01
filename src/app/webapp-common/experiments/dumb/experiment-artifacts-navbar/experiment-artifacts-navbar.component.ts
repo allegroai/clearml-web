@@ -5,6 +5,7 @@ import {IModelInfo} from '../../shared/common-experiment-model.model';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {MatExpansionPanel, MatExpansionPanelHeader} from '@angular/material/expansion';
 import {safeAngularUrlParameterPipe} from '@common/shared/pipes/safeAngularUrlParameter.pipe';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'sm-experiment-artifacts-navbar',
@@ -15,7 +16,8 @@ import {safeAngularUrlParameterPipe} from '@common/shared/pipes/safeAngularUrlPa
     MatExpansionPanel,
     MatExpansionPanelHeader,
     RouterLink,
-    safeAngularUrlParameterPipe
+    safeAngularUrlParameterPipe,
+    MatIcon
   ],
   standalone: true
 })

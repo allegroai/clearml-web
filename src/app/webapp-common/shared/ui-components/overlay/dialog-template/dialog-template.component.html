@@ -1,36 +1,37 @@
-<div class="dialog-template-container" [class]="containerClass">
-
-  @if (displayX) {
+<div class="dialog-template-container" [class]="containerClass()">
+  @if (displayX()) {
     <div style="position: relative">
-      <i (click)="onXPressed()" class="pointer stick-to-corner right al-icon al-ico-dialog-x al-color blue-400 sm-md" data-id="Cross">
-      </i>
-      @if (pageHeader) {
+      <button mat-icon-button (click)="onXPressed()" class="stick-to-corner right" data-id="Cross" tabindex="-1">
+        <mat-icon fontSet="al" fontIcon="al-ico-dialog-x"></mat-icon>
+      </button>
+
+      @if (pageHeader()) {
         <div class="stick-to-corner left">
-          <div [innerText]="pageHeader"></div>
+          <div [innerText]="pageHeader()"></div>
         </div>
       }
     </div>
   }
 
-  <div #container class="generic-container {{theme || 'light-theme'}}" cdkScrollable data-id="comparedExperimentContainer">
-    @if (iconClass) {
+  <div #container class="generic-container" cdkScrollable data-id="comparedExperimentContainer">
+    @if (iconClass()) {
       <div class="d-flex flex-column">
-        <div [class]="'al-icon icon xxl mx-auto '+ [iconClass]" data-id="pipelineIcon"></div>
+        <mat-icon class="icon-image lg" fontSet="al" [fontIcon]="iconClass()" data-id="pipelineIcon"></mat-icon>
       </div>
     }
-    @if (iconData) {
+    @if (iconData()) {
       <div class="d-flex justify-content-center">
-        <div class="app-icon-image" [style.background-image]="'url(' + iconData + ')'"></div>
+        <div class="app-icon-image" [style.background-image]="'url(' + iconData() + ')'"></div>
       </div>
     }
-    @if (header) {
+    @if (header()) {
       <div class="d-flex flex-column">
-        <div class="create-title mx-auto ellipsis {{headerClass ?? ''}}">{{header}}</div>
+        <div class="create-title mx-auto ellipsis {{headerClass() ?? ''}}">{{header()}}</div>
       </div>
     }
-    @if (subHeader) {
+    @if (subHeader()) {
       <div class="d-flex flex-column">
-        <p class="sub-header mx-auto" [innerHTML]="subHeader | purify"></p>
+        <p class="sub-header mx-auto" [innerHTML]="subHeader() | purify"></p>
       </div>
     }
     <ng-content></ng-content>

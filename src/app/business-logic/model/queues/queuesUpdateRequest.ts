@@ -29,4 +29,5 @@ export interface QueuesUpdateRequest {
      * System tags list. This field is reserved for system use, please don\'t use it.
      */
     system_tags?: Array<string>;
+    display_name: string;
 }

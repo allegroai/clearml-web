@@ -10,7 +10,7 @@ import {
   TipOfTheDayModalComponent,
   TipsModalData
 } from '../../layout/tip-of-the-day-modal/tip-of-the-day-modal.component';
-import {selectFirstLogin, selectNeverShowPopups} from '../../core/reducers/view.reducer';
+import {selectDarkTheme, selectFirstLogin, selectNeverShowPopups} from '../../core/reducers/view.reducer';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
@@ -46,6 +46,7 @@ export class TipsService {
   private firstTime = true;
   private mobile = this.deviceService.isMobile();
   public hasTips = computed(() => Object.keys(this.tipsConfig()).length > 0);
+  protected darkTheme = this.store.selectSignal(selectDarkTheme);
 
   constructor(
   ) {
@@ -58,7 +59,7 @@ export class TipsService {
       .pipe(
         takeUntilDestroyed(),
         debounceTime(1000),
-        filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
+        filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos?.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
         distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
       .subscribe(([routerConfig]) => {
         const urlConfig = routerConfig?.join('/');
@@ -124,6 +125,7 @@ export class TipsService {
         tips: allTips,
         visitedIndex,
         hideDontShow: this.neverShowAgain || hideDontShow,
+        darkTheme: this.darkTheme()
       },
       maxWidth: '712px'
     }).afterClosed()

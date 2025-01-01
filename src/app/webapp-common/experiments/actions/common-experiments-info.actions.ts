@@ -27,6 +27,11 @@ export interface TreeStep {
   base_task_id: string,
   queue: string,
   parents: string[],
+  stage: string,
+  isStage: boolean,
+  statusCount: Record<string, number>,
+  computingTime: number,
+  numberOfStepsInStage: number,
   executed: string;
   status: StepStatusEnum;
   job_type: TaskTypeEnum;

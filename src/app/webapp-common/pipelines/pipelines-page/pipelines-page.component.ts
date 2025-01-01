@@ -114,7 +114,7 @@ if __name__ == '__main__':
   }
 
   public override projectCardClicked(project: ProjectsGetAllResponseSingle) {
-    this.router.navigate([project.id, 'experiments'], {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
+    this.router.navigate([project.id, 'tasks'], {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 

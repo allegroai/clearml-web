@@ -8,13 +8,17 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector       : 'al-drawer',
-  templateUrl    : './drawer.component.html',
-  styleUrls      : ['./drawer.component.scss'],
+  selector: 'al-drawer',
+  templateUrl: './drawer.component.html',
+  styleUrls: ['./drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  imports: [
+    MatIcon
+  ]
 })
 export class DrawerComponent {
 

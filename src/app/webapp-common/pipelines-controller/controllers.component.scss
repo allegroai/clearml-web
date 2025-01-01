@@ -1,4 +1,3 @@
-@import "variables";
 @import "./../layout/layout.scss";
 
 :host {
@@ -20,19 +19,6 @@
     &.hide-experiment-info {
       width: 0 !important;
       max-width: 0 !important;
-    }
-  }
-
-  .btn-highlighted {
-    background-color: $running-green;
-    color: $running-green-contrast;
-    margin-right: 12px;
-    &:hover {
-      background-color: lighten($running-green, 10);
-    }
-
-    i {
-      margin-right: 12px;
     }
   }
 

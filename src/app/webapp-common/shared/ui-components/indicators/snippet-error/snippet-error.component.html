@@ -1,37 +1,35 @@
-<div class="frame text-center"
-     [class.dark-theme]="theme===themeEnum.Dark"
-     [class.light-theme]="theme===themeEnum.Light">
+<div class="frame text-center">
   <div class="labeled-icon" #labeled>
     <i
       class="error-icon al-icon al-color sm"
       [style.font-size.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
       [style.width.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
       [style.height.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
-      [class.blue-300]="theme === themeEnum.Light"
-      [class.neon-yellow]="theme === themeEnum.Dark"
       [class.al-ico-no-source]="missingSource"
       [class.al-ico-alert-outline]="!missingSource"
     ></i>
-    <div *ngIf="labeled.getBoundingClientRect().height > 50"
-         class="label"
-         [class.mt-2]="missingSource">
-      {{missingSource ? 'Source not available' : 'Unable to load image'}}
-    </div>
+    @if (labeled.getBoundingClientRect().height > 50) {
+      <div
+        class="label"
+        [class.mt-2]="missingSource">
+        {{missingSource ? 'Source not available' : 'Unable to load image'}}
+      </div>
+    }
     <div class="file-path w-100" [smTooltip]="baseFile" smShowTooltipIfEllipsis>{{baseFile}}</div>
   </div>
   <div class="d-flex justify-content-between buttons-footer align-items-center">
     <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-         [class.disabled]="missingSource"
-         ngxClipboard
-         smTooltip="Copy Image URL"
-         [cbContent]="copyContent"
-         (cbOnSuccess)="copyToClipboardSuccess(true)">
+      [class.disabled]="missingSource"
+      ngxClipboard
+      smTooltip="Copy Image URL"
+      [cbContent]="copyContent"
+      (cbOnSuccess)="copyToClipboardSuccess(true)">
       <i class="al-icon sm-md al-ico-copy-to-clipboard" data-id="copyToClipBoardButton"></i>
     </div>
     <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-         smTooltip="Open Image"
-         (click)="openImageClicked.emit()"
-    >
+      smTooltip="Open Image"
+      (click)="openImageClicked.emit()"
+      >
       <i class="al-icon sm-md al-ico-export"></i>
     </div>
   </div>

@@ -1,4 +1,3 @@
-@import "variables";
 
 .item-snippet {
   width: 180px;
@@ -6,7 +5,8 @@
   border-radius: 4px;
   position: relative;
   text-align: center;
-  background: $blue-50;
+  background: var(--color-surface-container-high);
+  border: 2px solid transparent;
 
   video {
     cursor: pointer;
@@ -31,43 +31,23 @@
   }
 
   &.loading {
-    background: white;
+    background: var(--color-surface-container-lowest);;
   }
   .image, .player {
     height: 100%;
   }
 
   &:hover:not(.no-hover-effect) {
-    box-shadow: 0 0 0 2px $blue-200;
+    border-color: var(--color-outline-variant);
     .toolbar {
       opacity: 1;
       visibility: visible;
     }
   }
 
-  // LIGHT THEME
-  // --------------------------
-  &.light {
-    .image-var {
-      color: $blue-500;
-      background-color: rgba($blue-50, 0.9);
-    }
-  }
-
-
-  // DARK THEME
-  // --------------------------
-  &.dark {
-    background: $blue-700;
-    &.loading {
-      background: $blue-700;
-    }
-    .image-var {
-      color: $blue-300;
-    }
-    &:hover {
-      box-shadow: 0 0 0 2px $blue-500;
-    }
+  .image-var {
+    color: var(--color-on-surface-variant);
+    background-color: rgba(from var(--color-surface-container-lowest) r g b / 80%);
   }
 
 }
@@ -82,8 +62,8 @@
   font-size: 12px;
   border-radius: 4px;
   padding: 0 12px;
-  color: $blue-100;
-  background-color: rgba($blue-900, 0.6);
+  color: var(--color-surface-container);
+  background-color: rgba(from var(--color-on-surface)r g b / 60%);
 }
 
 .html-wrap {
@@ -144,11 +124,11 @@
 .clickable-icon {
   width: 24px;
   height: 24px;
-  background-color: $blue-400;
-  color: $blue-50;
+  background-color: var(--color-outline);
+  color: var(--color-surface-container-lowest);
   border-radius: 4px;
   &:hover {
-    background-color: $blue-500;
+    background-color: var(--color-on-surface-variant);
   }
 }
 

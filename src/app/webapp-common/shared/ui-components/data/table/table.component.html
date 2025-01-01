@@ -1,68 +1,70 @@
-@if (columns?.length > 0) {
-  <p-table class="table"
-           [class.has-header]="!noHeader" dataKey="id"
-           [style.--table-row-height]="rowHeight + 'px'"
-           [style.--card-height]="(cardsCollapsed ? 56 : cardHeight) + 'px'"
-           [filterDelay]="0"
-           [globalFilterFields]="enableTableSearch? globalFilterFields: null"
-           [scrollHeight]="'flex'"
-           [autoLayout]="false"
-           [columns]="columns"
-           [selectionMode]="selectionMode"
-           [rows]="rowsNumber"
-           [value]="tableData"
-           [selection]="selection"
-           [reorderableColumns]="reorderableColumns"
-           [resizableColumns]="resizableColumns && !minView"
-           [columnResizeMode]="columnResizeMode"
-           [scrollable]="scrollable || resizableColumns"
-           [virtualScroll]="virtualScroll"
-           [virtualScrollOptions]="virtualScrollOptions"
-           [virtualScrollItemSize]="minView ? cardHeight : rowHeight"
-           [first]="first"
-           [rowHover]="true"
-           [contextMenu]="cm"
-           [rowTrackBy]="trackByFunction"
-           [expandedRowKeys]="expandedRowKeys"
-           [rowExpandMode]="rowExpandMode"
-           (onRowExpand)="updateNumberOfRows({event: $event, expanded: true}); rowExpanded.emit($event)"
-           (onRowCollapse)="updateNumberOfRows({event: $event, expanded: false}); rowCollapsed.emit($event)"
-           (firstChange)="onFirstChanged($event)"
-           (onColReorder)="onColReorder($event)"
-           (onSort)="onSortChanged($event)"
-           (onRowSelect)="onRowSelected($event)"
-           (onRowUnselect)="onRowDeselected($event)"
-           (onContextMenuSelect)="openContext($event)"
-           (onColResize)="colResize($event)">
+@if (visibleColumns()?.length > 0) {
+  <p-table
+    class="table"
+    [class.has-header]="!noHeader()" dataKey="id"
+    [class.card-view]="minimizedView()"
+    [style.--table-row-height]="rowHeight() + 'px'"
+    [style.--card-height]="(cardsCollapsed() ? 56 : cardHeight()) + 'px'"
+    [filterDelay]="0"
+    [globalFilterFields]="enableTableSearch() ? globalFilterFields() : null"
+    [scrollHeight]="'flex'"
+    [autoLayout]="false"
+    [columns]="visibleColumns()"
+    [selectionMode]="selectionMode()"
+    [rows]="currRowsNumber()"
+    [value]="tableData()"
+    [selection]="selection()"
+    [reorderableColumns]="reorderableColumns()"
+    [resizableColumns]="resizableColumns() && !minimizedView()"
+    [columnResizeMode]="columnResizeMode()"
+    [scrollable]="scrollable() || resizableColumns()"
+    [virtualScroll]="virtualScroll()"
+    [virtualScrollOptions]="virtualScrollOptions()"
+    [virtualScrollItemSize]="minimizedView() ? cardHeight() : rowHeight()"
+    [first]="first()"
+    [rowHover]="true"
+    [contextMenu]="cm"
+    [rowTrackBy]="trackByFunction"
+    [expandedRowKeys]="expandedRowKeys()"
+    [rowExpandMode]="rowExpandMode()"
+    (onRowExpand)="updateNumberOfRows({event: $event, expanded: true}); rowExpanded.emit($event)"
+    (onRowCollapse)="updateNumberOfRows({event: $event, expanded: false}); rowCollapsed.emit($event)"
+    (firstChange)="onFirstChanged($event)"
+    (onColReorder)="onColReorder($event)"
+    (onSort)="onSortChanged($event)"
+    (onRowSelect)="onRowSelected($event)"
+    (onRowUnselect)="onRowDeselected($event)"
+    (onContextMenuSelect)="openContext($event)"
+    (onColResize)="colResize($event)">
     <ng-template pTemplate="emptymessage">
-      <tr class="no-data-row" [style.height.px]="rowHeight" [style.line-height.px]="rowHeight">
-        <div [class.simple]="simple" class="no-data-wrapper" [style.top.px]="this.scrollable && noDataTop">
-          @if (!loading() && !noDataTemplate) {
-            <span>No data to show</span>
+      <tr class="no-data-row" [style.height.px]="rowHeight()" [style.line-height.px]="rowHeight()">
+        <div [class.simple]="simple()" class="no-data-wrapper" [style.top.px]="this.scrollable && noDataTop">
+          @if (!tableSate().loading() && !noDataTemplate()) {
+            <span class="no-data">No data to show</span>
           }
         </div>
       </tr>
-      @if (!loading()) {
-        <ng-container *ngTemplateOutlet="noDataTemplate"></ng-container>
+      @if (!tableSate().loading()) {
+        <ng-container *ngTemplateOutlet="noDataTemplate()"></ng-container>
       }
     </ng-template>
     <ng-template pTemplate="rowexpansion" let-row>
       <ng-container
         *ngTemplateOutlet="rowExpansionTemplate; context: {$implicit: row, lastFrame: lastRowExpanded}"></ng-container>
     </ng-template>
-    @if (!noHeader) {
+    @if (!noHeader()) {
       <ng-template pTemplate="header" let-columns>
-        @if (!minView) {
+        @if (!minimizedView()) {
           <tr class="header ui-state-default">
-            @for (col of columns; track trackByColFn($index, col)) {
+            @for (col of visibleColumns(); track col.id) {
               <th [attr.data-col-id]="col.id"
-                  [class.disable-drag]="!reorderableColumns || col?.disableDrag"
-                  [class.resize-disabled]="!resizableColumns"
-                  [class.resize-enabled]="resizableColumns"
+                  [class.disable-drag]="!reorderableColumns() || col?.disableDrag"
+                  [class.resize-disabled]="!resizableColumns()"
+                  [class.resize-enabled]="resizableColumns()"
                   [class.selected-col-header]="col?.disablePointerEvents"
-                  [pReorderableColumnDisabled]="!reorderableColumns || col?.disableDrag"
+                  [pReorderableColumnDisabled]="!reorderableColumns() || col?.disableDrag"
                   [pResizableColumnDisabled]="col?.disableDrag"
-                  [style.max-width]="col.style?.maxWidth ?? !resizableColumns && columnResizeMode === 'fit' && col.style?.width"
+                  [style.max-width]="col.style?.maxWidth ?? !resizableColumns() && columnResizeMode() === 'fit' && col.style?.width"
                   [style.min-width]="col.style?.minWidth"
                   [style.width]="col.style?.width"
                   pReorderableColumn smResizableColumn>
@@ -84,15 +86,15 @@
           <tr class="header card-header">
             <th>
               <div class="table-header" style="flex-basis:100%">
-                <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns?.[0]}"></ng-container>
-                <div class="table-header-title ellipsis" data-id="tableHeader">{{ minimizedTableHeader }}</div>
+                <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: visibleColumns()?.[0]}"></ng-container>
+                <div class="table-header-title ellipsis" data-id="tableHeader">{{ minimizedTableHeader() }}</div>
                 <div class="collapse-button al-icon al-ico-compact-view sm-md"
-                     [class.active]="cardsCollapsed"
+                     [class.active]="cardsCollapsed()"
                      (click)="cardsCollapsedToggle.emit()"></div>
                 <div class="table-actions">
                   <div class="recent-title">
-                    <sm-menu header="SORTED BY " class="menu" panelClasses="light-theme" data-id="sortedByFilter">
-                      @for (col of sortableCols; track trackByColFn($index, col)) {
+                    <sm-menu header="SORTED BY " class="menu" data-id="sortedByFilter">
+                      @for (col of sortableCols; track col.id) {
                         <div>
                           <sm-menu-item [itemLabel]="col.header" [sortOrder]="getOrder(col.id)"
                                         (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
@@ -109,29 +111,29 @@
       </ng-template>
     }
     <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex" let-expanded="expanded">
-      <tr [pRowToggler]="expandableRows? rowData : null"
-          [pRowTogglerDisabled]="!expandableRows || !expandRowOnClick"
+      <tr [pRowToggler]="expandableRows()? rowData : null"
+          [pRowTogglerDisabled]="!expandableRows() || !expandRowOnClick()"
           [pSelectableRow]="rowData" [pContextMenuRow]="rowData"
           [pContextMenuRowDisabled]=!rowRightClick.observed
-          [style.height.px]="minView ? (cardsCollapsed ? 56 : this.cardHeight) : this.rowHeight"
+          [style.height.px]="minimizedView() ? (cardsCollapsed() ? 56 : this.cardHeight()) : this.rowHeight()"
           [class.even]="(index + 1) % 2 === 0"
           [class.checked]="isRowSelected(rowData)"
-          [class.simple]="simple"
-          [class.contexted]="activeContextRow?.id ===rowData?.id && contextMenuOpen"
+          [class.simple]="simple()"
+          [class.contexted]="activeContextRow()?.id ===rowData?.id && contextMenuOpen()"
           [class.selected]="isSelected(rowData)"
-          [class.cards-table]="minView"
-          [class.pointer]="!!selectionMode"
-          (click)="!minView && checkClick({e: $event, data: rowData})"
-          (dblclick)="!minView && checkClick({e: $event, data: rowData})">
-        @if (!minView) {
-          @for (col of columns; track trackByColFn(i, col); let i = $index) {
+          [class.cards-table]="minimizedView()"
+          [class.pointer]="!!selectionMode()"
+          (click)="!minimizedView() && checkClick({e: $event, data: rowData})"
+          (dblclick)="!minimizedView() && checkClick({e: $event, data: rowData})">
+        @if (!minimizedView()) {
+          @for (col of columns; track col.id; let i = $index) {
             <td
-                [class.ui-resizable-column]="resizableColumns"
-                [class.cursor-default]="selectionMode===null"
-                [class.simple]="simple"
-                [style.min-width]="col.style?.minWidth"
-                [style.max-width]="col.style?.maxWidth ?? (!resizableColumns && columnResizeMode === 'fit' && col.style?.width)"
-                [style.width]="col.style?.width">
+              [class.ui-resizable-column]="resizableColumns()"
+              [class.cursor-default]="selectionMode()===null"
+              [class.simple]="simple()"
+              [style.min-width]="col.style?.minWidth"
+              [style.max-width]="col.style?.maxWidth ?? (!resizableColumns() && columnResizeMode() === 'fit' && col.style?.width)"
+              [style.width]="col.style?.width">
               @if (bodyTemplate) {
                 <ng-container
                   *ngTemplateOutlet="bodyTemplate; context: {$implicit: col, rowData: rowData, rowIndex: index, expanded}"></ng-container>
@@ -143,7 +145,7 @@
         } @else {
           <td class="pointer p-0" role="button">
             <div class="card-wrapper">
-              <div class="collapse-animation" [style.max-height.px]="cardsCollapsed? 54 : cardHeight">
+              <div class="collapse-animation" [style.max-height.px]="cardsCollapsed()? 54 : cardHeight()">
                 <ng-container
                   *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected: isSelected(rowData)}"></ng-container>
               </div>
@@ -151,34 +153,35 @@
           </td>
         }
         <div class="context-button-wrapper">
-          @if (rowRightClick.observed && !minView) {
-            <div tabindex="10" class="context-button"
-                 (click)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})"
-                 (keyup)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})">
-              <i data-id="3Dot Menu Button" class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42"></i>
-            </div>
+          @if (rowRightClick.observed && !minimizedView()) {
+            <button
+              mat-flat-button class="icon-only context-button"
+              (click)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})"
+            ><mat-icon fontSet="al" fontIcon="al-ico-dots-v-menu"></mat-icon></button>
           }
         </div>
       </tr>
 
-      @if (index === rowsNumber - 1 && lazyLoading) {
-        @if (autoLoadMore) {
+      @if (index === currRowsNumber() - 1 && lazyLoading()) {
+        @if (autoLoadMore()) {
           <tr class="table-load-more"
-              [class.hidden]="!(index === rowsNumber - 1 && lazyLoading && !noMoreData && !lastRowExpanded)"
+              [class.hidden]="!(index === currRowsNumber() - 1 && lazyLoading() && !noMoreData() && !lastRowExpanded)"
           >
             <div class="load-more-wrapper">
-              <sm-dots-load-more [loading]="loading() && !hasExperimentUpdate" class="pointer"
+              <sm-dots-load-more [loading]="tableSate().loading() && !hasExperimentUpdate()" class="pointer"
                                  (loadMore)="loadMore()" (mouseenter)="loadMore()"></sm-dots-load-more>
             </div>
           </tr>
         } @else {
           <tr class="table-load-more">
             <div class="load-more-wrapper">
-              <button #loadButton class="btn btn-cml-primary" data-id="LoadMore" (click)="loadMore()">
-                @if (loading() && !hasExperimentUpdate) {
-                  <i class="load-spinner"></i>
+              <button mat-stroked-button data-id="LoadMore" (click)="loadMore()">
+                @if (tableSate().loading() && !hasExperimentUpdate()) {
+                  <mat-icon>
+                    <i class="load-spinner"></i>
+                  </mat-icon>
                 }
-                {{ hasExperimentUpdate ? 'REFRESH LIST' : loading() ? 'LOADING...' : 'LOAD MORE' }}
+                {{ hasExperimentUpdate() ? 'REFRESH LIST' : tableSate().loading() ? 'LOADING...' : 'LOAD MORE' }}
               </button>
             </div>
           </tr>

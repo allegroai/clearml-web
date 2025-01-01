@@ -11,6 +11,7 @@ import {sortByArr} from '../../../pipes/show-selected-first.pipe';
 import {IOption} from '../../inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
 import {cleanTag} from '@common/shared/utils/helpers.util';
+import {FormControl} from '@angular/forms';
 
 @Directive()
 export abstract class BaseTableView implements AfterViewInit, OnDestroy {
@@ -28,10 +29,11 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   protected prevDeselect: string;
   private _entityType: EntityTypeEnum;
   public convertStatusMap: Record<string, string>;
-  protected waitForClick: number;
 
   @Input() contextMenuActive: boolean;
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
+  public selectionIndeterminate: boolean;
+  public selectionChecked = new FormControl<boolean>(false);
 
   @Input() set entityType(entityType: EntityTypeEnum) {
     this._entityType = entityType;
@@ -92,6 +94,8 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
 
   updateSelectionState() {
     this.selectionState = allItemsAreSelected(this[this.entitiesKey], this[this.selectedEntitiesKey]) ? 'All' : this[this.selectedEntitiesKey].length > 0 ? 'Partial' : 'None';
+    this.selectionIndeterminate = this.selectionState === 'Partial';
+    this.selectionChecked.setValue(this.selectionState !== 'None');
   }
 
   headerCheckboxClicked() {
@@ -104,20 +108,11 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
     this.emitSelection(selectionUnion);
   }
 
-  isRowSelected(entity: { id: any }) {
-    if (!entity || this[this.selectedEntitiesKey] === undefined) {
-      return false;
-    }
-
-    return this[this.selectedEntitiesKey].length > 0 &&
-      (this[this.selectedEntitiesKey].some((selectedEntity: { id: any }) => selectedEntity.id === entity.id));
-  }
-
   setContextMenuStatus(menuStatus: boolean) {
     this.contextMenuActive = menuStatus;
   }
 
-  protected getSelectionRange<T extends {id?: string}>(change: { field: string; value: boolean; event: Event }, entity: T): T[] {
+  protected getSelectionRange<T extends {id?: string}>(change: { value: boolean; event: Event }, entity: T): T[] {
     let addList = [entity];
     if ((change.event as MouseEvent).shiftKey && this.prevSelected) {
       let index1 = this[this.entitiesKey].findIndex(e => e.id === this.prevSelected);
@@ -135,7 +130,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
     return addList;
   }
 
-  protected getDeselectionRange<T extends {id?: string}>(change: { field: string; value: boolean; event: Event }, entity: T) {
+  protected getDeselectionRange<T extends {id?: string}>(change: { value: boolean; event: Event }, entity: T) {
     let list = [entity.id];
     const prev = this.prevDeselect || this.prevSelected;
     if ((change.event as MouseEvent).shiftKey && prev) {
@@ -187,12 +182,11 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   }
 
   scrollTableToTop() {
-    this.table?.table.scrollTo({top: 0});
+    this.table?.table().scrollTo({top: 0});
   }
 
   afterTableInit() {
-    const key = this.selectedEntitiesKey.slice(0, -1);
-    const selectedObject = this[key] || this[`${key}s`]?.[0];
+    const selectedObject = (this.table.selection() as {id: string });
     if (selectedObject) {
       window.setTimeout(() => this.table?.scrollToElement(selectedObject), 200);
     }

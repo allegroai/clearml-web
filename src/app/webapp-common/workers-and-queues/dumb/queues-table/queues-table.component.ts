@@ -1,87 +1,100 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  viewChild,
+  input,
+  output,
+  effect,
+  inject,
+  ElementRef,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {find, get} from 'lodash-es';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {ActivatedRoute} from '@angular/router';
-import {ICONS} from '@common/constants';
 import {Queue} from '@common/workers-and-queues/actions/queues.actions';
 
 
 @Component({
   selector: 'sm-queues-table',
   templateUrl: './queues-table.component.html',
-  styleUrls: ['./queues-table.component.scss']
+  styleUrls: ['./queues-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QueuesTableComponent extends BaseTableView {
-  public cols: Array<ISmCol>;
-  public readonly QUEUES_TABLE_COL_FIELDS = QUEUES_TABLE_COL_FIELDS;
-  public menuOpen: boolean;
-  private _queues: Array<Queue>;
-  public queuesManager: boolean;
-  readonly ICONS = ICONS;
+  private changeDetector = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+
+  protected cols: ISmCol[] = [
+    {
+      id: QUEUES_TABLE_COL_FIELDS.NAME,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'QUEUE',
+      style: {width: '35%', maxWidth: '600px'},
+      sortable: true,
+    },
+    {
+      id: QUEUES_TABLE_COL_FIELDS.WORKERS,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'WORKERS',
+      style: {width: '80px', maxWidth: '100px'},
+      sortable: true,
+    },
+    {
+      id: QUEUES_TABLE_COL_FIELDS.TASK,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'NEXT TASK',
+      style: {width: '30%', maxWidth: '600px'},
+      sortable: true,
+    },
+    {
+      id: QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'LAST UPDATED',
+      style: {width: '150px',  maxWidth: '200px'},
+      sortable: true,
+    },
+    {
+      id: QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
+      headerType: ColHeaderTypeEnum.sortFilter,
+      header: 'IN QUEUE',
+      style: {width: '100px',  maxWidth: '150px'},
+      sortable: true,
+    }
+  ];
+
+  protected readonly QUEUES_TABLE_COL_FIELDS = QUEUES_TABLE_COL_FIELDS;
+  protected menuOpen: boolean;
+  protected queuesManager = this.route.snapshot.data.queuesManager;
   contextQueue: Queue;
 
-  @Input() set queues(queues: Queue[]) {
-    this._queues = queues;
-    this.table && this.table.focusSelected();
-  }
+  queues = input<Queue[]>();
+  selectedQueue = input<Queue>();
+  short = input(true);
+  queueSelected = output<Queue>();
+  deleteQueue = output<Queue>();
+  renameQueue = output<Queue>();
+  clearQueue = output<Queue>();
+  sortedChanged = output<{
+        isShift: boolean;
+        colId: ISmCol['id'];
+    }>();
 
-  get queues() {
-    return this._queues;
-  }
+  tableContainer = viewChild<ElementRef<HTMLDivElement>>('tableContainer');
 
-  @Input() selectedQueue: Queue;
-  @Output() queueSelected = new EventEmitter();
-  @Output() deleteQueue = new EventEmitter();
-  @Output() renameQueue = new EventEmitter();
-  @Output() clearQueue = new EventEmitter();
-  @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
+  public menuPosition = signal<{ x: number; y: number }>(null);
 
-  @ViewChild('tableContainer', {static: false}) tableContainer;
-
-  public menuPosition: { x: number; y: number };
-
-  constructor(private changeDetector: ChangeDetectorRef, private route: ActivatedRoute) {
+  constructor() {
     super();
-    this.queuesManager = route.snapshot.data.queuesManager;
-    this.cols = [
-      {
-        id: QUEUES_TABLE_COL_FIELDS.NAME,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'QUEUE',
-        style: {width: '35%', maxWidth: '600px'},
-        sortable: true,
-      },
-      {
-        id: QUEUES_TABLE_COL_FIELDS.WORKERS,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'WORKERS',
-        style: {width: '80px', maxWidth: '100px'},
-        sortable: true,
-      },
-      {
-        id: QUEUES_TABLE_COL_FIELDS.TASK,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'NEXT EXPERIMENT',
-        style: {width: '30%', maxWidth: '600px'},
-        sortable: true,
-      },
-      {
-        id: QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'LAST UPDATED',
-        style: {width: '150px',  maxWidth: '200px'},
-        sortable: true,
-      },
-      {
-        id: QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
-        headerType: ColHeaderTypeEnum.sortFilter,
-        header: 'IN QUEUE',
-        style: {width: '100px',  maxWidth: '150px'},
-        sortable: true,
+    effect(() => {
+      if (this.queues()) {
+        this.table?.focusSelected();
       }
-    ];
+    });
+
   }
 
   getBodyData(rowData: any, col: ISmCol) {
@@ -93,7 +106,7 @@ export class QueuesTableComponent extends BaseTableView {
   }
 
   getQName(queue) {
-    const queueIns: any = find(this.queues, {id: queue});
+    const queueIns: any = find(this.queues(), {id: queue});
     return queueIns ? queueIns.name : queue;
   }
 
@@ -106,7 +119,7 @@ export class QueuesTableComponent extends BaseTableView {
     this.contextQueue = data.rowData;
     this.menuOpen = false;
     setTimeout(() => {
-      this.menuPosition = {x: data.e.clientX, y: data.e.clientY};
+      this.menuPosition.set({x: data.e.clientX, y: data.e.clientY});
       this.menuOpen = true;
       this.changeDetector.detectChanges();
     }, 0);
@@ -114,7 +127,7 @@ export class QueuesTableComponent extends BaseTableView {
   }
 
   override scrollTableToTop() {
-    this.tableContainer.nativeElement.scroll({top: 0});
+    this.tableContainer().nativeElement.scroll({top: 0});
   }
 
   onSortChanged(isShift: boolean, colId: ISmCol['id']) {

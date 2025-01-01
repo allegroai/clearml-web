@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, input, output } from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
@@ -15,10 +15,10 @@ import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.compon
   ]
 })
 export class ProjectCardMenuComponent {
-  @Output() deleteProjectClicked = new EventEmitter<Project>();
-  @Output() moveToClicked = new EventEmitter<Project>();
-  @Output() newProjectClicked = new EventEmitter<Project>();
-  @Output() projectNameInlineActivated = new EventEmitter();
-  @Output() projectEditClicked = new EventEmitter<Project>();
-  @Input() project;
+  deleteProjectClicked = output<Project>();
+  moveToClicked = output<Project>();
+  newProjectClicked = output<Project>();
+  projectNameInlineActivated = output();
+  projectEditClicked = output<Project>();
+  project = input<Project>();
 }

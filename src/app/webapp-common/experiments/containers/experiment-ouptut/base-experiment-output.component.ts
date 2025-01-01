@@ -12,7 +12,10 @@ import {
   selectSelectedExperiment
 } from '~/features/experiments/reducers';
 import {
+  groupByCharts,
+  GroupByCharts,
   resetExperimentMetrics,
+  setExperimentSettings,
   toggleMetricValuesView,
   toggleSettings
 } from '../../actions/common-experiment-output.actions';
@@ -24,6 +27,10 @@ import {
   selectIsExperimentInEditMode,
   selectMetricValuesView,
   selectSelectedExperiments,
+  selectSelectedSettingsGroupBy,
+  selectSelectedSettingsSmoothType,
+  selectSelectedSettingsSmoothWeight,
+  selectSelectedSettingsxAxisType,
   selectSplitSize
 } from '../../reducers';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -34,6 +41,8 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {headerActions} from '@common/core/actions/router.actions';
+import { SmoothTypeEnum } from '@common/shared/single-graph/single-graph.utils';
+import { ScalarKeyEnum } from '~/business-logic/model/events/scalarKeyEnum';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -45,8 +54,6 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   private subs = new Subscription();
   public infoData$: Observable<any>;
   public backdropActive$: Observable<any>;
-  public currentComponent: string;
-  public currentMetric: string;
   public minimized: boolean;
   private isExperimentInEditMode$: Observable<boolean>;
   private projectId: Project['id'];
@@ -60,7 +67,21 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   public selectSplitSize$: Observable<number>;
   private selectedProject$: Observable<Project>;
   public metricValuesView$: Observable<boolean>;
+  public smoothWeight$: Observable<number>;
+  public smoothType$: Observable<SmoothTypeEnum>;
+  public xAxisType$: Observable<ScalarKeyEnum>;
+  public groupBy$: Observable<GroupByCharts>;
 
+  groupByOptions = [
+    {
+      name: 'Metric',
+      value: groupByCharts.metric
+    },
+    {
+      name: 'None',
+      value: groupByCharts.none
+    }
+  ];
 
   constructor(
     private store: Store,
@@ -76,8 +97,10 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.selectSplitSize$ = this.store.select(selectSplitSize);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.metricValuesView$ = this.store.select(selectMetricValuesView);
-
-
+    this.smoothWeight$ = this.store.select(selectSelectedSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
+    this.smoothType$ = this.store.select(selectSelectedSettingsSmoothType);
+    this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType(false));
+    this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
   }
 
   ngOnInit() {
@@ -175,7 +198,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       parts.splice(5, 0, 'output');
       this.router.navigateByUrl(parts.join('/'));
     }
-    this.store.dispatch(headerActions.setTabs({contextMenu: null}));
+    this.store.dispatch(headerActions.reset());
     this.toMaximize = true;
   }
 
@@ -203,10 +226,27 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
             filterBaseNameWith: null,
             compareModule: null,
             showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename}})
+            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Tasks' : selectedProject?.basename}})
           }
         }
       }));
     }));
   }
+
+  changeSmoothness($event: number) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothWeight: $event}}));
+  }
+
+  changeSmoothType($event: SmoothTypeEnum) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothType: $event}}));
+  }
+
+  changeXAxisType($event: ScalarKeyEnum) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {xAxisType: $event}}));
+  }
+
+  changeGroupBy($event: GroupByCharts) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {groupBy: $event}}));
+  }
+
 }
