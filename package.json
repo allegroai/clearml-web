@@ -31,7 +31,7 @@
     "@angular/material-date-fns-adapter": "^21.2.14",
     "@angular/platform-browser": "^21.2.22",
     "@angular/platform-server": "^21.2.22",
-    "@angular/router": "^21.2.22",
+    "@angular/router": "^21.2.24",
     "@angular/service-worker": "^21.2.22",
     "@angular/youtube-player": "^21.2.14",
     "@aws-sdk/client-s3": "^3.1125.0",
